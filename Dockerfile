@@ -62,6 +62,7 @@ RUN apt-get update -qq && \
 # Copy built app and gems
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
+COPY --from=build /rails/public /rails/public
 
 # Create app user and assign ownership
 RUN useradd rails --create-home --shell /bin/bash && \
