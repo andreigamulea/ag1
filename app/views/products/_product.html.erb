@@ -1,0 +1,25 @@
+<div id="<%= dom_id product %>">
+  <h3><%= link_to product.name, product_path(product) %></h3>
+
+  <p>
+    <strong>Preț:</strong>
+    <%= number_to_currency(product.price) %>
+    <% if product.discount_price.present? %>
+      <span style="color: red;">
+        (Promo: <%= number_to_currency(product.discount_price) %>)
+      </span>
+    <% end %>
+  </p>
+
+  <p>
+    <strong>Stoc:</strong>
+    <%= product.stock %> -
+    <%= product.stock_status.humanize %>
+  </p>
+
+  <% if product.main_image.attached? %>
+    <p>
+      <%= image_tag product.main_image.variant(resize_to_limit: [150, 150]) %>
+    </p>
+  <% end %>
+</div>

@@ -1,0 +1,35 @@
+<h1>Detalii utilizator</h1>
+
+<p>
+  <strong>ID:</strong>
+  <%= @user.id %>
+</p>
+
+<p>
+  <strong>Email:</strong>
+  <%= @user.email %>
+</p>
+
+<p>
+  <strong>Rol:</strong>
+  <%= case @user.role
+      when 0 then "Client"
+      when 1 then "Administrator"
+      when 2 then "Manager"
+      else "Necunoscut"
+      end %>
+</p>
+
+<p>
+  <strong>Creat la:</strong>
+  <%= @user.created_at.strftime("%Y-%m-%d %H:%M") %>
+</p>
+
+<p>
+  <strong>Ultima actualizare:</strong>
+  <%= @user.updated_at.strftime("%Y-%m-%d %H:%M") %>
+</p>
+
+<%= link_to "Înapoi", users_path %> |
+<%= link_to "Editează", edit_user_path(@user) %>
+

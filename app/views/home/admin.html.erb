@@ -1,0 +1,9 @@
+<h1>Panou administrare</h1>
+
+<p>Bine ai venit, <%= current_user.email %>!</p>
+
+<ul>
+  <li><%= link_to "Gestionare produse", products_path %></li>
+  <li><%= link_to "Utilizatori", users_path %></li>
+  
+</ul>

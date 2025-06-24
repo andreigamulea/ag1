@@ -67,3 +67,5 @@ group :test do
 end
 
 gem 'devise', '~> 4.9', '>= 4.9.4'
+gem 'image_processing', '~> 1.14'
+gem 'mini_magick', '~> 5.2'

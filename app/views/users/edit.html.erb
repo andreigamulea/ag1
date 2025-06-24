@@ -1,0 +1,30 @@
+<h1>Modifică utilizator</h1>
+
+<%= form_with(model: @user, local: true) do |form| %>
+  <% if @user.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(@user.errors.count, "eroare") %>:</h2>
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :email %><br>
+    <%= form.text_field :email, readonly: true %>
+  </div>
+
+  <div>
+    <%= form.label :role, "Rol" %><br>
+    <%= form.select :role, [[ "Client", 0 ], ["Admin", 1], ["Manager", 2]] %>
+  </div>
+
+  <div>
+    <%= form.submit "Salvează modificările" %>
+  </div>
+<% end %>
+
+<%= link_to "Înapoi", users_path %>

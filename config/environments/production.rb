@@ -94,4 +94,5 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  Rails.application.config.active_storage.variant_processor = :mini_magick
 end

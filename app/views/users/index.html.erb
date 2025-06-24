@@ -1,0 +1,41 @@
+<h1>Listă utilizatori</h1>
+
+<%= link_to "Adaugă utilizator", new_user_path, class: "btn btn-primary", style: "margin-bottom: 1rem;" %>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #ccc;">
+  <thead style="background-color: #f5f5f5;">
+    <tr>
+      <th style="padding: 8px; border: 1px solid #ddd;">ID</th>
+      <th style="padding: 8px; border: 1px solid #ddd;">Email</th>
+      <th style="padding: 8px; border: 1px solid #ddd;">Rol</th>
+      <th style="padding: 8px; border: 1px solid #ddd;">Creat la</th>
+      <th style="padding: 8px; border: 1px solid #ddd;">Acțiuni</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @users.each do |user| %>
+      <tr>
+        <td style="padding: 8px; border: 1px solid #eee;"><%= user.id %></td>
+        <td style="padding: 8px; border: 1px solid #eee;"><%= user.email %></td>
+        <td style="padding: 8px; border: 1px solid #eee;">
+          <%= case user.role
+              when 0 then "Client"
+              when 1 then "Administrator"
+              when 2 then "Manager"
+              else "Necunoscut"
+              end %>
+        </td>
+        <td style="padding: 8px; border: 1px solid #eee;"><%= user.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+        <td style="padding: 8px; border: 1px solid #eee; white-space: nowrap;">
+          <%= link_to "Detalii", user_path(user), class: "btn btn-sm btn-outline-secondary" %>
+          <%= link_to "Editează", edit_user_path(user), class: "btn btn-sm btn-outline-primary" %>
+          <%= link_to "Șterge", user_path(user),
+              method: :delete,
+              data: { confirm: "Ești sigur?" },
+              class: "btn btn-sm btn-outline-danger", style: "margin-left: 0.3rem;" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

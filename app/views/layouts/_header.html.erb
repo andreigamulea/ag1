@@ -1,5 +1,3 @@
-<!-- app/views/layouts/_header.html.erb -->
-
 <script>
   console.log("salut din header");
 </script>
@@ -34,6 +32,11 @@
         <%= link_to "Resurse Digitale", "#" %>
         <%= link_to "Despre", "#" %>
         <%= link_to "Contact", "#" %>
+
+        <% if current_user&.admin? %>
+      
+          <%= link_to "Admin", admin_path, class: "admin-link" %>
+       <% end %>
       </nav>
 
       <nav>
@@ -42,16 +45,10 @@
               method: :delete,
               form: { class: "inline" },
               class: "link-button" %>
-
-          
         <% else %>
           <%= link_to "Login", new_user_session_path %>
           <%= link_to "Creează un cont", new_user_registration_path %>
         <% end %>
-
-        
-
-       
       </nav>
     </div>
   </header>

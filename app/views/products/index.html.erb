@@ -1,0 +1,35 @@
+<h1 class="mb-4">Listă produse</h1>
+
+<%= link_to "Adaugă produs", new_product_path, class: "btn btn-primary mb-3" %>
+
+<table class="table table-bordered table-hover">
+  <thead class="table-light">
+    <tr>
+      <th>ID</th>
+      <th>Nume</th>
+      <th>Preț</th>
+      <th>Stoc</th>
+      <th>Status</th>
+      <th>Acțiuni</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @products.each do |product| %>
+      <tr>
+        <td><%= product.id %></td>
+        <td><%= product.name %></td>
+        <td><%= number_to_currency(product.price, unit: "RON ") %></td>
+        <td><%= product.stock %></td>
+        <td><%= product.status.capitalize %></td>
+        <td class="text-nowrap">
+          <%= link_to "Detalii", product_path(product), class: "btn btn-outline-info btn-sm me-1" %>
+          <%= link_to "Editează", edit_product_path(product), class: "btn btn-outline-warning btn-sm me-1" %>
+          <%= link_to "Șterge", product_path(product),
+              method: :delete,
+              data: { confirm: "Ești sigur că vrei să ștergi acest produs?" },
+              class: "btn btn-outline-danger btn-sm" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

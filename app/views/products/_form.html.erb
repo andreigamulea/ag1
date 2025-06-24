@@ -1,0 +1,235 @@
+<%= form_with(model: product, local: true, data: { turbo: false }, html: { multipart: true }) do |form| %>
+
+  <% if product.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h4>
+      <ul>
+        <% product.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :name %>
+    <%= form.text_field :name, class: "form-control" %>
+  </div>
+
+  <div>
+    <%= form.label :slug %>
+    <%= form.text_field :slug %>
+  </div>
+
+  <div>
+    <%= form.label :description_title %>
+    <%= form.text_field :description_title %>
+  </div>
+
+  <div>
+    <%= form.label :description %>
+    <%= form.text_area :description %>
+  </div>
+
+  <div>
+    <%= form.label :price %>
+    <%= form.number_field :price, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :cost_price %>
+    <%= form.number_field :cost_price, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :discount_price %>
+    <%= form.number_field :discount_price, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :sku %>
+    <%= form.text_field :sku %>
+  </div>
+
+  <div>
+    <%= form.label :stock %>
+    <%= form.number_field :stock %>
+  </div>
+
+  <div>
+    <%= form.label :track_inventory %>
+    <%= form.check_box :track_inventory %>
+  </div>
+
+  <div>
+    <%= form.label :stock_status %>
+    <%= form.select :stock_status, Product.stock_statuses.keys.map { |k| [k.humanize, k] } %>
+  </div>
+
+  <div>
+    <%= form.label :sold_individually %>
+    <%= form.check_box :sold_individually %>
+  </div>
+
+  <div>
+    <%= form.label :available_on %>
+    <%= form.date_field :available_on %>
+  </div>
+
+  <div>
+    <%= form.label :discontinue_on %>
+    <%= form.date_field :discontinue_on %>
+  </div>
+
+  <div>
+    <%= form.label :height %>
+    <%= form.number_field :height, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :width %>
+    <%= form.number_field :width, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :depth %>
+    <%= form.number_field :depth, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :weight %>
+    <%= form.number_field :weight, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= form.label :meta_title %>
+    <%= form.text_field :meta_title %>
+  </div>
+
+  <div>
+    <%= form.label :meta_description %>
+    <%= form.text_field :meta_description %>
+  </div>
+
+  <div>
+    <%= form.label :meta_keywords %>
+    <%= form.text_field :meta_keywords %>
+  </div>
+
+  <div>
+    <%= form.label :status %>
+    <%= form.select :status, ["active", "inactive"] %>
+  </div>
+
+  <div>
+    <%= form.label :featured %>
+    <%= form.check_box :featured %>
+  </div>
+
+ <div class="mb-3">
+  <%= form.label :custom_attributes, "Atribute personalizate (JSON)", class: "form-label" %>
+  <%= form.text_area :custom_attributes, class: "form-control", rows: 5 %>
+</div>
+
+
+<div class="mb-3">
+  <%= form.label :main_image, "Imagine principală" %>
+  <%= form.file_field :main_image, direct_upload: true, class: "form-control" %>
+</div>
+
+<% if product.main_image.attached? %>
+  <div class="mb-3">
+    <p>Imagine principală curentă:</p>
+    <div style="position: relative; display: inline-block;">
+      <% if product.main_image.variable? %>
+        <%= image_tag product.main_image.variant(resize_to_limit: [200, 200]), class: "img-thumbnail" %>
+      <% else %>
+        <%= image_tag product.main_image, class: "img-thumbnail" %>
+      <% end %>
+
+      <%= link_to "✕", purge_main_image_product_path(product), method: :delete,
+          data: { confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
+          class: "btn btn-sm btn-danger mt-2" %>
+    </div>
+  </div>
+<% end %>
+
+
+<div class="mb-3">
+  <%= form.label :secondary_images, "Imagini secundare" %>
+ <%= form.file_field :secondary_images, multiple: true, direct_upload: true, class: "form-control", id: "secondary-images" %>
+
+
+  <div id="image-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
+</div>
+
+<% if product.secondary_images.attached? %>
+  <div class="mb-3">
+    <p>Imagini secundare existente:</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+      <% product.secondary_images.each do |img| %>
+        <div style="position: relative;">
+          <% if img.variable? %>
+            <%= image_tag img.variant(resize_to_limit: [150, 150]), class: "img-thumbnail" %>
+          <% else %>
+            <%= image_tag img, class: "img-thumbnail" %>
+          <% end %>
+          <%= link_to "✕", purge_image_product_path(product, image_id: img.id), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi această imagine?" }, class: "btn btn-sm btn-danger mt-1" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+
+<div>
+  <%= form.submit %>
+</div>
+
+<% end %>
+
+<script>
+document.addEventListener("turbo:load", () => {
+  const input = document.getElementById("secondary-images");
+  const wrapper = document.getElementById("image-badges-wrapper");
+  const form = document.querySelector("form");
+
+  let allFiles = [];
+
+  input.addEventListener("change", () => {
+    const newFiles = Array.from(input.files);
+
+    newFiles.forEach(file => {
+      if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
+        allFiles.push(file);
+      }
+    });
+
+    renderBadges();
+    input.value = ""; // trebuie resetat pentru a permite aceeași imagine din nou
+
+    // La fiecare adăugare, refacem `input.files`
+    const dt = new DataTransfer();
+    allFiles.forEach(file => dt.items.add(file));
+    input.files = dt.files;
+  });
+
+  function renderBadges() {
+    wrapper.innerHTML = "";
+    allFiles.forEach((file, index) => {
+      const badge = document.createElement("span");
+      badge.className = "badge bg-primary text-white me-2 mb-2";
+      badge.innerHTML = `${file.name} <span onclick="removeFile(${index})" style="cursor:pointer; margin-left:6px;">&times;</span>`;
+      wrapper.appendChild(badge);
+    });
+  }
+
+  window.removeFile = function(index) {
+    allFiles.splice(index, 1);
+    renderBadges();
+    const dt = new DataTransfer();
+    allFiles.forEach(file => dt.items.add(file));
+    input.files = dt.files;
+  };
+});
+</script>
