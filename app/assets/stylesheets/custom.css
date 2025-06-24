@@ -1,0 +1,116 @@
+
+
+/* Application styles */ 
+body {
+    font-family: 'Lora', serif;
+    margin: 0;
+    padding: 0;
+    background: #fdfaf5;
+    color: #333;
+}
+
+/* ----------- HEADER ----------- */
+.header_container {
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    }
+    
+    /* Header styles */
+    header {
+        color: white;
+        max-width: 1280px;
+        margin: 0 auto;
+        text-align: center;
+        font-size: 22px;
+        letter-spacing: 2px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+header p {
+    font-size: 22px;
+}
+
+
+/* ----------- MENIU NAV ----------- */
+nav {
+    text-align: center;
+    padding: 10px 0;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    /*border-top: 3px solid #fbc02d;*/
+}
+
+nav a {
+    color: #8b0000;
+    text-decoration: none;
+    margin: 0 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+nav a:hover {
+    color: #fbc02d;
+    border-bottom: 2px solid #fbc02d;
+    padding-bottom: 5px;
+}
+/*
+nav:hover {
+        transform: translateY(-2px);
+        box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.15);
+        
+    }
+*/
+
+
+        /* ----------- FOOTER ----------- */
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            background: #8b0000;
+            color: white;
+            font-size: 14px;
+            margin-top: 40px;
+        }
+        .swiper {
+            width: 100%;
+            height: 300px; /* Ajustează înălțimea galeriei */
+          }
+          
+          .swiper-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          
+          .swiper-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Asigură-te că imaginile nu sunt distorsionate */
+          }
+          
+          .swiper-button-prev,
+          .swiper-button-next {
+            color: #000;
+            /* Ajustează dimensiunea săgeților, dacă dorești */
+            width: 40px;
+            height: 40px;
+          }
+          
+          .swiper-pagination-bullet {
+            background: #000;
+            opacity: 0.5;
+          }
+          
+          .swiper-pagination-bullet-active {
+            opacity: 1;
+            background: #007bff;
+          }

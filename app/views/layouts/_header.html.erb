@@ -1,0 +1,45 @@
+<!-- app/views/layouts/_header.html.erb -->
+<script>
+console.log("salut din header");
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    console.log("✅ DOMContentLoaded a fost declanșat");
+
+    const logoLink = document.querySelector(".navbar-brand");
+    console.log("🔍 logoLink =", logoLink);
+
+    if (logoLink) {
+      logoLink.addEventListener("mouseenter", function() {
+        console.log("✅ Hover pe logo");
+      });
+    } else {
+      console.log("❌ Nu am găsit .navbar-brand");
+    }
+  });
+</script>
+
+
+
+
+
+
+
+<div class="header_container">
+<header>
+    <a href="/" class="navbar-brand">
+        <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
+    </a>
+    <div>
+    
+    <nav>
+<a href="/">Acasă</a>
+<a href="#">Articole</a>
+<a href="#">Resurse Digitale</a>
+<a href="#">Despre</a>
+<a href="#">Contact</a>
+</nav>
+
+</header>
+
+

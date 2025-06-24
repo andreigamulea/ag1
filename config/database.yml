@@ -1,0 +1,64 @@
+# PostgreSQL. Versions 9.3 and up are supported.
+#
+# Install the pg driver:
+#   gem install pg
+# On macOS with Homebrew:
+#   gem install pg -- --with-pg-config=/usr/local/bin/pg_config
+# On macOS with MacPorts:
+#   gem install pg -- --with-pg-config=/opt/local/lib/postgresql84/bin/pg_config
+# On Windows:
+#   gem install pg
+#       Choose the win32 build.
+#       Install PostgreSQL and put its /bin directory on your path.
+#
+# Configure Using Gemfile
+# gem "pg"
+#
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  # https://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: ag1_development
+  adapter: postgresql
+  encoding: utf8
+  username: postgres
+  password: 1
+  pool: 5 # not mandatory
+  timeout: 5000 # not mandatory
+  host: localhost
+  port: 5432
+
+test:
+  <<: *default
+  database: ag1_test
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  username: postgres
+  password: 1
+
+
+  
+
+
+
+production:
+  adapter: postgresql
+  encoding: unicode
+  url: postgres://andrei:oJGH2fo9VtVZQnnQ4qY58HiAnxFDG58k@dpg-d19hjsjipnbc73elbr8g-a.frankfurt-postgres.render.com/ag1_production
+  #url: postgres://andrei:UMXcEBmB0HojyLF341vJLLdUDchEp1lO@dpg-cgnf1ubldisfgrunqlv0-a/ia_production_3f1s  #asta e intern
+#production:
+ # adapter: postgresql
+  #database: ia_production_3f1s
+  #username: andrei
+  #password: UMXcEBmB0HojyLF341vJLLdUDchEp1lO
+  #host: dpg-cgnf1ubldisfgrunqlv0-a
+  #port: 5432
+  #pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  #timeout: 5000
+  

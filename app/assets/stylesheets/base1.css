@@ -1,0 +1,359 @@
+
+h6 {
+  all: unset;
+  font-size: 2.5rem;
+  color: blue !important;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #8b0000 !important;            /* roșu închis inițial */
+  font: inherit;
+  font-size: 0.875rem;                  /* 14px */
+  font-weight: 600;                     /* bold */
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+}
+
+.link-button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background-color: #fbc02d;            /* underline galben-cărămiziu */
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.link-button:hover {
+  color: #fbc02d !important;            /* text galben-cărămiziu */
+}
+
+.link-button:hover::after {
+  opacity: 1;
+}
+
+
+
+
+
+        /* ----------- STIL GENERAL ----------- */
+
+
+   
+        /* ----------- CONTAINER ----------- */
+        .container_content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 25px;
+            padding-top: 0px;
+            background: white;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* ----------- TITLU SECTIUNI ----------- */
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+            margin-bottom: 1em;
+            padding-top: 30px;
+            color: #8b0000;
+        }
+
+        .section-title h1 {
+            font-size: 24px;
+            margin-bottom: 0;
+        }
+
+        /* ----------- SEPARATOR ----------- */
+        .separator {
+            width: 68%;
+            height: 1px;
+            background-color: #8b0000;
+            margin: 0 auto;
+        }
+
+        /* ----------- GRID ARTICOLE + RESURSE ----------- */
+        .flex-container {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            padding-top: 20px;
+        }
+
+        .box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: #ffffff;
+            border-left: 1px solid #8b0000;
+            border-right: 1px solid #8b0000;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .box h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #8b0000;
+        }
+
+        .box p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .box a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            border: 1px solid #8b0000;
+            border-radius: 5px;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            background: #bc2c2c;
+        }
+
+        .box a:hover {
+            background: #8b0000;
+            color: white;
+        }
+
+        /* ----------- GRID PENTRU CARTI CU IMAGINI ----------- */
+        .books-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding-top: 20px;
+        }
+
+        .book {
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .book img {
+            width: 100%;
+            max-height: 75px;
+            object-fit: contain;
+            border-radius: 5px;
+            margin-bottom: 0px;
+
+        }
+
+        .book h3 {
+            font-size: 18px;
+            color: #8b0000;
+            margin-bottom: 5px;
+            margin-top:10px;
+        }
+
+        .book p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .book a {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 5px 22px;
+            border: 1px solid #8b0000;
+            border-radius: 5px;
+            color: #fff;
+            background: #bc2c2c;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .book a:hover {
+            background: #8b0000;
+            color: white;
+        }
+
+        .box,
+        .book {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .box:hover,
+        .book:hover {
+            transform: translateY(-5px);
+            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.15);
+            
+        }
+
+
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+                /* Mică mișcare în jos */
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .box {
+            opacity: 0;
+            /* Ascundem inițial */
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: 0.5s;
+            /* Delay global de 0.5s */
+        }
+
+        .book {
+            opacity: 0;
+            /* Ascundem inițial */
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: 0.90s;
+            /* Delay global de 0.5s */
+        }
+
+
+
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .books-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .books-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            .flex-container {
+                flex-direction: column;
+                margin-top: 20px;
+            }
+
+            .box {
+                background: #fff5f5;
+                margin: 10px 0;
+            }
+
+            .book h3 {
+                margin-top: 0px;
+            }
+
+            .book a,
+            .box a {
+                margin-bottom: 10px;
+            }
+
+            .box,
+            .book {
+                border: none;
+                padding: 10px;
+                margin-top: -20px;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            .flex-container {
+                margin-bottom: -20px;
+            }
+
+            .section-title {
+                margin-bottom: 0.2em;
+                margin-top: 10px;
+            }
+
+            header {
+                flex-direction: column;
+            }
+
+            nav {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 90%;
+
+                border-radius: 6px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 10px;
+            }
+
+            nav a {
+                padding: 5px;
+            }
+
+            nav a:hover {
+                padding-bottom: 2px;
+            }
+        }
+            
+
+        /* Wrapper pentru a face tabelul responsive */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        /* Stilizare tabel */
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        /* Stil pentru capul tabelului */
+        .styled-table thead {
+            background: #8b0000;
+            color: white;
+            text-align: center;
+        }
+
+        /* Stil pentru celule */
+        .styled-table th,
+        .styled-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Efect hover pe rânduri */
+        .styled-table tbody tr:hover {
+            background: #fbc02d;
+            color: #8b0000;
+            transition: 0.3s ease-in-out;
+        }
+
+        /* Responsive pentru mobil */
+        @media (max-width: 600px) {
+            .styled-table {
+                font-size: 14px;
+            }
+        }
+ 
