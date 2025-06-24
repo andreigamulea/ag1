@@ -1,0 +1,23 @@
+databases:
+  - name: ag1_production
+    databaseName: ag1_production
+    user: andrei
+    plan: Starter
+    region: frankfurt
+
+
+services:
+  - type: web
+    name: ag1
+    domains:
+      - ayus.ro
+    env: ruby
+    plan: Starter
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ag1_production
+          property: connectionString     
+    region: frankfurt
