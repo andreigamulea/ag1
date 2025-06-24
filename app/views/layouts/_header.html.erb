@@ -1,7 +1,9 @@
 <!-- app/views/layouts/_header.html.erb -->
+
 <script>
-console.log("salut din header");
+  console.log("salut din header");
 </script>
+
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     console.log("✅ DOMContentLoaded a fost declanșat");
@@ -19,27 +21,38 @@ console.log("salut din header");
   });
 </script>
 
-
-
-
-
-
-
 <div class="header_container">
-<header>
+  <header>
     <a href="/" class="navbar-brand">
-        <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
+      <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
     </a>
+
     <div>
-    
-    <nav>
-<a href="/">Acasă</a>
-<a href="#">Articole</a>
-<a href="#">Resurse Digitale</a>
-<a href="#">Despre</a>
-<a href="#">Contact</a>
-</nav>
+      <nav>
+        <%= link_to "Acasă", root_path %>
+        <%= link_to "Articole", "#" %>
+        <%= link_to "Resurse Digitale", "#" %>
+        <%= link_to "Despre", "#" %>
+        <%= link_to "Contact", "#" %>
+      </nav>
 
-</header>
+      <nav>
+        <% if current_user %>
+          <%= button_to "Delogare", destroy_user_session_path,
+              method: :delete,
+              form: { class: "inline" },
+              class: "link-button" %>
 
+          
+        <% else %>
+          <%= link_to "Login", new_user_session_path %>
+          <%= link_to "Creează un cont", new_user_registration_path %>
+        <% end %>
 
+        
+
+       
+      </nav>
+    </div>
+  </header>
+</div>
