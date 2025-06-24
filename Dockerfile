@@ -14,7 +14,8 @@ ENV RAILS_ENV="production" \
     BUNDLE_WITHOUT="development test"
 
 # ---------------- BUILD STAGE ----------------
-FROM base as build
+FROM base AS build
+
 
 # Install packages needed to build native gems
 RUN apt-get update -qq && \
