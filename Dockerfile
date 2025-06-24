@@ -24,8 +24,9 @@ RUN apt-get update -qq && \
     git \
     libpq-dev \
     libvips \
-    libyaml-dev \       # ← adăugat pentru psych
+    libyaml-dev \
     pkg-config
+
 
 # Copy gemfiles and install dependencies
 COPY Gemfile Gemfile.lock ./
