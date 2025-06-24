@@ -114,7 +114,6 @@ GEM
     erb (5.0.1)
     erubi (1.13.1)
     ffi (1.17.2-x64-mingw-ucrt)
-    ffi (1.17.2-x86_64-linux-gnu)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.7)
@@ -164,10 +163,7 @@ GEM
     nio4r (2.7.4)
     nokogiri (1.18.8-x64-mingw-ucrt)
       racc (~> 1.4)
-    nokogiri (1.18.8-x86_64-linux-gnu)
-      racc (~> 1.4)
     orm_adapter (0.5.0)
-    pg (1.5.9)
     pg (1.5.9-x64-mingw-ucrt)
     pp (0.6.2)
       prettyprint
@@ -276,7 +272,6 @@ GEM
 
 PLATFORMS
   x64-mingw-ucrt
-  x86_64-linux
 
 DEPENDENCIES
   bootsnap
@@ -302,4 +297,4 @@ RUBY VERSION
    ruby 3.3.7p123
 
 BUNDLED WITH
-   2.6.6
+   2.6.9
