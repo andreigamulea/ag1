@@ -9,11 +9,12 @@ local:
 bunny:
   service: S3
   access_key_id: <%= Rails.application.credentials.dig(:bunny, :access_key_id) %>
-  secret_access_key: <%= Rails.application.credentials.dig(:bunny, :secret_access_key) %>
+  secret_access_key: <%= Rails.application.credentials.dig(:bunny, :storage_password) %>
   region: "us-east-1"
   bucket: "ayus"
   endpoint: "https://storage.bunnycdn.com"
   force_path_style: true
+
   
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
