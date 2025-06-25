@@ -70,6 +70,10 @@ def purge_image
   image.purge
   redirect_back fallback_location: edit_product_path(params[:id]), notice: "Imaginea a fost ștearsă."
 end
+
+
+
+
 def purge_main_image
     @product = Product.find(params[:id])
     @product.main_image.purge if @product.main_image.attached?

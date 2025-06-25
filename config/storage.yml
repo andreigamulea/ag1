@@ -6,6 +6,8 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+
+
 bunny:
   service: S3
   access_key_id: <%= Rails.application.credentials.dig(:bunny, :access_key_id) %>
@@ -14,8 +16,8 @@ bunny:
   bucket: "ayus"
   endpoint: "https://storage.bunnycdn.com"
   force_path_style: true
-
-  
+  #public: true
+  #url_expires_in: 3600
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:

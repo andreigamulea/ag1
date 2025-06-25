@@ -1,0 +1,24 @@
+<%# View de test pentru o imagine atașată unui Product %>
+
+<h2>Test imagine secundară</h2>
+
+<% img = Product.last.secondary_images.first %>
+
+<% if img.present? %>
+  <p>Content type: <%= img.blob.content_type %></p>
+  <p>Variable?: <%= img.variable?.to_s %></p>
+
+  <h3>Imagine redimensionată (variant):</h3>
+  <% if img.variable? %>
+  <% variant = img.variant(resize_to_limit: [200, 200]).processed %>
+  <%= image_tag rails_representation_url(variant, host: "localhost:3000"), class: "img-thumbnail" %>
+<% else %>
+  <%= image_tag url_for(img), class: "img-thumbnail" %>
+<% end %>
+
+
+  <h3>URL brut (pentru debug):</h3>
+  <p><%= url_for(img) %></p>
+<% else %>
+  <p>Nu există imagine atașată.</p>
+<% end %>

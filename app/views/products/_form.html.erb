@@ -163,23 +163,18 @@
   <div id="image-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
 </div>
 
-<% if product.secondary_images.attached? %>
-  <div class="mb-3">
-    <p>Imagini secundare existente:</p>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-      <% product.secondary_images.each do |img| %>
-        <div style="position: relative;">
-          <% if img.variable? %>
-            <%= image_tag img.variant(resize_to_limit: [150, 150]), class: "img-thumbnail" %>
-          <% else %>
-            <%= image_tag img, class: "img-thumbnail" %>
-          <% end %>
-          <%= link_to "✕", purge_image_product_path(product, image_id: img.id), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi această imagine?" }, class: "btn btn-sm btn-danger mt-1" %>
-        </div>
-      <% end %>
-    </div>
+<% product.secondary_images_attachments.each do |attachment| %>
+  <div class="image-preview">
+    <% if attachment.variable? %>
+      <%= image_tag attachment.variant(resize_to_limit: [150, 150]), class: "img-thumbnail" %>
+    <% else %>
+      <%= image_tag url_for(attachment), class: "img-thumbnail" %>
+    <% end %>
+
+    <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id), method: :delete, data: { confirm: "Ștergi această imagine?" }, class: "btn btn-sm btn-danger mt-1" %>
   </div>
 <% end %>
+
 
 
 <div>
