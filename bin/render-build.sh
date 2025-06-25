@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -o errexit
 
+echo "🔧 Instalez ImageMagick pentru variant thumbnails..."
+apt-get update && apt-get install -y imagemagick
+
 echo "🧹 Curățare cache vechi..."
 rm -rf tmp/cache
 
@@ -17,4 +20,3 @@ echo "🗄 Migrez baza de date..."
 bundle exec rake db:migrate
 
 echo "✅ Build finalizat cu succes!"
-
