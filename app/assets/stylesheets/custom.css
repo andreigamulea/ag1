@@ -11,7 +11,7 @@ body {
 
 /* ----------- HEADER ----------- */
 /* === HEADER DESKTOP === */
-/* === HEADER GENERAL === */
+
 .header_container {
   width: 100%;
   background-color: #ffffff;
@@ -84,11 +84,13 @@ nav a:hover,
   display: none;
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: 40px;
   color: #8b0000;
   margin-top: auto;
   margin-bottom: 20px;
   cursor: pointer;
+  text-align: center;
+  width: -webkit-fill-available;
 }
 
 /* === MOBILE MENU === */
@@ -107,33 +109,67 @@ nav a:hover,
 @media (max-width: 922px) {
   /* Sigla din meniul mobil */
   .mobile-logo {
-    display: block;
+    display: flex;
     margin-bottom: 10px;
+    justify-content: space-evenly;
+        width: -webkit-fill-available;
   }
 
   .mobile-logo img {
     max-width: 100px;
     height: auto;
   }
-
+    .nav-wrapper{
+      padding-top:0;
+    }
   nav {
     flex-direction: column;
     align-items: flex-start;
-    width: 100%;
-    margin-top: 20px;
+    width: 95%;
+    background-color: #5e085f;
+    padding-top:20px;
   }
 
   nav a,
-  .link-button {
+  nav form
+   {
         width: 100%;
+        display: flex;
         padding: 0;
         font-size: 16px;
         border-bottom: 1px solid #eee;
         text-align: left;
-        margin-top: -10px;
+        margin-top: -20px;
         padding-bottom: 10px;
         padding-left: 20px;
+        padding-top: 10px;
+        color:white;
   }
+  nav .link-button{
+    color:white!important;
+    font-size: 16px;
+  }
+    nav .link-button:hover{
+    color:#8b0000!important;
+    font-size: 16px;
+  }
+  nav form{
+    padding:0;
+  }
+
+  nav form button {
+    width:100%;
+    text-align: left;
+    color:white;
+    padding-left: 20px!important;
+  }
+nav-button:hover{
+  color:#8b0000;
+}
+nav a:hover, nav form:hover {
+  background-color:#fbc02d;
+  color:#8b0000;
+}
 
   /* Meniul mobil fullscreen */
   .nav-wrapper {
@@ -147,16 +183,18 @@ nav a:hover,
     height: 100%;
     background: white;
     z-index: 1000;
-    padding-top: 20px;
+    padding-top: 10px;
     overflow-y: auto;
   }
 
   .nav-wrapper.open {
     display: flex;
+    align-items: flex-start;
   }
 
   .close-menu {
     display: block;
+    margin-top:0;
   }
 
   .hamburger {

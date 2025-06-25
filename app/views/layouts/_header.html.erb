@@ -3,30 +3,37 @@
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  function setupMobileMenu() {
     const hamburger = document.getElementById("hamburger");
     const navWrapper = document.getElementById("nav-wrapper");
     const closeBtn = document.getElementById("close-menu");
-    const navLinks = navWrapper.querySelectorAll("a, .link-button");
+    if (!hamburger || !navWrapper || !closeBtn) return;
 
-    hamburger.addEventListener("click", () => {
+    // Evită evenimente duplicate: resetăm întâi
+    hamburger.onclick = () => {
       navWrapper.classList.add("open");
       document.body.classList.add("menu-open");
-    });
+    };
 
-    closeBtn.addEventListener("click", () => {
+    closeBtn.onclick = () => {
       navWrapper.classList.remove("open");
       document.body.classList.remove("menu-open");
-    });
+    };
 
+    const navLinks = navWrapper.querySelectorAll("a, .link-button");
     navLinks.forEach(link => {
-      link.addEventListener("click", () => {
+      link.onclick = () => {
         navWrapper.classList.remove("open");
         document.body.classList.remove("menu-open");
-      });
+      };
     });
-  });
+  }
+
+  // Compatibil cu Turbo + Back button
+  document.addEventListener("turbo:load", setupMobileMenu);
 </script>
+
+
 
 
 
