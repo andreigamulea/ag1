@@ -2,7 +2,8 @@
 set -o errexit
 
 echo "🔧 Instalez ImageMagick pentru variant thumbnails..."
-apt-get update && apt-get install -y imagemagick
+apt-get update && apt-get install -y libvips
+
 
 echo "🧹 Curățare cache vechi..."
 rm -rf tmp/cache
