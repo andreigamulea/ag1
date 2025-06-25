@@ -41,6 +41,10 @@ Rails.application.configure do
   config.active_storage.resolve_model_to_route = :rails_storage_redirect
   config.active_storage.service = :bunny
 
+
+  config.active_storage.resolve_model_to_route = :rails_storage_redirect
+  config.active_storage.service = :bunny
+  Rails.application.routes.default_url_options[:host] = "https://ag1-eef1.onrender.com"
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "wss://example.com/cable"
@@ -97,6 +101,6 @@ Rails.application.configure do
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
   config.active_storage.variant_processor = :vips
-  Rails.application.routes.default_url_options[:host] = "https://ag1-eef1.onrender.com"
+  
 
 end

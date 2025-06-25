@@ -3,6 +3,37 @@
 </script>
 
 <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const hamburger = document.getElementById("hamburger");
+    const navWrapper = document.getElementById("nav-wrapper");
+    const closeBtn = document.getElementById("close-menu");
+    const navLinks = navWrapper.querySelectorAll("a, .link-button");
+
+    hamburger.addEventListener("click", () => {
+      navWrapper.classList.add("open");
+      document.body.classList.add("menu-open");
+    });
+
+    closeBtn.addEventListener("click", () => {
+      navWrapper.classList.remove("open");
+      document.body.classList.remove("menu-open");
+    });
+
+    navLinks.forEach(link => {
+      link.addEventListener("click", () => {
+        navWrapper.classList.remove("open");
+        document.body.classList.remove("menu-open");
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
+<script>
   document.addEventListener("DOMContentLoaded", function() {
     console.log("✅ DOMContentLoaded a fost declanșat");
 
@@ -21,11 +52,23 @@
 
 <div class="header_container">
   <header>
+    <!-- Sigla (vizibilă mereu) -->
     <a href="/" class="navbar-brand">
       <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
     </a>
 
-    <div>
+    <!-- Buton hamburger pentru mobil -->
+    <button class="hamburger" id="hamburger" aria-label="Deschide meniul">&#9776;</button>
+
+    <!-- Meniu unificat (desktop + mobil) -->
+    <div class="nav-wrapper" id="nav-wrapper">
+      <!-- Sigla duplicată doar pe mobil, ascunsă pe desktop -->
+      <div class="mobile-logo">
+        <a href="/">
+          <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" />
+        </a>
+      </div>
+
       <nav>
         <%= link_to "Acasă", root_path %>
         <%= link_to "Articole", "#" %>
@@ -34,12 +77,9 @@
         <%= link_to "Contact", "#" %>
 
         <% if current_user&.admin? %>
-      
           <%= link_to "Admin", admin_path, class: "admin-link" %>
-       <% end %>
-      </nav>
+        <% end %>
 
-      <nav>
         <% if current_user %>
           <%= button_to "Delogare", destroy_user_session_path,
               method: :delete,
@@ -50,6 +90,15 @@
           <%= link_to "Creează un cont", new_user_registration_path %>
         <% end %>
       </nav>
+
+      <!-- Buton X pentru mobil -->
+      <button class="close-menu" id="close-menu" aria-label="Închide meniul">&times;</button>
     </div>
   </header>
 </div>
+
+
+
+
+
+
