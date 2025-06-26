@@ -26,7 +26,7 @@
     </div>
   <% end %>
 
-  <div class="devise-links" >
+  <div class="devise-links special" >
     <%= render "devise/shared/links" %>
   </div>
 </div>
@@ -189,6 +189,21 @@ display:none;
 }
 
 /* RESPONSIVE */
+@media (max-width:922px) {
+.special{
+    flex-direction:column!important;
+    }
+#login-page .special a:first-of-type {
+  border-bottom: 1px solid #dddddd;
+  width: 61.8%;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  display: block; /* asigură afișare pe linie separată */
+}
+}
+
+
 @media (max-width: 500px) {
   #login-page {
     margin: 20px;
@@ -210,6 +225,8 @@ display:none;
     opacity: 1;
     transform: translateY(0);
   }
+
+
 }
 
 
