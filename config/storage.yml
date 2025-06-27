@@ -17,10 +17,10 @@ bunny:
   access_key_id: <%= Rails.application.credentials.dig(:bunny, :access_key_id) %>
   secret_access_key: <%= Rails.application.credentials.dig(:bunny, :storage_password) %>
   region: "us-east-1"
-  bucket: "ayus"
+  bucket: "ayus/p"
   endpoint: "https://storage.bunnycdn.com"
   force_path_style: true
-  prefix: "p"
+  
 
   #public: true
   #url_expires_in: 3600
