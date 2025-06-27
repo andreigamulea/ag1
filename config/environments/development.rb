@@ -21,7 +21,7 @@ Rails.application.configure do
   end
 
   # === FILES / UPLOADS ===
-  config.active_storage.service = :bunny
+  config.active_storage.service = :local
   config.active_storage.resolve_model_to_route = :rails_storage_proxy
   config.active_storage.variant_processor = :vips
   config.active_storage.draw_routes = true
