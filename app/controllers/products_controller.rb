@@ -97,6 +97,7 @@ def purge_main_image
     :status, :featured,
     :custom_attributes,
     :main_image,
+    :requires_login,
     secondary_images: []
   )
 end

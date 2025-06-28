@@ -125,11 +125,17 @@
     <%= form.label :featured %>
     <%= form.check_box :featured %>
   </div>
+  
+<div class="field">
+  <%= form.label :requires_login, "Doar utilizatori logați pot cumpăra?" %>
+  <%= form.check_box :requires_login %>
+</div>
 
  <div class="mb-3">
   <%= form.label :custom_attributes, "Atribute personalizate (JSON)", class: "form-label" %>
   <%= form.text_area :custom_attributes, class: "form-control", rows: 5 %>
 </div>
+
 
 
 <div class="mb-3">

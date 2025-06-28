@@ -40,7 +40,7 @@ end
 #
 # status              :string      - Stare generală: "active" / "inactive"
 # featured            :boolean     - Dacă produsul este promovat (ex: homepage)
-#
+# requires_login      :boolean     - Dacă utilizatorul trebuie să fie logat pentru a cumpăra
 # custom_attributes          :jsonb       - Atribute personalizate (culoare, mărime, etc.)
 #
 # main_image          :ActiveStorage - Imagine principală
@@ -48,7 +48,10 @@ end
 #
 # created_at          :datetime    - Data creării
 # updated_at          :datetime    - Data ultimei modificări
-#
+
+# de adaugat:
+# camp bool - produsul poate fi cumparat doar daca userul e logat
+
 
 
 
