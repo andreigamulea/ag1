@@ -125,11 +125,49 @@
     <%= form.label :featured %>
     <%= form.check_box :featured %>
   </div>
-  
+
 <div class="field">
   <%= form.label :requires_login, "Doar utilizatori logați pot cumpăra?" %>
   <%= form.check_box :requires_login %>
 </div>
+
+<div class="field">
+  <%= form.label :product_type, "Tip produs" %>
+  <%= form.select :product_type, Product.product_types.keys.map { |t| [t.titleize, t] } %>
+</div>
+
+<div class="field">
+  <%= form.label :delivery_method, "Mod de livrare" %>
+  <%= form.select :delivery_method, Product.delivery_methods.keys.map { |k| [k.titleize, k] } %>
+</div>
+
+<div class="field">
+  <%= form.label :visible_to_guests, "Vizibil pentru utilizatori neautentificați" %>
+  <%= form.check_box :visible_to_guests %>
+</div>
+
+
+<div class="field">
+  <%= form.label :taxable, "Se aplică TVA" %>
+  <%= form.check_box :taxable %>
+</div>
+
+<div class="field">
+  <%= form.label :coupon_applicable, "Se aplică cupon de reducere" %>
+  <%= form.check_box :coupon_applicable %>
+</div>
+
+<div class="field">
+  <%= form.label :download_file, "Fișier descărcabil (pentru produse digitale)" %>
+  <%= form.file_field :download_file %>
+  <% if form.object.download_file.attached? %>
+    <p>Fișier existent: <%= link_to form.object.download_file.filename.to_s, url_for(form.object.download_file), target: "_blank" %></p>
+  <% end %>
+</div>
+
+
+
+
 
  <div class="mb-3">
   <%= form.label :custom_attributes, "Atribute personalizate (JSON)", class: "form-label" %>

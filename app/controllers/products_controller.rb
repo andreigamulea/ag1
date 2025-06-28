@@ -98,6 +98,13 @@ def purge_main_image
     :custom_attributes,
     :main_image,
     :requires_login,
+    :product_type,
+    :delivery_method,
+    :visible_to_guests,
+    :taxable,
+    :coupon_applicable,    
+    :download_file,
+
     secondary_images: []
   )
 end

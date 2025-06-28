@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_28_122915) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_28_202406) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -70,6 +70,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_28_122915) do
     t.datetime "updated_at", null: false
     t.jsonb "custom_attributes", default: {}, null: false
     t.boolean "requires_login", default: false
+    t.string "product_type", default: "physical"
+    t.string "delivery_method", default: "shipping"
+    t.boolean "visible_to_guests", default: true
+    t.boolean "taxable", default: false
+    t.boolean "coupon_applicable", default: true
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
