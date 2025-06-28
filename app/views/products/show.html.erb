@@ -100,6 +100,66 @@
   <%= @product.meta_keywords %>
 </p>
 
+
+
+
+
+
+<p>
+  <strong>Tip produs:</strong>
+  <%= @product.product_type.humanize %>
+</p>
+
+<p>
+  <strong>Mod de livrare:</strong>
+  <%= @product.delivery_method.humanize %>
+</p>
+
+<p>
+  <strong>Vizibil pentru utilizatori neautentificați:</strong>
+  <%= @product.visible_to_guests ? "Da" : "Nu" %>
+</p>
+
+<p>
+  <strong>Se aplică TVA:</strong>
+  <%= @product.taxable ? "Da" : "Nu" %>
+</p>
+
+<p>
+  <strong>Se poate aplica cupon de reducere:</strong>
+  <%= @product.coupon_applicable ? "Da" : "Nu" %>
+</p>
+
+
+
+<p>
+  <strong>Necesită autentificare pentru cumpărare:</strong>
+  <%= @product.requires_login ? "Da" : "Nu" %>
+</p>
+
+<p>
+  <strong>Fișier descărcabil:</strong><br>
+  <% if @product.download_file.attached? %>
+    <%= link_to "Descarcă fișierul", url_for(@product.download_file), target: "_blank" %>
+  <% else %>
+    (fără fișier)
+  <% end %>
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <p>
   <strong>Atribute suplimentare:</strong><br>
   <pre><%= JSON.pretty_generate(@product.attributes || {}) rescue "{}" %></pre>
