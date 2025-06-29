@@ -52,16 +52,19 @@ def create
 end
 
 
- # PATCH/PUT /products/1 or /products/1.json
 def update
   respond_to do |format|
-    # 1. extragem secondary_images și attached_files din params
+    # 1. Extragem secondary_images și attached_files din params
     new_images = params[:product].delete(:secondary_images)
     new_files = params[:product].delete(:attached_files)
 
-    # 2. actualizăm restul atributelor
+    # 2. Setează category_ids la [] dacă este nil sau conține doar ""
+    product_params = product_params()
+    product_params[:category_ids] = product_params[:category_ids]&.reject(&:blank?) || []
+
+    # 3. Actualizăm restul atributelor
     if @product.update(product_params)
-      # 3. atașăm fișierele noi, dacă există
+      # 4. Atașăm fișierele noi, dacă există
       @product.secondary_images.attach(new_images) if new_images.present?
       @product.attached_files.attach(new_files) if new_files.present?
 
@@ -194,24 +197,13 @@ end
     # Only allow a list of trusted parameters through.
 def product_params
   params.require(:product).permit(
-    :name, :slug, :description_title, :description,
-    :price, :cost_price, :discount_price,
-    :sku, :stock, :track_inventory, :stock_status, :sold_individually,
-    :available_on, :discontinue_on,
-    :height, :width, :depth, :weight,
-    :meta_title, :meta_description, :meta_keywords,
-    :status, :featured,
-    :custom_attributes,
-    :main_image,
-    :requires_login,
-    :product_type,
-    :delivery_method,
-    :visible_to_guests,
-    :taxable,
-    :coupon_applicable,
-    category_ids: [],
-    attached_files: [],
-    secondary_images: []
+    :name, :slug, :description_title, :description, :price, :cost_price,
+    :discount_price, :sku, :stock, :track_inventory, :stock_status,
+    :sold_individually, :available_on, :discontinue_on, :height, :width,
+    :depth, :weight, :meta_title, :meta_description, :meta_keywords, :status,
+    :featured, :requires_login, :product_type, :delivery_method,
+    :visible_to_guests, :taxable, :coupon_applicable, :custom_attributes,
+    :main_image, attached_files: [], secondary_images: [], category_ids: []
   )
 end
 
