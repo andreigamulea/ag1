@@ -1,5 +1,7 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: %i[ show edit update destroy ]
+  before_action :set_product, only: [:show, :edit, :update, :destroy, :purge_attached_file]
+
 
   # GET /products or /products.json
   def index
@@ -50,16 +52,18 @@ def create
 end
 
 
-  # PATCH/PUT /products/1 or /products/1.json
+ # PATCH/PUT /products/1 or /products/1.json
 def update
   respond_to do |format|
-    # 1. extragem secondary_images din params
+    # 1. extragem secondary_images și attached_files din params
     new_images = params[:product].delete(:secondary_images)
+    new_files = params[:product].delete(:attached_files)
 
-    # 2. actualizăm restul atributele fără secondary_images
+    # 2. actualizăm restul atributelor
     if @product.update(product_params)
-      # 3. atașăm doar acum noile imagini (peste cele existente)
+      # 3. atașăm fișierele noi, dacă există
       @product.secondary_images.attach(new_images) if new_images.present?
+      @product.attached_files.attach(new_files) if new_files.present?
 
       format.html { redirect_to @product, notice: "Produs actualizat cu succes." }
       format.json { render :show, status: :ok, location: @product }
@@ -69,6 +73,7 @@ def update
     end
   end
 end
+
 
 
   # DELETE /products/1 or /products/1.json
@@ -95,6 +100,14 @@ def purge_main_image
     @product.main_image.purge if @product.main_image.attached?
     redirect_back fallback_location: edit_product_path(@product), notice: "Imaginea principală a fost ștearsă."
   end
+
+def purge_attached_file
+  file = @product.attached_files.find(params[:file_id])
+  file.purge
+  redirect_back fallback_location: edit_product_path(@product), notice: "Fișierul a fost șters."
+end
+
+
 
 
 def new_category
@@ -159,7 +172,7 @@ end
     end
 
     # Only allow a list of trusted parameters through.
-    def product_params
+def product_params
   params.require(:product).permit(
     :name, :slug, :description_title, :description,
     :price, :cost_price, :discount_price,
@@ -175,13 +188,13 @@ end
     :delivery_method,
     :visible_to_guests,
     :taxable,
-    :coupon_applicable,    
-    :download_file,
+    :coupon_applicable,
     category_ids: [],
-
+    attached_files: [],
     secondary_images: []
   )
 end
+
 
 def category_params
   params.require(:category).permit(:name, :slug)

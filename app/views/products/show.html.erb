@@ -150,12 +150,23 @@
 </p>
 
 <p>
-  <strong>Fișier descărcabil:</strong><br>
-  <% if @product.download_file.attached? %>
-    <%= link_to "Descarcă fișierul", url_for(@product.download_file), target: "_blank" %>
-  <% else %>
-    (fără fișier)
-  <% end %>
+ <% if @product.attached_files.attached? %>
+  <p><strong>Fișiere atașate:</strong></p>
+  <ul>
+    <% @product.attached_files.each do |file| %>
+      <li>
+        <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
+        <%= link_to "✕ Șterge", purge_attached_file_product_path(@product, file_id: file.id),
+                    method: :delete,
+                    data: { confirm: "Sigur vrei să ștergi fișierul?" },
+                    class: "btn btn-sm btn-danger ms-2" %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p><strong>Fișiere atașate:</strong> (niciun fișier)</p>
+<% end %>
+
 </p>
 
 

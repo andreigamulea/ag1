@@ -157,13 +157,35 @@
   <%= form.check_box :coupon_applicable %>
 </div>
 
-<div class="field">
-  <%= form.label :download_file, "Fișier descărcabil (pentru produse digitale)" %>
-  <%= form.file_field :download_file %>
-  <% if form.object.download_file.attached? %>
-    <p>Fișier existent: <%= link_to form.object.download_file.filename.to_s, url_for(form.object.download_file), target: "_blank" %></p>
-  <% end %>
+
+<div class="mb-3">
+  <%= form.label :attached_files, "Fișiere atașate" %>
+  <%= form.file_field :attached_files, multiple: true, direct_upload: true, class: "form-control", id: "attached-files" %>
+
+  <div id="attached-files-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
 </div>
+
+
+<% if product.attached_files.attached? %>
+  <div class="mb-3">
+    <strong>Fișiere existente:</strong>
+    <ul>
+      <% product.attached_files.each do |file| %>
+        <li>
+          <%= link_to file.filename, url_for(file), target: "_blank" %>
+          <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
+                      method: :delete,
+                      data: { confirm: "Ștergi acest fișier?" },
+                      class: "btn btn-sm btn-danger ms-2" %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+
+
+
 <div class="mb-3">
   <%= form.label :category_ids, "Categorii" %>
   <div id="category-options" class="d-flex flex-wrap gap-2 mb-2">
@@ -329,3 +351,46 @@ document.addEventListener("turbo:load", () => {
 });
 </script>
 
+<script>
+document.addEventListener("turbo:load", () => {
+  const input = document.getElementById("attached-files");
+  const wrapper = document.getElementById("attached-files-badges-wrapper");
+  const form = document.querySelector("form");
+
+  let allFiles = [];
+
+  input.addEventListener("change", () => {
+    const newFiles = Array.from(input.files);
+    newFiles.forEach(file => {
+      if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
+        allFiles.push(file);
+      }
+    });
+
+    renderBadges();
+    input.value = ""; // resetăm inputul real
+
+    const dt = new DataTransfer();
+    allFiles.forEach(file => dt.items.add(file));
+    input.files = dt.files;
+  });
+
+  function renderBadges() {
+    wrapper.innerHTML = "";
+    allFiles.forEach((file, index) => {
+      const badge = document.createElement("span");
+      badge.className = "badge bg-primary text-white me-2 mb-2";
+      badge.innerHTML = `${file.name} <span onclick="removeAttachedFile(${index})" style="cursor:pointer; margin-left:6px;">&times;</span>`;
+      wrapper.appendChild(badge);
+    });
+  }
+
+  window.removeAttachedFile = function(index) {
+    allFiles.splice(index, 1);
+    renderBadges();
+    const dt = new DataTransfer();
+    allFiles.forEach(file => dt.items.add(file));
+    input.files = dt.files;
+  };
+});
+</script>

@@ -1,7 +1,7 @@
 class Product < ApplicationRecord
   has_one_attached :main_image
   has_many_attached :secondary_images
-  has_one_attached :download_file
+  has_many_attached :attached_files
   has_and_belongs_to_many :categories
   
 
