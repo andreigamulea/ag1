@@ -173,11 +173,10 @@
       <% product.attached_files.each do |file| %>
         <li>
           <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
-          <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
+         <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
             method: :delete,
-            data: { confirm: "Sigur vrei să ștergi acest fișier?" },
-            class: "btn btn-sm btn-danger ms-2",
-            style: "display: inline-block; background: red; color: white;" %>
+            data: { confirm: "Sigur vrei să ștergi acest fișier?", turbo: false },
+            class: "btn btn-sm btn-danger ms-2" %>
         </li>
       <% end %>
     </ul>
