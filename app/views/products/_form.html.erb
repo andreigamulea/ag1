@@ -174,9 +174,10 @@
         <li>
           <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
           <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
-                      method: :delete,
-                      data: { confirm: "Sigur vrei să ștergi acest fișier?" },
-                      class: "btn btn-sm btn-danger ms-2" %>
+            method: :delete,
+            data: { confirm: "Sigur vrei să ștergi acest fișier?" },
+            class: "btn btn-sm btn-danger ms-2",
+            style: "display: inline-block; background: red; color: white;" %>
         </li>
       <% end %>
     </ul>
