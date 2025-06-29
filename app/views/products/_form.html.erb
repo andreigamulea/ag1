@@ -166,10 +166,15 @@
 </div>
 <div class="mb-3">
   <%= form.label :category_ids, "Categorii" %>
-<%= form.select :category_ids, Category.all.collect { |c| [c.name, c.id] },
-  {}, multiple: true, class: "form-control select2", data: { theme: "bootstrap-5" } %>
+  <%= form.select :category_ids,
+      Category.all.map { |c| [c.name, c.id] },
+      {}, multiple: true, size: 5,
+      class: "form-control", id: "category-select" %>
 
+
+  <div id="category-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
 </div>
+
 
 
 
@@ -282,13 +287,25 @@ document.addEventListener("turbo:load", () => {
 </script>
 <script>
 document.addEventListener("turbo:load", () => {
-  $(".select2").select2({
-    theme: "bootstrap4",
-    width: '100%' // ca să ocupe toată lățimea containerului
-  });
+  const select = document.getElementById("category-select");
+  const wrapper = document.getElementById("category-badges-wrapper");
+
+  function updateBadges() {
+    wrapper.innerHTML = "";
+    Array.from(select.selectedOptions).forEach(option => {
+      const badge = document.createElement("span");
+      badge.className = "badge bg-primary text-white me-2 mb-2";
+      badge.textContent = option.text;
+      wrapper.appendChild(badge);
+    });
+  }
+
+  select.addEventListener("change", updateBadges);
+
+  // inițial, dacă sunt categorii selectate (ex. la edit)
+  updateBadges();
 });
-
-
 </script>
+
 
 
