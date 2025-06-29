@@ -1,0 +1,17 @@
+<h1>Adaugă categorie nouă pentru: <%= @product.name %></h1>
+
+<%= form_with model: @category, url: create_category_product_path(@product), local: true do |f| %>
+  <div class="mb-3">
+    <%= f.label :name, "Nume categorie" %><br>
+    <%= f.text_field :name, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :slug, "Slug (URL prietenos)" %><br>
+    <%= f.text_field :slug, class: "form-control" %>
+  </div>
+
+  <%= f.submit "Creează și asociază", class: "btn btn-primary" %>
+<% end %>
+
+<%= link_to "Înapoi la categorii produs", edit_categories_product_path(@product), class: "btn btn-secondary mt-3" %>

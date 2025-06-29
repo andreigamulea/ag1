@@ -79,6 +79,63 @@ def purge_main_image
     @product.main_image.purge if @product.main_image.attached?
     redirect_back fallback_location: edit_product_path(@product), notice: "Imaginea principală a fost ștearsă."
   end
+
+
+def new_category
+  @product = Product.find(params[:id])
+  @category = Category.new
+end
+
+def create_category
+  @product = Product.find(params[:id])
+  @category = Category.new(category_params)
+  if @category.save
+    @product.categories << @category
+    redirect_to edit_categories_product_path(@product), notice: "Categorie creată și asociată produsului."
+  else
+    render :new_category, status: :unprocessable_entity
+  end
+end
+  def edit_categories
+  @product = Product.find(params[:id])
+  @categories = Category.all
+end
+
+def update_categories
+  @product = Product.find(params[:id])
+  if @product.update(category_ids: params[:product][:category_ids])
+    redirect_to @product, notice: "Categorii actualizate cu succes."
+  else
+    @categories = Category.all
+    render :edit_categories, status: :unprocessable_entity
+  end
+end
+
+
+
+def categories_index
+  @categories = Category.order(:name)
+end
+
+def new_standalone_category
+  @category = Category.new
+end
+
+def create_standalone_category
+  @category = Category.new(category_params)
+  if @category.save
+    redirect_to categories_index_products_path, notice: "Categorie creată cu succes."
+  else
+    render :new_standalone_category, status: :unprocessable_entity
+  end
+end
+
+def delete_standalone_category
+  @category = Category.find(params[:id])
+  @category.destroy
+  redirect_to categories_index_products_path, notice: "Categorie ștearsă cu succes."
+end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_product
@@ -109,6 +166,8 @@ def purge_main_image
   )
 end
 
-
+def category_params
+  params.require(:category).permit(:name, :slug)
+end
 
 end

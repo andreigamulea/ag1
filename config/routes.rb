@@ -5,12 +5,25 @@ Rails.application.routes.draw do
   # Rute RESTful pentru administrarea utilizatorilor și produse
   resources :users
   resources :products do
-    member do
-      delete 'purge_image/:image_id', to: 'products#purge_image', as: :purge_image
-      delete 'purge_main_image', to: 'products#purge_main_image', as: :purge_main_image
-    end
+  member do
+    delete 'purge_image/:image_id', to: 'products#purge_image', as: :purge_image
+    delete 'purge_main_image', to: 'products#purge_main_image', as: :purge_main_image
+    get :new_category
+    post :create_category
+    get :edit_categories
+    patch :update_categories
   end
 
+  collection do
+  get :categories_index
+  get :new_standalone_category
+  post :create_standalone_category
+  get :edit_standalone_category
+  patch :update_standalone_category
+  delete :delete_standalone_category
+end
+
+end
 
 
   # Pagini custom

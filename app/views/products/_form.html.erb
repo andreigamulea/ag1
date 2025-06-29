@@ -164,6 +164,14 @@
     <p>Fișier existent: <%= link_to form.object.download_file.filename.to_s, url_for(form.object.download_file), target: "_blank" %></p>
   <% end %>
 </div>
+<div class="mb-3">
+  <%= form.label :category_ids, "Categorii" %>
+<%= form.select :category_ids, Category.all.collect { |c| [c.name, c.id] },
+  {}, multiple: true, class: "form-control select2", data: { theme: "bootstrap-5" } %>
+
+</div>
+
+
 
 
 
@@ -272,3 +280,15 @@ document.addEventListener("turbo:load", () => {
   };
 });
 </script>
+<script>
+document.addEventListener("turbo:load", () => {
+  $(".select2").select2({
+    theme: "bootstrap4",
+    width: '100%' // ca să ocupe toată lățimea containerului
+  });
+});
+
+
+</script>
+
+

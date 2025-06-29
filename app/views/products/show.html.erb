@@ -130,6 +130,18 @@
   <%= @product.coupon_applicable ? "Da" : "Nu" %>
 </p>
 
+<p>
+  <strong>Categorii:</strong><br>
+  <% if @product.categories.any? %>
+    <ul>
+      <% @product.categories.each do |category| %>
+        <li><%= category.name %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <em>(Fără categorii asociate)</em>
+  <% end %>
+</p>
 
 
 <p>

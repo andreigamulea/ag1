@@ -1,0 +1,37 @@
+<h1>Listă categorii</h1>
+
+<div class="mb-3">
+  <%= link_to "Adaugă categorie nouă", new_standalone_category_products_path, class: "btn btn-success" %>
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nume</th>
+      <th>Slug</th>
+      <th>Acțiuni</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @categories.each do |category| %>
+      <tr>
+        <td><%= category.id %></td>
+        <td><%= category.name %></td>
+        <td><%= category.slug %></td>
+        <td>
+          <!-- Vezi (dacă vrei o pagină show) -->
+          <%= link_to "Vezi", "#", class: "btn btn-sm btn-outline-secondary disabled" %>
+
+          <!-- Editare -->
+          <%= link_to "Editare", edit_standalone_category_products_path(id: category.id), class: "btn btn-sm btn-outline-primary" %>
+
+          <!-- Ștergere -->
+          <%= link_to "Ștergere", delete_standalone_category_products_path(id: category.id), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi această categorie?" }, class: "btn btn-sm btn-outline-danger" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to "Înapoi la produse", products_path, class: "btn btn-secondary mt-4" %>

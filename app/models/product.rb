@@ -2,6 +2,8 @@ class Product < ApplicationRecord
   has_one_attached :main_image
   has_many_attached :secondary_images
   has_one_attached :download_file
+  has_and_belongs_to_many :categories
+  
 
 
   enum stock_status: { in_stock: "in_stock", out_of_stock: "out_of_stock" }

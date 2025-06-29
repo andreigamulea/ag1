@@ -1,0 +1,17 @@
+<h1>Categorii pentru: <%= @product.name %></h1>
+
+<%= form_with model: @product, url: update_categories_product_path(@product), method: :patch, local: true do |f| %>
+  <div class="mb-3">
+    <% @categories.each do |category| %>
+      <div class="form-check">
+        <%= check_box_tag "product[category_ids][]", category.id, @product.categories.include?(category), id: "cat_#{category.id}", class: "form-check-input" %>
+        <%= label_tag "cat_#{category.id}", category.name, class: "form-check-label" %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= f.submit "Salvează categorii", class: "btn btn-primary" %>
+<% end %>
+
+<%= link_to "Adaugă categorie nouă", new_category_product_path(@product), class: "btn btn-success mt-3" %>
+<%= link_to "Înapoi la produs", product_path(@product), class: "btn btn-secondary mt-2" %>
