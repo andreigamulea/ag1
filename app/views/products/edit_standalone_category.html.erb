@@ -1,0 +1,29 @@
+<h1>Editare categorie</h1>
+
+<%= form_with model: @category, url: update_standalone_category_products_path(id: @category.id), method: :patch, local: true do |form| %>
+  <% if @category.errors.any? %>
+    <div class="alert alert-danger">
+      <h4>Erori la salvare:</h4>
+      <ul>
+        <% @category.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :name, "Nume categorie" %>
+    <%= form.text_field :name, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :slug, "Slug categorie" %>
+    <%= form.text_field :slug, class: "form-control" %>
+  </div>
+
+  <div class="mt-3">
+    <%= form.submit "Salvează modificările", class: "btn btn-primary" %>
+    <%= link_to "Înapoi", categories_index_products_path, class: "btn btn-secondary ms-2" %>
+  </div>
+<% end %>

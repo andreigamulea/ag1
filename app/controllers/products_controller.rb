@@ -159,6 +159,26 @@ def create_standalone_category
   end
 end
 
+def update_standalone_category
+  @category = Category.find(params[:id])
+  if @category.update(category_params)
+    redirect_to categories_index_products_path, notice: "Categorie actualizată cu succes."
+  else
+    render :edit_standalone_category, status: :unprocessable_entity
+  end
+end
+
+
+def show_standalone_category
+  @category = Category.find_by(id: params[:id])
+  if @category.nil?
+    redirect_to categories_index_products_path, alert: "Categoria nu a fost găsită."
+  end
+end
+def edit_standalone_category
+  @category = Category.find(params[:id])
+end
+
 def delete_standalone_category
   @category = Category.find(params[:id])
   @category.destroy

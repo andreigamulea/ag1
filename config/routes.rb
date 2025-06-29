@@ -19,11 +19,13 @@ Rails.application.routes.draw do
   collection do
   get :categories_index
   get :new_standalone_category
+  get :show_standalone_category
   post :create_standalone_category
   get :edit_standalone_category
   patch :update_standalone_category
   delete :delete_standalone_category
 end
+
 
 end
 

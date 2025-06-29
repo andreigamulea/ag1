@@ -20,8 +20,7 @@
         <td><%= category.name %></td>
         <td><%= category.slug %></td>
         <td>
-          <!-- Vezi (dacă vrei o pagină show) -->
-          <%= link_to "Vezi", "#", class: "btn btn-sm btn-outline-secondary disabled" %>
+          <%= link_to "Vezi", show_standalone_category_products_path(id: category.id), class: "btn btn-sm btn-outline-secondary" %>
 
           <!-- Editare -->
           <%= link_to "Editare", edit_standalone_category_products_path(id: category.id), class: "btn btn-sm btn-outline-primary" %>
