@@ -19,20 +19,36 @@ class ProductsController < ApplicationController
   def edit
   end
 
-  # POST /products or /products.json
-  def create
-    @product = Product.new(product_params)
+# POST /products or /products.json
+def create
+  puts "=== PARAMS[:product] ==="
+  puts params[:product].inspect
 
-    respond_to do |format|
-      if @product.save
-        format.html { redirect_to @product, notice: "Product was successfully created." }
-        format.json { render :show, status: :created, location: @product }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
-      end
+  @product = Product.new(product_params)
+
+  puts "=== product_params ==="
+  puts product_params.inspect
+
+  puts "=== Category IDs in product ==="
+  puts @product.category_ids.inspect
+
+  respond_to do |format|
+    if @product.save
+      puts "=== Product saved successfully ==="
+      puts @product.categories.map(&:name).inspect
+
+      format.html { redirect_to @product, notice: "Product was successfully created." }
+      format.json { render :show, status: :created, location: @product }
+    else
+      puts "=== Product save failed ==="
+      puts @product.errors.full_messages.inspect
+
+      format.html { render :new, status: :unprocessable_entity }
+      format.json { render json: @product.errors, status: :unprocessable_entity }
     end
   end
+end
+
 
   # PATCH/PUT /products/1 or /products/1.json
 def update
@@ -161,6 +177,7 @@ end
     :taxable,
     :coupon_applicable,    
     :download_file,
+    category_ids: [],
 
     secondary_images: []
   )

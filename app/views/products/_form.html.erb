@@ -166,14 +166,26 @@
 </div>
 <div class="mb-3">
   <%= form.label :category_ids, "Categorii" %>
-  <%= form.select :category_ids,
-      Category.all.map { |c| [c.name, c.id] },
-      {}, multiple: true, size: 5,
-      class: "form-control", id: "category-select" %>
+  <div id="category-options" class="d-flex flex-wrap gap-2 mb-2">
+    <% Category.all.each do |category| %>
+      <% selected = product.category_ids.include?(category.id) %>
+      <span class="badge category-badge <%= selected ? 'bg-primary' : 'bg-secondary' %> text-white"
+            data-id="<%= category.id %>"
+            style="cursor: pointer;">
+        <%= category.name %>
+      </span>
+    <% end %>
+  </div>
 
-
-  <div id="category-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
+  <div id="category-hidden-inputs">
+    <% product.category_ids.each do |cat_id| %>
+      <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">
+    <% end %>
+  </div>
 </div>
+
+
+
 
 
 
@@ -285,27 +297,35 @@ document.addEventListener("turbo:load", () => {
   };
 });
 </script>
+
+
+
 <script>
 document.addEventListener("turbo:load", () => {
-  const select = document.getElementById("category-select");
-  const wrapper = document.getElementById("category-badges-wrapper");
+  const badges = document.querySelectorAll(".category-badge");
+  const hiddenInputsWrapper = document.getElementById("category-hidden-inputs");
 
-  function updateBadges() {
-    wrapper.innerHTML = "";
-    Array.from(select.selectedOptions).forEach(option => {
-      const badge = document.createElement("span");
-      badge.className = "badge bg-primary text-white me-2 mb-2";
-      badge.textContent = option.text;
-      wrapper.appendChild(badge);
+  badges.forEach(badge => {
+    badge.addEventListener("click", () => {
+      const id = badge.dataset.id;
+      const existing = hiddenInputsWrapper.querySelector(`input[value='${id}']`);
+
+      if (existing) {
+        existing.remove();
+        badge.classList.remove("bg-primary");
+        badge.classList.add("bg-secondary");
+      } else {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "product[category_ids][]";
+        input.value = id;
+        hiddenInputsWrapper.appendChild(input);
+
+        badge.classList.remove("bg-secondary");
+        badge.classList.add("bg-primary");
+      }
     });
-  }
-
-  select.addEventListener("change", updateBadges);
-
-  // inițial, dacă sunt categorii selectate (ex. la edit)
-  updateBadges();
+  });
 });
 </script>
-
-
 
