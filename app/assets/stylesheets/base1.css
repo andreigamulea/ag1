@@ -44,13 +44,15 @@ h6 {
 }
 
 
-.mb-3 ul li .btn-danger.mt-1 {
+.mb-3 .btn-danger.mt-1 {
   display: inline-block !important;
   visibility: visible !important;
   opacity: 1 !important;
   background-color: #dc3545 !important;
   color: white !important;
-  padding: 5px 10px !important;
+  padding: 6px 12px !important;
+  border: 1px solid #dc3545 !important;
+  border-radius: 4px !important;
 }
 
 
