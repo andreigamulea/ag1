@@ -167,16 +167,17 @@
 
 
 <% if product.persisted? && product.attached_files.attached? %>
-  <div class="mb-3">
+  <div class="mb-3" style="overflow: visible;">
     <strong>Fișiere existente:</strong>
-    <ul>
+    <ul style="list-style: none; padding: 0;">
       <% product.attached_files.each do |file| %>
-        <li>
+        <li style="display: flex; align-items: center; gap: 10px;">
           <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
           <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
                       method: :delete,
                       data: { confirm: "Sigur vrei să ștergi acest fișier?" },
-                      class: "btn btn-sm btn-danger mt-1" %>
+                      class: "btn btn-sm btn-danger mt-1",
+                      style: "background-color: #dc3545; color: white; padding: 5px 10px; display: inline-block; border: 1px solid black; text-decoration: none; margin-top: 4px;" %>
         </li>
       <% end %>
     </ul>
