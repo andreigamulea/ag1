@@ -166,7 +166,7 @@
 </div>
 
 
-<% if product.attached_files.attached? %>
+<% if product.persisted? && product.attached_files.attached? %>
   <div class="mb-3">
     <strong>Fișiere existente:</strong>
     <ul>
@@ -182,6 +182,7 @@
     </ul>
   </div>
 <% end %>
+
 
 
 
