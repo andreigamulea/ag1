@@ -1,1 +1,185 @@
-Contact
+
+  <style>
+    /* Stil general și compatibil cu tema site-ului Ayurveda */
+
+    body {
+      font-family: 'Lora', serif;
+      margin: 0;
+      padding: 0;
+      background: #fdfaf5;
+      color: #333;
+    }
+
+    .container_content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 25px;
+      padding-top: 0px;
+      background: white;
+      box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      padding: 8px;
+      margin-bottom: 1em;
+      padding-top: 30px;
+      color: #8b0000;
+    }
+
+    .section-title h2 {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .separator {
+      width: 68%;
+      height: 1px;
+      background-color: #8b0000;
+      margin: 0 auto;
+    }
+
+    .contact-wrapper {
+      display: flex;
+      gap: 40px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .contact-info {
+      flex: 1;
+      min-width: 260px;
+      font-size: 15px;
+      color: #444;
+    }
+
+    .contact-info h3 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #8b0000;
+    }
+
+    .contact-info p {
+      margin: 8px 0;
+    }
+
+    .contact-info a {
+      color: #8b0000;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .contact-info a:hover {
+      color: #fbc02d;
+    }
+
+    .contact-form {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .contact-form form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #8b0000;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 10px;
+      border: 1px solid #8b0000;
+      border-radius: 6px;
+      background: #fff8f8;
+      font-size: 1rem;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #650101;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(101, 1, 1, 0.3);
+    }
+
+    .form-button {
+      background-color: #bc2c2c;
+      color: white;
+      border: none;
+      padding: 6px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: fit-content;
+    }
+
+    .form-button:hover {
+      background-color: #8b0000;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .contact-wrapper {
+        flex-direction: column;
+      }
+    }
+  </style>
+
+
+
+  <div class="container_content">
+    <div class="section-title">
+      <h2>Contactează-ne</h2>
+    </div>
+    <div class="separator"></div>
+
+    <div class="contact-wrapper">
+      <div class="contact-info">
+        <h3>Informații de contact</h3>
+        <p><strong>📍 Adresă:</strong> Str. Liniștii nr. 10, București</p>
+        <p><strong>📞 Telefon:</strong> <a href="tel:+40740000000">+40 740 000 000</a></p>
+        <p><strong>✉️ Email:</strong> <a href="mailto:contact@ayusgrup.ro">contact@ayusgrup.ro</a></p>
+        <p><strong>⏰ Program:</strong> Luni - Vineri, 09:00 - 17:00</p>
+      </div>
+
+      <div class="contact-form">
+        <form action="#" method="post">
+          <div class="form-group">
+            <label for="name">Nume</label>
+            <input type="text" id="name" name="name" placeholder="Numele tău" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Adresă de email</label>
+            <input type="email" id="email" name="email" placeholder="exemplu@email.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Mesaj</label>
+            <textarea id="message" name="message" placeholder="Scrie mesajul tău aici..." rows="5" required></textarea>
+          </div>
+
+          <button type="submit" class="form-button">Trimite mesajul</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
