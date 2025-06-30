@@ -33,6 +33,7 @@ end
   # Pagini custom
   get 'admin', to: 'home#admin'
   get 'home/index'
+  get 'contact', to: 'home#contact'
   get 'up' => 'rails/health#show', as: :rails_health_check
 
   # Rădăcina aplicației

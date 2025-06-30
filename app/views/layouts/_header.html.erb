@@ -81,7 +81,8 @@
         <%= link_to "Articole", "#" %>
         <%= link_to "Resurse Digitale", "#" %>
         <%= link_to "Despre", "#" %>
-        <%= link_to "Contact", "#" %>
+        
+        <%= link_to "Contact", contact_path, class: "admin-link" %>
 
         <% if current_user&.admin? %>
           <%= link_to "Admin", admin_path, class: "admin-link" %>
