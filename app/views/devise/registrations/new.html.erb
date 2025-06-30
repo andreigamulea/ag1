@@ -1,29 +1,221 @@
-<h2>Sign up</h2>
+<div id="signup-page" class="container_content">
+  <h1>Creare cont</h1>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+    <div class="field">
+      <%= f.label :email %><br />
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
+    </div>
+
+<div class="field">
+  <%= f.label :password do %>
+    Parolă <em>(<%= @minimum_password_length %> caractere minim)</em>
+  <% end %><br />
+  <%= f.password_field :password, autocomplete: "new-password", class: "input-style" %>
+</div>
+
+
+    <div class="field">
+      <%= f.label :password_confirmation %><br />
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input-style" %>
+    </div>
+
+    <div class="actions" style="margin-top: 20px;">
+      <%= f.submit "Creează cont", class: "link-button" %>
+    </div>
+  <% end %>
+
+  <div class="devise-links special">
+    <%= render "devise/shared/links" %>
   </div>
+</div>
 
-  <div class="field">
-    <%= f.label :password %>
-    <% if @minimum_password_length %>
-    <em>(<%= @minimum_password_length %> characters minimum)</em>
-    <% end %><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-  </div>
+<style>
+/* ----------- PAGINA SIGNUP STILIZATĂ CA LOGIN ----------- */
+#signup-page h2{
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #8b0000;
+    }
+    
+#signup-page {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 30px 25px;
+  background: white;
+  border: 1px solid #8b0000;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.8s ease-out forwards;
+}
 
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
+/* TITLU SIGNUP */
+#signup-page h1 {
+  all: unset;
+  font-size: 2rem;
+  color: #8b0000 !important;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  display:block;
+  text-align:center;
+  width:100%;
+}
 
-  <div class="actions">
-    <%= f.submit "Sign up" %>
-  </div>
-<% end %>
+/* CÂMPURI FORMULAR */
+#signup-page .field {
+  margin-bottom: 1.5rem;
+}
 
-<%= render "devise/shared/links" %>
+#signup-page label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #8b0000;
+  margin-bottom: -20px;
+}
+
+/* INPUTURI */
+#signup-page input[type="email"],
+#signup-page input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #8b0000;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #333;
+  background-color: #fff8f8;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#signup-page input[type="email"]:focus,
+#signup-page input[type="password"]:focus {
+  border-color: #650101;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(101, 1, 1, 0.3);
+}
+
+/* BUTON SUBMIT */
+#signup-page .actions input[type="submit"] {
+  background: none;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #8b0000 !important;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  text-align: center;
+  transition: color 0.3s ease;
+  text-decoration: underline;
+}
+
+#signup-page .actions input[type="submit"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background-color: #fbc02d;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+#signup-page .actions input[type="submit"]:hover {
+  color: #fbc02d !important;
+}
+
+#signup-page .actions input[type="submit"]:hover::after {
+  opacity: 1;
+}
+
+/* LINKURI DEVIZE */
+#signup-page .devise-links {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #666666;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#signup-page .devise-links a {
+  color: #8b0000;
+  font-weight: bold;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+#signup-page .devise-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background-color: #fbc02d;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+#signup-page .devise-links a:hover {
+  color: #fbc02d;
+}
+
+#signup-page .devise-links a:hover::after {
+  opacity: 1;
+}
+
+#signup-page .devise-links br {
+  display: none;
+}
+
+/* RESPONSIVE */
+@media (max-width:922px) {
+  .special {
+    flex-direction: column !important;
+  }
+
+  #signup-page .special a:first-of-type {
+    border-bottom: 1px solid #dddddd;
+    width: 61.8%;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    display: block;
+  }
+}
+
+@media (max-width: 500px) {
+  #signup-page {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  #signup-page h1 {
+    font-size: 2rem;
+  }
+}
+
+/* ANIMAȚIE */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

@@ -88,13 +88,12 @@
         <% end %>
 
         <% if current_user %>
-          <%= button_to "Delogare", destroy_user_session_path,
+          <%= button_to "Logout", destroy_user_session_path,
               method: :delete,
               form: { class: "inline" },
               class: "link-button" %>
         <% else %>
           <%= link_to "Login", new_user_session_path %>
-          <%= link_to "Creează un cont", new_user_registration_path %>
         <% end %>
       </nav>
 
