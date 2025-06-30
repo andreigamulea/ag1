@@ -1,41 +1,144 @@
-<h1>Listă utilizatori</h1>
+<div class="container_content user-list">
+  <h1 class="admin-title">👥 Listă utilizatori</h1>
 
-<%= link_to "Adaugă utilizator", new_user_path, class: "btn btn-primary", style: "margin-bottom: 1rem;" %>
+  <%= link_to "➕ Adaugă utilizator", new_user_path, class: "form-button", style: "margin-bottom: 1.5rem;" %>
 
-<table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #ccc;">
-  <thead style="background-color: #f5f5f5;">
-    <tr>
-      <th style="padding: 8px; border: 1px solid #ddd;">ID</th>
-      <th style="padding: 8px; border: 1px solid #ddd;">Email</th>
-      <th style="padding: 8px; border: 1px solid #ddd;">Rol</th>
-      <th style="padding: 8px; border: 1px solid #ddd;">Creat la</th>
-      <th style="padding: 8px; border: 1px solid #ddd;">Acțiuni</th>
-    </tr>
-  </thead>
+  <div class="table-wrapper">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Creat la</th>
+          <th>Acțiuni</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @users.each do |user| %>
+          <tr>
+            <td><%= user.id %></td>
+            <td><%= user.email %></td>
+            <td>
+              <%= case user.role
+                  when 0 then "Client"
+                  when 1 then "Administrator"
+                  when 2 then "Manager"
+                  else "Necunoscut"
+                  end %>
+            </td>
+            <td><%= user.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+            <td class="table-actions">
+              <%= link_to "Detalii", user_path(user), class: "table-button neutral" %>
+              <%= link_to "Editează", edit_user_path(user), class: "table-button primary" %>
+              <%= link_to "Șterge", user_path(user), method: :delete, data: { confirm: "Ești sigur?" }, class: "table-button danger" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<style>
+/* Titlu listă utilizatori */
+.admin-title {
+  font-size: 28px;
+  color: #8b0000;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-top:20px;
+}
 
-  <tbody>
-    <% @users.each do |user| %>
-      <tr>
-        <td style="padding: 8px; border: 1px solid #eee;"><%= user.id %></td>
-        <td style="padding: 8px; border: 1px solid #eee;"><%= user.email %></td>
-        <td style="padding: 8px; border: 1px solid #eee;">
-          <%= case user.role
-              when 0 then "Client"
-              when 1 then "Administrator"
-              when 2 then "Manager"
-              else "Necunoscut"
-              end %>
-        </td>
-        <td style="padding: 8px; border: 1px solid #eee;"><%= user.created_at.strftime("%Y-%m-%d %H:%M") %></td>
-        <td style="padding: 8px; border: 1px solid #eee; white-space: nowrap;">
-          <%= link_to "Detalii", user_path(user), class: "btn btn-sm btn-outline-secondary" %>
-          <%= link_to "Editează", edit_user_path(user), class: "btn btn-sm btn-outline-primary" %>
-          <%= link_to "Șterge", user_path(user),
-              method: :delete,
-              data: { confirm: "Ești sigur?" },
-              class: "btn btn-sm btn-outline-danger", style: "margin-left: 0.3rem;" %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+/* Buton general reutilizabil */
+.form-button {
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.form-button:hover {
+  background-color: #fbc02d;
+  color: #8b0000;
+}
+
+/* Tabel */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 15px;
+  text-align: left;
+}
+
+.styled-table thead {
+  background-color: #8b0000;
+  color: white;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+}
+
+.styled-table tbody tr:hover {
+  background: #fef3dc;
+}
+
+/* Acțiuni din tabel */
+.table-actions {
+  white-space: nowrap;
+}
+
+.table-button {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 4px;
+  margin-right: 5px;
+  display: inline-block;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.table-button.secondary {
+  background: #eee;
+  color: #444;
+}
+
+.table-button.primary {
+  background: #8b0000;
+  color: white;
+}
+
+.table-button.danger {
+  background: #bc2c2c;
+  color: white;
+}
+  .table-button.neutral {
+  background-color: #f5f5f5;
+  color: #8b0000;
+  border: 1px solid #8b0000;
+}
+
+.table-button.neutral:hover {
+  background-color: #fbc02d;
+  color: #8b0000;
+  border-color: #fbc02d;
+}
+
+
+.table-button:hover {
+  opacity: 0.9;
+}
+
+</style>

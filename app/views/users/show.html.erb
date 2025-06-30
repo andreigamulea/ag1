@@ -1,35 +1,90 @@
-<h1>Detalii utilizator</h1>
+<div class="container_content user-details">
+  <h1 class="admin-title">👤 Detalii utilizator</h1>
 
-<p>
-  <strong>ID:</strong>
-  <%= @user.id %>
-</p>
+  <div class="details-group">
+    <p><strong>ID:</strong> <%= @user.id %></p>
+    <p><strong>Email:</strong> <%= @user.email %></p>
+    <p><strong>Rol:</strong>
+      <%= case @user.role
+          when 0 then "Client"
+          when 1 then "Administrator"
+          when 2 then "Manager"
+          else "Necunoscut"
+          end %>
+    </p>
+    <p><strong>Creat la:</strong> <%= @user.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+    <p><strong>Ultima actualizare:</strong> <%= @user.updated_at.strftime("%Y-%m-%d %H:%M") %></p>
+  </div>
 
-<p>
-  <strong>Email:</strong>
-  <%= @user.email %>
-</p>
+  <div class="details-actions">
+    <%= link_to "← Înapoi", users_path, class: "form-button secondary" %>
+    <%= link_to "✏️ Editează", edit_user_path(@user), class: "form-button primary" %>
+  </div>
+</div>
 
-<p>
-  <strong>Rol:</strong>
-  <%= case @user.role
-      when 0 then "Client"
-      when 1 then "Administrator"
-      when 2 then "Manager"
-      else "Necunoscut"
-      end %>
-</p>
+<style>
+.admin-title {
+  font-size: 28px;
+  color: #8b0000;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-top:20px;
+}
 
-<p>
-  <strong>Creat la:</strong>
-  <%= @user.created_at.strftime("%Y-%m-%d %H:%M") %>
-</p>
+.details-group {
+  font-size: 16px;
+  color: #444;
+  line-height: 1.8;
+  margin-bottom: 30px;
+  padding: 15px 20px;
+  background: #fff8f8;
+  border-radius: 8px;
+  border: 1px solid #8b0000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
 
-<p>
-  <strong>Ultima actualizare:</strong>
-  <%= @user.updated_at.strftime("%Y-%m-%d %H:%M") %>
-</p>
+.details-group p {
+  margin: 0 0 12px;
+}
 
-<%= link_to "Înapoi", users_path %> |
-<%= link_to "Editează", edit_user_path(@user) %>
+.details-group strong {
+  color: #8b0000;
+}
 
+.details-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.form-button {
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.form-button:hover {
+  background-color: #fbc02d;
+  color: #8b0000;
+}
+
+.form-button.secondary {
+  background-color: #eeeeee;
+  color: #8b0000;
+  border: 1px solid #8b0000;
+}
+
+.form-button.secondary:hover {
+  background-color: #fbc02d;
+  color: #8b0000;
+}
+
+</style>

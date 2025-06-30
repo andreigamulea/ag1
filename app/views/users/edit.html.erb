@@ -1,30 +1,138 @@
-<h1>Modifică utilizator</h1>
+<div class="container_content user-form">
+<div style="max-width:680px; margin: 0 auto;">
+  <h1 class="admin-title">✏️ Modifică utilizator</h1>
 
-<%= form_with(model: @user, local: true) do |form| %>
-  <% if @user.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(@user.errors.count, "eroare") %>:</h2>
-      <ul>
-        <% @user.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+  <%= form_with(model: @user, local: true) do |form| %>
+    <% if @user.errors.any? %>
+      <div class="form-errors">
+        <h2><%= pluralize(@user.errors.count, "eroare") %>:</h2>
+        <ul>
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= form.label :email, "Email" %>
+      <%= form.text_field :email, readonly: true, class: "form-control readonly" %>
+    </div>
+
+    <div class="form-group">
+      <%= form.label :role, "Rol" %>
+      <%= form.select :role, [["Client", 0], ["Administrator", 1], ["Manager", 2]], {}, class: "form-control" %>
+    </div>
+
+    <div class="form-actions">
+      <%= form.submit "💾 Salvează modificările", class: "form-button" %>
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :email %><br>
-    <%= form.text_field :email, readonly: true %>
-  </div>
+  <%= link_to "← Înapoi", users_path, class: "link-button", style: "margin-top: 1.2rem; display: inline-block;" %>
+</div>
+</div>
 
-  <div>
-    <%= form.label :role, "Rol" %><br>
-    <%= form.select :role, [[ "Client", 0 ], ["Admin", 1], ["Manager", 2]] %>
-  </div>
+<style>
+.admin-title {
+  font-size: 28px;
+  color: #8b0000;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-top:20px;
+}
 
-  <div>
-    <%= form.submit "Salvează modificările" %>
-  </div>
-<% end %>
+.form-errors {
+  background: #ffe5e5;
+  border: 1px solid #bc2c2c;
+  color: #8b0000;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
 
-<%= link_to "Înapoi", users_path %>
+.form-errors h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #8b0000;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #8b0000;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fff8f8;
+}
+
+.form-control:focus {
+  border-color: #650101;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(101, 1, 1, 0.3);
+}
+
+.form-control.readonly {
+  background-color: #f3f3f3;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.form-actions {
+  margin-top: 20px;
+}
+
+.form-button {
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-button:hover {
+  background-color: #fbc02d;
+  color: #8b0000;
+}
+
+/* link-button reutilizabil */
+.link-button {
+  background: none;
+  border: none;
+  color: #8b0000;
+  font: inherit;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.link-button:hover {
+  color: #fbc02d;
+}
+  .user-form > div {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+</style>
