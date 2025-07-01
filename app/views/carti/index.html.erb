@@ -1,0 +1,132 @@
+<h1 style="text-align: center;">Cărți în format fizic și digital</h1>
+
+<div class="product-grid">
+  <% @products.each do |product| %>
+    <div class="product-card">
+      <% if product.main_image.attached? %>
+        <%= link_to carti_path(product.id), class: "image-link" do %>
+          <%= image_tag product.main_image.variant(resize_to_limit: [200, 200]), alt: product.name, class: "product-image" %>
+        <% end %>
+      <% else %>
+        <%= image_tag "placeholder.png", class: "product-image" %>
+      <% end %>
+
+      <h2 class="product-title"><%= product.name %></h2>
+
+      <% if product.custom_attributes && product.custom_attributes["autor"] %>
+        <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
+      <% end %>
+
+      <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei", separator: ",", delimiter: ".") %></p>
+
+      <% if product.track_inventory && product.stock.to_i == 0 %>
+        <% if product.stock_status == "in_stock" %>
+          <p class="stock yellow">Stoc: 0 Permite comenzi în așteptare</p>
+        <% else %>
+          <p class="stock red">Stoc: 0 Nu mai este pe stoc</p>
+        <% end %>
+      <% else %>
+        <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
+      <% end %>
+
+      <form class="add-to-cart-form">
+        <input type="number" value="1" min="1" class="qty-input" />
+        <button type="submit" class="add-to-cart-btn" <%= 'disabled' if product.stock.to_i == 0 && product.stock_status != "in_stock" %>>
+          Adaugă în coș
+        </button>
+      </form>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  padding: 20px;
+}
+
+.product-card {
+  width: 220px;
+  border: 1px solid #b51e1e;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #fffdf8;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.product-image {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.product-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.product-author {
+  font-style: italic;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+
+.product-price {
+  font-weight: bold;
+  color: #b51e1e;
+  margin-bottom: 5px;
+}
+
+.stock {
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+
+.stock.green {
+  color: green;
+}
+
+.stock.yellow {
+  color: #d19c00;
+}
+
+.stock.red {
+  color: #b51e1e;
+}
+
+.add-to-cart-form {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  align-items: center;
+}
+
+.qty-input {
+  width: 40px;
+  padding: 2px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-to-cart-btn {
+  background-color: #b51e1e;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.add-to-cart-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+</style>

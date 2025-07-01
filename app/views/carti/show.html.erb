@@ -1,0 +1,146 @@
+<div class="product-page">
+
+  <div class="main-image">
+    <% if @product.main_image.attached? %>
+      <%= image_tag @product.main_image.variant(resize_to_limit: [300, 300]),
+              alt: @product.name,
+              class: "popup-trigger",
+              data: { full: url_for(@product.main_image) } %>
+
+    <% end %>
+  </div>
+
+  <% if @product.secondary_images.any? %>
+    <div class="secondary-images">
+      <% @product.secondary_images.each do |image| %>
+        <%= image_tag image.variant(resize_to_limit: [80, 80]),
+              class: "thumb popup-trigger",
+              data: { full: url_for(image) } %>
+
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Lightbox popup -->
+  <div id="lightbox-overlay">
+    <span id="lightbox-close">&times;</span>
+    <img id="lightbox-image" src="" alt="Imagine mărită">
+  </div>
+
+  <div class="product-info">
+    <h1><%= @product.name %></h1>
+    <% if @product.custom_attributes && @product.custom_attributes["autor"] %>
+      <p><strong>Autor:</strong> <%= @product.custom_attributes["autor"] %></p>
+    <% end %>
+
+    <p><strong>Preț:</strong> <%= number_to_currency(@product.price, unit: "lei") %></p>
+    <p><strong>Descriere:</strong> <%= simple_format(@product.description) %></p>
+  </div>
+
+  <div class="back-button">
+    <%= link_to "← Înapoi la listă", carti_index_path, class: "btn-back" %>
+  </div>
+
+</div>
+
+
+<style>
+.product-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.main-image img,
+.secondary-images .thumb {
+  border-radius: 6px;
+  cursor: zoom-in;
+}
+
+.secondary-images {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+
+#lightbox-overlay {
+  position: fixed;
+  display: none;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  justify-content: center;
+  align-items: center;
+}
+
+#lightbox-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 6px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+#lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 2em;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10000;
+}
+
+
+.back-button {
+  margin-top: 30px;
+}
+
+.btn-back {
+  background-color: #b51e1e;
+  color: white;
+  padding: 8px 14px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+
+</style>
+<script>
+document.addEventListener('turbo:load', function () {
+  const overlay = document.getElementById('lightbox-overlay');
+  const lightboxImage = document.getElementById('lightbox-image');
+  const closeBtn = document.getElementById('lightbox-close');
+
+  document.querySelectorAll('.popup-trigger').forEach(img => {
+  img.addEventListener('click', function () {
+    lightboxImage.src = img.dataset.full || img.src;
+    overlay.style.display = 'flex';
+  });
+});
+
+
+  closeBtn.addEventListener('click', function () {
+    overlay.style.display = 'none';
+    lightboxImage.src = '';
+  });
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay || e.target === closeBtn) {
+      overlay.style.display = 'none';
+      lightboxImage.src = '';
+    }
+  });
+});
+
+</script>

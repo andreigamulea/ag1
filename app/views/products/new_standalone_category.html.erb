@@ -1,17 +1,97 @@
-<h1>Adaugă categorie nouă</h1>
+<div class="container_content user-form">
+  <div style="max-width: 680px; margin: 0 auto;">
+    <h1 class="admin-title">➕ Adaugă categorie nouă</h1>
 
-<%= form_with model: @category, url: create_standalone_category_products_path, local: true do |f| %>
-  <div class="mb-3">
-    <%= f.label :name, "Nume categorie" %>
-    <%= f.text_field :name, class: "form-control" %>
+    <%= form_with model: @category, url: create_standalone_category_products_path, local: true do |f| %>
+      <div class="form-group">
+        <%= f.label :name, "Nume categorie" %>
+        <%= f.text_field :name, class: "form-control" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :slug, "Slug (URL prietenos)" %>
+        <%= f.text_field :slug, class: "form-control" %>
+      </div>
+
+      <div class="form-actions">
+        <%= f.submit "💾 Salvează", class: "form-button" %>
+      </div>
+    <% end %>
+
+    <%= link_to "← Înapoi", products_path, class: "link-button", style: "margin-top: 1.2rem; display: inline-block;" %>
   </div>
+</div>
 
-  <div class="mb-3">
-    <%= f.label :slug, "Slug (URL prietenos)" %>
-    <%= f.text_field :slug, class: "form-control" %>
-  </div>
+<style>
+.admin-title {
+  font-size: 28px;
+  color: #8b0000;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-top: 20px;
+}
 
-  <%= f.submit "Salvează", class: "btn btn-primary" %>
-<% end %>
+.form-group {
+  margin-bottom: 20px;
+}
 
-<%= link_to "Înapoi", products_path, class: "btn btn-secondary mt-3" %>
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #8b0000;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #8b0000;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fff8f8;
+}
+
+.form-control:focus {
+  border-color: #650101;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(101, 1, 1, 0.3);
+}
+
+.form-actions {
+  margin-top: 20px;
+}
+
+.form-button {
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-button:hover {
+  background-color: #fbc02d;
+  color: #8b0000;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #8b0000;
+  font: inherit;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.link-button:hover {
+  color: #fbc02d;
+}
+</style>

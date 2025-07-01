@@ -1,8 +1,12 @@
 Rails.application.routes.draw do
   # Autentificare Devise (înainte de orice alte rute care pot intra în conflict)
   devise_for :users
-
   # Rute RESTful pentru administrarea utilizatorilor și produse
+  resources :carti, only: [:index, :show]
+
+
+
+
   resources :users
   resources :products do
   member do
