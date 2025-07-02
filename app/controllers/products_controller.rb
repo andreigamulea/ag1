@@ -84,26 +84,47 @@ def purge_image
 end
 
 def force_gc
-  before_rss, _ = get_memory_usage
-  before_heap = GC.stat[:heap_used] rescue nil
+  before_rss = fetch_memory_usage
+  before_heap = GC.stat[:heap_used]
 
   GC.start(full_mark: true, immediate_sweep: true)
 
-  after_rss, _ = get_memory_usage
-  after_heap = GC.stat[:heap_used] rescue nil
+  after_rss = fetch_memory_usage
+  after_heap = GC.stat[:heap_used]
 
-  freed_mb = (before_rss - after_rss).round(2)
-
-  MemoryLog.create!(
-    used_memory_mb: after_rss,
-    freed_memory_mb: freed_mb,
-    note: "GC manual (heap: #{before_heap} → #{after_heap})"
-  )
+  freed = (before_rss - after_rss).round(2)
 
   Rails.logger.info "[GC] GC declanșat manual – RSS: #{before_rss} → #{after_rss} MB | Heap: #{before_heap} → #{after_heap}"
 
-  redirect_to admin_path, notice: "RAM eliberat: #{freed_mb} MB"
+  MemoryLog.create!(
+    used_memory_mb: after_rss,
+    freed_memory_mb: freed,
+    note: "GC manual (heap: #{before_heap} → #{after_heap})"
+  )
+
+  redirect_to admin_path, notice: "🧹 GC declanșat manual – Memorie eliberată: #{freed} MB"
 end
+
+
+  def fetch_memory_usage
+  require 'sys/proctable'
+  info = Sys::ProcTable.ps.find { |p| p.pid == Process.pid }
+  return 0 unless info
+
+  if RbConfig::CONFIG['host_os'] =~ /linux/
+    (info.rss.to_f / 1024 / 1024).round(2)
+  elsif RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+    (info.working_set_size.to_f / 1024 / 1024).round(2)
+  else
+    0
+  end
+end
+
+
+
+
+
+
 
 
 
@@ -247,23 +268,10 @@ def generate_variants_for(product)
   GC.start(full_mark: true, immediate_sweep: true)
 end
 
-def get_memory_usage
-  if Gem.win_platform?
-    output = `tasklist /FI "PID eq #{Process.pid}" /FO CSV /NH`
-    if output =~ /"[^"]+","\d+","\w+","\d+ K"/
-      mem_kb = output.split(',').last.strip.delete('"').delete(' K').to_i
-      used_mb = (mem_kb / 1024.0).round(2)
-      [used_mb, nil]
-    else
-      [0.0, nil]
-    end
-  else
-    output = `ps -o rss= -p #{Process.pid}`.to_i
-    used_mb = (output / 1024.0).round(2)
-    total_mb = 512 # setare manuală dacă vrei să o compari cu Render
-    [used_mb, total_mb]
-  end
-end
+
+
+
+
 
 
 

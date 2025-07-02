@@ -9,7 +9,8 @@ Rails.application.routes.draw do
   get "/ram_logs", to: "memory_logs#index", as: :ram_logs
 
 
-post "admin/force_gc", to: "home#force_gc", as: :force_gc
+get '/products/force_gc', to: 'products#force_gc', as: 'force_gc_products'
+
 
 
   resources :users

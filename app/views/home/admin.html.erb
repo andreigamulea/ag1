@@ -9,10 +9,8 @@
      <li><%= link_to "Utilizare RAM", mem_path %></li>
      <li><%= link_to "📈 Istoric RAM", ram_logs_path %></li>
 
-     <%= button_to "Curăță RAM (GC)", "/products/force_gc",
-      method: :post,
-      data: { turbo: false, confirm: "Ești sigur că vrei să eliberezi memoria?" },
-      class: "btn btn-warning", style: "margin-bottom: 20px;" %>
+     <li><%= link_to "🧹 Curăță RAM (GC)", force_gc_products_path %></li>
+
 
 
   </ul>
