@@ -1,12 +1,23 @@
+require 'sys/proctable'
+include Sys
+
 class MonitoringController < ActionController::Base
   def mem
-    rss = `ps -o rss= -p #{Process.pid}`.to_i / 1024
+    process = ProcTable.ps.find { |p| p.pid == Process.pid }
 
-    uptime_seconds = (Time.now - Process.clock_gettime(Process::CLOCK_BOOTTIME)).to_i
+    rss_mb = if Gem.win_platform?
+  process&.working_set_size.to_i / (1024 * 1024)
+else
+  process&.rss.to_i / 1024
+end
+
+
+    uptime_seconds = (Time.now - ::APP_BOOT_TIME).to_i
+
+
     uptime = format_duration(uptime_seconds)
 
     threads = Thread.list.count
-
     variants_size = `du -sh storage/variants 2>/dev/null`.strip.presence || "N/A"
 
     attached_count = ActiveStorage::Blob.count
@@ -16,7 +27,7 @@ class MonitoringController < ActionController::Base
     render plain: <<~TEXT
       ✅ Monitoring Status
       -------------------------
-      RAM usage:        #{rss} MB
+      RAM usage:        #{rss_mb} MB
       Uptime:           #{uptime}
       Threads:          #{threads}
       Variants size:    #{variants_size}
@@ -34,7 +45,6 @@ class MonitoringController < ActionController::Base
     "%d days, %02d:%02d:%02d" % [days, hrs, mins, secs]
   end
 
-  # Format bytes to human-readable (e.g. 12.3 MB)
   def number_to_human_size(size)
     ApplicationController.helpers.number_to_human_size(size)
   end

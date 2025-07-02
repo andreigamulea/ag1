@@ -1,0 +1,1 @@
+APP_BOOT_TIME = Time.now.freeze
