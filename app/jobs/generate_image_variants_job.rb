@@ -1,11 +1,13 @@
-# app/jobs/generate_image_variants_job.rb
 class GenerateImageVariantsJob < ApplicationJob
   queue_as :default
 
-  def perform(attachment)
+  def perform(attachment, resize_dimensions)
     return unless attachment.variable?
 
-    # Creează varianta și o procesează acum
-    attachment.variant(resize_to_limit: [300, 300]).processed
+    # Procesare variantă
+    attachment.variant(resize_to_limit: resize_dimensions).processed
+
+    # Opțional, forțăm curățarea memoriei
+    GC.start(full_mark: true, immediate_sweep: true)
   end
 end
