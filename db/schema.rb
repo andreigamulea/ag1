@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_28_225921) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_02_210237) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -54,6 +54,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_28_225921) do
     t.bigint "product_id", null: false
     t.index ["category_id", "product_id"], name: "index_categories_products_on_category_id_and_product_id"
     t.index ["product_id", "category_id"], name: "index_categories_products_on_product_id_and_category_id"
+  end
+
+  create_table "memory_logs", force: :cascade do |t|
+    t.float "used_mb"
+    t.float "available_mb"
+    t.string "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "products", force: :cascade do |t|

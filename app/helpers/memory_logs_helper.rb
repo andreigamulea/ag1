@@ -1,0 +1,2 @@
+module MemoryLogsHelper
+end

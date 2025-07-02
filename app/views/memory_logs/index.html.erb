@@ -1,0 +1,21 @@
+<h2>Istoric utilizare RAM</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>RAM folosit (MB)</th>
+      <th>Eliberat (MB)</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @logs.each do |log| %>
+      <tr>
+        <td><%= log.created_at.strftime("%d.%m.%Y %H:%M:%S") %></td>
+        <td><%= log.used_mb %></td>
+        <td><%= log.available_mb %></td>
+        <td><%= log.note %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

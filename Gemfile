@@ -73,3 +73,6 @@ group :development, :test do
   
 end
 gem 'sys-proctable', '~> 1.3'
+gem 'get_process_mem', '~> 1.0'
+gem 'chartkick', '~> 5.2'
+gem 'groupdate', '~> 6.7'

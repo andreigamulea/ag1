@@ -83,6 +83,23 @@ def purge_image
   redirect_back fallback_location: edit_product_path(params[:id]), notice: "Imaginea a fost ștearsă."
 end
 
+def force_gc
+  before = GetProcessMem.new.mb
+  GC.start(full_mark: true, immediate_sweep: true)
+  after = GetProcessMem.new.mb
+  freed = (before - after).round(2)
+
+  MemoryLog.create!(
+    used_mb: after.round(2),
+    available_mb: freed,
+    note: "GC manual din pagina admin (#{Time.current.strftime('%H:%M:%S')})"
+  )
+
+  Rails.logger.info "[GC] Garbage Collector declanșat manual – Memorie eliberată: #{freed} MB (#{before.round(2)} → #{after.round(2)} MB)"
+  redirect_to admin_path, notice: "RAM eliberat: #{freed} MB"
+end
+
+
 
 
 

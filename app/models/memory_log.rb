@@ -1,0 +1,2 @@
+class MemoryLog < ApplicationRecord
+end

@@ -1,12 +1,15 @@
 Rails.application.routes.draw do
+  get 'memory_logs/index'
   # Autentificare Devise (înainte de orice alte rute care pot intra în conflict)
   devise_for :users
   # Rute RESTful pentru administrarea utilizatorilor și produse
   resources :carti, only: [:index, :show]
 
   get "/mem", to: "monitoring#mem", as: :mem
+  get "/ram_logs", to: "memory_logs#index", as: :ram_logs
 
 
+post "admin/force_gc", to: "home#force_gc", as: :force_gc
 
 
   resources :users
@@ -23,6 +26,8 @@ Rails.application.routes.draw do
   end
 
   collection do
+    post :force_gc
+  #post :force_gc # va apela metoda `force_gc` din controller
   get :categories_index
   get :new_standalone_category
   get :show_standalone_category

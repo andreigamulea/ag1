@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  used_mb: 1.5
+  available_mb: 1.5
+  note: MyString
+
+two:
+  used_mb: 1.5
+  available_mb: 1.5
+  note: MyString
