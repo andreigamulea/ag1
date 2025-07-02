@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_02_212512) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_02_230135) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -64,6 +64,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_02_212512) do
     t.datetime "updated_at", null: false
     t.float "used_memory_mb"
     t.float "freed_memory_mb"
+    t.float "reclaimed_mb"
+    t.string "notes"
   end
 
   create_table "products", force: :cascade do |t|

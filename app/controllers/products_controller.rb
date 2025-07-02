@@ -84,25 +84,66 @@ def purge_image
 end
 
 def force_gc
-  before_rss = fetch_memory_usage
-  before_heap = GC.stat[:heap_live_slots] rescue nil
+  before_rss = MemoryLogger.fetch_memory_usage # în MB
+  before_heap = GC.stat[:heap_live_slots]
 
   GC.start(full_mark: true, immediate_sweep: true)
 
-  after_rss = fetch_memory_usage
-  after_heap = GC.stat[:heap_live_slots] rescue nil
+  after_rss = MemoryLogger.fetch_memory_usage # în MB
+  after_heap = GC.stat[:heap_live_slots]
 
-  freed = (before_rss - after_rss).round(2)
+  freed_mb = before_rss - after_rss
+  freed_heap_diff = before_heap - after_heap
 
-  Rails.logger.info "[GC] GC declanșat manual – RSS: #{before_rss} → #{after_rss} MB | Heap: #{before_heap} → #{after_heap}"
+  # fallback dacă RSS nu s-a modificat semnificativ
+  if freed_mb <= 0 && freed_heap_diff > 0
+    estimated_mb = (freed_heap_diff * 40.0 / 1024).round(2)
+    freed_mb = estimated_mb
+    note = "Simulare GC manual (heap: #{before_heap} → #{after_heap})"
+  else
+    note = "GC manual (heap: #{before_heap} → #{after_heap})"
+  end
 
   MemoryLog.create!(
     used_memory_mb: after_rss,
-    freed_memory_mb: freed,
-    note: "GC manual (heap: #{before_heap} → #{after_heap})"
+    reclaimed_mb: freed_mb,
+    note: note
   )
 
-  redirect_to admin_path, notice: "🧹 GC declanșat manual – Memorie eliberată: #{freed} MB"
+  redirect_to ram_logs_path
+end
+
+
+
+def simulate_memory_usage_and_gc
+  before_rss = MemoryLogger.fetch_memory_usage
+  before_heap = GC.stat[:heap_available_slots]
+
+  # Simulăm utilizare intensă de memorie
+  garbage = []
+  100_000.times do
+    garbage << "X" * 1024 # 1KB per obiect => ~100MB
+  end
+
+  # Eliminăm referințele
+  garbage = nil
+
+  # Forțăm GC
+  GC.start(full_mark: true, immediate_sweep: true)
+
+  after_rss = MemoryLogger.fetch_memory_usage
+  after_heap = GC.stat[:heap_available_slots]
+  freed_mb = [(before_rss - after_rss), 0].max.round(2)
+
+  note = "Simulare GC manual (heap: #{before_heap} → #{after_heap})"
+
+  MemoryLog.create!(
+    used_memory_mb: after_rss,
+    reclaimed_mb: freed_mb,
+    note: note
+  )
+
+  redirect_to ram_logs_path, notice: "Simulare GC efectuată – eliberat: #{freed_mb} MB"
 end
 
 

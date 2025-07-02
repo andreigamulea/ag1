@@ -3,9 +3,7 @@ include Sys
 
 class MonitoringController < ActionController::Base
 
-  def index
-  @logs = MemoryLog.order(created_at: :desc).limit(50)
-end
+
 
   def mem
     process = ProcTable.ps.find { |p| p.pid == Process.pid }

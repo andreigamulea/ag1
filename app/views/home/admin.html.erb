@@ -11,6 +11,7 @@
 
      <li><%= link_to "🧹 Curăță RAM (GC)", force_gc_products_path %></li>
 
+<%= button_to "Simulează GC și eliberare RAM", simulate_memory_usage_and_gc_path, method: :post, data: { turbo: false } %>
 
 
   </ul>

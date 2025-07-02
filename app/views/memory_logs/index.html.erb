@@ -1,27 +1,33 @@
 <h2>Istoric utilizare RAM</h2>
 <table class="table">
   <thead>
-    <tr>
-      <th>Data</th>
-      <th>RAM folosit (MB)</th>
-      <th>Eliberat (MB)</th>
-      <th>Note</th>
-    </tr>
-  </thead>
+  <tr>
+    <th>Data</th>
+    <th>RAM folosit (MB)</th>
+    <th>Eliberat (MB)</th>
+    <th>Note</th>
+  </tr>
+</thead>
+
   <tbody>
-  <% @logs.each do |log| %>
+  <% @memory_logs.each do |log| %>
     <tr>
       <td><%= log.created_at.strftime("%d.%m.%Y %H:%M:%S") %></td>
       <td><%= number_with_precision(log.used_memory_mb, precision: 2) %></td>
-      <td><%= number_with_precision(log.freed_memory_mb, precision: 2) %></td>
+      <td><%= number_with_precision(log.reclaimed_mb || 0.0, precision: 2) %></td>
       <td>
-        <% if log.note.include?("automat") %>
-          <span style="color: green; font-weight: bold;">🌀 Automat</span><br>
+        <% if log.note&.include?("automat") %>
+            <span style="color: green; font-weight: bold;">🧠 Automat</span><br>
+        <% else %>
+            <span style="color: #007bff; font-weight: bold;">🔧 Manual</span><br>
         <% end %>
         <%= log.note %>
-      </td>
+        </td>
+
     </tr>
   <% end %>
 </tbody>
+
+
 
 </table>

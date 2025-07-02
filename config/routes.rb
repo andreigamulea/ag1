@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   get "/mem", to: "monitoring#mem", as: :mem
   get "/ram_logs", to: "memory_logs#index", as: :ram_logs
+post "simulate_gc", to: "products#simulate_memory_usage_and_gc", as: :simulate_memory_usage_and_gc
 
 
 get '/products/force_gc', to: 'products#force_gc', as: 'force_gc_products'
