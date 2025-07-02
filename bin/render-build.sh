@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 set -o errexit
 
-echo "🔧 Instalez ImageMagick pentru variant thumbnails..."
-apt-get update && apt-get install -y libvips
+echo "🔧 Instalez libvips pentru ActiveStorage & variant thumbnails..."
+apt-get update -qq && apt-get install -y -qq libvips
 
-
-echo "🧹 Curățare cache vechi..."
+echo "🧹 Curăț cache vechi..."
 rm -rf tmp/cache
 
-echo "📦 Instalez gem-uri..."
-bundle install
+echo "📦 Instalez gem-urile necesare pentru producție..."
+bundle install --without development test --jobs 4 --retry 3
 
-echo "📁 Creez directorul pentru fișiere Active Storage..."
+echo "📁 Creez directorul pentru fișiere ActiveStorage..."
 mkdir -p /var/data/storage
 
-echo "🧱 Precompilez assets (Importmap)..."
+echo "🧱 Precompilez assets..."
 bundle exec rake assets:precompile
 
 echo "🗄 Migrez baza de date..."
