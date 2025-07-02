@@ -1,6 +1,7 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: %i[ show edit update destroy ]
   before_action :set_product, only: [:show, :edit, :update, :destroy, :purge_attached_file]
+  after_action :cleanup_memory, only: [:create, :update, :show, :edit, :new]
 
 
   # GET /products or /products.json
@@ -210,6 +211,11 @@ end
 
 def category_params
   params.require(:category).permit(:name, :slug)
+end
+
+def cleanup_memory
+  GC.start(full_mark: true, immediate_sweep: true)
+  Rails.logger.info "[GC] Memorie eliberată manual după acțiunea #{action_name}"
 end
 
 end

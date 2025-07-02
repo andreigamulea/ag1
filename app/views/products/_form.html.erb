@@ -239,8 +239,9 @@
     <p>Imagine principală curentă:</p>
     <div style="position: relative; display: inline-block;">
       <% if product.main_image.variable? %>
-        <%= image_tag rails_representation_url(product.main_image.variant(resize_to_limit: [200, 200]).processed, only_path: false), class: "img-thumbnail" %>
-      <% else %>
+<%= image_tag product.main_image.representation(resize_to_limit: [200, 200]), class: "img-thumbnail" %>
+      
+        <% else %>
         <%= image_tag product.main_image, class: "img-thumbnail" %>
       <% end %>
 
@@ -260,17 +261,25 @@
   <div id="image-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
 </div>
 
-<% product.secondary_images_attachments.each do |attachment| %>
-  <div class="image-preview">
-    <% if attachment.variable? %>
-      <%= image_tag attachment.variant(resize_to_limit: [150, 150]), class: "img-thumbnail" %>
-    <% else %>
-      <%= image_tag url_for(attachment), class: "img-thumbnail" %>
-    <% end %>
+<% if product.secondary_images_attachments.any? %>
+  <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
+    <% product.secondary_images_attachments.each do |attachment| %>
+      <div style="text-align: center;">
+        <% if attachment.variable? %>
+          <%= image_tag attachment.representation(resize_to_limit: [150, 150]), class: "img-thumbnail" %>
+        <% else %>
+          <%= image_tag url_for(attachment), class: "img-thumbnail" %>
+        <% end %>
 
-    <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id), method: :delete, data: { confirm: "Ștergi această imagine?" }, class: "btn btn-sm btn-danger mt-1" %>
+        <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
+                    method: :delete,
+                    data: { confirm: "Ștergi această imagine?" },
+                    class: "btn btn-sm btn-danger mt-1" %>
+      </div>
+    <% end %>
   </div>
 <% end %>
+
 
 
 
