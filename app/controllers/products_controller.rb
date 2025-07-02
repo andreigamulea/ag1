@@ -84,20 +84,25 @@ def purge_image
 end
 
 def force_gc
-  before = GetProcessMem.new.mb
+  before_rss = get_memory_usage
+  before_heap = GC.stat[:heap_used]
+
   GC.start(full_mark: true, immediate_sweep: true)
-  after = GetProcessMem.new.mb
-  freed = (before - after).round(2)
+
+  after_rss = get_memory_usage
+  after_heap = GC.stat[:heap_used]
 
   MemoryLog.create!(
-    used_mb: after.round(2),
-    available_mb: freed,
-    note: "GC manual din pagina admin (#{Time.current.strftime('%H:%M:%S')})"
+    used_memory_mb: after_rss,
+    freed_memory_mb: (before_rss - after_rss).round(2),
+    note: "GC manual (heap: #{before_heap} → #{after_heap})"
   )
 
-  Rails.logger.info "[GC] Garbage Collector declanșat manual – Memorie eliberată: #{freed} MB (#{before.round(2)} → #{after.round(2)} MB)"
-  redirect_to admin_path, notice: "RAM eliberat: #{freed} MB"
+  Rails.logger.info "[GC] GC declanșat manual – RSS: #{before_rss} → #{after_rss} MB | Heap: #{before_heap} → #{after_heap}"
+
+  redirect_to admin_path, notice: "Memoria a fost curățată (heap: #{before_heap} → #{after_heap})"
 end
+
 
 
 
@@ -239,5 +244,18 @@ def generate_variants_for(product)
   GC.start(full_mark: true, immediate_sweep: true)
 end
 
+def get_memory_usage
+  pid = Process.pid
+  if RUBY_PLATFORM.include?("linux")
+    `ps -o rss= -p #{pid}`.to_i / 1024.0 # în MB
+  elsif RUBY_PLATFORM.include?("mingw") || RUBY_PLATFORM.include?("mswin")
+    require 'win32ole'
+    wmi = WIN32OLE.connect("winmgmts://")
+    process = wmi.ExecQuery("select * from Win32_Process where ProcessId = #{pid}").each.first
+    (process.WorkingSetSize.to_i / 1024.0 / 1024.0).round(2) # în MB
+  else
+    0.0 # fallback
+  end
+end
 
 end
