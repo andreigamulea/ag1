@@ -70,5 +70,6 @@ gem 'ruby-vips', '~> 2.2', '>= 2.2.4'
 group :development, :test do
   gem 'derailed_benchmarks', '~> 2.2', '>= 2.2.1' #pentrua vedea de ce consuma ram
   gem 'memory_profiler'
-  gem 'sys-proctable', '~> 1.3'
+  
 end
+gem 'sys-proctable', '~> 1.3'
