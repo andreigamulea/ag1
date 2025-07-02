@@ -219,6 +219,7 @@ def generate_variants_for(product)
   product.secondary_images.each do |img|
     GenerateImageVariantsJob.perform_now(img, [150, 150]) if img.variable?
   end
+  GC.start(full_mark: true, immediate_sweep: true)
 end
 
 
