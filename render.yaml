@@ -32,6 +32,8 @@ services:
         value: "2"
       - key: RAILS_MIN_THREADS
         value: "1"
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
 
       # opțional pentru debugging (nu activa în producție finală):
       # - key: RUBY_GC_HEAP_GROWTH_FACTOR

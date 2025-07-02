@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   # Rute RESTful pentru administrarea utilizatorilor și produse
   resources :carti, only: [:index, :show]
 
+  get "/mem", to: "monitoring#mem", as: :mem
+
 
 
 
