@@ -24,28 +24,15 @@ class ProductsController < ApplicationController
 
 # POST /products or /products.json
 def create
-  puts "=== PARAMS[:product] ==="
-  puts params[:product].inspect
-
   @product = Product.new(product_params)
-
-  puts "=== product_params ==="
-  puts product_params.inspect
-
-  puts "=== Category IDs in product ==="
-  puts @product.category_ids.inspect
 
   respond_to do |format|
     if @product.save
-      puts "=== Product saved successfully ==="
-      puts @product.categories.map(&:name).inspect
+      generate_variants_for(@product)
 
       format.html { redirect_to @product, notice: "Product was successfully created." }
       format.json { render :show, status: :created, location: @product }
     else
-      puts "=== Product save failed ==="
-      puts @product.errors.full_messages.inspect
-
       format.html { render :new, status: :unprocessable_entity }
       format.json { render json: @product.errors, status: :unprocessable_entity }
     end
@@ -53,21 +40,20 @@ def create
 end
 
 
+
 def update
   respond_to do |format|
-    # 1. Extragem secondary_images și attached_files din params
     new_images = params[:product].delete(:secondary_images)
     new_files = params[:product].delete(:attached_files)
 
-    # 2. Setează category_ids la [] dacă este nil sau conține doar ""
     product_params = product_params()
     product_params[:category_ids] = product_params[:category_ids]&.reject(&:blank?) || []
 
-    # 3. Actualizăm restul atributelor
     if @product.update(product_params)
-      # 4. Atașăm fișierele noi, dacă există
       @product.secondary_images.attach(new_images) if new_images.present?
       @product.attached_files.attach(new_files) if new_files.present?
+
+      generate_variants_for(@product)
 
       format.html { redirect_to @product, notice: "Produs actualizat cu succes." }
       format.json { render :show, status: :ok, location: @product }
@@ -77,6 +63,7 @@ def update
     end
   end
 end
+
 
 
 
@@ -215,7 +202,24 @@ end
 
 def cleanup_memory
   GC.start(full_mark: true, immediate_sweep: true)
-  Rails.logger.info "[GC] Memorie eliberată manual după acțiunea #{action_name}"
+  Rails.logger.info "[GC] ✅ GC finalizat după #{action_name}"
+
+  if request.format.html? && response.body.present?
+    flash.now[:notice] = "🧹 Memorie curățată manual după #{action_name} (#{Time.now.strftime('%H:%M:%S')})"
+  end
 end
+
+
+
+def generate_variants_for(product)
+  if product.main_image.attached? && product.main_image.variable?
+    GenerateImageVariantsJob.perform_now(product.main_image, [300, 300])
+  end
+
+  product.secondary_images.each do |img|
+    GenerateImageVariantsJob.perform_now(img, [150, 150]) if img.variable?
+  end
+end
+
 
 end

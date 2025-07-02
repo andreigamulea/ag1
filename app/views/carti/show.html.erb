@@ -2,24 +2,24 @@
 
   <div class="main-image">
     <% if @product.main_image.attached? %>
-  <%= image_tag @product.main_image.representation(resize_to_limit: [300, 300]),
-        alt: @product.name,
-        class: "popup-trigger",
-        data: { full: url_for(@product.main_image) } %>
-<% end %>
-
+      <%= image_tag @product.main_image.variant(resize_to_limit: [300, 300]),
+                    alt: @product.name,
+                    class: "popup-trigger",
+                    data: { full: url_for(@product.main_image) } %>
+    <% end %>
   </div>
 
   <% if @product.secondary_images.any? %>
-  <div class="secondary-images" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-    <% @product.secondary_images.each do |image| %>
-      <%= image_tag image.representation(resize_to_limit: [80, 80]),
-            class: "thumb popup-trigger",
-            data: { full: url_for(image) },
-            style: "border: 1px solid #ccc; border-radius: 4px;" %>
-    <% end %>
-  </div>
-<% end %>
+    <div class="secondary-images" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+      <% @product.secondary_images.each do |image| %>
+        <%= image_tag image.variant(resize_to_limit: [80, 80]),
+                      class: "thumb popup-trigger",
+                      data: { full: url_for(image) },
+                      style: "border: 1px solid #ccc; border-radius: 4px;" %>
+      <% end %>
+    </div>
+  <% end %>
+
 
 
     </div>

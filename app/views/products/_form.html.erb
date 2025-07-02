@@ -238,19 +238,19 @@
   <div class="mb-3">
     <p>Imagine principală curentă:</p>
     <div style="position: relative; display: inline-block;">
-      <% if product.main_image.variable? %>
-<%= image_tag product.main_image.representation(resize_to_limit: [200, 200]), class: "img-thumbnail" %>
-      
-        <% else %>
-        <%= image_tag product.main_image, class: "img-thumbnail" %>
-      <% end %>
+      <%= image_tag url_for(product.main_image.variant(resize_to_limit: [300, 300])), class: "img-thumbnail", style: "display: block;" %>
 
-      <%= link_to "✕", purge_main_image_product_path(product), method: :delete,
-          data: { confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
-          class: "btn btn-sm btn-danger mt-2" %>
+
+      <%= link_to "✕", purge_main_image_product_path(product),
+                  method: :delete,
+                  data: { turbo: false, confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
+                  class: "btn btn-sm btn-danger",
+                  style: "position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 12px;" %>
     </div>
   </div>
 <% end %>
+
+
 
 
 <div class="mb-3">
@@ -264,21 +264,21 @@
 <% if product.secondary_images_attachments.any? %>
   <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
     <% product.secondary_images_attachments.each do |attachment| %>
-      <div style="text-align: center;">
-        <% if attachment.variable? %>
-          <%= image_tag attachment.representation(resize_to_limit: [150, 150]), class: "img-thumbnail" %>
-        <% else %>
-          <%= image_tag url_for(attachment), class: "img-thumbnail" %>
-        <% end %>
+      <div style="position: relative; display: inline-block;">
+        <%= image_tag url_for(attachment.variant(resize_to_limit: [150, 150])), class: "img-thumbnail", style: "display: block;" %>
+
 
         <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
                     method: :delete,
-                    data: { confirm: "Ștergi această imagine?" },
-                    class: "btn btn-sm btn-danger mt-1" %>
+                    data: { turbo: false, confirm: "Ștergi această imagine?" },
+                    class: "btn btn-sm btn-danger",
+                    style: "position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 12px;" %>
       </div>
     <% end %>
   </div>
 <% end %>
+
+
 
 
 
