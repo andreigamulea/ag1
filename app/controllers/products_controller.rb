@@ -84,24 +84,27 @@ def purge_image
 end
 
 def force_gc
-  before_rss = get_memory_usage
-  before_heap = GC.stat[:heap_used]
+  before_rss, _ = get_memory_usage
+  before_heap = GC.stat[:heap_used] rescue nil
 
   GC.start(full_mark: true, immediate_sweep: true)
 
-  after_rss = get_memory_usage
-  after_heap = GC.stat[:heap_used]
+  after_rss, _ = get_memory_usage
+  after_heap = GC.stat[:heap_used] rescue nil
+
+  freed_mb = (before_rss - after_rss).round(2)
 
   MemoryLog.create!(
     used_memory_mb: after_rss,
-    freed_memory_mb: (before_rss - after_rss).round(2),
+    freed_memory_mb: freed_mb,
     note: "GC manual (heap: #{before_heap} → #{after_heap})"
   )
 
   Rails.logger.info "[GC] GC declanșat manual – RSS: #{before_rss} → #{after_rss} MB | Heap: #{before_heap} → #{after_heap}"
 
-  redirect_to admin_path, notice: "Memoria a fost curățată (heap: #{before_heap} → #{after_heap})"
+  redirect_to admin_path, notice: "RAM eliberat: #{freed_mb} MB"
 end
+
 
 
 
@@ -245,17 +248,24 @@ def generate_variants_for(product)
 end
 
 def get_memory_usage
-  pid = Process.pid
-  if RUBY_PLATFORM.include?("linux")
-    `ps -o rss= -p #{pid}`.to_i / 1024.0 # în MB
-  elsif RUBY_PLATFORM.include?("mingw") || RUBY_PLATFORM.include?("mswin")
-    require 'win32ole'
-    wmi = WIN32OLE.connect("winmgmts://")
-    process = wmi.ExecQuery("select * from Win32_Process where ProcessId = #{pid}").each.first
-    (process.WorkingSetSize.to_i / 1024.0 / 1024.0).round(2) # în MB
+  if Gem.win_platform?
+    output = `tasklist /FI "PID eq #{Process.pid}" /FO CSV /NH`
+    if output =~ /"[^"]+","\d+","\w+","\d+ K"/
+      mem_kb = output.split(',').last.strip.delete('"').delete(' K').to_i
+      used_mb = (mem_kb / 1024.0).round(2)
+      [used_mb, nil]
+    else
+      [0.0, nil]
+    end
   else
-    0.0 # fallback
+    output = `ps -o rss= -p #{Process.pid}`.to_i
+    used_mb = (output / 1024.0).round(2)
+    total_mb = 512 # setare manuală dacă vrei să o compari cu Render
+    [used_mb, total_mb]
   end
 end
+
+
+
 
 end
