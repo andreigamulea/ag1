@@ -5,7 +5,6 @@ databases:
     plan: Starter
     region: frankfurt
 
-
 services:
   - type: web
     name: ag1
@@ -19,5 +18,21 @@ services:
       - key: DATABASE_URL
         fromDatabase:
           name: ag1_production
-          property: connectionString     
-    region: frankfurt
+          property: connectionString
+
+      # ⬇️ Adăugări importante pentru memorie ⬇️
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: enabled
+
+      - key: RAILS_MAX_THREADS
+        value: "2"
+      - key: RAILS_MIN_THREADS
+        value: "1"
+      - key: WEB_CONCURRENCY
+        value: "1"
+
+      # opțional pentru debugging (nu activa în producție finală):
+      # - key: RUBY_GC_HEAP_GROWTH_FACTOR
+      #   value: "1.1"

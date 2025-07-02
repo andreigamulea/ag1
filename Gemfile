@@ -72,3 +72,8 @@ gem 'image_processing', '~> 1.14'
 #gem "psych", "~> 5.1"
 gem 'aws-sdk-s3', '~> 1.190'
 gem 'ruby-vips', '~> 2.2', '>= 2.2.4'
+
+
+gem 'derailed_benchmarks', '~> 2.2'
+gem 'memory_profiler'
+gem 'sys-proctable', '~> 1.3'
