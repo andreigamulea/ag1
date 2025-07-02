@@ -85,12 +85,12 @@ end
 
 def force_gc
   before_rss = fetch_memory_usage
-  before_heap = GC.stat[:heap_used]
+  before_heap = GC.stat[:heap_live_slots] rescue nil
 
   GC.start(full_mark: true, immediate_sweep: true)
 
   after_rss = fetch_memory_usage
-  after_heap = GC.stat[:heap_used]
+  after_heap = GC.stat[:heap_live_slots] rescue nil
 
   freed = (before_rss - after_rss).round(2)
 
@@ -104,6 +104,7 @@ def force_gc
 
   redirect_to admin_path, notice: "🧹 GC declanșat manual – Memorie eliberată: #{freed} MB"
 end
+
 
 
   def fetch_memory_usage
@@ -248,13 +249,23 @@ def category_params
 end
 
 def cleanup_memory
-  GC.start(full_mark: true, immediate_sweep: true)
-  Rails.logger.info "[GC] ✅ GC finalizat după #{action_name}"
+  before_rss = fetch_memory_usage
+  before_heap = GC.stat[:heap_live_slots] rescue nil
 
-  if request.format.html? && response.body.present?
-    flash.now[:notice] = "🧹 Memorie curățată manual după #{action_name} (#{Time.now.strftime('%H:%M:%S')})"
-  end
+  GC.start(full_mark: true, immediate_sweep: true)
+
+  after_rss = fetch_memory_usage
+  after_heap = GC.stat[:heap_live_slots] rescue nil
+
+  freed = (before_rss - after_rss).round(2)
+  MemoryLog.create!(
+    used_memory_mb: after_rss,
+    freed_memory_mb: freed,
+    note: "GC automat (#{action_name}) – heap: #{before_heap} → #{after_heap}"
+  )
 end
+
+
 
 
 

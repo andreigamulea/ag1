@@ -9,13 +9,19 @@
     </tr>
   </thead>
   <tbody>
-    <% @logs.each do |log| %>
-      <tr>
-        <td><%= log.created_at.strftime("%d.%m.%Y %H:%M:%S") %></td>
-        <td><%= log.used_mb %></td>
-        <td><%= log.available_mb %></td>
-        <td><%= log.note %></td>
-      </tr>
-    <% end %>
-  </tbody>
+  <% @logs.each do |log| %>
+    <tr>
+      <td><%= log.created_at.strftime("%d.%m.%Y %H:%M:%S") %></td>
+      <td><%= number_with_precision(log.used_memory_mb, precision: 2) %></td>
+      <td><%= number_with_precision(log.freed_memory_mb, precision: 2) %></td>
+      <td>
+        <% if log.note.include?("automat") %>
+          <span style="color: green; font-weight: bold;">🌀 Automat</span><br>
+        <% end %>
+        <%= log.note %>
+      </td>
+    </tr>
+  <% end %>
+</tbody>
+
 </table>
