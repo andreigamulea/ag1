@@ -132,6 +132,7 @@ end
 
 
 
+
 def purge_main_image
     @product = Product.find(params[:id])
     @product.main_image.purge if @product.main_image.attached?
