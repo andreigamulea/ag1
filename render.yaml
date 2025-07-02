@@ -26,11 +26,11 @@ services:
       - key: RAILS_LOG_TO_STDOUT
         value: enabled
 
+      - key: WEB_CONCURRENCY
+        value: "1"
       - key: RAILS_MAX_THREADS
         value: "2"
       - key: RAILS_MIN_THREADS
-        value: "1"
-      - key: WEB_CONCURRENCY
         value: "1"
 
       # opțional pentru debugging (nu activa în producție finală):

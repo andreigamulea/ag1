@@ -26,14 +26,7 @@ gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
-# Use Redis adapter to run Action Cable in production
-# gem "redis", ">= 4.0.1"
 
-# Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
-# gem "kredis"
-
-# Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -74,6 +67,8 @@ gem 'aws-sdk-s3', '~> 1.190'
 gem 'ruby-vips', '~> 2.2', '>= 2.2.4'
 
 
-gem 'derailed_benchmarks', '~> 2.2'
-gem 'memory_profiler'
-gem 'sys-proctable', '~> 1.3'
+group :development, :test do
+  gem 'derailed_benchmarks', '~> 2.2', '>= 2.2.1' #pentrua vedea de ce consuma ram
+  gem 'memory_profiler'
+  gem 'sys-proctable', '~> 1.3'
+end

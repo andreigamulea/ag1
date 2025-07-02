@@ -11,9 +11,8 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 worker_timeout 30 if rails_env == "production"
 
 if rails_env == "production"
-  worker_count = Integer(ENV.fetch("WEB_CONCURRENCY") { 1 })
-  preload_app!  # FORȚAT pentru economie de memorie
-  workers worker_count if worker_count > 1
+  preload_app!
+  workers 1
 end
 
 plugin :tmp_restart
