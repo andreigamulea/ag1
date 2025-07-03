@@ -165,6 +165,25 @@ end
 
 
 
+require 'net/http'
+require 'uri'
+
+def test_cdn_url(attachment, resize: [200, 200])
+  helper = Class.new { include Rails.application.routes.url_helpers }.new
+  variant = attachment.variant(resize_to_limit: resize).processed
+  cdn_url = "https://ayus-cdn.b-cdn.net" +
+            helper.rails_representation_path(variant, only_path: true)
+
+  uri = URI.parse(cdn_url)
+  response = Net::HTTP.get_response(uri)
+
+  puts "CDN URL: #{cdn_url}"
+  puts "Status: #{response.code} #{response.message}"
+  puts "Content-Type: #{response['Content-Type']}"
+rescue => e
+  puts "Eroare: #{e.message}"
+end
+
 
 
 
