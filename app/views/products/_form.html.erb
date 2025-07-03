@@ -238,7 +238,8 @@
   <div class="mb-3">
     <p>Imagine principală curentă:</p>
     <div style="position: relative; display: inline-block;">
-      <%= image_tag rails_blob_url(product.main_image.variant(resize_to_limit: [300, 300]), host: "https://ayus-cdn.b-cdn.net") %>
+      <%= image_tag cdn_image_url(product.main_image, resize: [300, 300]) %>
+
 
 
       <%= link_to "✕", purge_main_image_product_path(product),
@@ -265,7 +266,14 @@
   <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
     <% product.secondary_images_attachments.each do |attachment| %>
       <div style="position: relative; display: inline-block;">
-        <%= image_tag rails_blob_url(attachment.variant(resize_to_limit: [150, 150]), host: "https://ayus-cdn.b-cdn.net") %>
+        <% product.secondary_images_attachments.each do |attachment| %>
+          <%= image_tag(
+                attachment&.attached? ? cdn_image_url(attachment) : asset_path("fallbacks/no-image.jpg"),
+                alt: "Imagine",
+                loading: "lazy",
+                class: "img-thumbnail"
+              ) %>
+        <% end %>
 
 
         <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
