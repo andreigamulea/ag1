@@ -1,7 +1,7 @@
 # app/controllers/cdn_proxy_controller.rb
 class CdnProxyController < ApplicationController
   include ActiveStorage::SetCurrent
-  include ActiveStorage::DownloadHelper
+  
 
   def proxy
     blob = ActiveStorage::Blob.find_signed(params[:signed_id])
