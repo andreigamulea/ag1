@@ -266,10 +266,12 @@
   <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
     <% product.secondary_images_attachments.each do |attachment| %>
       <div style="position: relative; display: inline-block;">
-        <%= image_tag cdn_image_url(attachment),
-                      alt: "Imagine",
-                      loading: "lazy",
-                      class: "img-thumbnail" %>
+        <%= image_tag bunny_cdn_url(attachment),
+              alt: "Imagine",
+              loading: "lazy",
+              class: "img-thumbnail" %>
+
+
 
         <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
                     method: :delete,
