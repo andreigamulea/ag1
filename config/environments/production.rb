@@ -22,7 +22,7 @@ Rails.application.configure do
   config.active_storage.resolve_model_to_route = :rails_storage_proxy
   config.active_storage.variant_processor = :vips
   config.active_storage.draw_routes = true
-
+  config.active_storage.default_host = "https://ayus-cdn.b-cdn.net"
   # === DEFAULT URLS ===
   Rails.application.routes.default_url_options[:host] = "https://ag1-eef1.onrender.com"
 
