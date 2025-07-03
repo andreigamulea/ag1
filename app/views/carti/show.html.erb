@@ -2,20 +2,28 @@
 
   <div class="main-image">
     <% if @product.main_image.attached? %>
-      <%= image_tag @product.main_image.variant(resize_to_limit: [300, 300]),
-                    alt: @product.name,
-                    class: "popup-trigger",
-                    data: { full: url_for(@product.main_image) } %>
+      <%= image_tag rails_representation_url(
+          @product.main_image.variant(resize_to_limit: [300, 300]),
+          host: "https://ayus-cdn.b-cdn.net"
+        ),
+        alt: @product.name,
+        class: "popup-trigger",
+        data: { full: rails_blob_url(@product.main_image, host: "https://ayus-cdn.b-cdn.net") } %>
+
     <% end %>
   </div>
 
   <% if @product.secondary_images.any? %>
     <div class="secondary-images" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
       <% @product.secondary_images.each do |image| %>
-        <%= image_tag image.variant(resize_to_limit: [80, 80]),
-                      class: "thumb popup-trigger",
-                      data: { full: url_for(image) },
-                      style: "border: 1px solid #ccc; border-radius: 4px;" %>
+          <%= image_tag rails_representation_url(
+          image.variant(resize_to_limit: [80, 80]),
+          host: "https://ayus-cdn.b-cdn.net"
+        ),
+        class: "thumb popup-trigger",
+        data: { full: rails_blob_url(image, host: "https://ayus-cdn.b-cdn.net") },
+        style: "border: 1px solid #ccc; border-radius: 4px;" %>
+
       <% end %>
     </div>
   <% end %>
