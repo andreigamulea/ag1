@@ -256,8 +256,7 @@
 
 <div class="mb-3">
   <%= form.label :secondary_images, "Imagini secundare" %>
- <%= form.file_field :secondary_images, multiple: true, direct_upload: true, class: "form-control", id: "secondary-images" %>
-
+  <%= form.file_field :secondary_images, multiple: true, direct_upload: true, class: "form-control", id: "secondary-images" %>
 
   <div id="image-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
 </div>
@@ -266,15 +265,10 @@
   <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
     <% product.secondary_images_attachments.each do |attachment| %>
       <div style="position: relative; display: inline-block;">
-        <% product.secondary_images_attachments.each do |attachment| %>
-          <%= image_tag(
-                attachment&.attached? ? cdn_image_url(attachment) : asset_path("fallbacks/no-image.jpg"),
-                alt: "Imagine",
-                loading: "lazy",
-                class: "img-thumbnail"
-              ) %>
-        <% end %>
-
+        <%= image_tag cdn_image_url(attachment),
+                      alt: "Imagine",
+                      loading: "lazy",
+                      class: "img-thumbnail" %>
 
         <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
                     method: :delete,
@@ -285,6 +279,7 @@
     <% end %>
   </div>
 <% end %>
+
 
 
 
