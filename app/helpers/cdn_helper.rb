@@ -1,14 +1,13 @@
 module CdnHelper
   def bunny_cdn_url(attachment)
-    return asset_path("fallbacks/no-image.jpg") unless attachment&.respond_to?(:key) && attachment&.respond_to?(:filename)
+    return asset_path("fallbacks/no-image.jpg") unless attachment&.attached?
 
-    key = attachment.key
-    filename = attachment.filename.to_s
+    original_url = url_for(attachment)
 
     if Rails.env.production?
-      "https://ayus-cdn.b-cdn.net/#{key}/#{filename}"
+      original_url.gsub("https://ag1-eef1.onrender.com", "https://ayus-cdn.b-cdn.net")
     else
-      url_for(attachment)
+      original_url
     end
   end
 end
