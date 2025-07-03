@@ -12,4 +12,20 @@ module CdnHelper
       url_for(variant)
     end
   end
+  
+  def cdn_image_url(attachment, resize: [300, 300])
+    return asset_path("fallbacks/no-image.jpg") unless attachment.present?
+
+    url = rails_representation_url(
+      attachment.variant(resize_to_limit: resize).processed,
+      only_path: false
+    )
+
+    if Rails.env.production?
+      url.gsub("https://ag1-eef1.onrender.com", "https://ayus-cdn.b-cdn.net")
+    else
+      url
+    end
+  end
+
 end

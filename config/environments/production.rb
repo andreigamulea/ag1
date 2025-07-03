@@ -20,12 +20,15 @@ Rails.application.configure do
   # === FILE STORAGE ===
   config.active_storage.service = :bunny
   config.active_storage.resolve_model_to_route = :rails_storage_redirect
+  
 
   config.active_storage.variant_processor = :vips
   config.active_storage.draw_routes = true
   config.active_storage.default_host = "https://ayus-cdn.b-cdn.net"
+  
   # === DEFAULT URLS ===
-  Rails.application.routes.default_url_options[:host] = "https://ag1-eef1.onrender.com"
+  #Rails.application.routes.default_url_options[:host] = "https://ag1-eef1.onrender.com"
+  Rails.application.routes.default_url_options[:host] = "https://ayus-cdn.b-cdn.net"
 
   # === SECURITY ===
   config.force_ssl = true
