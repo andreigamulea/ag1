@@ -266,7 +266,13 @@
   <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
     <% product.secondary_images_attachments.each do |attachment| %>
       <div style="position: relative; display: inline-block;">
-        <%= image_tag bunny_storage_url(attachment),
+        <%= image_tag(
+            bunny_storage_url(attachment),
+            alt: "Imagine",
+            loading: "lazy",
+            class: "img-thumbnail"
+          ) %>
+
 
 
 
