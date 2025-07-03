@@ -5,6 +5,8 @@ module CdnHelper
 
     original_url = url_for(attachment)
 
-    "https://ayus.b-cdn.net/#{attachment.key}/#{attachment.filename}"
+    
+    "https://ayus-cdn.b-cdn.net/#{attachment.key}/#{attachment.filename}"
+
   end
 end
