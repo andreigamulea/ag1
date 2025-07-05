@@ -4,13 +4,16 @@
   <% @products.each do |product| %>
     <div class="product-card">
       <% if product.main_image.attached? %>
-    <%= link_to carti_path(product.id), class: "image-link" do %>
-    
-    <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [300, 300])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) } %>  
-    <% end %>
-    <% else %>
-      <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
-    <% end %>
+        <% begin %>
+          <%= link_to carti_path(product.id), class: "image-link" do %>
+<%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [200, 200])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) } %>          <% end %>
+        <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
+          <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+          <% Rails.logger.error "Eroare la încărcarea imaginii principale pentru produsul #{product.id}: #{e.message}" %>
+        <% end %>
+      <% else %>
+        <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+      <% end %>
 
       <h2 class="product-title"><%= product.name %></h2>
 
@@ -20,15 +23,9 @@
 
       <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei", separator: ",", delimiter: ".") %></p>
 
-      <% if product.track_inventory && product.stock.to_i == 0 %>
-        <% if product.stock_status == "in_stock" %>
-          <p class="stock yellow">Stoc: 0 Permite comenzi în așteptare</p>
-        <% else %>
-          <p class="stock red">Stoc: 0 Nu mai este pe stoc</p>
-        <% end %>
-      <% else %>
-        <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
-      <% end %>
+      <p class="stock <%= product.track_inventory ? 'green' : 'red' %>">
+        <%= product.track_inventory ? "Stocul este urmărit" : "Stocul nu este urmărit" %>
+      </p>
 
       <form class="add-to-cart-form">
         <input type="number" value="1" min="1" class="qty-input" />
@@ -40,6 +37,9 @@
   <% end %>
 </div>
 
+<%= paginate @products %>
+
+
 <style>
 .product-grid {
   display: flex;
@@ -49,21 +49,30 @@
   padding: 20px;
 }
 
+
 .product-card {
-  width: 220px;
-  border: 1px solid #b51e1e;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #fffdf8;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 300px;
+  margin: 10px;
+  overflow: hidden;
 }
 
+.popup-trigger {
+  width: 100%;
+  height: auto;
+  object-fit: contain; 
+  max-height: 300px;
+  border-radius: 4px;
+}
+
+
+
 .product-image {
-  width: 180px;
-  height: 180px;
+  width: 100%;
+  height: auto;
   object-fit: contain;
-  margin-bottom: 10px;
+  max-height: 300px;
+  border-radius: 4px;
 }
 
 .product-title {
