@@ -329,18 +329,16 @@ end
 
 
 
+# app/controllers/products_controller.rb
 def generate_variants_for(product)
   if product.main_image.attached? && product.main_image.variable?
-    GenerateImageVariantsJob.perform_now(product.main_image, [300, 300])
+    GenerateImageVariantsJob.perform_later(product.main_image.blob_id, [300, 300])
+    GenerateImageVariantsJob.perform_later(product.main_image.blob_id, [200, 200])
   end
-
   product.secondary_images.each do |img|
-    GenerateImageVariantsJob.perform_now(img, [150, 150]) if img.variable?
+    GenerateImageVariantsJob.perform_later(img.blob_id, [150, 150]) if img.variable?
   end
-  GC.start(full_mark: true, immediate_sweep: true)
 end
-
-
 
 
 

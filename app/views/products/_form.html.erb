@@ -230,75 +230,46 @@
 
 
 <div class="mb-3">
-  <%= form.label :main_image, "Imagine principală" %>
-  <%= form.file_field :main_image, direct_upload: true, class: "form-control" %>
-</div>
-
-<% if product.main_image.attached? %>
-  <div class="mb-3">
-    <p>Imagine principală curentă:</p>
-    <div style="position: relative; display: inline-block;">
-      <%= image_tag bunny_storage_url(product.main_image), class: "img-thumbnail" %>
-      
-
-
-
-
-      <%= link_to "✕", purge_main_image_product_path(product),
-                  method: :delete,
-                  data: { turbo: false, confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
-                  class: "btn btn-sm btn-danger",
-                  style: "position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 12px;" %>
-    </div>
+    <%= form.label :main_image, "Imagine principală" %>
+    <%= form.file_field :main_image, direct_upload: true, class: "form-control", accept: "image/*", data: { max_file_size: 5.megabytes } %>
   </div>
-<% end %>
-
-
-
-
-<div class="mb-3">
-  <%= form.label :secondary_images, "Imagini secundare" %>
-  <%= form.file_field :secondary_images, multiple: true, direct_upload: true, class: "form-control", id: "secondary-images" %>
-
-  <div id="image-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
-</div>
-
-<% if product.secondary_images_attachments.any? %>
-  <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
-    <% product.secondary_images_attachments.each do |attachment| %>
+  <% if product.main_image.attached? && product.main_image.blob.persisted? %>
+    <div class="mb-3">
+      <p>Imagine principală curentă:</p>
       <div style="position: relative; display: inline-block;">
-        <%= image_tag(
-            bunny_storage_url(attachment),
-            alt: "Imagine",
-            loading: "lazy",
-            class: "img-thumbnail"
-          ) %>
-
-
-
-
-
-
-        <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
+        <%= image_tag bunny_storage_url(product.main_image), class: "img-thumbnail" %>
+        <%= link_to "✕", purge_main_image_product_path(product),
                     method: :delete,
-                    data: { turbo: false, confirm: "Ștergi această imagine?" },
+                    data: { turbo: false, confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
                     class: "btn btn-sm btn-danger",
                     style: "position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 12px;" %>
       </div>
-    <% end %>
+    </div>
+  <% end %>
+  <div class="mb-3">
+    <%= form.label :secondary_images, "Imagini secundare" %>
+    <%= form.file_field :secondary_images, multiple: true, direct_upload: true, class: "form-control", id: "secondary-images", accept: "image/*", data: { max_file_size: 5.megabytes, max_files: 10 } %>
+    <div id="image-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
   </div>
-<% end %>
-
-
-
-
-
-
-
-<div>
-  <%= form.submit %>
-</div>
-
+  <% if product.secondary_images_attachments.any? %>
+    <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
+      <% product.secondary_images_attachments.each do |attachment| %>
+        <% if attachment.blob.persisted? %>
+          <div style="position: relative; display: inline-block;">
+            <%= image_tag bunny_storage_url(attachment), alt: "Imagine", loading: "lazy", class: "img-thumbnail" %>
+            <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
+                        method: :delete,
+                        data: { turbo: false, confirm: "Ștergi această imagine?" },
+                        class: "btn btn-sm btn-danger",
+                        style: "position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 12px;" %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+  <div>
+    <%= form.submit %>
+  </div>
 <% end %>
 
 <script>
@@ -306,22 +277,33 @@ document.addEventListener("turbo:load", () => {
   const input = document.getElementById("secondary-images");
   const wrapper = document.getElementById("image-badges-wrapper");
   const form = document.querySelector("form");
+  const maxSize = 5 * 1024 * 1024; // 5 MB
+  const maxFiles = 10; // Maxim 10 imagini secundare
 
   let allFiles = [];
 
   input.addEventListener("change", () => {
     const newFiles = Array.from(input.files);
 
+    // Validare dimensiune și număr
+    if (allFiles.length + newFiles.length > maxFiles) {
+      alert(`Poți încărca maxim ${maxFiles} imagini secundare.`);
+      input.value = "";
+      return;
+    }
+
     newFiles.forEach(file => {
-      if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
+      if (file.size > maxSize) {
+        alert(`Fișierul ${file.name} este prea mare. Dimensiunea maximă este 5MB.`);
+      } else if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
         allFiles.push(file);
       }
     });
 
     renderBadges();
-    input.value = ""; // trebuie resetat pentru a permite aceeași imagine din nou
+    input.value = ""; // Resetăm pentru a permite reîncărcarea aceleiași imagini
 
-    // La fiecare adăugare, refacem `input.files`
+    // Refacem input.files
     const dt = new DataTransfer();
     allFiles.forEach(file => dt.items.add(file));
     input.files = dt.files;
@@ -332,7 +314,7 @@ document.addEventListener("turbo:load", () => {
     allFiles.forEach((file, index) => {
       const badge = document.createElement("span");
       badge.className = "badge bg-primary text-white me-2 mb-2";
-      badge.innerHTML = `${file.name} <span onclick="removeFile(${index})" style="cursor:pointer; margin-left:6px;">&times;</span>`;
+      badge.innerHTML = `${file.name} <span onclick="removeFile(${index})" style="cursor:pointer; margin-left:6px;">×</span>`;
       wrapper.appendChild(badge);
     });
   }
@@ -347,8 +329,6 @@ document.addEventListener("turbo:load", () => {
 });
 </script>
 
-
-
 <script>
 document.addEventListener("turbo:load", () => {
   const badges = document.querySelectorAll(".category-badge");
@@ -358,13 +338,9 @@ document.addEventListener("turbo:load", () => {
     badge.addEventListener("click", () => {
       const id = badge.dataset.id;
       const existingInputs = hiddenInputsWrapper.querySelectorAll(`input[value='${id}']`);
-      console.log(`Badge clicked: ID=${id}, Existing inputs: ${existingInputs.length}`);
 
       if (existingInputs.length > 0) {
-        existingInputs.forEach(input => {
-          console.log(`Removing input with value: ${input.value}`);
-          input.remove();
-        });
+        existingInputs.forEach(input => input.remove());
         badge.classList.remove("bg-primary");
         badge.classList.add("bg-secondary");
       } else {
@@ -373,15 +349,9 @@ document.addEventListener("turbo:load", () => {
         input.name = "product[category_ids][]";
         input.value = id;
         hiddenInputsWrapper.appendChild(input);
-        console.log(`Added input with value: ${id}`);
-
         badge.classList.remove("bg-secondary");
         badge.classList.add("bg-primary");
       }
-
-      // Log starea finală
-      const allInputs = hiddenInputsWrapper.querySelectorAll("input");
-      console.log("Current category inputs:", Array.from(allInputs).map(input => input.value));
     });
   });
 });
@@ -392,19 +362,31 @@ document.addEventListener("turbo:load", () => {
   const input = document.getElementById("attached-files");
   const wrapper = document.getElementById("attached-files-badges-wrapper");
   const form = document.querySelector("form");
+  const maxSize = 5 * 1024 * 1024; // 5 MB
+  const maxFiles = 10; // Maxim 10 fișiere atașate
 
   let allFiles = [];
 
   input.addEventListener("change", () => {
     const newFiles = Array.from(input.files);
+
+    // Validare dimensiune și număr
+    if (allFiles.length + newFiles.length > maxFiles) {
+      alert(`Poți încărca maxim ${maxFiles} fișiere atașate.`);
+      input.value = "";
+      return;
+    }
+
     newFiles.forEach(file => {
-      if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
+      if (file.size > maxSize) {
+        alert(`Fișierul ${file.name} este prea mare. Dimensiunea maximă este 5MB.`);
+      } else if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
         allFiles.push(file);
       }
     });
 
     renderBadges();
-    input.value = ""; // resetăm inputul real
+    input.value = ""; // Resetăm inputul
 
     const dt = new DataTransfer();
     allFiles.forEach(file => dt.items.add(file));
@@ -416,7 +398,7 @@ document.addEventListener("turbo:load", () => {
     allFiles.forEach((file, index) => {
       const badge = document.createElement("span");
       badge.className = "badge bg-primary text-white me-2 mb-2";
-      badge.innerHTML = `${file.name} <span onclick="removeAttachedFile(${index})" style="cursor:pointer; margin-left:6px;">&times;</span>`;
+      badge.innerHTML = `${file.name} <span onclick="removeAttachedFile(${index})" style="cursor:pointer; margin-left:6px;">×</span>`;
       wrapper.appendChild(badge);
     });
   }

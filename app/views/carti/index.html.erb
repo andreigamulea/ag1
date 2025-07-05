@@ -2,41 +2,24 @@
 
 <div class="product-grid">
   <% @products.each do |product| %>
-    <div class="product-card">
-      <% if product.main_image.attached? %>
-        <% begin %>
-          <%= link_to carti_path(product.id), class: "image-link" do %>
-<%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [200, 200])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) } %>          <% end %>
-        <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-          <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
-          <% Rails.logger.error "Eroare la încărcarea imaginii principale pentru produsul #{product.id}: #{e.message}" %>
+  <div class="product-card">
+    <% if product.main_image.attached? %>
+      <% begin %>
+        <%= link_to carti_path(product.id), class: "image-link" do %>
+          <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [300, 300])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) } %>
         <% end %>
-      <% else %>
+      <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
         <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+        <% Rails.logger.error "Failed to load main image variant for product #{product.id}: #{e.message}" %>
       <% end %>
-
-      <h2 class="product-title"><%= product.name %></h2>
-
-      <% if product.custom_attributes && product.custom_attributes["autor"] %>
-        <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
-      <% end %>
-
-      <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei", separator: ",", delimiter: ".") %></p>
-
-      <p class="stock <%= product.track_inventory ? 'green' : 'red' %>">
-        <%= product.track_inventory ? "Stocul este urmărit" : "Stocul nu este urmărit" %>
-      </p>
-
-      <form class="add-to-cart-form">
-        <input type="number" value="1" min="1" class="qty-input" />
-        <button type="submit" class="add-to-cart-btn" <%= 'disabled' if product.stock.to_i == 0 && product.stock_status != "in_stock" %>>
-          Adaugă în coș
-        </button>
-      </form>
-    </div>
-  <% end %>
-</div>
-
+    <% else %>
+      <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+    <% end %>
+    <p><%= product.name %></p>
+    <p>Price: <%= product.price %></p>
+    <p><%= product.track_inventory ? "Inventory tracked" : "Inventory not tracked" %></p>
+  </div>
+<% end %>
 <%= paginate @products %>
 
 

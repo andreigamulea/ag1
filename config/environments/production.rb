@@ -30,6 +30,10 @@ Rails.application.configure do
   #Rails.application.routes.default_url_options[:host] = "https://ag1-eef1.onrender.com"
   Rails.application.routes.default_url_options[:host] = "https://ayus-cdn.b-cdn.net"
 
+  # config/environments/production.rb
+  config.active_job.queue_adapter = :async
+  config.active_job.queue_name_prefix = "low_priority"
+
   # === SECURITY ===
   config.force_ssl = true
   # config.assume_ssl = true
