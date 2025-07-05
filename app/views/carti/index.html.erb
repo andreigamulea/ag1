@@ -6,15 +6,7 @@
       <% if product.main_image.attached? %>
         <%= link_to carti_path(product.id), class: "image-link" do %>
           
-          <%= image_tag rails_representation_url(
-              product.main_image.variant(resize_to_limit: [200, 200]),
-              host: "https://ayus-cdn.b-cdn.net"
-            ),
-            alt: product.name,
-            class: "product-image",
-            loading: "lazy" %>
-
-          <% end %>
+          <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [200, 200])), alt: product.name, class: "product-image", loading: "lazy" %>
       <% else %>
         <%= image_tag "placeholder.png", class: "product-image" %>
       <% end %>
