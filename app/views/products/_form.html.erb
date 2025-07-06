@@ -237,7 +237,12 @@
     <div class="mb-3">
       <p>Imagine principală curentă:</p>
       <div style="position: relative; display: inline-block;">
-        <%= image_tag bunny_storage_url(product.main_image), class: "img-thumbnail", loading: "lazy" %>
+        <% begin %>
+          <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [200, 200])), class: "img-thumbnail", loading: "lazy" %>
+        <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
+          <%= image_tag "placeholder.png", class: "img-thumbnail", loading: "lazy" %>
+          <% Rails.logger.error "Failed to load main image variant for product #{product.id}: #{e.message}" %>
+        <% end %>
         <%= link_to "✕", purge_main_image_product_path(product),
                     method: :delete,
                     data: { turbo: false, confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
@@ -256,7 +261,12 @@
       <% product.secondary_images_attachments.each do |attachment| %>
         <% if attachment.blob.persisted? %>
           <div style="position: relative; display: inline-block;">
-            <%= image_tag bunny_storage_url(attachment), alt: "Imagine", loading: "lazy", class: "img-thumbnail" %>
+            <% begin %>
+              <%= image_tag bunny_storage_url(attachment.variant(resize_to_limit: [150, 150])), alt: "Imagine", loading: "lazy", class: "img-thumbnail" %>
+            <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
+              <%= image_tag "placeholder.png", alt: "Imagine", loading: "lazy", class: "img-thumbnail" %>
+              <% Rails.logger.error "Failed to load secondary image variant for product #{product.id}: #{e.message}" %>
+            <% end %>
             <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
                         method: :delete,
                         data: { turbo: false, confirm: "Ștergi această imagine?" },
