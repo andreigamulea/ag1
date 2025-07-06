@@ -254,12 +254,15 @@
       <% end %>
     </div>
   </div>
-
-  
+<div id="external-hidden-inputs">
   <%= hidden_field_tag 'product[external_image_url]', @product.external_image_url %>
   <% (@product.external_image_urls || []).each do |url| %>
     <%= hidden_field_tag 'product[external_image_urls][]', url %>
   <% end %>
+</div>
+
+  
+  
 
   <%= form.submit "Salvează produsul", class: "btn btn-primary" %>
 <% end %>
@@ -440,7 +443,9 @@ document.addEventListener("turbo:load", () => {
           hidden.type = "hidden";
           hidden.name = "product[external_image_urls][]";
           hidden.value = cdnUrl;
-          form.appendChild(hidden);
+          const externalContainer = document.getElementById("external-hidden-inputs");
+          externalContainer.appendChild(hidden);
+
 
           // previzualizare
           secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
