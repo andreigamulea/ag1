@@ -13,6 +13,10 @@
 /storage_local/*
 /ag1_development.sql
 
+/storage_local/*
+!/storage_local/.keep
+
+
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
