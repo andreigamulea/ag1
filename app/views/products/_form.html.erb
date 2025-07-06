@@ -362,7 +362,7 @@ document.addEventListener("turbo:load", () => {
   const secondaryInput = document.getElementById("bunny-secondary-upload");
   const secondaryPreview = document.getElementById("bunny-secondary-preview");
 
-  // Creează element imagine + buton de ștergere
+  // Creează un preview cu imagine + buton ștergere
   const createImageElement = (url, type, index = null) => {
     const div = document.createElement("div");
     div.className = "bunny-preview position-relative";
@@ -438,6 +438,11 @@ document.addEventListener("turbo:load", () => {
           const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
           const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
+          // ⚠️ Verificăm dacă deja există acea imagine
+          const existingImgs = secondaryPreview.querySelectorAll("img");
+          const alreadyExists = Array.from(existingImgs).some(img => img.src === cdnUrl);
+          if (alreadyExists) continue;
+
           // creează input hidden
           const hidden = document.createElement("input");
           hidden.type = "hidden";
@@ -446,18 +451,17 @@ document.addEventListener("turbo:load", () => {
           const externalContainer = document.getElementById("external-hidden-inputs");
           externalContainer.appendChild(hidden);
 
-
           // previzualizare
           secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
           currentIndex++;
         }
       }
 
-      secondaryInput.value = ""; // reset pentru a permite reîncărcare aceeași imagine
+      secondaryInput.value = ""; // reset
     });
   }
 
-  // Eliminare imagine din preview + input hidden
+  // Ștergere imagine principală sau secundară
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("remove-bunny-image")) {
       const target = e.target.dataset.target;
@@ -468,16 +472,22 @@ document.addEventListener("turbo:load", () => {
       }
 
       if (target === "secondary") {
-        const index = parseInt(e.target.dataset.index);
-        const inputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
-        if (inputs[index]) inputs[index].remove();
-        e.target.closest(".bunny-preview").remove();
+        const container = e.target.closest(".bunny-preview");
+        const img = container.querySelector("img");
+        const url = img.src;
+
+        // Eliminăm input-ul hidden cu acel URL
+        const hiddenInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
+        hiddenInputs.forEach(input => {
+          if (input.value === url) input.remove();
+        });
+
+        container.remove();
       }
     }
   });
 });
 </script>
-
 
 
 
