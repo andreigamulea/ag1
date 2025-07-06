@@ -293,15 +293,22 @@ end
     # Only allow a list of trusted parameters through.
 def product_params
   params.require(:product).permit(
-    :name, :slug, :description_title, :description, :price, :cost_price,
-    :discount_price, :sku, :stock, :track_inventory, :stock_status,
-    :sold_individually, :available_on, :discontinue_on, :height, :width,
-    :depth, :weight, :meta_title, :meta_description, :meta_keywords, :status,
-    :featured, :requires_login, :product_type, :delivery_method,
-    :visible_to_guests, :taxable, :coupon_applicable, :custom_attributes,
-    :main_image, attached_files: [], secondary_images: [], category_ids: []
+    :name, :slug, :description_title, :description,
+    :price, :cost_price, :discount_price,
+    :sku, :stock, :track_inventory, :stock_status,
+    :sold_individually, :available_on, :discontinue_on,
+    :height, :width, :depth, :weight,
+    :meta_title, :meta_description, :meta_keywords,
+    :status, :featured, :requires_login,
+    :product_type, :delivery_method, :visible_to_guests,
+    :taxable, :coupon_applicable, :custom_attributes,
+    :main_image, :external_image_url,                     # imagine principală externă
+    attached_files: [], secondary_images: [],             # ActiveStorage
+    external_image_urls: [],                              # imagini secundare externe
+    category_ids: []
   )
 end
+
 
 
 def category_params

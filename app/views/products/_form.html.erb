@@ -1,4 +1,5 @@
 <%= form_with(model: product, local: true, data: { turbo: false }, html: { multipart: true }) do |form| %>
+  
 
   <% if product.errors.any? %>
     <div class="alert alert-danger">
@@ -229,57 +230,39 @@
 
 
 
-<div class="mb-3">
-    <%= form.label :main_image, "Imagine principală" %>
-    <%= form.file_field :main_image, direct_upload: true, class: "form-control", accept: "image/*", data: { max_file_size: 5.megabytes } %>
-  </div>
-  <% if product.main_image.attached? && product.main_image.blob.persisted? %>
-    <div class="mb-3">
-      <p>Imagine principală curentă:</p>
-      <div style="position: relative; display: inline-block;">
-        <% begin %>
-          <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [200, 200])), class: "img-thumbnail", loading: "lazy" %>
-        <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-          <%= image_tag "placeholder.png", class: "img-thumbnail", loading: "lazy" %>
-          <% Rails.logger.error "Failed to load main image variant for product #{product.id}: #{e.message}" %>
-        <% end %>
-        <%= link_to "✕", purge_main_image_product_path(product),
-                    method: :delete,
-                    data: { turbo: false, confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
-                    class: "btn btn-sm btn-danger",
-                    style: "position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 12px;" %>
-      </div>
-    </div>
-  <% end %>
+ 
+
+  <!-- Imagine principală externă (direct upload în Bunny) -->
   <div class="mb-3">
-    <%= form.label :secondary_images, "Imagini secundare" %>
-    <%= form.file_field :secondary_images, multiple: true, direct_upload: true, class: "form-control", id: "secondary-images", accept: "image/*", data: { max_file_size: 5.megabytes, max_files: 10 } %>
-    <div id="image-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
+    <label for="bunny-direct-upload">Imagine principală (direct Bunny)</label>
+    <input type="file" id="bunny-direct-upload" class="form-control" accept="image/*" />
+    <input type="hidden" name="product[external_image_url]" id="external_image-url" />
+    <% if product.external_image_url.present? %>
+      <div class="mt-2">
+        <p>Imagine externă curentă:</p>
+        <%= image_tag product.external_image_url, class: "img-thumbnail", width: 200 %>
+      </div>
+    <% end %>
   </div>
-  <% if product.secondary_images_attachments.any? %>
-    <div class="secondary-image-previews" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;">
-      <% product.secondary_images_attachments.each do |attachment| %>
-        <% if attachment.blob.persisted? %>
-          <div style="position: relative; display: inline-block;">
-            <% begin %>
-              <%= image_tag bunny_storage_url(attachment.variant(resize_to_limit: [150, 150])), alt: "Imagine", loading: "lazy", class: "img-thumbnail" %>
-            <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-              <%= image_tag "placeholder.png", alt: "Imagine", loading: "lazy", class: "img-thumbnail" %>
-              <% Rails.logger.error "Failed to load secondary image variant for product #{product.id}: #{e.message}" %>
-            <% end %>
-            <%= link_to "✕", purge_image_product_path(product, image_id: attachment.id),
-                        method: :delete,
-                        data: { turbo: false, confirm: "Ștergi această imagine?" },
-                        class: "btn btn-sm btn-danger",
-                        style: "position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 12px;" %>
-          </div>
-        <% end %>
-      <% end %>
-    </div>
-  <% end %>
+
+  
+
+  <!-- Imagini secundare externe (upload direct Bunny) -->
+  <div class="mb-3">
+    <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
+    <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
+    <div id="bunny-secondary-preview" class="mt-2" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+    <% product.external_image_urls.each do |url| %>
+      <div style="margin-top: 8px;">
+        <%= image_tag url, width: 120, class: "img-thumbnail" %>
+      </div>
+    <% end %>
+  </div>
+
   <div>
     <%= form.submit %>
   </div>
+
 <% end %>
 
 <script>
@@ -417,5 +400,80 @@ document.addEventListener("turbo:load", () => {
     allFiles.forEach(file => dt.items.add(file));
     input.files = dt.files;
   };
+});
+</script>
+<script>
+document.addEventListener("turbo:load", () => {
+  const form = document.querySelector("form");
+
+  // imagine principală externă
+  const mainInput = document.getElementById("bunny-direct-upload");
+  if (mainInput) {
+    mainInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const presignRes = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+      const { upload_url, headers } = await presignRes.json();
+
+      const upload = await fetch(upload_url, {
+        method: "PUT",
+        headers: {
+          "AccessKey": headers["AccessKey"],
+          "Content-Type": headers["Content-Type"]
+        },
+        body: file
+      });
+
+      if (upload.ok) {
+        const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
+        document.getElementById("external_image-url").value = cdnUrl;
+      } else {
+        alert("Eroare la upload imagine principală.");
+      }
+    });
+  }
+
+  // imagini secundare externe
+  const secondaryInput = document.getElementById("bunny-secondary-upload");
+  const preview = document.getElementById("bunny-secondary-preview");
+
+  if (secondaryInput) {
+    secondaryInput.addEventListener("change", async () => {
+      for (const file of secondaryInput.files) {
+        const presignRes = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+        const { upload_url, headers } = await presignRes.json();
+
+        const upload = await fetch(upload_url, {
+          method: "PUT",
+          headers: {
+            "AccessKey": headers["AccessKey"],
+            "Content-Type": headers["Content-Type"]
+          },
+          body: file
+        });
+
+        if (upload.ok) {
+          const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
+
+          // previzualizare
+          const img = document.createElement("img");
+          img.src = cdnUrl;
+          img.width = 100;
+          img.classList.add("img-thumbnail");
+          preview.appendChild(img);
+
+          // hidden input pentru Rails
+          const hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "product[external_image_urls][]";
+          hidden.value = cdnUrl;
+          form.appendChild(hidden);
+        } else {
+          alert(`Eroare la upload pentru ${file.name}`);
+        }
+      }
+    });
+  }
 });
 </script>
