@@ -292,7 +292,7 @@ end
 
     # Only allow a list of trusted parameters through.
 def product_params
-  params.require(:product).permit(
+  clean_params = params.require(:product).permit(
     :name, :slug, :description_title, :description,
     :price, :cost_price, :discount_price,
     :sku, :stock, :track_inventory, :stock_status,
@@ -302,11 +302,17 @@ def product_params
     :status, :featured, :requires_login,
     :product_type, :delivery_method, :visible_to_guests,
     :taxable, :coupon_applicable, :custom_attributes,
-    :external_image_url,                         # imagine principală
-    external_image_urls: [],                     # imagini secundare
+    :external_image_url,
+    external_image_urls: [],
     category_ids: []
   )
+
+  # elimină duplicatele (important!)
+  clean_params[:external_image_urls] = clean_params[:external_image_urls].uniq.compact if clean_params[:external_image_urls]
+
+  clean_params
 end
+
 
 
 

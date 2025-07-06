@@ -359,32 +359,31 @@ document.addEventListener("turbo:load", () => {
   const secondaryInput = document.getElementById("bunny-secondary-upload");
   const secondaryPreview = document.getElementById("bunny-secondary-preview");
 
+  // Creează element imagine + buton de ștergere
   const createImageElement = (url, type, index = null) => {
     const div = document.createElement("div");
-    div.className = "bunny-preview";
+    div.className = "bunny-preview position-relative";
     div.dataset.type = type;
     if (index !== null) div.dataset.index = index;
 
     const img = document.createElement("img");
     img.src = url;
     img.className = "img-thumbnail me-2";
-    img.width = 100;
+    img.style.width = "100px";
 
     const btn = document.createElement("button");
-    btn.className = "btn btn-sm btn-danger remove-bunny-image";
+    btn.className = "btn btn-sm btn-danger position-absolute top-0 end-0 remove-bunny-image";
     btn.textContent = "×";
     btn.type = "button";
-    if (type === "main") btn.dataset.target = "main";
-    if (type === "secondary") {
-      btn.dataset.target = "secondary";
-      btn.dataset.index = index;
-    }
+    btn.dataset.target = type;
+    if (type === "secondary") btn.dataset.index = index;
 
     div.appendChild(img);
     div.appendChild(btn);
     return div;
   };
 
+  // Upload imagine principală
   if (mainInput) {
     mainInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
@@ -403,7 +402,7 @@ document.addEventListener("turbo:load", () => {
       });
 
       if (upload.ok) {
-        const path = new URL(upload_url).pathname.split('/').slice(2).join('/'); // elimină primul `/ayus`
+        const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
         const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
         mainHidden.value = cdnUrl;
@@ -413,61 +412,66 @@ document.addEventListener("turbo:load", () => {
     });
   }
 
+  // Upload imagini secundare
   if (secondaryInput) {
-  secondaryInput.addEventListener("change", async () => {
-    const existingInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
-    let currentIndex = existingInputs.length;
+    secondaryInput.addEventListener("change", async () => {
+      const existingInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
+      let currentIndex = existingInputs.length;
 
-    for (const file of secondaryInput.files) {
-      const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
-      const { upload_url, headers } = await res.json();
+      for (const file of secondaryInput.files) {
+        const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+        const { upload_url, headers } = await res.json();
 
-      const upload = await fetch(upload_url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": headers["Content-Type"],
-          "AccessKey": headers["AccessKey"]
-        },
-        body: file
-      });
+        const upload = await fetch(upload_url, {
+          method: "PUT",
+          headers: {
+            "Content-Type": headers["Content-Type"],
+            "AccessKey": headers["AccessKey"]
+          },
+          body: file
+        });
 
-      if (upload.ok) {
-        const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
-        const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
+        if (upload.ok) {
+          const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
+          const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
-        const hidden = document.createElement("input");
-        hidden.type = "hidden";
-        hidden.name = "product[external_image_urls][]";
-        hidden.value = cdnUrl;
-        form.appendChild(hidden);
+          // creează input hidden
+          const hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "product[external_image_urls][]";
+          hidden.value = cdnUrl;
+          form.appendChild(hidden);
 
-        secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
-        currentIndex++; // incrementăm după fiecare adăugare
+          // previzualizare
+          secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
+          currentIndex++;
+        }
       }
-    }
 
-    secondaryInput.value = ""; // Resetăm ca să permită reîncărcarea aceleași imagini
-  });
-}
+      secondaryInput.value = ""; // reset pentru a permite reîncărcare aceeași imagine
+    });
+  }
 
+  // Eliminare imagine din preview + input hidden
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("remove-bunny-image")) {
       const target = e.target.dataset.target;
+
       if (target === "main") {
         mainHidden.value = "";
         mainPreview.innerHTML = "";
-      } else if (target === "secondary") {
+      }
+
+      if (target === "secondary") {
         const index = parseInt(e.target.dataset.index);
         const inputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
         if (inputs[index]) inputs[index].remove();
-        e.target.parentElement.remove();
+        e.target.closest(".bunny-preview").remove();
       }
     }
   });
 });
 </script>
-
-
 
 
 
