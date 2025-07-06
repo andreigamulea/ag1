@@ -190,22 +190,24 @@
 <p>
 <strong>Imagine principală:</strong><br>
 <% if @product.external_image_url.present? %>
-  <%= image_tag @product.external_image_url, width: 300, class: "img-thumbnail" %>
+  <%= image_tag @product.external_image_url, class: "img-thumbnail", style: "max-width: 300px;" %>
 <% else %>
   (fără imagine)
 <% end %>
 
 
 
+
 <p>
   <strong>Imagini secundare:</strong><br>
-  <% if @product.external_image_urls.present? %>
-    <% Array(@product.external_image_urls).each do |url| %>
-      <%= image_tag url, width: 150, class: "img-thumbnail me-2 mb-2" %>
-    <% end %>
-  <% else %>
-    (fără imagini)
+  <% if @product.external_image_urls.any? %>
+  <% @product.external_image_urls.each do |url| %>
+    <%= image_tag url, class: "img-thumbnail", style: "max-width: 150px; margin-right: 10px;" %>
   <% end %>
+<% else %>
+  (fără imagini)
+<% end %>
+
 </p>
 
 
