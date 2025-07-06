@@ -1,16 +1,3 @@
-<style>
-.bunny-preview a {
-  text-decoration: none;
-  color: #333;
-}
-.bunny-preview .remove-bunny-file {
-  z-index: 2;
-  padding: 0.3rem 0.5rem;
-  line-height: 1;
-}
-</style>
-
-
 <%= form_with(model: product, local: true, html: { multipart: true }) do |form| %>
 
   <% if product.errors.any? %>
@@ -505,30 +492,6 @@ document.addEventListener("turbo:load", () => {
 
   if (!fileInput) return;
 
-  // Previzualizare fișiere deja salvate (la editare)
-const existingUrls = Array.from(fileHiddenInputs.querySelectorAll("input")).map(i => i.value);
-existingUrls.forEach(url => {
-  const filename = url.split("/").pop();
-  const container = document.createElement("div");
-container.className = "bunny-preview position-relative border p-2 rounded d-inline-block me-2 mb-2";
-container.style.maxWidth = "300px";
-container.innerHTML = `
-  <a href="${url}" target="_blank" class="d-block text-truncate">${filename}</a>
-  <button type="button"
-          class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-bunny-file"
-          title="Șterge acest fișier">×</button>
-`;
-  container.dataset.url = url;
-
-  container.innerHTML = `
-    <a href="${url}" target="_blank">${filename}</a>
-    <button type="button" class="btn btn-sm btn-danger ms-2 remove-bunny-file">×</button>
-  `;
-
-  filePreview.appendChild(container);
-});
-
-
   fileInput.addEventListener("change", async () => {
     for (const file of fileInput.files) {
       // 1. obține presigned URL de la Rails
@@ -551,14 +514,7 @@ container.innerHTML = `
 
         // 3. previzualizare fișier
         const container = document.createElement("div");
-container.className = "bunny-preview position-relative border p-2 rounded d-inline-block me-2 mb-2";
-container.style.maxWidth = "300px";
-container.innerHTML = `
-  <a href="${url}" target="_blank" class="d-block text-truncate">${filename}</a>
-  <button type="button"
-          class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-bunny-file"
-          title="Șterge acest fișier">×</button>
-`;
+        container.className = "bunny-file-preview d-flex align-items-center justify-content-between border p-2 rounded";
         container.dataset.url = fileUrl;
 
         container.innerHTML = `
