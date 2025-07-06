@@ -203,6 +203,22 @@
   </div>
 <% end %>
 
+<% if @product.external_file_urls.present? %>
+  <h3>Fișiere externe (Bunny)</h3>
+  <ul>
+    <% @product.external_file_urls.each do |url| %>
+      <li>
+        <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener" %>
+        <%= link_to "✕ Șterge", purge_external_file_product_path(@product, url: CGI.escape(url)),
+                    method: :delete,
+                    data: { confirm: "Sigur vrei să ștergi acest fișier?" },
+                    class: "btn btn-sm btn-danger ms-2" %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p><strong>Fișiere externe:</strong> (niciun fișier încărcat)</p>
+<% end %>
 
 
 <hr>
