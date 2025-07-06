@@ -5,22 +5,41 @@
     <div class="product-card">
       <% if product.external_image_url.present? %>
         <%= link_to carti_path(product.id), class: "image-link" do %>
-          <%= image_tag product.external_image_url, alt: product.name, class: "popup-trigger", style: "max-height: 300px; width: 100%; object-fit: contain;" %>
+          <%= image_tag product.external_image_url, alt: product.name, class: "product-image popup-trigger" %>
         <% end %>
       <% else %>
         <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
       <% end %>
 
       <p class="product-title"><%= product.name %></p>
-      <p class="product-price">Price: <%= number_to_currency(product.price) %></p>
-      <p class="stock <%= product.stock_status == 'in_stock' ? 'green' : 'red' %>">
-        <%= product.track_inventory ? "Inventory tracked" : "Inventory not tracked" %>
-      </p>
+
+      <% if product.custom_attributes["autor"].present? %>
+        <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
+      <% end %>
+
+      <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei") %></p>
+
+      <% if product.track_inventory %>
+        <% if product.stock > 5 %>
+          <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
+        <% elsif product.stock > 0 %>
+          <p class="stock yellow">Stoc: <%= product.stock %> Permite comenzi în așteptare</p>
+        <% else %>
+          <p class="stock red">Stoc: 0 Nu mai este pe stoc</p>
+        <% end %>
+      <% else %>
+        <p class="stock">Stoc: Netransmis</p>
+      <% end %>
+
+      <div class="add-to-cart-form">
+        <%= number_field_tag "quantity", 1, class: "qty-input", min: 1 %>
+        <%= button_tag "Adaugă în coș", class: "add-to-cart-btn", disabled: product.stock <= 0 && product.track_inventory %>
+      </div>
     </div>
   <% end %>
 </div>
-<%= paginate @products %>
 
+<%= paginate @products %>
 
 <style>
 .product-grid {
@@ -31,30 +50,23 @@
   padding: 20px;
 }
 
-
 .product-card {
   width: 100%;
-  max-width: 300px;
+  max-width: 260px;
   margin: 10px;
+  padding: 10px;
   overflow: hidden;
+  border: 1px solid #b51e1e;
+  border-radius: 8px;
+  background-color: #fff;
+  text-align: center;
 }
-
-.popup-trigger {
-  width: 100%;
-  height: auto;
-  object-fit: contain; 
-  max-height: 300px;
-  border-radius: 4px;
-}
-
-
 
 .product-image {
   width: 100%;
-  height: auto;
+  max-height: 280px;
   object-fit: contain;
-  max-height: 300px;
-  border-radius: 4px;
+  margin-bottom: 10px;
 }
 
 .product-title {
