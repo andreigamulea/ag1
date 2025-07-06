@@ -226,43 +226,40 @@
 
  
 
-  <!-- Imagine principală (upload direct BunnyCDN) -->
-  <div class="mb-3">
+   <div class="mb-3">
     <label for="bunny-direct-upload">Imagine principală (direct Bunny)</label>
     <input type="file" id="bunny-direct-upload" class="form-control" accept="image/*" />
-    <input type="hidden" name="product[external_image_url]" id="external_image-url" />
-    <% if @product.external_image_url.present? %>
-  <div class="bunny-preview" data-type="main">
-    <img src="<%= @product.external_image_url %>" class="img-thumbnail" style="max-height: 150px;">
-    <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="main">×</button>
-  </div>
-<% end %>
-
-  </div>
-
-  <!-- Imagini secundare -->
-  <div class="mb-3">
-    <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
-    <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
-    <div id="bunny-secondary-preview" class="mt-2 d-flex flex-wrap gap-2"></div>
-    <% if @product.external_image_urls.present? %>
-    <div class="bunny-thumbs">
-      <% @product.external_image_urls.each_with_index do |url, index| %>
-        <div class="bunny-preview" data-index="<%= index %>">
-          <img src="<%= url %>" class="img-thumbnail" style="max-height: 120px;">
-          <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="secondary" data-index="<%= index %>">×</button>
+    <input type="hidden" name="product[external_image_url]" id="external_image-url" value="<%= @product.external_image_url %>" />
+    <div id="main-preview">
+      <% if @product.external_image_url.present? %>
+        <div class="bunny-preview" data-type="main">
+          <img src="<%= @product.external_image_url %>" class="img-thumbnail" style="max-height: 150px;">
+          <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="main">×</button>
         </div>
       <% end %>
     </div>
-  <% end %>
-
   </div>
 
-  <!-- Atribute personalizate -->
   <div class="mb-3">
-    <%= form.label :custom_attributes, "Atribute personalizate (JSON)" %>
-    <%= form.text_area :custom_attributes, class: "form-control", rows: 5 %>
+    <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
+    <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
+    <div id="bunny-secondary-preview" class="mt-2 d-flex flex-wrap gap-2">
+      <% if @product.external_image_urls.present? %>
+        <% @product.external_image_urls.each_with_index do |url, index| %>
+          <div class="bunny-preview" data-index="<%= index %>">
+            <img src="<%= url %>" class="img-thumbnail me-2" width="100">
+            <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="secondary" data-index="<%= index %>">×</button>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
   </div>
+
+  
+  <%= hidden_field_tag 'product[external_image_url]', @product.external_image_url %>
+  <% (@product.external_image_urls || []).each do |url| %>
+    <%= hidden_field_tag 'product[external_image_urls][]', url %>
+  <% end %>
 
   <%= form.submit "Salvează produsul", class: "btn btn-primary" %>
 <% end %>
@@ -355,15 +352,68 @@ document.addEventListener("turbo:load", () => {
 <script>
 document.addEventListener("turbo:load", () => {
   const form = document.querySelector("form");
-
-  // === Upload imagine principală ===
   const mainInput = document.getElementById("bunny-direct-upload");
+  const mainPreview = document.getElementById("main-preview");
+  const mainHidden = document.getElementById("external_image-url");
+
+  const secondaryInput = document.getElementById("bunny-secondary-upload");
+  const secondaryPreview = document.getElementById("bunny-secondary-preview");
+
+  const createImageElement = (url, type, index = null) => {
+    const div = document.createElement("div");
+    div.className = "bunny-preview";
+    div.dataset.type = type;
+    if (index !== null) div.dataset.index = index;
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "img-thumbnail me-2";
+    img.width = 100;
+
+    const btn = document.createElement("button");
+    btn.className = "btn btn-sm btn-danger remove-bunny-image";
+    btn.textContent = "×";
+    btn.type = "button";
+    if (type === "main") btn.dataset.target = "main";
+    if (type === "secondary") {
+      btn.dataset.target = "secondary";
+      btn.dataset.index = index;
+    }
+
+    div.appendChild(img);
+    div.appendChild(btn);
+    return div;
+  };
+
   if (mainInput) {
     mainInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      try {
+      const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+      const { upload_url, headers } = await res.json();
+
+      const upload = await fetch(upload_url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": headers["Content-Type"],
+          "AccessKey": headers["AccessKey"]
+        },
+        body: file
+      });
+
+      if (upload.ok) {
+        const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
+        mainHidden.value = cdnUrl;
+        mainPreview.innerHTML = "";
+        mainPreview.appendChild(createImageElement(cdnUrl, "main"));
+      }
+    });
+  }
+
+  if (secondaryInput) {
+    secondaryInput.addEventListener("change", async () => {
+      for (const file of secondaryInput.files) {
         const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
         const { upload_url, headers } = await res.json();
 
@@ -371,73 +421,43 @@ document.addEventListener("turbo:load", () => {
           method: "PUT",
           headers: {
             "Content-Type": headers["Content-Type"],
-            "AccessKey": headers["AccessKey"] // 🔥 esențial
+            "AccessKey": headers["AccessKey"]
           },
           body: file
         });
 
         if (upload.ok) {
-          const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net").split("?")[0];
-          document.getElementById("external_image-url").value = cdnUrl;
-        } else {
-          alert("Eroare la upload imagine principală.");
-          console.error("Upload error:", upload.status, await upload.text());
-        }
-      } catch (err) {
-        alert("Eroare la comunicare cu serverul.");
-        console.error(err);
-      }
-    });
-  }
+          const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
+          const index = document.querySelectorAll("input[name='product[external_image_urls][]']").length;
 
-  // === Upload imagini secundare ===
-  const secondaryInput = document.getElementById("bunny-secondary-upload");
-  const preview = document.getElementById("bunny-secondary-preview");
+          const hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "product[external_image_urls][]";
+          hidden.value = cdnUrl;
+          form.appendChild(hidden);
 
-  if (secondaryInput) {
-    secondaryInput.addEventListener("change", async () => {
-      for (const file of secondaryInput.files) {
-        try {
-          const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
-          const { upload_url, headers } = await res.json();
-
-          const upload = await fetch(upload_url, {
-            method: "PUT",
-            headers: {
-              "Content-Type": headers["Content-Type"],
-              "AccessKey": headers["AccessKey"]
-            },
-            body: file
-          });
-
-          if (upload.ok) {
-            const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net").split("?")[0];
-
-            const img = document.createElement("img");
-            img.src = cdnUrl;
-            img.width = 100;
-            img.classList.add("img-thumbnail", "me-2");
-            preview.appendChild(img);
-
-            const hidden = document.createElement("input");
-            hidden.type = "hidden";
-            hidden.name = "product[external_image_urls][]";
-            hidden.value = cdnUrl;
-            form.appendChild(hidden);
-          } else {
-            alert(`Eroare la upload pentru ${file.name}`);
-            console.error("Upload error:", upload.status, await upload.text());
-          }
-        } catch (err) {
-          alert(`Eroare la comunicare pentru ${file.name}`);
-          console.error(err);
+          secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", index));
         }
       }
     });
   }
+
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("remove-bunny-image")) {
+      const target = e.target.dataset.target;
+      if (target === "main") {
+        mainHidden.value = "";
+        mainPreview.innerHTML = "";
+      } else if (target === "secondary") {
+        const index = parseInt(e.target.dataset.index);
+        const inputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
+        if (inputs[index]) inputs[index].remove();
+        e.target.parentElement.remove();
+      }
+    }
+  });
 });
 </script>
-
 
 
 
