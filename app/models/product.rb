@@ -1,5 +1,5 @@
 class Product < ApplicationRecord
-  has_many_attached :attached_files
+  #has_many_attached :attached_files
   has_and_belongs_to_many :categories
 
   enum stock_status: { in_stock: "in_stock", out_of_stock: "out_of_stock" }

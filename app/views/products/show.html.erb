@@ -149,25 +149,23 @@
   <%= @product.requires_login ? "Da" : "Nu" %>
 </p>
 
-<p>
- <% if @product.attached_files.attached? %>
-  <p><strong>Fișiere atașate:</strong></p>
-  <ul>
-    <% @product.attached_files.each do |file| %>
-      <li>
-        <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
-        <%= link_to "✕ Șterge", purge_attached_file_product_path(@product, file_id: file.id),
+<% if @product.external_file_urls.present? %>
+  <h3>Fișiere atașate (Bunny)</h3>
+  <div class="d-flex flex-column gap-2">
+    <% @product.external_file_urls.each do |url| %>
+      <div class="border rounded p-2 d-flex justify-content-between align-items-center">
+        <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener" %>
+        <%= link_to "✕ Șterge", purge_external_file_product_path(@product, url: CGI.escape(url)),
                     method: :delete,
-                    data: { confirm: "Sigur vrei să ștergi fișierul?" },
-                    class: "btn btn-sm btn-danger ms-2" %>
-      </li>
+                    data: { confirm: "Sigur vrei să ștergi acest fișier?" },
+                    class: "btn btn-sm btn-danger" %>
+      </div>
     <% end %>
-  </ul>
+  </div>
 <% else %>
   <p><strong>Fișiere atașate:</strong> (niciun fișier)</p>
 <% end %>
 
-</p>
 
 
 
