@@ -1,25 +1,26 @@
 <div class="product-page">
   <div class="main-image">
-    <% if @product.main_image.attached? %>
+    <% if @product.main_image.attached? && @product.main_image.blob.persisted? %>
       <% begin %>
-        <%= image_tag bunny_storage_url(@product.main_image.variant(resize_to_limit: [300, 300])), alt: @product.name, class: "popup-trigger", data: { full: bunny_storage_url(@product.main_image) } %>
+        <%= image_tag bunny_storage_url(@product.main_image.variant(resize_to_limit: [300, 300])), alt: @product.name, class: "popup-trigger", data: { full: bunny_storage_url(@product.main_image) }, loading: "lazy" %>
       <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-        <%= image_tag "placeholder.png", alt: "No image", class: "popup-trigger" %>
+        <%= image_tag "placeholder.png", alt: "No image", class: "popup-trigger", loading: "lazy" %>
         <% Rails.logger.error "Failed to load main image variant for product #{@product.id}: #{e.message}" %>
       <% end %>
     <% else %>
-      <%= image_tag "placeholder.png", alt: "No image", class: "popup-trigger" %>
+      <%= image_tag "placeholder.png", alt: "No image", class: "popup-trigger", loading: "lazy" %>
     <% end %>
   </div>
-
   <% if @product.secondary_images.any? %>
     <div class="secondary-images" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
       <% @product.secondary_images.each do |image| %>
-        <% begin %>
-          <%= image_tag bunny_storage_url(image.variant(resize_to_limit: [80, 80])), class: "thumb popup-trigger", data: { full: bunny_storage_url(image) }, style: "border: 1px solid #ccc; border-radius: 4px;" %>
-        <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-          <%= image_tag "placeholder.png", class: "thumb popup-trigger", style: "border: 1px solid #ccc; border-radius: 4px;" %>
-          <% Rails.logger.error "Failed to load secondary image variant for product #{@product.id}: #{e.message}" %>
+        <% if image.blob.persisted? %>
+          <% begin %>
+            <%= image_tag bunny_storage_url(image.variant(resize_to_limit: [80, 80])), class: "thumb popup-trigger", data: { full: bunny_storage_url(image) }, style: "border: 1px solid #ccc; border-radius: 4px;", loading: "lazy" %>
+          <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
+            <%= image_tag "placeholder.png", class: "thumb popup-trigger", style: "border: 1px solid #ccc; border-radius: 4px;", loading: "lazy" %>
+            <% Rails.logger.error "Failed to load secondary image variant for product #{@product.id}: #{e.message}" %>
+          <% end %>
         <% end %>
       <% end %>
     </div>

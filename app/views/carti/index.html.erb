@@ -1,12 +1,12 @@
 <h1 style="text-align: center;">Cărți în format fizic și digital</h1>
 
 <div class="product-grid">
-  <% @products.each do |product| %>
+<% @products.each do |product| %>
   <div class="product-card">
-    <% if product.main_image.attached? %>
+    <% if product.main_image.attached? && product.main_image.blob.persisted? %>
       <% begin %>
         <%= link_to carti_path(product.id), class: "image-link" do %>
-          <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [300, 300])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) } %>
+          <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [300, 300])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) }, loading: "lazy" %>
         <% end %>
       <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
         <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>

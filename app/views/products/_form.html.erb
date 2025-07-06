@@ -237,7 +237,7 @@
     <div class="mb-3">
       <p>Imagine principală curentă:</p>
       <div style="position: relative; display: inline-block;">
-        <%= image_tag bunny_storage_url(product.main_image), class: "img-thumbnail" %>
+        <%= image_tag bunny_storage_url(product.main_image), class: "img-thumbnail", loading: "lazy" %>
         <%= link_to "✕", purge_main_image_product_path(product),
                     method: :delete,
                     data: { turbo: false, confirm: "Ești sigur că vrei să ștergi imaginea principală?" },
@@ -359,20 +359,17 @@ document.addEventListener("turbo:load", () => {
 
 <script>
 document.addEventListener("turbo:load", () => {
-  const input = document.getElementById("attached-files");
-  const wrapper = document.getElementById("attached-files-badges-wrapper");
-  const form = document.querySelector("form");
+  const input = document.getElementById("secondary-images");
+  const wrapper = document.getElementById("image-badges-wrapper");
   const maxSize = 5 * 1024 * 1024; // 5 MB
-  const maxFiles = 10; // Maxim 10 fișiere atașate
+  const maxFiles = 10; // Maxim 10 imagini secundare
 
   let allFiles = [];
 
   input.addEventListener("change", () => {
     const newFiles = Array.from(input.files);
-
-    // Validare dimensiune și număr
     if (allFiles.length + newFiles.length > maxFiles) {
-      alert(`Poți încărca maxim ${maxFiles} fișiere atașate.`);
+      alert(`Poți încărca maxim ${maxFiles} imagini secundare.`);
       input.value = "";
       return;
     }
@@ -386,7 +383,7 @@ document.addEventListener("turbo:load", () => {
     });
 
     renderBadges();
-    input.value = ""; // Resetăm inputul
+    input.value = "";
 
     const dt = new DataTransfer();
     allFiles.forEach(file => dt.items.add(file));
@@ -398,12 +395,12 @@ document.addEventListener("turbo:load", () => {
     allFiles.forEach((file, index) => {
       const badge = document.createElement("span");
       badge.className = "badge bg-primary text-white me-2 mb-2";
-      badge.innerHTML = `${file.name} <span onclick="removeAttachedFile(${index})" style="cursor:pointer; margin-left:6px;">×</span>`;
+      badge.innerHTML = `${file.name} <span onclick="removeFile(${index})" style="cursor:pointer; margin-left:6px;">×</span>`;
       wrapper.appendChild(badge);
     });
   }
 
-  window.removeAttachedFile = function(index) {
+  window.removeFile = function(index) {
     allFiles.splice(index, 1);
     renderBadges();
     const dt = new DataTransfer();
