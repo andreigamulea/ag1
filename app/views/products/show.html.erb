@@ -187,29 +187,21 @@
   <strong>Atribute suplimentare:</strong><br>
   <pre><%= JSON.pretty_generate(@product.attributes || {}) rescue "{}" %></pre>
 </p>
-<p>
-  <strong>Imagine principală:</strong><br>
-  <% if @product.external_image_url.present? %>
-    <%= image_tag @product.external_image_url, width: 300 %>
-  <% else %>
-    (fără imagine)
-  <% end %>
-</p>
+<% if @product.external_image_url.present? %>
+  <h3>Imagine principală</h3>
+  <img src="<%= @product.external_image_url %>" class="img-fluid" style="max-width: 300px;" />
+<% end %>
 
 
 
-
-<p>
-  <strong>Imagini secundare:</strong><br>
-  <% if @product.external_image_urls.present? %>
-    <% @product.external_image_urls.each do |img_url| %>
-      <%= image_tag img_url, width: 150, style: "margin-right: 10px;" %>
+<% if @product.external_image_urls.present? %>
+  <h3>Imagini secundare</h3>
+  <div class="d-flex flex-wrap gap-2">
+    <% @product.external_image_urls.each do |url| %>
+      <img src="<%= url %>" class="img-thumbnail" style="width: 120px;" />
     <% end %>
-  <% else %>
-    (fără imagini)
-  <% end %>
-</p>
-
+  </div>
+<% end %>
 
 
 
