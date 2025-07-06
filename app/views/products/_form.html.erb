@@ -414,37 +414,41 @@ document.addEventListener("turbo:load", () => {
   }
 
   if (secondaryInput) {
-    secondaryInput.addEventListener("change", async () => {
-      for (const file of secondaryInput.files) {
-        const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
-        const { upload_url, headers } = await res.json();
+  secondaryInput.addEventListener("change", async () => {
+    const existingInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
+    let currentIndex = existingInputs.length;
 
-        const upload = await fetch(upload_url, {
-          method: "PUT",
-          headers: {
-            "Content-Type": headers["Content-Type"],
-            "AccessKey": headers["AccessKey"]
-          },
-          body: file
-        });
+    for (const file of secondaryInput.files) {
+      const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+      const { upload_url, headers } = await res.json();
 
-        if (upload.ok) {
-          const path = new URL(upload_url).pathname.split('/').slice(2).join('/'); // elimină primul `/ayus`
-          const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
+      const upload = await fetch(upload_url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": headers["Content-Type"],
+          "AccessKey": headers["AccessKey"]
+        },
+        body: file
+      });
 
-          const index = document.querySelectorAll("input[name='product[external_image_urls][]']").length;
+      if (upload.ok) {
+        const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
+        const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
-          const hidden = document.createElement("input");
-          hidden.type = "hidden";
-          hidden.name = "product[external_image_urls][]";
-          hidden.value = cdnUrl;
-          form.appendChild(hidden);
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = "product[external_image_urls][]";
+        hidden.value = cdnUrl;
+        form.appendChild(hidden);
 
-          secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", index));
-        }
+        secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
+        currentIndex++; // incrementăm după fiecare adăugare
       }
-    });
-  }
+    }
+
+    secondaryInput.value = ""; // Resetăm ca să permită reîncărcarea aceleași imagini
+  });
+}
 
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("remove-bunny-image")) {
