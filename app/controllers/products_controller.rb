@@ -115,6 +115,16 @@ end
 
 
 
+def purge_external_file
+  @product = Product.find(params[:id])
+  url = CGI.unescape(params[:url])
+  @product.external_file_urls -= [url]
+  @product.save
+  redirect_to product_path(@product), notice: "Fișierul a fost șters."
+end
+
+
+
 def simulate_memory_usage_and_gc
   before_rss = MemoryLogger.fetch_memory_usage
   before_heap = GC.stat[:heap_available_slots]

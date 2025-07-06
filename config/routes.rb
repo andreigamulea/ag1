@@ -29,7 +29,7 @@ get '/products/force_gc', to: 'products#force_gc', as: 'force_gc_products'
     delete 'purge_image/:image_id', to: 'products#purge_image', as: :purge_image
     delete 'purge_main_image', to: 'products#purge_main_image', as: :purge_main_image
     delete :purge_attached_file
-    
+    delete :purge_external_file
     get :new_category
     post :create_category
     get :edit_categories
