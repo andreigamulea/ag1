@@ -494,23 +494,6 @@ document.addEventListener("turbo:load", () => {
 
   if (!fileInput) return;
 
-  // Previzualizare fișiere deja salvate (la editare)
-const existingUrls = Array.from(fileHiddenInputs.querySelectorAll("input")).map(i => i.value);
-existingUrls.forEach(url => {
-  const filename = url.split("/").pop();
-  const container = document.createElement("div");
-  container.className = "bunny-file-preview d-flex align-items-center justify-content-between border p-2 rounded";
-  container.dataset.url = url;
-
-  container.innerHTML = 
-    <a href="${url}" target="_blank">${filename}</a>
-    <button type="button" class="btn btn-sm btn-danger ms-2 remove-bunny-file">×</button>
-  ;
-
-  filePreview.appendChild(container);
-});
-
-
   fileInput.addEventListener("change", async () => {
     for (const file of fileInput.files) {
       // 1. obține presigned URL de la Rails
