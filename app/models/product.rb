@@ -3,6 +3,14 @@ class Product < ApplicationRecord
   has_many_attached :secondary_images
   has_many_attached :attached_files
   has_and_belongs_to_many :categories
+
+
+  
+
+
+
+serialize :external_image_urls, Array
+
   
 
 

@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
 
   get "/uploads/presign", to: "uploads#presign"
+  post "/uploads/presign", to: "uploads#presign"
+
 
   get 'memory_logs/index'
   # Autentificare Devise (înainte de orice alte rute care pot intra în conflict)
