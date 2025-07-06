@@ -1,29 +1,19 @@
-# app/controllers/uploads_controller.rb
 class UploadsController < ApplicationController
   def presign
-  filename = params[:filename]
-  zone = ENV['BUNNY_STORAGE_ZONE']
-  key = ENV['BUNNY_STORAGE_API_KEY']
+    zone = ENV["BUNNY_STORAGE_ZONE"]
+    api_key = ENV["BUNNY_STORAGE_API_KEY"]
+    raise "Zona de stocare Bunny nu e setată" unless zone && api_key
 
-  upload_url = "https://storage.bunnycdn.com/#{zone}/#{filename}"
-  headers = {
-    "AccessKey" => key,
-    "Content-Type" => "application/octet-stream"
-  }
+    filename = params[:filename]
+    raise "Lipsă filename" if filename.blank?
 
-  render json: { upload_url:, headers: }
-end
-
-
-
-  private
-
-  def mime_type(filename)
-    case File.extname(filename).downcase
-    when ".png" then "image/png"
-    when ".jpg", ".jpeg" then "image/jpeg"
-    when ".gif" then "image/gif"
-    else "application/octet-stream"
-    end
+    upload_url = "https://storage.bunnycdn.com/#{zone}/#{filename}"
+    render json: {
+      upload_url: upload_url,
+      headers: {
+        "AccessKey" => api_key,
+        "Content-Type" => "application/octet-stream"
+      }
+    }
   end
 end
