@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
 
   get "/uploads/presign", to: "uploads#presign"
-  post "/uploads/presign", to: "uploads#presign"
+  post "/uploads/presign", to: "uploads#presign" 
+  post "/uploads/upload_bunny", to: "uploads#upload_bunny"
+  
+
 
 
   get 'memory_logs/index'

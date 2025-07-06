@@ -217,6 +217,7 @@
 
 
 
+<button type="button" onclick="testPresign()">Testează presign</button>
 
 
 
@@ -232,37 +233,30 @@
 
  
 
-  <!-- Imagine principală externă (direct upload în Bunny) -->
-  <div class="mb-3">
-    <label for="bunny-direct-upload">Imagine principală (direct Bunny)</label>
-    <input type="file" id="bunny-direct-upload" class="form-control" accept="image/*" />
-    <input type="hidden" name="product[external_image_url]" id="external_image-url" />
-    <% if product.external_image_url.present? %>
-      <div class="mt-2">
-        <p>Imagine externă curentă:</p>
-        <%= image_tag product.external_image_url, class: "img-thumbnail", width: 200 %>
-      </div>
-    <% end %>
+  <!-- Imagine principală (upload direct BunnyCDN) -->
+  <div>
+    <label>Imagine principală (direct Bunny)</label><br>
+    <%= file_field_tag :main_image_file, id: "bunny-direct-upload" %>
+    <%= hidden_field_tag "product[external_image_url]", product.external_image_url, id: "external_image-url" %>
   </div>
 
-  
-
-  <!-- Imagini secundare externe (upload direct Bunny) -->
-  <div class="mb-3">
-    <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
-    <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
-    <div id="bunny-secondary-preview" class="mt-2" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-    <% product.external_image_urls.each do |url| %>
-      <div style="margin-top: 8px;">
-        <%= image_tag url, width: 120, class: "img-thumbnail" %>
-      </div>
-    <% end %>
+  <!-- Imagini secundare (upload direct BunnyCDN) -->
+  <div>
+    <label>Imagini secundare (direct Bunny)</label><br>
+    <%= file_field_tag :secondary_image_files, multiple: true, id: "bunny-secondary-upload" %>
+    <div id="bunny-secondary-preview" class="mt-2 d-flex flex-wrap gap-2">
+      <% if product.external_image_urls.present? %>
+        <% product.external_image_urls.each do |url| %>
+          <img src="<%= url %>" width="100" class="img-thumbnail me-2">
+          <%= hidden_field_tag "product[external_image_urls][]", url %>
+        <% end %>
+      <% end %>
+    </div>
   </div>
 
   <div>
     <%= form.submit %>
   </div>
-
 <% end %>
 
 <script>
@@ -352,128 +346,107 @@ document.addEventListener("turbo:load", () => {
 
 <script>
 document.addEventListener("turbo:load", () => {
-  const input = document.getElementById("secondary-images");
-  const wrapper = document.getElementById("image-badges-wrapper");
-  const maxSize = 5 * 1024 * 1024; // 5 MB
-  const maxFiles = 10; // Maxim 10 imagini secundare
-
-  let allFiles = [];
-
-  input.addEventListener("change", () => {
-    const newFiles = Array.from(input.files);
-    if (allFiles.length + newFiles.length > maxFiles) {
-      alert(`Poți încărca maxim ${maxFiles} imagini secundare.`);
-      input.value = "";
-      return;
-    }
-
-    newFiles.forEach(file => {
-      if (file.size > maxSize) {
-        alert(`Fișierul ${file.name} este prea mare. Dimensiunea maximă este 5MB.`);
-      } else if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
-        allFiles.push(file);
-      }
-    });
-
-    renderBadges();
-    input.value = "";
-
-    const dt = new DataTransfer();
-    allFiles.forEach(file => dt.items.add(file));
-    input.files = dt.files;
-  });
-
-  function renderBadges() {
-    wrapper.innerHTML = "";
-    allFiles.forEach((file, index) => {
-      const badge = document.createElement("span");
-      badge.className = "badge bg-primary text-white me-2 mb-2";
-      badge.innerHTML = `${file.name} <span onclick="removeFile(${index})" style="cursor:pointer; margin-left:6px;">×</span>`;
-      wrapper.appendChild(badge);
-    });
-  }
-
-  window.removeFile = function(index) {
-    allFiles.splice(index, 1);
-    renderBadges();
-    const dt = new DataTransfer();
-    allFiles.forEach(file => dt.items.add(file));
-    input.files = dt.files;
-  };
-});
-</script>
-<script>
-document.addEventListener("turbo:load", () => {
   const form = document.querySelector("form");
 
-  // imagine principală externă
+  // === Upload imagine principală ===
   const mainInput = document.getElementById("bunny-direct-upload");
-  if (mainInput) {
+  const mainHiddenInput = document.getElementById("external_image-url");
+
+  if (mainInput && mainHiddenInput) {
     mainInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      const presignRes = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
-      const { upload_url, headers } = await presignRes.json();
-
-      const upload = await fetch(upload_url, {
-        method: "PUT",
-        headers: {
-          "AccessKey": headers["AccessKey"],
-          "Content-Type": headers["Content-Type"]
-        },
-        body: file
-      });
-
-      if (upload.ok) {
-        const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
-        document.getElementById("external_image-url").value = cdnUrl;
-      } else {
-        alert("Eroare la upload imagine principală.");
-      }
-    });
-  }
-
-  // imagini secundare externe
-  const secondaryInput = document.getElementById("bunny-secondary-upload");
-  const preview = document.getElementById("bunny-secondary-preview");
-
-  if (secondaryInput) {
-    secondaryInput.addEventListener("change", async () => {
-      for (const file of secondaryInput.files) {
+      try {
         const presignRes = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
         const { upload_url, headers } = await presignRes.json();
+
+        console.log("Presign OK (MAIN):", { upload_url, headers });
 
         const upload = await fetch(upload_url, {
           method: "PUT",
           headers: {
-            "AccessKey": headers["AccessKey"],
             "Content-Type": headers["Content-Type"]
           },
           body: file
         });
 
         if (upload.ok) {
-          const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
-
-          // previzualizare
-          const img = document.createElement("img");
-          img.src = cdnUrl;
-          img.width = 100;
-          img.classList.add("img-thumbnail");
-          preview.appendChild(img);
-
-          // hidden input pentru Rails
-          const hidden = document.createElement("input");
-          hidden.type = "hidden";
-          hidden.name = "product[external_image_urls][]";
-          hidden.value = cdnUrl;
-          form.appendChild(hidden);
+          const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net").split("?")[0];
+          mainHiddenInput.value = cdnUrl;
+          alert("Imagine principală încărcată cu succes!");
         } else {
-          alert(`Eroare la upload pentru ${file.name}`);
+          console.error("Upload failed (main)", await upload.text());
+          alert("Eroare la upload imagine principală.");
+        }
+      } catch (err) {
+        console.error("Eroare la comunicare (main)", err);
+        alert("Eroare la comunicarea cu serverul.");
+      }
+    });
+  }
+
+  // === Upload imagini secundare ===
+  const secondaryInput = document.getElementById("bunny-secondary-upload");
+  const preview = document.getElementById("bunny-secondary-preview");
+
+  if (secondaryInput && preview) {
+    secondaryInput.addEventListener("change", async () => {
+      for (const file of secondaryInput.files) {
+        try {
+          const presignRes = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+          const { upload_url, headers } = await presignRes.json();
+
+          console.log("Presign OK (SECONDARY):", { upload_url, headers });
+
+          const upload = await fetch(upload_url, {
+            method: "PUT",
+            headers: {
+              "Content-Type": headers["Content-Type"]
+            },
+            body: file
+          });
+
+          if (upload.ok) {
+            const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net").split("?")[0];
+
+            const img = document.createElement("img");
+            img.src = cdnUrl;
+            img.width = 100;
+            img.classList.add("img-thumbnail", "me-2");
+            preview.appendChild(img);
+
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = "product[external_image_urls][]";
+            hidden.value = cdnUrl;
+            form.appendChild(hidden);
+
+            alert(`Imaginea ${file.name} a fost încărcată.`);
+          } else {
+            console.error(`Upload failed (${file.name})`, await upload.text());
+            alert(`Eroare la upload pentru ${file.name}`);
+          }
+        } catch (err) {
+          console.error(`Eroare la comunicare pentru ${file.name}`, err);
+          alert(`Eroare la comunicare pentru ${file.name}`);
         }
       }
     });
   }
 });
+</script>
+
+
+
+
+
+
+<script>
+  function testPresign() {
+    fetch("/uploads/presign?filename=test_bunny.png")
+      .then(response => response.json())
+      .then(data => console.log("Presign OK:", data))
+      .catch(error => console.error("Eroare:", error));
+  }
 </script>

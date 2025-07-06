@@ -8,3 +8,5 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 pin "@rails/ujs", to: "@rails--ujs.js" # @7.1.3
 pin "jquery" # @3.7.1
 pin "select2" # @4.1.0
+pin "bunny_upload"
+

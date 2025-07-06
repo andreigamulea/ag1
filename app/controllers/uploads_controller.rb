@@ -1,21 +1,29 @@
+# app/controllers/uploads_controller.rb
 class UploadsController < ApplicationController
-  skip_before_action :verify_authenticity_token
-
   def presign
-    filename = params[:filename]
-    zone = ENV["BUNNY_STORAGE_ZONE"]
-    key = ENV["BUNNY_STORAGE_API_KEY"]
+  filename = params[:filename]
+  extension = File.extname(filename).downcase
+  mime = Rack::Mime.mime_type(extension)
 
-    upload_url = "https://storage.bunnycdn.com/#{zone}/#{filename}"
+  upload_url = "https://storage.bunnycdn.com/#{ENV["BUNNY_STORAGE_ZONE"]}/#{filename}?AccessKey=#{ENV["BUNNY_STORAGE_API_KEY"]}"
 
-    headers = {
-      "AccessKey" => key,
-      "Content-Type" => Rack::Mime.mime_type(File.extname(filename))
+  render json: {
+    upload_url: upload_url,
+    headers: {
+      "Content-Type": mime || "application/octet-stream"
     }
+  }
+end
 
-    render json: {
-      upload_url: upload_url,
-      headers: headers
-    }
+
+  private
+
+  def mime_type(filename)
+    case File.extname(filename).downcase
+    when ".png" then "image/png"
+    when ".jpg", ".jpeg" then "image/jpeg"
+    when ".gif" then "image/gif"
+    else "application/octet-stream"
+    end
   end
 end
