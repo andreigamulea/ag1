@@ -2,18 +2,18 @@
 class UploadsController < ApplicationController
   def presign
   filename = params[:filename]
-  extension = File.extname(filename).downcase
-  mime = Rack::Mime.mime_type(extension)
+  zone = ENV['BUNNY_STORAGE_ZONE']
+  key = ENV['BUNNY_STORAGE_API_KEY']
 
-  upload_url = "https://storage.bunnycdn.com/#{ENV["BUNNY_STORAGE_ZONE"]}/#{filename}?AccessKey=#{ENV["BUNNY_STORAGE_API_KEY"]}"
-
-  render json: {
-    upload_url: upload_url,
-    headers: {
-      "Content-Type": mime || "application/octet-stream"
-    }
+  upload_url = "https://storage.bunnycdn.com/#{zone}/#{filename}"
+  headers = {
+    "AccessKey" => key,
+    "Content-Type" => "application/octet-stream"
   }
+
+  render json: { upload_url:, headers: }
 end
+
 
 
   private
