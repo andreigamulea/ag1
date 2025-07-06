@@ -568,15 +568,18 @@ document.addEventListener("turbo:load", () => {
   // === Ștergere fișier Bunny (din preview + input ascuns) ===
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("remove-bunny-file")) {
-      const url = e.target.dataset.url;
+    const url = e.target.dataset.url;
 
-      const inputs = fileHiddenInputs.querySelectorAll("input");
-      inputs.forEach(input => {
-        if (input.value === url) input.remove();
-      });
+    // Elimină hidden input cu acel URL
+    const hiddenInputs = document.querySelectorAll("input[name='product[external_file_urls][]']");
+    hiddenInputs.forEach(input => {
+      if (input.value === url) input.remove();
+    });
 
-      e.target.closest(".bunny-preview-file").remove();
-    }
-  });
+    // Elimină vizual cardul
+    const card = e.target.closest(".position-relative");
+    if (card) card.remove();
+  }
+});
 });
 </script>
