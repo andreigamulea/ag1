@@ -302,12 +302,12 @@ def product_params
     :status, :featured, :requires_login,
     :product_type, :delivery_method, :visible_to_guests,
     :taxable, :coupon_applicable, :custom_attributes,
-    :main_image, :external_image_url,                     # imagine principală externă
-    attached_files: [], secondary_images: [],             # ActiveStorage
-    external_image_urls: [],                              # imagini secundare externe
+    :external_image_url,                         # imagine principală
+    external_image_urls: [],                     # imagini secundare
     category_ids: []
   )
 end
+
 
 
 
@@ -337,21 +337,10 @@ end
 
 # app/controllers/products_controller.rb
 def generate_variants_for(product)
-  if product.main_image.attached? && product.main_image.variable?
-    GenerateImageVariantsJob.perform_now(product.main_image.blob_id, [300, 300])
-    GC.start
-    GenerateImageVariantsJob.perform_now(product.main_image.blob_id, [200, 200])
-    GC.start
-  end
-  product.secondary_images.each do |img|
-    if img.variable?
-      GenerateImageVariantsJob.perform_now(img.blob_id, [150, 150])
-      GC.start
-      GenerateImageVariantsJob.perform_now(img.blob_id, [80, 80])
-      GC.start
-    end
-  end
+  puts "Imagine principală externă: #{product.external_image_url}"
+  puts "Imagini secundare externe: #{product.external_image_urls}"
 end
+
 
 
 
