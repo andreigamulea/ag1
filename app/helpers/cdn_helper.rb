@@ -25,7 +25,8 @@ module CdnHelper
   private
 
   def fallback_url(attachment)
-    host = Rails.application.config.action_mailer.default_url_options&.[](:host) || "your-domain.com" # Înlocuiește cu domeniul tău real
+    host = Rails.application.config.action_mailer.default_url_options&.[](:host) || "your-domain.com"
+    Rails.logger.info "Falling back to rails_blob_url for attachment #{attachment.blob.key}"
     Rails.application.routes.url_helpers.rails_blob_url(attachment, host: host)
   end
 end
