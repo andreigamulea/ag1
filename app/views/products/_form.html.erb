@@ -158,16 +158,17 @@
 </div>
 
 
-<!-- Fișiere atașate (ActiveStorage) -->
 <div class="mb-3">
   <label for="bunny-files-upload">Fișiere atașate (Bunny)</label>
   <input type="file" id="bunny-files-upload" class="form-control" multiple />
-  <div id="bunny-files-preview" class="mt-2">
+  <div id="bunny-files-preview" class="mt-2 d-flex flex-column gap-2">
     <% if @product.external_file_urls.present? %>
       <% @product.external_file_urls.each do |url| %>
-        <div class="bunny-preview-file mb-2 d-flex align-items-center justify-content-between">
-          <span><%= File.basename(URI.parse(url).path) %></span>
-          <button type="button" class="btn btn-sm btn-danger remove-bunny-file" data-url="<%= url %>">×</button>
+        <div class="position-relative border rounded p-2">
+          <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener", class: "text-decoration-none d-block" %>
+          <button type="button"
+                  class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-bunny-file"
+                  data-url="<%= url %>">×</button>
         </div>
       <% end %>
     <% end %>
