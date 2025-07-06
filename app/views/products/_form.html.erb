@@ -231,11 +231,13 @@
     <label for="bunny-direct-upload">Imagine principală (direct Bunny)</label>
     <input type="file" id="bunny-direct-upload" class="form-control" accept="image/*" />
     <input type="hidden" name="product[external_image_url]" id="external_image-url" />
-    <% if product.external_image_url.present? %>
-      <div class="mt-2">
-        <%= image_tag product.external_image_url, class: "img-thumbnail", width: 200 %>
-      </div>
-    <% end %>
+    <% if @product.external_image_url.present? %>
+  <div class="bunny-preview" data-type="main">
+    <img src="<%= @product.external_image_url %>" class="img-thumbnail" style="max-height: 150px;">
+    <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="main">×</button>
+  </div>
+<% end %>
+
   </div>
 
   <!-- Imagini secundare -->
@@ -243,11 +245,17 @@
     <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
     <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
     <div id="bunny-secondary-preview" class="mt-2 d-flex flex-wrap gap-2"></div>
-    <% Array(product.external_image_urls).each do |url| %>
-      <div>
-        <%= image_tag url, width: 120, class: "img-thumbnail" %>
-      </div>
-    <% end %>
+    <% if @product.external_image_urls.present? %>
+    <div class="bunny-thumbs">
+      <% @product.external_image_urls.each_with_index do |url, index| %>
+        <div class="bunny-preview" data-index="<%= index %>">
+          <img src="<%= url %>" class="img-thumbnail" style="max-height: 120px;">
+          <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="secondary" data-index="<%= index %>">×</button>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
   </div>
 
   <!-- Atribute personalizate -->
