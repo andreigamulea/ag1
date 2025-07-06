@@ -246,9 +246,12 @@
     <div id="bunny-secondary-preview" class="mt-2 d-flex flex-wrap gap-2">
       <% if @product.external_image_urls.present? %>
         <% @product.external_image_urls.each_with_index do |url, index| %>
-          <div class="bunny-preview" data-index="<%= index %>">
+          <div class="bunny-preview position-relative" data-index="<%= index %>">
             <img src="<%= url %>" class="img-thumbnail me-2" width="100">
-            <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="secondary" data-index="<%= index %>">×</button>
+            <button type="button"
+                    class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-bunny-image"
+                    data-target="secondary"
+                    data-index="<%= index %>">×</button>
           </div>
         <% end %>
       <% end %>
