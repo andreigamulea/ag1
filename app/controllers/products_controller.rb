@@ -303,6 +303,7 @@ def product_params
     :product_type, :delivery_method, :visible_to_guests,
     :taxable, :coupon_applicable, :custom_attributes,
     :external_image_url,
+    external_file_urls: [],
     external_image_urls: [],
     category_ids: []
   )
