@@ -1,32 +1,23 @@
 <div class="product-page">
   <div class="main-image">
-    <% if @product.main_image.attached? %>
-      <% begin %>
-        <%= image_tag bunny_storage_url(@product.main_image.variant(resize_to_limit: [300, 300])), alt: @product.name, class: "popup-trigger", data: { full: bunny_storage_url(@product.main_image) } %>
-      <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-        <%= image_tag "placeholder.png", alt: "No image", class: "popup-trigger" %>
-        <% Rails.logger.error "Failed to load main image variant for product #{@product.id}: #{e.message}" %>
-      <% end %>
+    <% if @product.external_image_url.present? %>
+      <%= image_tag @product.external_image_url, alt: @product.name, class: "popup-trigger", style: "max-height: 300px;" %>
     <% else %>
       <%= image_tag "placeholder.png", alt: "No image", class: "popup-trigger" %>
     <% end %>
   </div>
 
-  <% if @product.secondary_images.any? %>
+  <% if @product.external_image_urls.present? %>
     <div class="secondary-images" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-      <% @product.secondary_images.each do |image| %>
-        <% begin %>
-          <%= image_tag bunny_storage_url(image.variant(resize_to_limit: [80, 80])), class: "thumb popup-trigger", data: { full: bunny_storage_url(image) }, style: "border: 1px solid #ccc; border-radius: 4px;" %>
-        <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-          <%= image_tag "placeholder.png", class: "thumb popup-trigger", style: "border: 1px solid #ccc; border-radius: 4px;" %>
-          <% Rails.logger.error "Failed to load secondary image variant for product #{@product.id}: #{e.message}" %>
-        <% end %>
+      <% @product.external_image_urls.each do |url| %>
+        <%= image_tag url, class: "thumb popup-trigger", data: { full: url }, style: "width: 80px; border: 1px solid #ccc; border-radius: 4px;" %>
       <% end %>
     </div>
   <% else %>
     <p>No secondary images available.</p>
   <% end %>
 </div>
+
   
 
   <!-- Lightbox popup -->

@@ -3,18 +3,23 @@
 <div class="product-grid">
 <% @products.each do |product| %>
   <div class="product-card">
-    <% if product.main_image.attached? && product.main_image.blob.persisted? %>
-      <% begin %>
-        <%= link_to carti_path(product.id), class: "image-link" do %>
-          <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [300, 300])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) }, loading: "lazy" %>
-        <% end %>
-      <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
-        <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
-        <% Rails.logger.error "Failed to load main image variant for product #{product.id}: #{e.message}" %>
-      <% end %>
-    <% else %>
-      <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+   <% if product.main_image.attached? && product.main_image.blob.persisted? %>
+  <% begin %>
+    <%= link_to carti_path(product.id), class: "image-link" do %>
+      <%= image_tag bunny_storage_url(product.main_image.variant(resize_to_limit: [300, 300])), alt: product.name, class: "popup-trigger", data: { full: bunny_storage_url(product.main_image) }, loading: "lazy" %>
     <% end %>
+  <% rescue ActiveStorage::FileNotFoundError, ActiveStorage::InvariableError => e %>
+    <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+    <% Rails.logger.error "Failed to load main image variant for product #{product.id}: #{e.message}" %>
+  <% end %>
+<% elsif product.respond_to?(:external_image_url) && product.external_image_url.present? %>
+  <%= link_to carti_path(product.id), class: "image-link" do %>
+    <%= image_tag product.external_image_url, alt: product.name, class: "popup-trigger", loading: "lazy", style: "max-height: 300px;" %>
+  <% end %>
+<% else %>
+  <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+<% end %>
+
     <p><%= product.name %></p>
     <p>Price: <%= product.price %></p>
     <p><%= product.track_inventory ? "Inventory tracked" : "Inventory not tracked" %></p>
