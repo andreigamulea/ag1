@@ -1,13 +1,3 @@
-
-<style>
-  .fade-out {
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
-  }
-</style>
-
-
-
 <%= form_with(model: product, local: true, html: { multipart: true }) do |form| %>
 
   <% if product.errors.any? %>
@@ -580,18 +570,16 @@ document.addEventListener("turbo:load", () => {
     if (e.target.classList.contains("remove-bunny-file")) {
     const url = e.target.dataset.url;
 
-    // Elimină input hidden
+    // Elimină hidden input cu acel URL
     const hiddenInputs = document.querySelectorAll("input[name='product[external_file_urls][]']");
     hiddenInputs.forEach(input => {
       if (input.value === url) input.remove();
     });
 
-    // Fade-out și remove vizual
+    // Elimină vizual cardul
     const card = e.target.closest(".position-relative");
-    if (card) {
-      card.classList.add("fade-out");
-      setTimeout(() => card.remove(), 300); // 300ms = durata tranziției
-    }
+    if (card) card.remove();
   }
+});
 });
 </script>
