@@ -2,14 +2,16 @@
 
 <div class="product-grid">
   <% @products.each do |product| %>
-    <div class="product-card">
-      <% if product.external_image_url.present? %>
-        <%= link_to carti_path(product.id), class: "image-link" do %>
-          <%= image_tag product.external_image_url, alt: product.name, class: "product-image popup-trigger" %>
-        <% end %>
-      <% else %>
-        <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
-      <% end %>
+    <div class="image-wrapper">
+  <% if product.external_image_url.present? %>
+    <%= link_to carti_path(product.id), class: "image-link" do %>
+      <%= image_tag product.external_image_url, alt: product.name, class: "popup-trigger" %>
+    <% end %>
+  <% else %>
+    <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+  <% end %>
+</div>
+
 
       <p class="product-title"><%= product.name %></p>
 
@@ -60,14 +62,26 @@
   border-radius: 8px;
   background-color: #fff;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 420px; 
 }
 
-.product-image {
-  width: 100%;
-  max-height: 280px;
-  object-fit: contain;
+.image-wrapper {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 10px;
 }
+
+.product-image, .popup-trigger {
+  max-height: 200px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 
 .product-title {
   font-size: 1.1em;
@@ -109,6 +123,7 @@
   justify-content: center;
   gap: 5px;
   align-items: center;
+  margin-top: 10px;
 }
 
 .qty-input {
@@ -133,4 +148,41 @@
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+
+@media (max-width: 768px) {
+  .product-grid {
+    gap: 15px;
+    padding: 10px;
+  }
+
+  .product-card {
+    max-width: 100%;
+    padding: 8px;
+  }
+
+  .product-title {
+    font-size: 1em;
+  }
+
+  .product-author,
+  .product-price,
+  .stock {
+    font-size: 0.85em;
+  }
+
+  .product-image {
+    max-height: 200px;
+  }
+
+  .add-to-cart-form {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .qty-input {
+    width: 60px;
+  }
+}
 </style>
+
