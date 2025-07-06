@@ -118,10 +118,18 @@ end
 def purge_external_file
   @product = Product.find(params[:id])
   url = CGI.unescape(params[:url])
-  @product.external_file_urls -= [url]
-  @product.save
-  redirect_to product_path(@product), notice: "Fișierul a fost șters."
+
+  if @product.external_file_urls.present?
+    @product.external_file_urls.delete(url)
+    @product.save
+    flash[:notice] = "Fișierul a fost șters."
+  else
+    flash[:alert] = "Fișierul nu a fost găsit."
+  end
+
+  redirect_to @product
 end
+
 
 
 
