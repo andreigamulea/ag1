@@ -181,9 +181,7 @@
   <% @product.external_file_urls&.each do |url| %>
     <input type="hidden" name="product[external_file_urls][]" value="<%= url %>">
   <% end %>
-  <% @product.external_file_urls&.each do |url| %>
-  <input type="hidden" name="product[external_file_urls][]" value="<%= url %>">
-<% end %>
+  
 </div>
 
 
