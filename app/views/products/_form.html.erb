@@ -1,5 +1,4 @@
-<%= form_with(model: product, local: true, data: { turbo: false }, html: { multipart: true }) do |form| %>
-  
+<%= form_with(model: product, local: true, html: { multipart: true }) do |form| %>
 
   <% if product.errors.any? %>
     <div class="alert alert-danger">
@@ -159,34 +158,28 @@
 </div>
 
 
-<div class="mb-3">
-  <%= form.label :attached_files, "Fișiere atașate" %>
-  <%= form.file_field :attached_files, multiple: true, direct_upload: true, class: "form-control", id: "attached-files" %>
-
-  <div id="attached-files-badges-wrapper" class="mt-2" style="min-height: 48px; display: flex; flex-wrap: wrap;"></div>
-</div>
-
-
-<% if product.persisted? && product.attached_files.attached? %>
-  <div class="mb-3" style="overflow: visible; position: relative;">
-    <strong>Fișiere existente:</strong>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <% product.attached_files.each do |file| %>
-        <div style="display: flex; align-items: center; gap: 10px; position: relative;">
-          <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
-          <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
-                      method: :delete,
-                      data: { confirm: "Sigur vrei să ștergi acest fișier?" },
-                      class: "btn btn-sm btn-danger mt-1",
-                      style: "background-color: #dc3545; color: white; padding: 6px 12px; display: inline-block; border: 1px solid #dc3545; text-decoration: none; font-size: 14px; line-height: 1.5; border-radius: 4px; cursor: pointer; visibility: visible; opacity: 1; position: relative; z-index: 1;" %>
-        </div>
-      <% end %>
-    </div>
+<!-- Fișiere atașate (ActiveStorage) -->
+  <div class="mb-3">
+    <%= form.label :attached_files, "Fișiere atașate" %>
+    <%= form.file_field :attached_files, multiple: true, direct_upload: true, class: "form-control", id: "attached-files" %>
   </div>
 
-  
-
-<% end %>
+  <% if product.persisted? && product.attached_files.attached? %>
+    <div class="mb-3">
+      <strong>Fișiere existente:</strong>
+      <ul>
+        <% product.attached_files.each do |file| %>
+          <li>
+            <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
+            <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
+                        method: :delete,
+                        data: { confirm: "Sigur vrei să ștergi acest fișier?" },
+                        class: "btn btn-sm btn-danger" %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 
 
 
@@ -233,35 +226,38 @@
 
  
 
-  <!-- Imagine principală externă (direct upload în Bunny) -->
-<div class="mb-3">
-  <label for="bunny-direct-upload">Imagine principală (direct Bunny)</label>
-  <input type="file" id="bunny-direct-upload" class="form-control" accept="image/*" />
-  <input type="hidden" name="product[external_image_url]" id="external_image-url" />
-  <% if product.external_image_url.present? %>
-    <div class="mt-2">
-      <p>Imagine externă curentă:</p>
-      <%= image_tag product.external_image_url, class: "img-thumbnail", width: 200 %>
-    </div>
-  <% end %>
-</div>
+  <!-- Imagine principală (upload direct BunnyCDN) -->
+  <div class="mb-3">
+    <label for="bunny-direct-upload">Imagine principală (direct Bunny)</label>
+    <input type="file" id="bunny-direct-upload" class="form-control" accept="image/*" />
+    <input type="hidden" name="product[external_image_url]" id="external_image-url" />
+    <% if product.external_image_url.present? %>
+      <div class="mt-2">
+        <%= image_tag product.external_image_url, class: "img-thumbnail", width: 200 %>
+      </div>
+    <% end %>
+  </div>
 
-<!-- Imagini secundare externe (direct upload în Bunny) -->
-<div class="mb-3">
-  <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
-  <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
-  <div id="bunny-secondary-preview" class="mt-2" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
-  <% Array(product.external_image_urls).each do |url| %>
-    <div style="margin-top: 8px;">
-      <%= image_tag url, width: 120, class: "img-thumbnail" %>
-    </div>
-  <% end %>
-</div>
+  <!-- Imagini secundare -->
+  <div class="mb-3">
+    <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
+    <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
+    <div id="bunny-secondary-preview" class="mt-2 d-flex flex-wrap gap-2"></div>
+    <% Array(product.external_image_urls).each do |url| %>
+      <div>
+        <%= image_tag url, width: 120, class: "img-thumbnail" %>
+      </div>
+    <% end %>
+  </div>
 
-<div>
-  <%= form.submit %>
-</div>
+  <!-- Atribute personalizate -->
+  <div class="mb-3">
+    <%= form.label :custom_attributes, "Atribute personalizate (JSON)" %>
+    <%= form.text_area :custom_attributes, class: "form-control", rows: 5 %>
+  </div>
 
+  <%= form.submit "Salvează produsul", class: "btn btn-primary" %>
+<% end %>
 
 <script>
 document.addEventListener("turbo:load", () => {
@@ -352,7 +348,7 @@ document.addEventListener("turbo:load", () => {
 document.addEventListener("turbo:load", () => {
   const form = document.querySelector("form");
 
-  // === Imagine principală ===
+  // === Upload imagine principală ===
   const mainInput = document.getElementById("bunny-direct-upload");
   if (mainInput) {
     mainInput.addEventListener("change", async (e) => {
@@ -376,13 +372,13 @@ document.addEventListener("turbo:load", () => {
           alert("Eroare la upload imagine principală.");
         }
       } catch (err) {
-        alert("Eroare la comunicare imagine principală.");
+        alert("Eroare la comunicare cu serverul.");
         console.error(err);
       }
     });
   }
 
-  // === Imagini secundare ===
+  // === Upload imagini secundare ===
   const secondaryInput = document.getElementById("bunny-secondary-upload");
   const preview = document.getElementById("bunny-secondary-preview");
 
@@ -425,6 +421,7 @@ document.addEventListener("turbo:load", () => {
   }
 });
 </script>
+
 
 
 
