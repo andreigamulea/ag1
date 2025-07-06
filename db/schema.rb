@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_06_020543) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_06_175800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -105,6 +105,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_06_020543) do
     t.integer "views_count", default: 0
     t.string "external_image_url"
     t.text "external_image_urls", default: [], array: true
+    t.text "external_file_urls", default: [], array: true
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 

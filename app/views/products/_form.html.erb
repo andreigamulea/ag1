@@ -158,28 +158,18 @@
 </div>
 
 
-<!-- Fișiere atașate (ActiveStorage) -->
-  <div class="mb-3">
-    <%= form.label :attached_files, "Fișiere atașate" %>
-    <%= form.file_field :attached_files, multiple: true, direct_upload: true, class: "form-control", id: "attached-files" %>
-  </div>
+<div class="mb-3">
+  <label for="bunny-files-upload">Fișiere atașate (direct Bunny)</label>
+  <input type="file" id="bunny-files-upload" class="form-control" multiple />
+  <div id="bunny-files-preview" class="mt-2 d-flex flex-wrap gap-2"></div>
+</div>
 
-  <% if product.persisted? && product.attached_files.attached? %>
-    <div class="mb-3">
-      <strong>Fișiere existente:</strong>
-      <ul>
-        <% product.attached_files.each do |file| %>
-          <li>
-            <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
-            <%= link_to "✕", purge_attached_file_product_path(product, file_id: file.id),
-                        method: :delete,
-                        data: { confirm: "Sigur vrei să ștergi acest fișier?" },
-                        class: "btn btn-sm btn-danger" %>
-          </li>
-        <% end %>
-      </ul>
-    </div>
+<div id="external-file-hidden-inputs">
+  <% @product.external_file_urls&.each do |url| %>
+    <input type="hidden" name="product[external_file_urls][]" value="<%= url %>">
   <% end %>
+</div>
+
 
 
 
@@ -493,6 +483,75 @@ document.addEventListener("turbo:load", () => {
 </script>
 
 
+<script>
+document.addEventListener("turbo:load", () => {
+  const fileInput = document.getElementById("bunny-files-upload");
+  const filePreview = document.getElementById("bunny-files-preview");
+  const fileHiddenInputs = document.getElementById("external-file-hidden-inputs");
+
+  if (!fileInput) return;
+
+  fileInput.addEventListener("change", async () => {
+    for (const file of fileInput.files) {
+      // 1. obține presigned URL de la Rails
+      const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+      const { upload_url, headers } = await res.json();
+
+      // 2. upload către Bunny
+      const upload = await fetch(upload_url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": headers["Content-Type"],
+          "AccessKey": headers["AccessKey"]
+        },
+        body: file
+      });
+
+      if (upload.ok) {
+        const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
+        const fileUrl = `https://ayus-cdn.b-cdn.net/${path}`;
+
+        // 3. previzualizare fișier
+        const container = document.createElement("div");
+        container.className = "bunny-file-preview d-flex align-items-center justify-content-between border p-2 rounded";
+        container.dataset.url = fileUrl;
+
+        container.innerHTML = `
+          <a href="${fileUrl}" target="_blank">${file.name}</a>
+          <button type="button" class="btn btn-sm btn-danger ms-2 remove-bunny-file">×</button>
+        `;
+
+        filePreview.appendChild(container);
+
+        // 4. input hidden
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "product[external_file_urls][]";
+        input.value = fileUrl;
+        fileHiddenInputs.appendChild(input);
+      }
+    }
+
+    fileInput.value = ""; // reset input
+  });
+
+  // Ștergere fișier
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("remove-bunny-file")) {
+      const container = e.target.closest(".bunny-file-preview");
+      const url = container.dataset.url;
+
+      // șterge input hidden asociat
+      const inputs = document.querySelectorAll("input[name='product[external_file_urls][]']");
+      inputs.forEach(input => {
+        if (input.value === url) input.remove();
+      });
+
+      container.remove();
+    }
+  });
+});
+</script>
 
 
 
