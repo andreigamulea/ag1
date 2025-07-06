@@ -150,19 +150,22 @@
 </p>
 
 <p>
- <% if @product.external_file_urls.present? %>
+ <% if @product.attached_files.attached? %>
   <p><strong>Fișiere atașate:</strong></p>
   <ul>
-    <% @product.external_file_urls.each do |url| %>
+    <% @product.attached_files.each do |file| %>
       <li>
-        <a href="<%= url %>" target="_blank"><%= File.basename(URI.parse(url).path) %></a>
+        <%= link_to file.filename.to_s, url_for(file), target: "_blank" %>
+        <%= link_to "✕ Șterge", purge_attached_file_product_path(@product, file_id: file.id),
+                    method: :delete,
+                    data: { confirm: "Sigur vrei să ștergi fișierul?" },
+                    class: "btn btn-sm btn-danger ms-2" %>
       </li>
     <% end %>
   </ul>
 <% else %>
   <p><strong>Fișiere atașate:</strong> (niciun fișier)</p>
 <% end %>
-
 
 </p>
 
