@@ -403,7 +403,9 @@ document.addEventListener("turbo:load", () => {
       });
 
       if (upload.ok) {
-        const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
+        const path = new URL(upload_url).pathname.split('/').slice(2).join('/'); // elimină primul `/ayus`
+        const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
+
         mainHidden.value = cdnUrl;
         mainPreview.innerHTML = "";
         mainPreview.appendChild(createImageElement(cdnUrl, "main"));
@@ -427,7 +429,9 @@ document.addEventListener("turbo:load", () => {
         });
 
         if (upload.ok) {
-          const cdnUrl = upload_url.replace("storage.bunnycdn.com", "ayus-cdn.b-cdn.net");
+          const path = new URL(upload_url).pathname.split('/').slice(2).join('/'); // elimină primul `/ayus`
+          const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
+
           const index = document.querySelectorAll("input[name='product[external_image_urls][]']").length;
 
           const hidden = document.createElement("input");
