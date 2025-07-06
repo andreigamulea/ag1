@@ -11,8 +11,8 @@ class UploadsController < ApplicationController
     render json: {
       upload_url: upload_url,
       headers: {
-        "AccessKey" => api_key,
-        "Content-Type" => "application/octet-stream"
+        "AccessKey": api_key,
+        "Content-Type": "application/octet-stream"
       }
     }
   end
