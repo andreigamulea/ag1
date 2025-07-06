@@ -2,44 +2,44 @@
 
 <div class="product-grid">
   <% @products.each do |product| %>
+  <div class="product-card"> <!-- AICI trebuie învelit tot -->
     <div class="image-wrapper">
-  <% if product.external_image_url.present? %>
-    <%= link_to carti_path(product.id), class: "image-link" do %>
-      <%= image_tag product.external_image_url, alt: product.name, class: "popup-trigger" %>
-    <% end %>
-  <% else %>
-    <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
-  <% end %>
-</div>
-
-
-      <p class="product-title"><%= product.name %></p>
-
-      <% if product.custom_attributes["autor"].present? %>
-        <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
-      <% end %>
-
-      <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei") %></p>
-
-      <% if product.track_inventory %>
-        <% if product.stock > 5 %>
-          <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
-        <% elsif product.stock > 0 %>
-          <p class="stock yellow">Stoc: <%= product.stock %> Permite comenzi în așteptare</p>
-        <% else %>
-          <p class="stock red">Stoc: 0 Nu mai este pe stoc</p>
+      <% if product.external_image_url.present? %>
+        <%= link_to carti_path(product.id), class: "image-link" do %>
+          <%= image_tag product.external_image_url, alt: product.name, class: "popup-trigger" %>
         <% end %>
       <% else %>
-        <p class="stock">Stoc: Netransmis</p>
+        <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
       <% end %>
-
-      <div class="add-to-cart-form">
-        <%= number_field_tag "quantity", 1, class: "qty-input", min: 1 %>
-        <%= button_tag "Adaugă în coș", class: "add-to-cart-btn", disabled: product.stock <= 0 && product.track_inventory %>
-      </div>
     </div>
-  <% end %>
-</div>
+
+    <p class="product-title"><%= product.name %></p>
+
+    <% if product.custom_attributes["autor"].present? %>
+      <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
+    <% end %>
+
+    <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei") %></p>
+
+    <% if product.track_inventory %>
+      <% if product.stock > 5 %>
+        <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
+      <% elsif product.stock > 0 %>
+        <p class="stock yellow">Stoc: <%= product.stock %> Permite comenzi în așteptare</p>
+      <% else %>
+        <p class="stock red">Stoc: 0 Nu mai este pe stoc</p>
+      <% end %>
+    <% else %>
+      <p class="stock">Stoc: Netransmis</p>
+    <% end %>
+
+    <div class="add-to-cart-form">
+      <%= number_field_tag "quantity", 1, class: "qty-input", min: 1 %>
+      <%= button_tag "Adaugă în coș", class: "add-to-cart-btn", disabled: product.stock <= 0 && product.track_inventory %>
+    </div>
+  </div> <!-- final div.product-card -->
+<% end %>
+</div> 
 
 <%= paginate @products %>
 
@@ -53,19 +53,19 @@
 }
 
 .product-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
   width: 100%;
   max-width: 260px;
-  margin: 10px;
   padding: 10px;
-  overflow: hidden;
+  margin: 10px;
   border: 1px solid #b51e1e;
   border-radius: 8px;
   background-color: #fff;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 420px; 
+  box-sizing: border-box;
 }
 
 .image-wrapper {
@@ -119,11 +119,11 @@
 }
 
 .add-to-cart-form {
+  margin-top: auto; 
   display: flex;
   justify-content: center;
   gap: 5px;
   align-items: center;
-  margin-top: 10px;
 }
 
 .qty-input {
