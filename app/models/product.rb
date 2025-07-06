@@ -9,7 +9,7 @@ class Product < ApplicationRecord
 
 
 
-serialize :external_image_urls, Array
+#serialize :external_image_urls, Array
 
   
 
