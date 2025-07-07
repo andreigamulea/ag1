@@ -326,11 +326,21 @@ def product_params
     category_ids: []
   )
 
-  # elimină duplicatele (important!)
+  # ✅ Parsează JSON-ul dacă este string
+  if clean_params[:custom_attributes].is_a?(String)
+    begin
+      clean_params[:custom_attributes] = JSON.parse(clean_params[:custom_attributes])
+    rescue JSON::ParserError
+      clean_params[:custom_attributes] = {}
+    end
+  end
+
+  # elimină duplicatele
   clean_params[:external_image_urls] = clean_params[:external_image_urls].uniq.compact if clean_params[:external_image_urls]
 
   clean_params
 end
+
 
 
 

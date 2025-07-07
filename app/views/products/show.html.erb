@@ -67,13 +67,16 @@
 
 <p>
   <strong>Dimensiuni (H x W x D):</strong>
-  <%= [@product.height, @product.width, @product.depth].compact.join(" x ") %> cm
+  <%= [@product.height, @product.width, @product.depth]
+        .compact.map { |v| (v.to_f * 10).round }
+        .join(" x ") %> mm
 </p>
 
 <p>
   <strong>Greutate:</strong>
-  <%= @product.weight %> kg
+  <%= (@product.weight.to_f * 1000).round %> g
 </p>
+
 
 <p>
   <strong>Status:</strong>
