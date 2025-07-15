@@ -23,6 +23,20 @@
   <%= number_to_currency(@product.price) %>
 </p>
 
+<% breakdown = @product.price_breakdown %>
+
+<% breakdown = @product.price_breakdown %>
+
+<p><strong>Preț (cu TVA):</strong> <%= number_to_currency(breakdown[:brut], unit: "lei") %></p>
+
+<p><strong>TVA inclus: </strong> 
+  <%= number_to_currency(breakdown[:tva], unit: "lei ") %>
+  (<%= number_with_precision(@product.vat, precision: 2) %>%)
+</p>
+
+<p><strong>Preț fără TVA:</strong> <%= number_to_currency(breakdown[:net], unit: "lei ") %></p>
+
+
 <% if @product.discount_price.present? %>
   <p>
     <strong>Preț promoțional:</strong>

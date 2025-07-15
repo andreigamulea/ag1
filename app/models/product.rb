@@ -17,4 +17,19 @@ class Product < ApplicationRecord
     download: "download",
     external_link: "external_link"
   }
+
+  def price_breakdown
+    vat_rate = vat.to_f
+    return { brut: price.to_f, net: price.to_f, tva: 0.0 } if vat_rate <= 0
+
+    brut = price.to_f
+    net = brut / (1 + vat_rate / 100)
+    tva_value = brut - net
+
+    {
+      brut: brut.round(2),
+      net: net.round(2),
+      tva: tva_value.round(2)
+    }
+  end
 end

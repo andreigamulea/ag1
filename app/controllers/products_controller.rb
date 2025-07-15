@@ -320,7 +320,7 @@ def product_params
     :status, :featured, :requires_login,
     :product_type, :delivery_method, :visible_to_guests,
     :taxable, :coupon_applicable, :custom_attributes,
-    :external_image_url,
+    :external_image_url, :vat,
     external_file_urls: [],
     external_image_urls: [],
     category_ids: []

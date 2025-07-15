@@ -37,6 +37,12 @@
   </div>
 
   <div>
+  <%= form.label :vat, "TVA (%)" %>
+  <%= form.number_field :vat, min: 0, class: "form-control" %>
+</div>
+
+
+  <div>
     <%= form.label :cost_price %>
     <%= form.number_field :cost_price, step: 0.01 %>
   </div>
