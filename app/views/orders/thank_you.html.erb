@@ -1,0 +1,55 @@
+<h1>Mulțumim pentru comandă!</h1>
+
+<p><strong>Comanda #<%= @order.id %></strong> a fost plasată cu succes.</p>
+
+<h2>Detalii client:</h2>
+<ul>
+  <li><strong>Nume:</strong> <%= @order.name %></li>
+  <li><strong>Email:</strong> <%= @order.email %></li>
+  <li><strong>Adresă:</strong> <%= @order.address %>, <%= @order.city %>, <%= @order.country %></li>
+</ul>
+
+<h2>Produse comandate:</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Produs</th>
+      <th>Cantitate</th>
+      <th>Preț unitar</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @order.order_items.each do |item| %>
+      <tr>
+        <td><%= item.product_name %></td>
+        <td><%= item.quantity %></td>
+        <td><%= number_to_currency(item.unit_price, unit: "lei") %></td>
+        <td><%= number_to_currency(item.total_price, unit: "lei") %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% subtotal = @order.order_items.sum(&:total_price) %>
+<% discount = 0 %>
+
+<h3>Rezumat plată:</h3>
+<ul>
+  <li><strong>Subtotal:</strong> <%= number_to_currency(subtotal, unit: "lei") %></li>
+
+  <% if @order.coupon.present? %>
+    <% if @order.coupon.discount_type == "percentage" %>
+      <% discount = (subtotal * @order.coupon.discount_value / 100.0).round(2) %>
+      <li><strong>Reducere cupon (<%= @order.coupon.code %> – <%= @order.coupon.discount_value %>%) :</strong> -<%= number_to_currency(discount, unit: "lei") %></li>
+    <% elsif @order.coupon.discount_type == "fixed" %>
+      <% discount = @order.coupon.discount_value.to_f %>
+      <li><strong>Reducere cupon (<%= @order.coupon.code %>) :</strong> -<%= number_to_currency(discount, unit: "lei") %></li>
+    <% end %>
+  <% end %>
+
+  <li><strong>TVA estimat:</strong> <%= number_to_currency(@order.vat_amount, unit: "lei") %></li>
+  <li><strong>Total de plată:</strong> <%= number_to_currency(@order.total, unit: "lei") %></li>
+</ul>
+
+<p>Vei primi un email de confirmare cu detaliile comenzii în curând.</p>

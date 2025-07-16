@@ -1,0 +1,89 @@
+<h1>Rezumat comandă</h1>
+
+<table>
+  <tr>
+    <th>Produs</th>
+    <th>Cantitate</th>
+    <th>Preț unitar</th>
+    <th>Total</th>
+  </tr>
+  <% @cart.each do |product_id, data| %>
+    <% product = Product.find_by(id: product_id) %>
+    <% quantity = data["quantity"].to_i %>
+    <% next unless product %>
+    <tr>
+      <td><%= product.name %></td>
+      <td><%= quantity %></td>
+      <td><%= number_to_currency(product.price, unit: "lei") %></td>
+      <td><%= number_to_currency(product.price * quantity, unit: "lei") %></td>
+    </tr>
+  <% end %>
+</table>
+
+<hr>
+
+<p><strong>Subtotal:</strong> <%= number_to_currency(@subtotal, unit: "lei") %></p>
+
+<% if @discount.positive? %>
+  <p style="color: green;">
+    ✅ Discount aplicat: -<strong><%= number_to_currency(@discount, unit: "lei") %></strong>
+  </p>
+<% end %>
+
+<% if @shipping_cost > 0 %>
+  <p><strong>Transport:</strong> <%= number_to_currency(@shipping_cost, unit: "lei") %></p>
+<% else %>
+  <p><strong>Transport:</strong> Gratuit (comandă peste 200 lei)</p>
+<% end %>
+
+<p><strong>Total estimat:</strong> <%= number_to_currency(@total, unit: "lei") %></p>
+
+<hr>
+
+<h2>Finalizează comanda</h2>
+
+<%= form_with model: @order, url: orders_path, method: :post, local: true do |f| %>
+  <div>
+    <%= f.label :name, "Nume complet" %><br>
+    <%= f.text_field :name, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :email, "Email" %><br>
+    <%= f.email_field :email, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :phone, "Telefon" %><br>
+    <%= f.telephone_field :phone, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :address, "Adresă" %><br>
+    <%= f.text_field :address, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :city, "Oraș" %><br>
+    <%= f.text_field :city, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :postal_code, "Cod poștal" %><br>
+    <%= f.text_field :postal_code, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :country, "Țară" %><br>
+    <%= f.text_field :country, required: true, value: "România" %>
+  </div>
+
+  <div>
+    <%= f.label :notes, "Note comanda (opțional)" %><br>
+    <%= f.text_area :notes, rows: 3 %>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <%= f.submit "Plasează comanda", class: "btn btn-primary" %>
+  </div>
+<% end %>

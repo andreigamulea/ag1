@@ -1,0 +1,28 @@
+<h3>Ai un cupon de reducere?</h3>
+<% if session[:coupon_code].present? %>
+  <p><strong>Cupon activ:</strong> <%= session[:coupon_code] %></p>
+<% end %>
+<% if session[:coupon_code].present? %>
+  <p>
+    <strong>Cupon activ:</strong> <%= session[:coupon_code] %>
+    <%= button_to "Șterge cupon", remove_coupon_path, method: :post, data: { confirm: "Ești sigur?" } %>
+  </p>
+<% end %>
+
+
+
+<%= form_with url: apply_coupon_path, method: :post, local: true do |f| %>
+  <div>
+    <%= f.label :coupon_code, "Cod cupon" %>
+    <%= f.text_field :coupon_code, value: session[:coupon_code], placeholder: "Ex: reducere10" %>
+    <%= f.submit "Aplică cuponul" %>
+  </div>
+<% end %>
+
+<% if flash[:notice] %>
+  <p style="color: green;"><%= flash[:notice] %></p>
+<% elsif flash[:alert] %>
+  <p style="color: red;"><%= flash[:alert] %></p>
+<% end %>
+
+

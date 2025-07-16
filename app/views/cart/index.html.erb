@@ -1,0 +1,55 @@
+<h1>Coșul tău</h1>
+
+<h3>Aplică un cupon de reducere</h3>
+
+<%= form_with url: apply_coupon_path, method: :post, local: true do |f| %>
+  <%= f.label :code, "Cod cupon:" %>
+  <%= f.text_field :code, required: true %>
+  <%= f.submit "Aplică cuponul", class: "btn btn-success" %>
+<% end %>
+
+<% if session[:applied_coupon] && @discount.positive? %>
+  <p style="color: green;">
+    ✅ Cupon aplicat: <strong><%= session[:applied_coupon]["code"] %></strong> –
+    reducere 
+    <% if session[:applied_coupon]["discount_type"] == "percentage" %>
+      <%= session[:applied_coupon]["discount_value"] %>%
+    <% else %>
+      <%= number_to_currency(@discount, unit: "lei") %>
+    <% end %>
+    (<%= number_to_currency(@discount, unit: "lei") %>)
+  </p>
+  <%= button_to "Șterge cupon", remove_coupon_path, method: :post, class: "btn btn-danger", form: { style: "display:inline;" } %>
+<% end %>
+
+<p><strong>Subtotal:</strong> <%= number_to_currency(@subtotal, unit: "lei") %></p>
+
+<% if @discount.positive? %>
+  <p><strong>Reducere:</strong> -<%= number_to_currency(@discount, unit: "lei") %></p>
+<% end %>
+
+<% if @shipping_cost.positive? %>
+  <p><strong>Transport:</strong> <%= number_to_currency(@shipping_cost, unit: "lei") %></p>
+<% elsif @has_physical %>
+  <p><strong>Transport:</strong> <span style="color: green;">Gratuit (comandă peste 200 lei)</span></p>
+<% end %>
+
+<p><strong>Total de plată:</strong> <%= number_to_currency(@total, unit: "lei") %></p>
+
+<% if @cart_items.any? %>
+  <ul>
+    <% @cart_items.each do |item| %>
+      <li>
+        <%= item[:product].name %> – <%= item[:quantity] %> buc x 
+        <%= number_to_currency(item[:product].price, unit: "lei") %> =
+        <strong><%= number_to_currency(item[:subtotal], unit: "lei") %></strong>
+        <%= button_to "Șterge", remove_cart_index_path(product_id: item[:product].id), method: :post %>
+      </li>
+    <% end %>
+  </ul>
+
+  <%= button_to "Golește coșul", clear_cart_index_path, method: :post %>
+<% else %>
+  <p>Coșul este gol.</p>
+<% end %>
+<%= link_to "Finalizează comanda", new_order_path, class: "btn btn-primary" if @cart_items.any? %>

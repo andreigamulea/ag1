@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_15_175814) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,17 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_175814) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "cart_snapshots", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "email"
+    t.string "session_id"
+    t.jsonb "cart_data"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_cart_snapshots_on_user_id"
+  end
+
   create_table "categories", force: :cascade do |t|
     t.string "name"
     t.string "slug"
@@ -56,6 +67,23 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_175814) do
     t.index ["product_id", "category_id"], name: "index_categories_products_on_product_id_and_category_id"
   end
 
+  create_table "coupons", force: :cascade do |t|
+    t.string "code"
+    t.string "discount_type"
+    t.decimal "discount_value"
+    t.boolean "active"
+    t.datetime "starts_at"
+    t.datetime "expires_at"
+    t.integer "usage_limit"
+    t.integer "usage_count"
+    t.decimal "minimum_cart_value"
+    t.integer "minimum_quantity"
+    t.integer "product_id"
+    t.boolean "free_shipping"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "memory_logs", force: :cascade do |t|
     t.float "used_mb"
     t.float "available_mb"
@@ -66,6 +94,40 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_175814) do
     t.float "freed_memory_mb"
     t.float "reclaimed_mb"
     t.string "notes"
+  end
+
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "quantity"
+    t.decimal "price"
+    t.decimal "vat"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "product_name"
+    t.decimal "unit_price"
+    t.decimal "total_price"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "email"
+    t.string "name"
+    t.string "phone"
+    t.text "address"
+    t.string "city"
+    t.string "postal_code"
+    t.string "country"
+    t.decimal "total"
+    t.string "status"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "vat_amount"
+    t.datetime "placed_at"
+    t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -125,4 +187,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_175814) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "cart_snapshots", "users"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "products"
+  add_foreign_key "orders", "users"
 end

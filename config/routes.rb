@@ -1,5 +1,24 @@
 Rails.application.routes.draw do
 
+
+ post "/apply-coupon", to: "cart#apply_coupon", as: :apply_coupon
+ post "/remove-coupon", to: "cart#remove_coupon", as: :remove_coupon
+resources :coupons
+
+  resources :cart, only: [:index] do
+    post :add, on: :collection
+    post :update, on: :collection
+    post :remove, on: :collection
+    post :clear, on: :collection
+  end
+
+  resources :orders, only: [:new, :create] do
+    get :thank_you, on: :collection
+  end
+
+
+
+
   get "/uploads/presign", to: "uploads#presign"
   post "/uploads/presign", to: "uploads#presign" 
   post "/uploads/upload_bunny", to: "uploads#upload_bunny"

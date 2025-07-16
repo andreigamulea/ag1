@@ -34,9 +34,13 @@
     <% end %>
 
     <div class="add-to-cart-form">
-      <%= number_field_tag "quantity", 1, class: "qty-input", min: 1 %>
-      <%= button_tag "Adaugă în coș", class: "add-to-cart-btn", disabled: product.stock <= 0 && product.track_inventory %>
-    </div>
+  <%= form_with url: add_cart_index_path, method: :post, local: true do %>
+    <%= hidden_field_tag :product_id, product.id %>
+    <%= number_field_tag :quantity, 1, class: "qty-input", min: 1 %>
+    <%= submit_tag "Adaugă în coș", class: "add-to-cart-btn", disabled: product.track_inventory && product.stock <= 0 %>
+  <% end %>
+</div>
+
   </div> <!-- final div.product-card -->
 <% end %>
 </div> 

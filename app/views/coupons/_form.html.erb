@@ -1,0 +1,60 @@
+<%= form_with model: coupon, local: true do |f| %>
+  <div>
+    <%= f.label :code, "Cod cupon" %>
+    <%= f.text_field :code %>
+  </div>
+
+  <div>
+    <%= f.label :discount_type, "Tip reducere" %>
+    <%= f.select :discount_type, [["Procentaj", "percentage"], ["Fix", "fixed"]] %>
+  </div>
+
+  <div>
+    <%= f.label :discount_value, "Valoare reducere" %>
+    <%= f.number_field :discount_value, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= f.label :active, "Activ" %>
+    <%= f.check_box :active %>
+  </div>
+
+  <div>
+    <%= f.label :starts_at, "Data început" %>
+    <%= f.datetime_select :starts_at, include_blank: true %>
+  </div>
+
+  <div>
+    <%= f.label :expires_at, "Data sfârșit" %>
+    <%= f.datetime_select :expires_at, include_blank: true %>
+  </div>
+
+  <div>
+    <%= f.label :usage_limit, "Limită utilizări" %>
+    <%= f.number_field :usage_limit %>
+  </div>
+
+  <div>
+    <%= f.label :minimum_cart_value, "Valoare minimă coș" %>
+    <%= f.number_field :minimum_cart_value, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= f.label :minimum_quantity, "Cantitate minimă totală" %>
+    <%= f.number_field :minimum_quantity %>
+  </div>
+
+  <div>
+    <%= f.label :product_id, "Valabil doar pentru produs (ID opțional)" %>
+    <%= f.number_field :product_id %>
+  </div>
+
+  <div>
+    <%= f.label :free_shipping, "Transport gratuit?" %>
+    <%= f.check_box :free_shipping %>
+  </div>
+
+  <div>
+    <%= f.submit class: "btn btn-success" %>
+  </div>
+<% end %>

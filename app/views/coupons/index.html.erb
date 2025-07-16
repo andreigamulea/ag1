@@ -1,0 +1,36 @@
+<h1>Lista cuponelor</h1>
+
+<%= link_to "Adaugă cupon nou", new_coupon_path, class: "btn btn-primary" %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Cod</th>
+      <th>Tip reducere</th>
+      <th>Valoare</th>
+      <th>Activ</th>
+      <th>Valabilitate</th>
+      <th>Utilizări</th>
+      <th>Acțiuni</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @coupons.each do |coupon| %>
+      <tr>
+        <td><%= coupon.code %></td>
+        <td><%= coupon.discount_type %></td>
+        <td><%= coupon.discount_value %></td>
+        <td><%= coupon.active ? "✔" : "✖" %></td>
+        <td>
+          <%= coupon.starts_at&.strftime("%d.%m.%Y") %> -
+          <%= coupon.expires_at&.strftime("%d.%m.%Y") %>
+        </td>
+        <td><%= coupon.usage_count %>/<%= coupon.usage_limit || "∞" %></td>
+        <td>
+          <%= link_to "Editare", edit_coupon_path(coupon), class: "btn btn-sm btn-warning" %>
+          <%= link_to "Șterge", coupon_path(coupon), method: :delete, data: { confirm: "Ești sigur?" }, class: "btn btn-sm btn-danger" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

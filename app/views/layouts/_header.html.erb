@@ -85,6 +85,52 @@
         <%= link_to "Contact", contact_path, class: "admin-link" %>
         <%= link_to "Cărți", carti_index_path, class: "admin-link" %>
 
+<%= link_to cart_index_path, style: "display: inline-block; background-color: #ffa500; color: white; padding: 10px 15px; border-radius: 6px; position: relative;" do %>
+  <% total_quantity = @cart.sum { |_id, data| data["quantity"].to_i } %>
+
+  <% products = Product.where(id: @cart.keys) %>
+  <% subtotal = products.sum { |p| p.price * @cart[p.id.to_s]["quantity"].to_i } %>
+
+  <% discount = 0 %>
+  <% if session[:applied_coupon] %>
+    <% cupon = Coupon.find_by(code: session[:applied_coupon]["code"]) %>
+    <% if cupon && cupon.active &&
+          (cupon.starts_at.nil? || cupon.starts_at <= Time.current) &&
+          (cupon.expires_at.nil? || cupon.expires_at >= Time.current) %>
+
+      <% valid = true %>
+      <% valid &&= subtotal >= cupon.minimum_cart_value.to_f if cupon.minimum_cart_value.present? %>
+      <% valid &&= total_quantity >= cupon.minimum_quantity.to_i if cupon.minimum_quantity.present? %>
+      <% valid &&= @cart.keys.map(&:to_i).include?(cupon.product_id) if cupon.product_id.present? %>
+
+      <% if valid %>
+        <% if cupon.discount_type == "percentage" %>
+          <% discount = subtotal * cupon.discount_value.to_f / 100.0 %>
+        <% elsif cupon.discount_type == "fixed" %>
+          <% discount = cupon.discount_value.to_f %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <% discounted_subtotal = [subtotal - discount, 0].max %>
+
+  <% has_physical = products.any? { |p| p.categories.exists?(name: "fizic") } %>
+  <% shipping_cost = (has_physical && discounted_subtotal < 200) ? 20 : 0 %>
+
+  <% total_final = discounted_subtotal + shipping_cost %>
+
+  <span style="position: absolute; top: -5px; left: 5px; background-color: white; color: #ffa500; font-size: 12px; padding: 2px 5px; border-radius: 50%;">
+    <%= total_quantity %>
+  </span>
+  🛒 
+  <%= number_to_currency(total_final, unit: "lei") %>
+<% end %>
+
+
+
+
+
         <% if current_user&.admin? %>
           <%= link_to "Admin", admin_path, class: "admin-link" %>
         <% end %>
