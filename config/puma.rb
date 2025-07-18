@@ -12,7 +12,7 @@ worker_timeout 30 if rails_env == "production"
 
 if rails_env == "production"
   preload_app!
-  workers 1
+  workers 2
 end
 
 plugin :tmp_restart

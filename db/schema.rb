@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_17_180906) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -84,6 +84,27 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "judets", force: :cascade do |t|
+    t.string "oasp"
+    t.string "denjud"
+    t.string "cod"
+    t.integer "idjudet"
+    t.string "cod_j"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "localitatis", force: :cascade do |t|
+    t.string "cod"
+    t.integer "judetid"
+    t.string "denumire"
+    t.string "denj"
+    t.string "abr"
+    t.string "cod_vechi"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "memory_logs", force: :cascade do |t|
     t.float "used_mb"
     t.float "available_mb"
@@ -98,7 +119,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
 
   create_table "order_items", force: :cascade do |t|
     t.bigint "order_id", null: false
-    t.bigint "product_id", null: false
+    t.bigint "product_id"
     t.integer "quantity"
     t.decimal "price"
     t.decimal "vat"
@@ -112,7 +133,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
   end
 
   create_table "orders", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.string "email"
     t.string "name"
     t.string "phone"
@@ -127,6 +148,28 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
     t.datetime "updated_at", null: false
     t.decimal "vat_amount"
     t.datetime "placed_at"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "company_name"
+    t.string "cui"
+    t.string "cnp"
+    t.string "county"
+    t.string "street"
+    t.string "street_number"
+    t.text "block_details"
+    t.string "shipping_first_name"
+    t.string "shipping_last_name"
+    t.string "shipping_company_name"
+    t.string "shipping_country"
+    t.string "shipping_county"
+    t.string "shipping_city"
+    t.string "shipping_street"
+    t.string "shipping_street_number"
+    t.text "shipping_block_details"
+    t.string "shipping_postal_code"
+    t.string "shipping_phone"
+    t.bigint "coupon_id"
+    t.index ["coupon_id"], name: "index_orders_on_coupon_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
@@ -172,6 +215,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
+  create_table "taris", force: :cascade do |t|
+    t.string "nume"
+    t.string "abr"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -190,5 +240,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_231342) do
   add_foreign_key "cart_snapshots", "users"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
+  add_foreign_key "orders", "coupons"
   add_foreign_key "orders", "users"
 end

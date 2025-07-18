@@ -1,0 +1,3 @@
+class Tari < ApplicationRecord
+    
+end

@@ -1,15 +1,10 @@
 <script>
-  console.log("salut din header");
-</script>
-
-<script>
   function setupMobileMenu() {
     const hamburger = document.getElementById("hamburger");
     const navWrapper = document.getElementById("nav-wrapper");
     const closeBtn = document.getElementById("close-menu");
     if (!hamburger || !navWrapper || !closeBtn) return;
 
-    // Evită evenimente duplicate: resetăm întâi
     hamburger.onclick = () => {
       navWrapper.classList.add("open");
       document.body.classList.add("menu-open");
@@ -29,37 +24,12 @@
     });
   }
 
-  // Compatibil cu Turbo + Back button
   document.addEventListener("turbo:load", setupMobileMenu);
-</script>
-
-
-
-
-
-
-
-
-<script>
-  document.addEventListener("turbo:load", function() {
-    console.log("✅ DOMContentLoaded a fost declanșat");
-
-    const logoLink = document.querySelector(".navbar-brand");
-    console.log("🔍 logoLink =", logoLink);
-
-    if (logoLink) {
-      logoLink.addEventListener("mouseenter", function() {
-        console.log("✅ Hover pe logo");
-      });
-    } else {
-      console.log("❌ Nu am găsit .navbar-brand");
-    }
-  });
 </script>
 
 <div class="header_container">
   <header>
-    <!-- Sigla (vizibilă mereu) -->
+    <!-- Sigla principală -->
     <a href="/" class="navbar-brand">
       <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
     </a>
@@ -67,9 +37,9 @@
     <!-- Buton hamburger pentru mobil -->
     <button class="hamburger" id="hamburger" aria-label="Deschide meniul">&#9776;</button>
 
-    <!-- Meniu unificat (desktop + mobil) -->
+    <!-- Meniu principal -->
     <div class="nav-wrapper" id="nav-wrapper">
-      <!-- Sigla duplicată doar pe mobil, ascunsă pe desktop -->
+      <!-- Sigla duplicată pentru mobil -->
       <div class="mobile-logo">
         <a href="/">
           <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" />
@@ -81,55 +51,21 @@
         <%= link_to "Articole", "#" %>
         <%= link_to "Resurse Digitale", "#" %>
         <%= link_to "Despre", "#" %>
-        
         <%= link_to "Contact", contact_path, class: "admin-link" %>
         <%= link_to "Cărți", carti_index_path, class: "admin-link" %>
 
-<%= link_to cart_index_path, style: "display: inline-block; background-color: #ffa500; color: white; padding: 10px 15px; border-radius: 6px; position: relative;" do %>
-  <% total_quantity = @cart.sum { |_id, data| data["quantity"].to_i } %>
-
-  <% products = Product.where(id: @cart.keys) %>
-  <% subtotal = products.sum { |p| p.price * @cart[p.id.to_s]["quantity"].to_i } %>
-
-  <% discount = 0 %>
-  <% if session[:applied_coupon] %>
-    <% cupon = Coupon.find_by(code: session[:applied_coupon]["code"]) %>
-    <% if cupon && cupon.active &&
-          (cupon.starts_at.nil? || cupon.starts_at <= Time.current) &&
-          (cupon.expires_at.nil? || cupon.expires_at >= Time.current) %>
-
-      <% valid = true %>
-      <% valid &&= subtotal >= cupon.minimum_cart_value.to_f if cupon.minimum_cart_value.present? %>
-      <% valid &&= total_quantity >= cupon.minimum_quantity.to_i if cupon.minimum_quantity.present? %>
-      <% valid &&= @cart.keys.map(&:to_i).include?(cupon.product_id) if cupon.product_id.present? %>
-
-      <% if valid %>
-        <% if cupon.discount_type == "percentage" %>
-          <% discount = subtotal * cupon.discount_value.to_f / 100.0 %>
-        <% elsif cupon.discount_type == "fixed" %>
-          <% discount = cupon.discount_value.to_f %>
+        <!-- Coșul de cumpărături -->
+        <%= link_to cart_index_path, style: "display: inline-block; background-color: #ffa500; color: white; padding: 10px 15px; border-radius: 6px; position: relative;" do %>
+          <span style="position: absolute; top: -5px; left: 5px; background-color: white; color: #ffa500; font-size: 12px; padding: 2px 5px; border-radius: 50%;">
+            <%= @cart_items_count || 0 %>
+          </span>
+          🛒 
+          <%= number_to_currency(@cart_total || 0, unit: "lei") %>
         <% end %>
-      <% end %>
-    <% end %>
-  <% end %>
 
-  <% discounted_subtotal = [subtotal - discount, 0].max %>
-
-  <% has_physical = products.any? { |p| p.categories.exists?(name: "fizic") } %>
-  <% shipping_cost = (has_physical && discounted_subtotal < 200) ? 20 : 0 %>
-
-  <% total_final = discounted_subtotal + shipping_cost %>
-
-  <span style="position: absolute; top: -5px; left: 5px; background-color: white; color: #ffa500; font-size: 12px; padding: 2px 5px; border-radius: 50%;">
-    <%= total_quantity %>
-  </span>
-  🛒 
-  <%= number_to_currency(total_final, unit: "lei") %>
-<% end %>
-
-
-
-
+        <% if @shipping_cost == 0 && @cart_items_count.to_i > 0 %>
+          <p style="color: green; font-size: 12px; margin-top: 2px;">🎁 Transport gratuit!</p>
+        <% end %>
 
         <% if current_user&.admin? %>
           <%= link_to "Admin", admin_path, class: "admin-link" %>
@@ -145,14 +81,8 @@
         <% end %>
       </nav>
 
-      <!-- Buton X pentru mobil -->
+      <!-- Buton închidere meniu pe mobil -->
       <button class="close-menu" id="close-menu" aria-label="Închide meniul">&times;</button>
     </div>
   </header>
 </div>
-
-
-
-
-
-

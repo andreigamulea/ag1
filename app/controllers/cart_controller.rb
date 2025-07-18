@@ -1,6 +1,7 @@
 class CartController < ApplicationController
   
 def index
+  set_cart_totals
   @cart_items = Product.find(@cart.keys).map do |product|
     quantity = @cart[product.id.to_s]["quantity"]
     {
@@ -19,7 +20,7 @@ def index
   end
 
   # Cost transport: 20 lei dacă sunt produse fizice și total < 200
-  @shipping_cost = (@has_physical && @subtotal < 200) ? 20 : 0
+  #@shipping_cost = (@has_physical && @subtotal < 200) ? 30 : 0
 
   if session[:applied_coupon]
     coupon_data = session[:applied_coupon]

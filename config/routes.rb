@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  #get 'locations/judete', to: 'locations#judete'
+  #get 'locations/localitati', to: 'locations#localitati'
+
+get '/autocomplete_tara', to: 'orders#autocomplete_tara'
+get '/autocomplete_judet', to: 'orders#autocomplete_judet'
+get '/autocomplete_localitate', to: 'orders#autocomplete_localitate'
+
+
 
 
  post "/apply-coupon", to: "cart#apply_coupon", as: :apply_coupon

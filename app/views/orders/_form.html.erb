@@ -1,0 +1,186 @@
+<style>
+.dropdown-menu {
+  border: 1px solid #ccc;
+  background-color: white;
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+}
+.dropdown-item {
+  padding: 8px;
+  cursor: pointer;
+}
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+.col {
+  flex: 1;
+  min-width: 200px;
+}
+</style>
+
+<%= form_with model: @order, url: orders_path, method: :post, local: true do |f| %>
+  <% if @order.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><strong>Comanda nu a putut fi salvată:</strong></h4>
+      <ul>
+        <% @order.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <fieldset>
+    <legend><strong>Date de facturare</strong></legend>
+
+    <div class="row">
+      <div class="col"><%= f.label :first_name, "Prenume" %><br><%= f.text_field :first_name, required: true %></div>
+      <div class="col"><%= f.label :last_name, "Nume" %><br><%= f.text_field :last_name, required: true %></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><%= f.label :company_name, "Companie (opțional)" %><br><%= f.text_field :company_name %></div>
+      <div class="col"><%= f.label :cui, "CUI (opțional)" %><br><%= f.text_field :cui %></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><%= f.label :cnp, "CNP" %><br><%= f.text_field :cnp, placeholder: "0000000000000" %></div>
+      <div class="col"><%= f.label :phone, "Telefon" %><br><%= f.telephone_field :phone, required: true %></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><%= f.label :email, "Email" %><br><%= f.email_field :email, required: true %></div>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :country, "Țara", class: "form-label" %>
+      <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_tara">
+        <%= f.text_field :country, class: "form-control", id: "tara_input", data: { autocomplete_target: "input" }, placeholder: "Selectează țara...", autocomplete: "off" %>
+        <div id="tara_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :county, "Județ", class: "form-label" %>
+      <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_judet" data-autocomplete-filter-id-value="tara_input">
+        <%= f.text_field :county, class: "form-control", id: "judet_input", data: { autocomplete_target: "input" }, placeholder: "Selectează județul...", autocomplete: "off" %>
+        <div id="judet_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :city, "Localitate", class: "form-label" %>
+      <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_localitate" data-autocomplete-filter-id-value="judet_input">
+        <%= f.text_field :city, class: "form-control", id: "localitate_input", data: { autocomplete_target: "input" }, placeholder: "Selectează localitatea...", autocomplete: "off" %>
+        <div id="localitate_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col"><%= f.label :postal_code, "Cod poștal" %><br><%= f.text_field :postal_code, required: true %></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><%= f.label :street, "Stradă" %><br><%= f.text_field :street, required: true %></div>
+      <div class="col"><%= f.label :street_number, "Număr" %><br><%= f.text_field :street_number %></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><%= f.label :block_details, "Bloc/Etaj/Apt (opțional)" %><br><%= f.text_field :block_details %></div>
+    </div>
+  </fieldset>
+
+  <hr>
+
+  <div data-controller="toggle-shipping">
+  <div style="margin: 20px 0;">
+    <%= check_box_tag "use_different_shipping", "1", @order.use_different_shipping.to_s == "1", id: "toggle-shipping", data: { "toggle-shipping-target": "checkbox", action: "toggle-shipping#toggle" } %>
+    <%= label_tag "toggle-shipping", "Adresa de livrare este diferită" %>
+  </div>
+
+  <div id="shipping-fields" data-toggle-shipping-target="fields" style="display: none;">
+    <fieldset>
+      <legend><strong>Date de livrare</strong></legend>
+
+      <div class="row">
+        <div class="col"><%= f.label :shipping_first_name, "Prenume livrare" %><br><%= f.text_field :shipping_first_name %></div>
+        <div class="col"><%= f.label :shipping_last_name, "Nume livrare" %><br><%= f.text_field :shipping_last_name %></div>
+      </div>
+
+      <div class="row">
+        <div class="col"><%= f.label :shipping_company_name, "Companie livrare" %><br><%= f.text_field :shipping_company_name %></div>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :shipping_country, "Țara livrare", class: "form-label" %>
+        <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_tara">
+          <%= f.text_field :shipping_country, class: "form-control", id: "shipping_tara_input", data: { autocomplete_target: "input" }, placeholder: "Selectează țara...", autocomplete: "off" %>
+          <div id="shipping_tara_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :shipping_county, "Județ livrare", class: "form-label" %>
+        <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_judet" data-autocomplete-filter-id-value="shipping_tara_input">
+          <%= f.text_field :shipping_county, class: "form-control", id: "shipping_judet_input", data: { autocomplete_target: "input" }, placeholder: "Selectează județul...", autocomplete: "off" %>
+          <div id="shipping_judet_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :shipping_city, "Localitate livrare", class: "form-label" %>
+        <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_localitate" data-autocomplete-filter-id-value="shipping_judet_input">
+          <%= f.text_field :shipping_city, class: "form-control", id: "shipping_localitate_input", data: { autocomplete_target: "input" }, placeholder: "Selectează localitatea...", autocomplete: "off" %>
+          <div id="shipping_localitate_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col"><%= f.label :shipping_postal_code, "Cod poștal livrare" %><br><%= f.text_field :shipping_postal_code %></div>
+      </div>
+
+      <div class="row">
+        <div class="col"><%= f.label :shipping_street, "Stradă livrare" %><br><%= f.text_field :shipping_street %></div>
+        <div class="col"><%= f.label :shipping_street_number, "Număr livrare" %><br><%= f.text_field :shipping_street_number %></div>
+      </div>
+
+      <div class="row">
+        <div class="col"><%= f.label :shipping_block_details, "Bloc/Etaj/Apt livrare" %><br><%= f.text_field :shipping_block_details %></div>
+        <div class="col"><%= f.label :shipping_phone, "Telefon livrare" %><br><%= f.text_field :shipping_phone %></div>
+      </div>
+    </fieldset>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <%= f.label :notes, "Note comandă (opțional)" %><br>
+      <%= f.text_area :notes, rows: 3 %>
+    </div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <%= f.submit "Plasează comanda", class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener("turbo:load", () => {
+    const form = document.querySelector("form");
+    const submitBtn = form?.querySelector("input[type='submit']");
+    if (form && submitBtn) {
+      form.addEventListener("submit", () => {
+        submitBtn.disabled = true;
+        submitBtn.value = "Se trimite...";
+      });
+    }
+  });
+</script>

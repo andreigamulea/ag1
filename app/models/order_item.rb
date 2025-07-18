@@ -1,11 +1,14 @@
 class OrderItem < ApplicationRecord
   belongs_to :order
-  belongs_to :product
+  belongs_to :product, optional: true
+
   validate :stock_available
   
-  def total_price
-    price.to_f * quantity
-  end
+  # app/models/order_item.rb
+def total_price
+  (price || 0) * quantity
+end
+
 
   def net_price
     return price if vat.to_f <= 0

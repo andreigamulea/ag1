@@ -1,55 +1,91 @@
 <h1>Mulțumim pentru comandă!</h1>
-
-<p><strong>Comanda #<%= @order.id %></strong> a fost plasată cu succes.</p>
+<p>Comanda #<%= @order.id %> a fost plasată cu succes.</p>
 
 <h2>Detalii client:</h2>
 <ul>
-  <li><strong>Nume:</strong> <%= @order.name %></li>
+  <li><strong>Nume:</strong> <%= @order.last_name %> <%= @order.first_name %></li>
   <li><strong>Email:</strong> <%= @order.email %></li>
-  <li><strong>Adresă:</strong> <%= @order.address %>, <%= @order.city %>, <%= @order.country %></li>
+  <li><strong>Adresă:</strong> <%= [@order.street, "nr #{@order.street_number}", @order.block_details, @order.city, @order.county, @order.country].compact.join(', ') %> (Cod poștal: <%= @order.postal_code %>)</li>
+  <li><strong>Telefon:</strong> <%= @order.phone %></li>
 </ul>
 
+<% if @order.shipping_address_different? %>
+  <h2>Adresă de livrare:</h2>
+  <ul>
+    <li><strong>Nume:</strong> <%= @order.shipping_last_name %> <%= @order.shipping_first_name %></li>
+    <li><strong>Adresă:</strong> <%= [@order.shipping_street, "nr #{@order.shipping_street_number}", @order.shipping_block_details, @order.shipping_city, @order.shipping_county, @order.shipping_country].compact.join(', ') %> (Cod poștal: <%= @order.shipping_postal_code %>)</li>
+    <li><strong>Telefon:</strong> <%= @order.shipping_phone %></li>
+  </ul>
+<% end %>
+
 <h2>Produse comandate:</h2>
-<table>
+<table style="width: 100%; border-collapse: collapse;">
   <thead>
     <tr>
-      <th>Produs</th>
-      <th>Cantitate</th>
-      <th>Preț unitar</th>
-      <th>Total</th>
+      <th style="text-align: left; border-bottom: 1px solid #ccc;">Produs</th>
+      <th style="text-align: left; border-bottom: 1px solid #ccc;">Cantitate</th>
+      <th style="text-align: left; border-bottom: 1px solid #ccc;">Preț unitar</th>
+      <th style="text-align: left; border-bottom: 1px solid #ccc;">Total</th>
     </tr>
   </thead>
   <tbody>
+    <% transport_item = @order.order_items.find { |i| i.product_name == "Transport" } %>
+
     <% @order.order_items.each do |item| %>
+      <% next if item.product_name == "Transport" %>
       <tr>
         <td><%= item.product_name %></td>
         <td><%= item.quantity %></td>
-        <td><%= number_to_currency(item.unit_price, unit: "lei") %></td>
-        <td><%= number_to_currency(item.total_price, unit: "lei") %></td>
+        <td>
+          <% unit_price = item.total_price.to_f / item.quantity.to_i rescue 0 %>
+          <% if item.product_name == "Discount" %>
+            -<%= number_with_precision(unit_price.abs, precision: 2) %> lei
+          <% else %>
+            <%= number_with_precision(unit_price, precision: 2) %> lei
+          <% end %>
+        </td>
+        <td>
+          <% if item.product_name == "Discount" %>
+            -<%= number_with_precision(item.total_price.to_f.abs, precision: 2) %> lei
+          <% else %>
+            <%= number_with_precision(item.total_price.to_f, precision: 2) %> lei
+          <% end %>
+        </td>
       </tr>
     <% end %>
+
+    <%# Forțăm afișarea transportului, chiar și dacă e gratuit sau lipsit %>
+    <tr>
+      <td>Transport</td>
+      <td>1</td>
+      <% if transport_item && transport_item.total_price.to_f > 0 %>
+        <td><%= number_with_precision(transport_item.total_price.to_f, precision: 2) %> lei</td>
+        <td><%= number_with_precision(transport_item.total_price.to_f, precision: 2) %> lei</td>
+      <% else %>
+        <td style="color: green;">Gratuit</td>
+        <td>0.00 lei</td>
+      <% end %>
+    </tr>
   </tbody>
 </table>
 
-<% subtotal = @order.order_items.sum(&:total_price) %>
-<% discount = 0 %>
-
 <h3>Rezumat plată:</h3>
 <ul>
-  <li><strong>Subtotal:</strong> <%= number_to_currency(subtotal, unit: "lei") %></li>
+  <li>Subtotal: <%= number_with_precision(@subtotal || 0, precision: 2) %> lei</li>
 
-  <% if @order.coupon.present? %>
-    <% if @order.coupon.discount_type == "percentage" %>
-      <% discount = (subtotal * @order.coupon.discount_value / 100.0).round(2) %>
-      <li><strong>Reducere cupon (<%= @order.coupon.code %> – <%= @order.coupon.discount_value %>%) :</strong> -<%= number_to_currency(discount, unit: "lei") %></li>
-    <% elsif @order.coupon.discount_type == "fixed" %>
-      <% discount = @order.coupon.discount_value.to_f %>
-      <li><strong>Reducere cupon (<%= @order.coupon.code %>) :</strong> -<%= number_to_currency(discount, unit: "lei") %></li>
-    <% end %>
+  <% if @discount.to_f != 0 %>
+    <li>Reducere: -<%= number_with_precision(@discount.to_f.abs, precision: 2) %> lei</li>
   <% end %>
 
-  <li><strong>TVA estimat:</strong> <%= number_to_currency(@order.vat_amount, unit: "lei") %></li>
-  <li><strong>Total de plată:</strong> <%= number_to_currency(@order.total, unit: "lei") %></li>
+  <% if @transport.to_f != 0 %>
+    <li>Transport: <%= number_with_precision(@transport, precision: 2) %> lei</li>
+  <% else %>
+    <li>Transport: Gratuit</li>
+  <% end %>
+
+  <li><strong>Total de plată: <%= number_with_precision(@total || 0, precision: 2) %> lei</strong></li>
 </ul>
 
 <p>Vei primi un email de confirmare cu detaliile comenzii în curând.</p>
+
+<%= link_to "Înapoi la homepage", root_path, class: "btn btn-primary mt-3" %>
