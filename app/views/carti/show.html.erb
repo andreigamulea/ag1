@@ -1,145 +1,596 @@
-<div class="product-page">
-  <div class="main-image">
-    <% if @product.external_image_url.present? %>
-      <%= image_tag @product.external_image_url, alt: @product.name, class: "popup-trigger", style: "max-height: 300px;" %>
-    <% else %>
-      <%= image_tag "placeholder.png", alt: "No image", class: "popup-trigger" %>
-    <% end %>
+<div class="container_content product-view">
+  <div class="section-title">
+    <h1><%= @product.name %></h1>
+    <div class="separator"></div>
   </div>
 
-  <% if @product.external_image_urls.present? %>
-    <div class="secondary-images" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-      <% @product.external_image_urls.each do |url| %>
-        <%= image_tag url, class: "thumb popup-trigger", data: { full: url }, style: "width: 80px; border: 1px solid #ccc; border-radius: 4px;" %>
+
+
+  <div class="product-grid <%= 'no-thumbnails' unless @product.external_image_urls.present? && @product.external_image_urls.any? %>">
+    <!-- Column 1: Thumbnails (hidden if no secondary images) -->
+    <% if @product.external_image_urls.present? && @product.external_image_urls.any? %>
+      <div class="product-thumbnails">
+        <% @product.external_image_urls.each do |url| %>
+          <%= image_tag url, class: "thumb", data: { full: url }, alt: "Thumbnail" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Column 2: Main Image -->
+    <div class="product-image">
+      <% if @product.external_image_url.present? %>
+        <%= image_tag @product.external_image_url, alt: @product.name, class: "main-image popup-trigger", data: { full: @product.external_image_url } %>
+      <% else %>
+        <%= image_tag "placeholder.png", alt: "Fără imagine", class: "main-image popup-trigger" %>
       <% end %>
     </div>
-  <% else %>
-    <p>No secondary images available.</p>
-  <% end %>
-</div>
 
-  
+    <!-- Column 3: Product Details -->
+    <div class="product-details">
+      <% if @product.custom_attributes && @product.custom_attributes["autor"] %>
+        <p class="product-author"><strong>Autor:</strong> <%= @product.custom_attributes["autor"] %></p>
+      <% end %>
+      <p class="product-categories">
+  <strong>Categorii:</strong>
+  <%= @product.categories.map(&:name).join(", ") if @product.categories.present? %>
+</p>
 
-  <!-- Lightbox popup -->
+      <div class="product-description">
+        <strong>Descriere:</strong>
+        <%= simple_format(@product.description) %>
+      </div>
+      <div class="badges">
+        <span class="badge">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="#8b0000" viewBox="0 0 24 24" width="16" height="16">
+            <path d="M3 3h13v13H3V3zm15 6h3l3 4v3h-6V9zM6 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm12 0a2 2 0 1 0 .001 3.999A2 2 0 0 0 18 18z"/>
+          </svg>
+          Livrare rapidă
+        </span>
+        <span class="badge">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="#8b0000" viewBox="0 0 24 24" width="16" height="16">
+            <path d="M9 16.17l-3.88-3.88-1.41 1.41L9 19 20.29 7.71 18.88 6.29z"/>
+          </svg>
+          În stoc
+        </span>
+      </div>
+    </div>
+
+    <!-- Column 4: Price and Cart Actions -->
+    <div class="product-actions">
+      <p class="product-price"><strong>Preț:</strong> <%= number_to_currency(@product.price, unit: "lei", format: "%n %u") %></p>
+      <%= form_with url: "/cart/add", method: :post, local: true, class: "add-to-cart-form" do |f| %>
+        <%= f.hidden_field :product_id, value: @product.id %>
+        <div class="quantity-wrapper">
+          <label for="quantity_input" class="quantity-label">Cantitate:</label>
+          <div class="quantity-controls">
+            <button type="button" class="quantity-btn quantity-decrease">-</button>
+            <%= f.number_field :quantity, value: 1, min: 1, class: "quantity-input", id: "quantity_input" %>
+            <button type="button" class="quantity-btn quantity-increase">+</button>
+          </div>
+        </div>
+        <%= f.submit "Adaugă în coș", class: "btn btn-primary add-to-cart-btn" %>
+      <% end %>
+      <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-checkout" %>
+      <%= link_to "Continuă cumpărăturile", carti_index_path, class: "btn btn-secondary continue-shopping-btn" %>
+    </div>
+  </div>
+
   <div id="lightbox-overlay">
-    <span id="lightbox-close">&times;</span>
+    <span id="lightbox-close">×</span>
     <img id="lightbox-image" src="" alt="Imagine mărită">
   </div>
-
-  <div class="product-info">
-    <h1><%= @product.name %></h1>
-    <% if @product.custom_attributes && @product.custom_attributes["autor"] %>
-      <p><strong>Autor:</strong> <%= @product.custom_attributes["autor"] %></p>
-    <% end %>
-
-    <p><strong>Preț:</strong> <%= number_to_currency(@product.price, unit: "lei") %></p>
-    <p><strong>Descriere:</strong> <%= simple_format(@product.description) %></p>
-  </div>
-
-  <div class="back-button">
-    <%= link_to "← Înapoi la listă", carti_index_path, class: "btn-back" %>
-  </div>
-
 </div>
 
-
 <style>
-.product-page {
+/* ----------- PRODUCT PAGE STYLING ----------- */
+.container_content.product-view {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.section-title h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #8b0000;
+  margin-bottom: 8px;
+}
+
+.separator {
+  width: 40%;
+  height: 2px;
+  background: #8b0000;
+  opacity: 0.2;
+  margin: 0 auto;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: 100px 1fr 1.5fr 1fr;
+  gap: 15px;
+  align-items: start;
+}
+
+.product-grid.no-thumbnails {
+  grid-template-columns: 1fr 1.5fr 1fr;
+}
+
+.product-thumbnails {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.main-image img,
-.secondary-images .thumb {
-  border-radius: 6px;
-  cursor: zoom-in;
-}
-
-.secondary-images {
-  display: flex;
   gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
+.product-grid.no-thumbnails .product-thumbnails {
+  display: none;
+}
+
+.thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.thumb:hover {
+  border-color: #8b0000;
+  transform: scale(1.05);
+}
+
+.product-image {
+  text-align: center;
+}
+
+.main-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: zoom-in;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.main-image:hover {
+  transform: scale(1.02);
+}
+
+.product-details {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product-author,
+.product-categories,
+.product-price,
+.product-description {
+  font-size: 14px;
+  color: #333;
+}
+
+.product-author strong,
+.product-categories strong,
+.product-price strong,
+.product-description strong {
+  color: #8b0000;
+}
+
+.product-price {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.product-description {
+  line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.badges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  width: max-content;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff4e5;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  color: #8b0000;
+  font-weight: 600;
+  border: 1px solid #ffa500;
+  transition: background 0.3s ease-in-out;
+}
+
+.badge:hover {
+  background: #ffecd1;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.product-actions {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  grid-column: 4 / 5;
+}
+
+.product-grid.no-thumbnails .product-actions {
+  grid-column: 3 / 4;
+}
+
+.add-to-cart-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quantity-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8b0000;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.quantity-input {
+  width: 50px;
+  padding: 6px;
+  border: none;
+  text-align: center;
+  font-size: 13px;
+  background: transparent;
+}
+
+.quantity-btn {
+  background: #ffa500;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.quantity-btn:hover {
+  background: #e69500;
+}
+
+.btn {
+  font-size: 13px;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background: #ffa500;
+  border: 1px solid #ffa500;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #e69500;
+  border-color: #e69500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #8b0000;
+  color: #8b0000;
+}
+
+.btn-secondary:hover {
+  background: #8b0000;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-actions .btn-checkout {
+  background: #28a745;
+  border: 1px solid #28a745;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-actions .btn-checkout:hover {
+  background: #218838;
+  border-color: #218838;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
 
 #lightbox-overlay {
   position: fixed;
-  display: none;
-  z-index: 9999;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.85);
+  display: none;
   justify-content: center;
   align-items: center;
+  z-index: 9999;
 }
 
-#lightbox-overlay img {
+#lightbox-image {
   max-width: 90vw;
   max-height: 90vh;
-  border-radius: 6px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
 }
 
 #lightbox-close {
   position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 2em;
+  top: 15px;
+  right: 25px;
+  font-size: 1.5em;
   color: white;
-  font-weight: bold;
   cursor: pointer;
   z-index: 10000;
 }
 
-
-.back-button {
-  margin-top: 30px;
+#lightbox-close:hover {
+  color: #ffa500;
 }
 
-.btn-back {
-  background-color: #b51e1e;
-  color: white;
-  padding: 8px 14px;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: bold;
+/* Responsive Design */
+@media (max-width: 992px) {
+  .product-grid {
+    grid-template-columns: 80px 1fr 1fr;
+    gap: 10px;
+  }
+  .product-grid.no-thumbnails {
+    grid-template-columns: 1fr 1fr;
+  }
+  .product-actions {
+    grid-column: 3 / 4;
+  }
+  .product-grid.no-thumbnails .product-actions {
+    grid-column: 2 / 3;
+  }
 }
 
+@media (max-width: 768px) {
+  .container_content.product-view {
+    padding: 15px;
+  }
+  .section-title h1 {
+    font-size: 20px;
+  }
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+  .product-grid.no-thumbnails {
+    grid-template-columns: 1fr;
+  }
+  .product-thumbnails {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .thumb {
+    width: 60px;
+    height: 60px;
+  }
+  .main-image {
+    max-height: 250px;
+  }
+  .product-details,
+  .product-actions {
+    padding: 0;
+  }
+  .product-author,
+  .product-categories,
+  .product-price,
+  .product-description {
+    font-size: 13px;
+  }
+  .product-price {
+    font-size: 14px;
+  }
+  .btn {
+    font-size: 12px;
+  }
+  .product-actions {
+    grid-column: auto;
+  }
+}
 
+@media (max-width: 480px) {
+  .container_content.product-view {
+    padding: 10px;
+  }
+  .section-title h1 {
+    font-size: 18px;
+  }
+  .thumb {
+    width: 50px;
+    height: 50px;
+  }
+  .badge {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+  .icon {
+    width: 14px;
+    height: 14px;
+  }
+}
 </style>
+
 <script>
-document.addEventListener('turbo:load', function () {
+document.addEventListener('turbo:load', initializeBindings);
+document.addEventListener('DOMContentLoaded', initializeBindings); // Fallback pentru a asigura încărcarea
+
+function initializeBindings() {
+  bindLightbox();
+  bindQuantityControls();
+  bindThumbnailClick();
+  console.log('Initialize bindings executed, binding events to page elements');
+}
+
+function bindLightbox() {
   const overlay = document.getElementById('lightbox-overlay');
   const lightboxImage = document.getElementById('lightbox-image');
   const closeBtn = document.getElementById('lightbox-close');
+  const mainImage = document.querySelector('.main-image');
+
+  if (!overlay || !lightboxImage || !closeBtn || !mainImage) {
+    console.warn('Lightbox elements not fully found, skipping binding');
+    return;
+  }
+
+  // Elimină event listener-urile existente prin clonare
+  const newOverlay = overlay.cloneNode(true);
+  overlay.parentNode.replaceChild(newOverlay, overlay);
+  const newCloseBtn = newOverlay.querySelector('#lightbox-close');
+  const newLightboxImage = newOverlay.querySelector('#lightbox-image');
 
   document.querySelectorAll('.popup-trigger').forEach(img => {
-  img.addEventListener('click', function () {
-    lightboxImage.src = img.dataset.full || img.src;
-    overlay.style.display = 'flex';
-  });
-});
-
-
-  closeBtn.addEventListener('click', function () {
-    overlay.style.display = 'none';
-    lightboxImage.src = '';
+    img.addEventListener('click', () => {
+      newLightboxImage.src = img.dataset.full || img.src;
+      newOverlay.style.display = 'flex';
+      console.log('Lightbox triggered with image: ', img.dataset.full || img.src);
+    });
   });
 
-  overlay.addEventListener('click', function (e) {
-    if (e.target === overlay || e.target === closeBtn) {
-      overlay.style.display = 'none';
-      lightboxImage.src = '';
+  function closeLightbox() {
+    newOverlay.style.display = 'none';
+    newLightboxImage.src = '';
+    console.log('Lightbox closed');
+  }
+
+  newCloseBtn.addEventListener('click', closeLightbox);
+  newOverlay.addEventListener('click', e => {
+    if (e.target === newOverlay || e.target === newCloseBtn) {
+      closeLightbox();
     }
   });
-});
+}
 
+function bindThumbnailClick() {
+  const mainImage = document.querySelector('.main-image');
+  const thumbs = document.querySelectorAll('.thumb');
+  const originalSrc = mainImage ? mainImage.dataset.full || mainImage.src : null; // Salvează imaginea principală inițială
+
+  if (!mainImage) {
+    console.error('Main image element (.main-image) not found');
+    return;
+  }
+  if (!thumbs || thumbs.length === 0) {
+    console.warn('No thumbnail elements (.thumb) found');
+    return;
+  }
+
+  console.log(`Found ${thumbs.length} thumbnails, binding hover events to main image`);
+
+  thumbs.forEach(thumb => {
+    // Actualizare imagine principală la hover
+    thumb.addEventListener('mouseenter', () => {
+      console.log(`Hover on thumbnail with src: ${thumb.src}, data-full: ${thumb.dataset.full}`);
+      updateMainImage(thumb);
+    });
+
+    // Revenire la imaginea principală la ieșirea din hover
+    thumb.addEventListener('mouseleave', () => {
+      console.log(`Leaving thumbnail, reverting to original image: ${originalSrc}`);
+      if (originalSrc) {
+        mainImage.style.opacity = '0';
+        mainImage.src = `${originalSrc}?t=${Date.now()}`; // Forțează reîncărcare cu timestamp
+        mainImage.dataset.full = originalSrc;
+        mainImage.onload = () => {
+          mainImage.style.opacity = '1';
+          console.log(`Reverted to original image: ${originalSrc}`);
+        };
+        mainImage.onerror = () => {
+          console.error(`Failed to load original image: ${originalSrc}`);
+          mainImage.style.opacity = '1';
+        };
+      }
+    });
+  });
+
+  function updateMainImage(thumb) {
+    const newSrc = thumb.dataset.full || thumb.src;
+    if (newSrc && newSrc !== originalSrc) { // Evită actualizarea inutilă
+      mainImage.style.opacity = '0'; // Ascunde temporar pentru a preveni flicker
+      mainImage.src = `${newSrc}?t=${Date.now()}`; // Adaugă timestamp pentru a evita cache
+      mainImage.dataset.full = newSrc;
+      mainImage.onload = () => {
+        mainImage.style.opacity = '1'; // Arată imaginea după încărcare
+        console.log(`Main image updated and loaded to: ${newSrc}`);
+      };
+      mainImage.onerror = () => {
+        console.error(`Failed to load image: ${newSrc}`);
+        mainImage.style.opacity = '1'; // Revenire la vizibilitate în caz de eroare
+      };
+    }
+  }
+}
+
+function bindQuantityControls() {
+  const input = document.getElementById('quantity_input');
+  const decreaseBtn = document.querySelector('.quantity-decrease');
+  const increaseBtn = document.querySelector('.quantity-increase');
+
+  if (!input || !decreaseBtn || !increaseBtn) {
+    console.warn('Quantity controls not fully found, skipping binding');
+    return;
+  }
+
+  function adjustQty(delta) {
+    let value = parseInt(input.value, 10) || 1;
+    value = Math.max(1, value + delta);
+    input.value = value;
+    console.log(`Quantity adjusted to: ${value}`);
+  }
+
+  decreaseBtn.addEventListener('click', () => adjustQty(-1));
+  increaseBtn.addEventListener('click', () => adjustQty(1));
+}
 </script>

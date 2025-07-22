@@ -1,55 +1,457 @@
-<h1>Coșul tău</h1>
+<div class="cart-container">
+  <h1>Coșul tău</h1>
 
-<h3>Aplică un cupon de reducere</h3>
+  <!-- Lista articolelor din coș -->
+  <% if @cart_items.any? %>
+    <section class="cart-items">
+      <ul class="cart-item-list">
+        <% @cart_items.each do |item| %>
+          <li class="cart-item">
+            <div class="cart-item-details">
+              <span class="cart-item-name">
+                <%= link_to item[:product].name, product_path(item[:product]), class: "product-link" %>
+              </span>
+              <span class="cart-item-quantity"><%= item[:quantity] %> buc</span>
+              <span class="cart-item-price">
+                x <%= number_to_currency(item[:product].price, unit: "lei", format: "%n %u") %>
+              </span>
+              <span class="cart-item-subtotal">
+                = <%= number_to_currency(item[:subtotal], unit: "lei", format: "%n %u") %>
+              </span>
+            </div>
+            <%= button_to "X", remove_cart_index_path(product_id: item[:product].id), method: :post, class: "btn btn-danger cart-item-delete" %>
+          </li>
+        <% end %>
+      </ul>
+      <%= button_to "Golește", clear_cart_index_path, method: :post, class: "btn btn-subtle clear-cart-btn", data: { confirm: "Ești sigur că vrei să golești coșul?" } %>
+    </section>
+  <% else %>
+    <p class="empty-cart">Coșul este gol.</p>
+  <% end %>
 
-<%= form_with url: apply_coupon_path, method: :post, local: true do |f| %>
-  <%= f.label :code, "Cod cupon:" %>
-  <%= f.text_field :code, required: true %>
-  <%= f.submit "Aplică cuponul", class: "btn btn-success" %>
-<% end %>
-
-<% if session[:applied_coupon] && @discount.positive? %>
-  <p style="color: green;">
-    ✅ Cupon aplicat: <strong><%= session[:applied_coupon]["code"] %></strong> –
-    reducere 
-    <% if session[:applied_coupon]["discount_type"] == "percentage" %>
-      <%= session[:applied_coupon]["discount_value"] %>%
-    <% else %>
-      <%= number_to_currency(@discount, unit: "lei") %>
+  <!-- Sumarul coșului -->
+  <section class="cart-summary">
+    <p><strong>Subtotal:</strong> <%= number_to_currency(@subtotal, unit: "lei", format: "%n %u") %></p>
+    <% if @discount.positive? %>
+      <p><strong>Reducere:</strong> -<%= number_to_currency(@discount, unit: "lei", format: "%n %u") %></p>
     <% end %>
-    (<%= number_to_currency(@discount, unit: "lei") %>)
-  </p>
-  <%= button_to "Șterge cupon", remove_coupon_path, method: :post, class: "btn btn-danger", form: { style: "display:inline;" } %>
-<% end %>
-
-<p><strong>Subtotal:</strong> <%= number_to_currency(@subtotal, unit: "lei") %></p>
-
-<% if @discount.positive? %>
-  <p><strong>Reducere:</strong> -<%= number_to_currency(@discount, unit: "lei") %></p>
-<% end %>
-
-<% if @shipping_cost.positive? %>
-  <p><strong>Transport:</strong> <%= number_to_currency(@shipping_cost, unit: "lei") %></p>
-<% elsif @has_physical %>
-  <p><strong>Transport:</strong> <span style="color: green;">Gratuit (comandă peste 200 lei)</span></p>
-<% end %>
-
-<p><strong>Total de plată:</strong> <%= number_to_currency(@total, unit: "lei") %></p>
-
-<% if @cart_items.any? %>
-  <ul>
-    <% @cart_items.each do |item| %>
-      <li>
-        <%= item[:product].name %> – <%= item[:quantity] %> buc x 
-        <%= number_to_currency(item[:product].price, unit: "lei") %> =
-        <strong><%= number_to_currency(item[:subtotal], unit: "lei") %></strong>
-        <%= button_to "Șterge", remove_cart_index_path(product_id: item[:product].id), method: :post %>
-      </li>
+    <% if @shipping_cost.positive? %>
+      <p><strong>Transport:</strong> <%= number_to_currency(@shipping_cost, unit: "lei", format: "%n %u") %></p>
+    <% elsif @has_physical %>
+      <p><strong>Transport:</strong> <span class="free-shipping">Gratuit (comandă peste 200 lei)</span></p>
     <% end %>
-  </ul>
+    <p><strong>Total de plată:</strong> <%= number_to_currency(@total, unit: "lei", format: "%n %u") %></p>
+  </section>
 
-  <%= button_to "Golește coșul", clear_cart_index_path, method: :post %>
-<% else %>
-  <p>Coșul este gol.</p>
-<% end %>
-<%= link_to "Finalizează comanda", new_order_path, class: "btn btn-primary" if @cart_items.any? %>
+  <!-- Secțiunea pentru aplicarea cuponului -->
+  <section class="coupon-section">
+    <h3>Aplică un cupon de reducere</h3>
+    <%= form_with url: apply_coupon_path, method: :post, local: true, class: "coupon-form" do |f| %>
+      <div class="form-group">
+        <%= f.label :code, "Cod cupon:", class: "form-label" %>
+        <%= f.text_field :code, required: true, class: "form-input", placeholder: "Introdu codul" %>
+        <%= f.submit "Aplică cuponul", class: "btn btn-success" %>
+      </div>
+    <% end %>
+  </section>
+
+  <!-- Mesaj pentru cupon aplicat -->
+  <% if session[:applied_coupon] && @discount.positive? %>
+    <div class="coupon-message">
+      <p>
+        ✅ Cupon aplicat: <strong><%= session[:applied_coupon]["code"] %></strong> –
+        reducere
+        <% if session[:applied_coupon]["discount_type"] == "percentage" %>
+          <%= session[:applied_coupon]["discount_value"] %>%
+        <% else %>
+          <%= number_to_currency(@discount, unit: "lei", format: "%n %u") %>
+        <% end %>
+        (<%= number_to_currency(@discount, unit: "lei", format: "%n %u") %>)
+      </p>
+      <%= button_to "Șterge cupon", remove_coupon_path, method: :post, class: "btn btn-danger" %>
+    </div>
+  <% end %>
+
+  <!-- Butoane pentru continuarea cumpărăturilor și finalizarea comenzii -->
+  <% if @cart_items.any? %>
+    <div class="checkout-container">
+      <%= link_to "Continuă cumpărăturile", request.referer || products_path, class: "btn btn-primary continue-shopping-btn" %>
+      <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-primary checkout-btn" %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+/* ----------- CART PAGE STYLING ----------- */
+.cart-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 25px;
+    background: white;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.cart-container h1 {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #8b0000;
+    margin-bottom: 20px;
+    padding-top: 20px;
+}
+
+.cart-container .coupon-section h3 {
+    font-size: 18px;
+    color: #8b0000;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.cart-container .coupon-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cart-container .form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cart-container .form-label {
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+}
+
+.cart-container .form-input {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #8b0000;
+    border-radius: 5px;
+    outline: none;
+    width: 200px;
+}
+
+.cart-container .btn-success {
+    background: #28a745;
+    border: 1px solid #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.cart-container .btn-success:hover {
+    background: #218838;
+    border-color: #218838;
+}
+
+.cart-container .coupon-message {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.cart-container .coupon-message p {
+    font-size: 14px;
+    color: #28a745;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.cart-container .coupon-message p strong {
+    color: #8b0000;
+}
+
+.cart-container .btn-danger {
+    background: #6c757d;
+    border: 1px solid #6c757d;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: normal;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.cart-container .btn-danger:hover {
+    background: #5a6268;
+    border-color: #5a6268;
+}
+
+.cart-container .cart-item-delete {
+    position: static;
+    display: inline-block;
+    visibility: visible;
+    opacity: 1;
+    min-width: 30px;
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: 11px;
+    align-self: center;
+    line-height: 1.2;
+}
+
+.cart-container .btn-subtle {
+    background: #adb5bd;
+    border: 1px solid #adb5bd;
+    color: #333;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.cart-container .btn-subtle:hover {
+    background: #8f9aa3;
+    border-color: #8f9aa3;
+    color: #333;
+}
+
+.cart-container .clear-cart-btn {
+    display: block;
+    margin: 10px 0 10px auto;
+    width: max-content;
+}
+
+.cart-container .cart-items {
+    margin: 20px 0;
+}
+
+.cart-container .cart-item-list {
+    list-style: none;
+    padding: 0;
+}
+
+.cart-container .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+    color: #333;
+    position: relative;
+}
+
+.cart-container .cart-item-details {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+    gap: 10px;
+    align-items: center;
+}
+
+.cart-container .cart-item-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #8b0000;
+    flex: 1 1 200px;
+}
+
+.cart-container .product-link {
+    color: #8b0000;
+    text-decoration: none;
+    transition: text-decoration 0.3s ease-in-out;
+}
+
+.cart-container .product-link:hover {
+    text-decoration: underline;
+}
+
+.cart-container .cart-item-quantity {
+    font-size: 13px;
+    color: #555;
+    min-width: 60px;
+}
+
+.cart-container .cart-item-price {
+    font-size: 14px;
+    color: #333;
+    min-width: 80px;
+}
+
+.cart-container .cart-item-subtotal {
+    font-size: 14px;
+    font-weight: bold;
+    color: #8b0000;
+    min-width: 80px;
+}
+
+.cart-container .cart-summary {
+    text-align: right;
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid #8b0000;
+}
+
+.cart-container .cart-summary p {
+    font-size: 16px;
+    color: #333;
+    margin: 5px 0;
+}
+
+.cart-container .cart-summary p strong {
+    color: #8b0000;
+}
+
+.cart-container .cart-summary .free-shipping {
+    color: #28a745;
+}
+
+.cart-container .empty-cart {
+    text-align: center;
+    font-size: 16px;
+    color: #555;
+    margin: 20px 0;
+}
+
+.cart-container .checkout-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cart-container .btn-primary {
+    background: #ffa500;
+    border: 1px solid #ffa500;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    width: max-content;
+}
+
+.cart-container .btn-primary:hover {
+    background: #e69500;
+    border-color: #e69500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cart-container {
+        padding: 15px;
+    }
+
+    .cart-container h1 {
+        font-size: 20px;
+    }
+
+    .cart-container .coupon-section h3 {
+        font-size: 16px;
+    }
+
+    .cart-container .coupon-form {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cart-container .form-input {
+        width: 100%;
+    }
+
+    .cart-container .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .cart-container .cart-item-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .cart-container .cart-item-name {
+        font-size: 14px;
+        flex: 1 1 100%;
+    }
+
+    .cart-container .cart-item-quantity {
+        font-size: 12px;
+    }
+
+    .cart-container .cart-item-price {
+        font-size: 13px;
+    }
+
+    .cart-container .cart-item-subtotal {
+        font-size: 13px;
+    }
+
+    .cart-container .cart-item .cart-item-delete {
+        width: 100%;
+        margin-left: 0;
+        text-align: center;
+        min-width: unset;
+    }
+
+    .cart-container .clear-cart-btn {
+        margin: 10px auto;
+    }
+
+    .cart-container .cart-summary {
+        text-align: center;
+    }
+
+    .cart-container .checkout-container {
+        justify-content: center;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cart-container .btn-primary {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-container {
+        padding: 10px;
+    }
+
+    .cart-container h1 {
+        font-size: 18px;
+    }
+
+    .cart-container .coupon-section h3 {
+        font-size: 14px;
+    }
+
+    .cart-container .cart-summary p {
+        font-size: 14px;
+    }
+
+    .cart-container .cart-item {
+        font-size: 12px;
+    }
+
+    .cart-container .btn-success,
+    .cart-container .btn-danger,
+    .cart-container .btn-subtle,
+    .cart-container .btn-primary {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
