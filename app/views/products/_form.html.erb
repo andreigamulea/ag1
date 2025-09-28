@@ -279,7 +279,7 @@
 <% end %>
 
 <script>
-document.addEventListener("turbo:load", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("secondary-images");
   const wrapper = document.getElementById("image-badges-wrapper");
   const form = document.querySelector("form");
@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <script>
-document.addEventListener("turbo:load", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("form");
   const mainInput = document.getElementById("bunny-direct-upload");
   const mainPreview = document.getElementById("main-preview");
@@ -517,7 +517,7 @@ document.addEventListener("turbo:load", () => {
   }
 </script>
 <script>
-document.addEventListener("turbo:load", () => {
+document.addEventListener("DOMContentLoaded", () => {
   // === Upload fișiere pe Bunny ===
   const fileInput = document.getElementById("bunny-files-upload");
   const filePreview = document.getElementById("bunny-files-preview");
@@ -526,7 +526,10 @@ document.addEventListener("turbo:load", () => {
   if (fileInput) {
     fileInput.addEventListener("change", async () => {
       for (const file of fileInput.files) {
-        const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+        // Fă filename unique ca să eviți overwrite (adaugă timestamp)
+        const uniqueFilename = `${Date.now()}_${encodeURIComponent(file.name)}`;
+
+        const res = await fetch(`/uploads/presign?filename=${uniqueFilename}`);
         const { upload_url, headers } = await res.json();
 
         const upload = await fetch(upload_url, {
@@ -542,7 +545,7 @@ document.addEventListener("turbo:load", () => {
           const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
           const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
-          // Verificăm dacă deja există
+          // Verificăm dacă deja există (acum cu unique, e improbabil, dar păstrăm)
           const exists = [...fileHiddenInputs.querySelectorAll("input")].some(input => input.value === cdnUrl);
           if (exists) continue;
 
@@ -553,15 +556,15 @@ document.addEventListener("turbo:load", () => {
           hidden.value = cdnUrl;
           fileHiddenInputs.appendChild(hidden);
 
-          // Previzualizare vizuală
+          // Previzualizare vizuală (adaugă "position-relative" pentru ștergere corectă)
           const wrapper = document.createElement("div");
-          wrapper.className = "bunny-preview-file mb-2 d-flex align-items-center justify-content-between border p-2 rounded";
+          wrapper.className = "position-relative bunny-preview-file mb-2 d-flex align-items-center justify-content-between border p-2 rounded";  // Adaugă position-relative
 
           const nameSpan = document.createElement("span");
           nameSpan.textContent = file.name;
 
           const removeBtn = document.createElement("button");
-          removeBtn.className = "btn btn-sm btn-danger remove-bunny-file";
+          removeBtn.className = "btn btn-sm btn-danger remove-bunny-file position-absolute top-0 end-0 m-1";  // Adaugă position-absolute
           removeBtn.textContent = "×";
           removeBtn.type = "button";
           removeBtn.dataset.url = cdnUrl;
@@ -572,25 +575,25 @@ document.addEventListener("turbo:load", () => {
         }
       }
 
-      fileInput.value = "";
+      fileInput.value = "";  // Reset input pentru adaugări viitoare
     });
   }
 
   // === Ștergere fișier Bunny (din preview + input ascuns) ===
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("remove-bunny-file")) {
-    const url = e.target.dataset.url;
+      const url = e.target.dataset.url;
 
-    // Elimină hidden input cu acel URL
-    const hiddenInputs = document.querySelectorAll("input[name='product[external_file_urls][]']");
-    hiddenInputs.forEach(input => {
-      if (input.value === url) input.remove();
-    });
+      // Elimină hidden input cu acel URL
+      const hiddenInputs = document.querySelectorAll("input[name='product[external_file_urls][]']");
+      hiddenInputs.forEach(input => {
+        if (input.value === url) input.remove();
+      });
 
-    // Elimină vizual cardul
-    const card = e.target.closest(".position-relative");
-    if (card) card.remove();
-  }
-});
+      // Elimină vizual cardul (acum cu .position-relative)
+      const card = e.target.closest(".position-relative");
+      if (card) card.remove();
+    }
+  });
 });
 </script>

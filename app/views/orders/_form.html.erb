@@ -61,29 +61,36 @@
       <div class="col"><%= f.label :email, "Email" %><br><%= f.email_field :email, required: true %></div>
     </div>
 
-    <div class="mb-3">
-      <%= f.label :country, "Țara", class: "form-label" %>
-      <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_tara">
-        <%= f.text_field :country, class: "form-control", id: "tara_input", data: { autocomplete_target: "input" }, placeholder: "Selectează țara...", autocomplete: "off" %>
-        <div id="tara_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
-      </div>
-    </div>
+<div class="mb-3">
+  <%= f.label :country, "Țara", class: "form-label" %>
+  <div class="position-relative">
+    <%= f.text_field :country, class: "form-control", id: "tara_input", placeholder: "Selectează țara...", autocomplete: "off" %>
+    <div id="tara_dropdown" class="dropdown-menu w-100 shadow"></div>
+  </div>
+</div>
 
-    <div class="mb-3">
-      <%= f.label :county, "Județ", class: "form-label" %>
-      <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_judet" data-autocomplete-filter-id-value="tara_input">
-        <%= f.text_field :county, class: "form-control", id: "judet_input", data: { autocomplete_target: "input" }, placeholder: "Selectează județul...", autocomplete: "off" %>
-        <div id="judet_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
-      </div>
-    </div>
+<div class="mb-3">
+  <%= f.label :county, "Județ", class: "form-label" %>
+  <div class="position-relative">
+    <%= f.text_field :county, class: "form-control", id: "judet_input", placeholder: "Selectează județul...", autocomplete: "off", disabled: true %>
+    <div id="judet_dropdown" class="dropdown-menu w-100 shadow"></div>
+  </div>
+</div>
 
-    <div class="mb-3">
-      <%= f.label :city, "Localitate", class: "form-label" %>
-      <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_localitate" data-autocomplete-filter-id-value="judet_input">
-        <%= f.text_field :city, class: "form-control", id: "localitate_input", data: { autocomplete_target: "input" }, placeholder: "Selectează localitatea...", autocomplete: "off" %>
-        <div id="localitate_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
-      </div>
-    </div>
+<div class="mb-3">
+  <%= f.label :city, "Localitate", class: "form-label" %>
+  <div class="position-relative">
+    <%= f.text_field :city, class: "form-control", id: "localitate_input", placeholder: "Selectează localitatea...", autocomplete: "off", disabled: true %>
+    <div id="localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
+  </div>
+</div>
+
+
+
+
+
+
+
 
     <div class="row">
       <div class="col"><%= f.label :postal_code, "Cod poștal" %><br><%= f.text_field :postal_code, required: true %></div>
@@ -103,8 +110,17 @@
 
   <div data-controller="toggle-shipping">
   <div style="margin: 20px 0;">
-    <%= check_box_tag "use_different_shipping", "1", @order.use_different_shipping.to_s == "1", id: "toggle-shipping", data: { "toggle-shipping-target": "checkbox", action: "toggle-shipping#toggle" } %>
-    <%= label_tag "toggle-shipping", "Adresa de livrare este diferită" %>
+
+
+    <div class="field">
+  <%= f.check_box :use_different_shipping, id: "toggle-shipping" %>
+  <%= f.label :use_different_shipping, "Adresa de livrare este diferită" %>
+</div>
+
+
+
+
+
   </div>
 
   <div id="shipping-fields" data-toggle-shipping-target="fields" style="display: none;">
@@ -121,28 +137,33 @@
       </div>
 
       <div class="mb-3">
-        <%= f.label :shipping_country, "Țara livrare", class: "form-label" %>
-        <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_tara">
-          <%= f.text_field :shipping_country, class: "form-control", id: "shipping_tara_input", data: { autocomplete_target: "input" }, placeholder: "Selectează țara...", autocomplete: "off" %>
-          <div id="shipping_tara_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
-        </div>
-      </div>
+    <%= f.label :shipping_country, "Țara livrare", class: "form-label" %>
+    <div class="position-relative">
+      <%= f.text_field :shipping_country, class: "form-control", id: "shipping_tara_input", placeholder: "Selectează țara...", autocomplete: "off" %>
+      <div id="shipping_tara_dropdown" class="dropdown-menu w-100 shadow"></div>
+    </div>
+  </div>
 
-      <div class="mb-3">
-        <%= f.label :shipping_county, "Județ livrare", class: "form-label" %>
-        <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_judet" data-autocomplete-filter-id-value="shipping_tara_input">
-          <%= f.text_field :shipping_county, class: "form-control", id: "shipping_judet_input", data: { autocomplete_target: "input" }, placeholder: "Selectează județul...", autocomplete: "off" %>
-          <div id="shipping_judet_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
-        </div>
-      </div>
+  <div class="mb-3">
+    <%= f.label :shipping_county, "Județ livrare", class: "form-label" %>
+    <div class="position-relative">
+      <%= f.text_field :shipping_county, class: "form-control", id: "shipping_judet_input", placeholder: "Selectează județul...", autocomplete: "off", disabled: true %>
+      <div id="shipping_judet_dropdown" class="dropdown-menu w-100 shadow"></div>
+    </div>
+  </div>
 
-      <div class="mb-3">
-        <%= f.label :shipping_city, "Localitate livrare", class: "form-label" %>
-        <div class="position-relative" data-controller="autocomplete" data-autocomplete-endpoint-value="/autocomplete_localitate" data-autocomplete-filter-id-value="shipping_judet_input">
-          <%= f.text_field :shipping_city, class: "form-control", id: "shipping_localitate_input", data: { autocomplete_target: "input" }, placeholder: "Selectează localitatea...", autocomplete: "off" %>
-          <div id="shipping_localitate_dropdown" class="dropdown-menu w-100 shadow" data-autocomplete-target="dropdown"></div>
-        </div>
-      </div>
+  <div class="mb-3">
+    <%= f.label :shipping_city, "Localitate livrare", class: "form-label" %>
+    <div class="position-relative">
+      <%= f.text_field :shipping_city, class: "form-control", id: "shipping_localitate_input", placeholder: "Selectează localitatea...", autocomplete: "off", disabled: true %>
+      <div id="shipping_localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
+    </div>
+  </div>
+
+
+
+
+
 
       <div class="row">
         <div class="col"><%= f.label :shipping_postal_code, "Cod poștal livrare" %><br><%= f.text_field :shipping_postal_code %></div>
@@ -172,15 +193,175 @@
   </div>
 <% end %>
 
+
+
 <script>
-  document.addEventListener("turbo:load", () => {
-    const form = document.querySelector("form");
-    const submitBtn = form?.querySelector("input[type='submit']");
-    if (form && submitBtn) {
-      form.addEventListener("submit", () => {
-        submitBtn.disabled = true;
-        submitBtn.value = "Se trimite...";
+  document.addEventListener("DOMContentLoaded", () => {
+    function setupAutocomplete(inputId, dropdownId, endpoint, filterId = null, taraInputId = "tara_input") {
+      const input = document.getElementById(inputId);
+      const dropdown = document.getElementById(dropdownId);
+      let validSuggestions = []; // Stocăm sugestiile valide
+
+      function updateDropdown(query, filterValue = null) {
+        // 1. Verificăm dacă țara este România
+        const taraInput = document.getElementById(taraInputId);
+        const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
+
+        // 2. Dacă input-ul e județ sau localitate și țara NU e România,
+        //    nu mai afișăm sugestii (dropdown)
+        if ((inputId.endsWith("judet_input") || inputId.endsWith("localitate_input")) && !isRomania) {
+          dropdown.innerHTML = '';
+          dropdown.style.display = 'none';
+          return;
+        }
+
+        // 3. Dacă e România sau e vorba de câmpul Țară, continuăm logica obișnuită
+        dropdown.innerHTML = ''; // Resetăm lista
+        if (query.length > 1) {
+          let url = `${endpoint}?q=${encodeURIComponent(query)}`;
+          if (filterValue) {
+            url += `&filter=${encodeURIComponent(filterValue)}`;
+          }
+          fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+              validSuggestions = data; // Actualizăm lista sugestiilor valide
+              if (data.length > 0) {
+                dropdown.style.display = 'block';
+                data.forEach((item) => {
+                  const option = document.createElement('a');
+                  option.classList.add('dropdown-item');
+                  option.textContent = item;
+                  option.href = '#';
+                  option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    input.value = item;
+                    dropdown.style.display = 'none';
+                    // Enable câmpurile următoare doar dacă e selectat din listă
+                    enableNextFields(inputId, item);
+                  });
+                  dropdown.appendChild(option);
+                });
+              } else {
+                dropdown.style.display = 'none';
+              }
+            })
+            .catch((error) => console.error("Eroare la încărcarea sugestiilor:", error));
+        } else {
+          validSuggestions = []; // Resetăm sugestiile valide
+          dropdown.style.display = 'none';
+        }
+      }
+
+      // Când utilizatorul tastează
+      input.addEventListener('input', () => {
+        const query = input.value.trim();
+        const filterValue = filterId ? document.getElementById(filterId)?.value.trim() : null;
+        updateDropdown(query, filterValue);
       });
+
+      // Când se pierde focalizarea (obligatoriu din listă)
+      input.addEventListener('blur', () => {
+        if (!validSuggestions.includes(input.value)) {
+          input.value = ''; // Reset dacă nu e din listă
+          disableNextFields(inputId);
+        }
+      });
+
+      // Când se dă click în afara dropdown-ului
+      document.addEventListener('click', (event) => {
+        if (!dropdown.contains(event.target) && event.target !== input) {
+          dropdown.style.display = 'none';
+        }
+      });
+    }
+
+    function enableNextFields(inputId, value) {
+      if (inputId.endsWith("tara_input")) {
+        const tara = value.trim().toLowerCase();
+        const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
+        const judetInput = document.getElementById(`${prefix}judet_input`);
+        const localitateInput = document.getElementById(`${prefix}localitate_input`);
+        judetInput.disabled = tara !== "romania";
+        localitateInput.disabled = true; // Reset enable localitate
+        if (tara !== "romania") {
+          judetInput.value = "";
+          localitateInput.value = "";
+        }
+      } else if (inputId.endsWith("judet_input")) {
+        const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
+        document.getElementById(`${prefix}localitate_input`).disabled = false;
+        document.getElementById(`${prefix}localitate_input`).value = "";
+      }
+    }
+
+    function disableNextFields(inputId) {
+      if (inputId.endsWith("tara_input")) {
+        const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
+        document.getElementById(`${prefix}judet_input`).disabled = true;
+        document.getElementById(`${prefix}localitate_input`).disabled = true;
+      } else if (inputId.endsWith("judet_input")) {
+        const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
+        document.getElementById(`${prefix}localitate_input`).disabled = true;
+      }
+    }
+
+    function initializeFields(prefix = "") {
+      const taraInput = document.getElementById(`${prefix}tara_input`);
+      const judetInput = document.getElementById(`${prefix}judet_input`);
+      const localitateInput = document.getElementById(`${prefix}localitate_input`);
+
+      if (taraInput.value.trim()) {
+        const tara = taraInput.value.trim().toLowerCase();
+        judetInput.disabled = tara !== "romania";
+        if (tara === "romania" && judetInput.value.trim()) {
+          localitateInput.disabled = false;
+        }
+      }
+    }
+
+    // Configurează autocomplete pentru Facturare
+    setupAutocomplete("tara_input", "tara_dropdown", "/autocomplete_tara");
+    setupAutocomplete("judet_input", "judet_dropdown", "/autocomplete_judet");
+    setupAutocomplete("localitate_input", "localitate_dropdown", "/autocomplete_localitate", "judet_input");
+
+    // Configurează autocomplete pentru Shipping
+    setupAutocomplete("shipping_tara_input", "shipping_tara_dropdown", "/autocomplete_tara", null, "shipping_tara_input");
+    setupAutocomplete("shipping_judet_input", "shipping_judet_dropdown", "/autocomplete_judet", null, "shipping_tara_input");
+    setupAutocomplete("shipping_localitate_input", "shipping_localitate_dropdown", "/autocomplete_localitate", "shipping_judet_input", "shipping_tara_input");
+
+    // Inițializează starea câmpurilor la load (pentru pre-populare)
+    initializeFields(); // Pentru facturare
+    initializeFields("shipping_"); // Pentru shipping
+
+    // Gestionăm activarea/dezactivarea în funcție de țară (pentru input events)
+    const taraInput = document.getElementById("tara_input");
+    taraInput.addEventListener("input", function () {
+      enableNextFields("tara_input", taraInput.value);
+    });
+
+    const shippingTaraInput = document.getElementById("shipping_tara_input");
+    shippingTaraInput.addEventListener("input", function () {
+      enableNextFields("shipping_tara_input", shippingTaraInput.value);
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const checkbox = document.getElementById("toggle-shipping");
+    const fields = document.getElementById("shipping-fields");
+
+    if (checkbox && fields) {
+      // Inițializează starea
+      fields.style.display = checkbox.checked ? "block" : "none";
+
+      // Event listener pentru change
+      checkbox.addEventListener("change", () => {
+        fields.style.display = checkbox.checked ? "block" : "none";
+      });
+    } else {
+      console.error("Eroare: Checkbox sau fields nu găsit!");
     }
   });
 </script>

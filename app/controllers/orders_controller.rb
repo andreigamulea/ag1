@@ -8,22 +8,40 @@ def new
     last_order = current_user.orders.order(placed_at: :desc).first
     @order.assign_attributes(last_order.slice(
       :first_name, :last_name, :company_name, :cui, :cnp,
-      :address, :city, :county, :postal_code, :country, :phone,
+      :email, :phone, :country, :county, :city, :postal_code,
+      :street, :street_number, :block_details,
+      :use_different_shipping,
       :shipping_first_name, :shipping_last_name, :shipping_company_name,
       :shipping_country, :shipping_county, :shipping_city,
-      :shipping_street, :shipping_street_number, :shipping_block_details,
-      :shipping_postal_code, :shipping_phone
+      :shipping_postal_code, :shipping_street, :shipping_street_number,
+      :shipping_block_details, :shipping_phone
     ))
+
+    # Dacă ultima comandă NU avea livrare diferită, copiază câmpurile shipping din facturare (pentru consistență)
+    unless @order.use_different_shipping
+      @order.shipping_first_name = @order.first_name
+      @order.shipping_last_name = @order.last_name
+      @order.shipping_company_name = @order.company_name
+      @order.shipping_country = @order.country
+      @order.shipping_county = @order.county
+      @order.shipping_city = @order.city
+      @order.shipping_postal_code = @order.postal_code
+      @order.shipping_street = @order.street
+      @order.shipping_street_number = @order.street_number
+      @order.shipping_block_details = @order.block_details
+      @order.shipping_phone = @order.phone
+    end
   else
-    # populăm doar emailul (există în modelul User)
+    # Pentru user nou, populăm doar emailul din modelul User
     @order.email = current_user.email if user_signed_in?
   end
 
-  @order.use_different_shipping = params[:use_different_shipping]
+  # Păstrează params dacă vine din alt flow (ex: back button), dar prioritate la last_order
+  @order.use_different_shipping = params[:use_different_shipping] if params[:use_different_shipping].present?
 
   @subtotal = calculate_subtotal
   @discount = calculate_discount
-  
+  @shipping_cost = calculate_shipping_cost # Presupun că ai o metodă pentru asta, bazată pe total etc.
   @total = [@subtotal - @discount + @shipping_cost, 0].max
 end
 
@@ -35,7 +53,7 @@ end
 
 
 
-  def create
+def create
   @order = Order.new(order_params)
   @order.user = current_user if user_signed_in?
   @order.status = "pending"
@@ -58,77 +76,86 @@ end
     @order.shipping_phone         = @order.phone
   end
 
+  # Adaugă produsele comandate
+  items_added = false
+  @cart.each do |product_id, data|
+    product = Product.find_by(id: product_id)
+    unless product
+      flash.now[:alert] = "Produs invalid în coș (ID: #{product_id})."
+      render :new, status: :unprocessable_entity and return
+    end
+
+    quantity = data["quantity"].to_i
+
+    @order.order_items.build(
+      product: product,
+      product_name: product.name,
+      quantity: quantity,
+      price: product.price,
+      vat: product.vat || 0,
+      total_price: product.price * quantity
+    )
+    items_added = true
+  end
+
+  if !items_added
+    flash.now[:alert] = "Nu s-au putut adăuga produsele din coș. Verifică coșul."
+    render :new, status: :unprocessable_entity and return
+  end
+
+  # === Adaugă linia de discount dacă există cupon
+  if @order.coupon.present?
+    subtotal = @order.order_items.sum(&:total_price)
+
+    discount_value =
+      if @order.coupon.discount_type == "percentage"
+        (subtotal * (@order.coupon.discount_value.to_f / 100.0)).round(2)
+      elsif @order.coupon.discount_type == "fixed"
+        @order.coupon.discount_value.to_f
+      else
+        0
+      end
+
+    if discount_value > 0
+      @order.order_items.build(
+        product: nil,
+        product_name: "Discount",
+        quantity: 1,
+        price: -discount_value,
+        vat: 0,
+        total_price: -discount_value
+      )
+    end
+  end
+
+  # === Adaugă linia de transport dacă e cazul
+  transport_cost = session[:shipping_cost].to_f
+
+  if transport_cost > 0
+    @order.order_items.build(
+      product: nil,
+      product_name: "Transport",
+      quantity: 1,
+      price: transport_cost,
+      vat: 0,
+      total_price: transport_cost
+    )
+  end
+
+  # Recalculare total final (inclusiv transport și discount)
+  @order.total = @order.order_items.sum(&:total_price)
   @order.vat_amount = calculate_vat_total
 
+  puts "Order valid? #{@order.valid?}"
+  puts "Errors: #{@order.errors.full_messages.join(', ')}"
+
   if @order.save
-    # Adaugă produsele comandate
-    @cart.each do |product_id, data|
-      product = Product.find_by(id: product_id)
-      next unless product
-
-      quantity = data["quantity"].to_i
-
-      next if product.track_inventory && product.stock.to_i < quantity
-
-      @order.order_items.create!(
-        product: product,
-        product_name: product.name,
-        quantity: quantity,
-        price: product.price, # <--- corect!
-        vat: product.vat || 0,
-        total_price: product.price * quantity
-      )
-
-      # Actualizează stocul dacă e cazul
-      if product.track_inventory
-        product.update(stock: product.stock - quantity)
-      end
+    # Actualizează stocul dacă e cazul
+    @order.order_items.each do |item|
+      #if item.product && item.product.track_inventory
+        #item.product.update(stock: item.product.stock - item.quantity)
+      #end
     end
-
-    # === Adaugă linia de transport dacă e cazul
-    transport_cost = session[:shipping_cost].to_f
-
-    if transport_cost > 0
-      @order.order_items.create!(
-        product: nil,
-        product_name: "Transport",
-        quantity: 1,
-        price: transport_cost, # <--- corect!
-        vat: 0,
-        total_price: transport_cost
-      )
-    end
-
-    # === Adaugă linia de discount dacă există cupon
-    if @order.coupon.present?
-      subtotal = @order.order_items
-        .where.not(product_name: ["Transport", "Discount"])
-        .sum(&:total_price)
-
-      discount_value =
-        if @order.coupon.discount_type == "percentage"
-          (subtotal * (@order.coupon.discount_value.to_f / 100.0)).round(2)
-        elsif @order.coupon.discount_type == "fixed"
-          @order.coupon.discount_value.to_f
-        else
-          0
-        end
-
-      if discount_value > 0
-        @order.order_items.create!(
-          product: nil,
-          product_name: "Discount",
-          quantity: 1,
-          price: -discount_value, # <--- corect!
-          vat: 0,
-          total_price: -discount_value
-        )
-      end
-    end
-
-    # Recalculare total final (inclusiv transport și discount)
-    @order.total = @order.order_items.sum(&:total_price)
-    @order.save
 
     # Marcăm cuponul ca utilizat
     @order.coupon.increment!(:usage_count) if @order.coupon.present?
@@ -146,24 +173,6 @@ end
     render :new, status: :unprocessable_entity
   end
 end
-
-
-def calculate_shipping_cost_from_order(order)
-  produse_fizice = order.order_items.any? do |item|
-    item.product&.categories&.any? { |cat| cat.name.downcase == "fizic" }
-  end
-
-  return 0 unless produse_fizice
-
-  # Exclude linia de discount și transport din subtotal
-  subtotal = order.order_items
-    .where.not(product_name: ["Transport", "Discount"])
-    .sum(&:total_price)
-
-  subtotal >= 200 ? 0 : 20
-end
-
-
 
  def thank_you
   @order = Order.find(params[:id])
@@ -355,7 +364,7 @@ end
     :first_name, :last_name, :company_name, :cui, :cnp,
     :address, :city, :county, :postal_code, :country,
     :street, :street_number, :block_details,
-    :phone, :email,
+    :phone, :email, :use_different_shipping,
     :shipping_first_name, :shipping_last_name, :shipping_company_name,
     :shipping_country, :shipping_county, :shipping_city,
     :shipping_street, :shipping_street_number, :shipping_block_details,
@@ -363,7 +372,6 @@ end
     :notes
   )
 end
-
 
 
 

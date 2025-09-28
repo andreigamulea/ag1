@@ -8,3 +8,6 @@ import ToggleShippingController from "./toggle_shipping_controller"
 application.register("toggle-shipping", ToggleShippingController)
 import CategorySelectController from "./category_select_controller"
 application.register("category-select", CategorySelectController)
+
+import TestController from "./test_controller"
+application.register("test", TestController)

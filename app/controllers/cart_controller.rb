@@ -60,15 +60,40 @@ end
 
 
 
-  def add
-    product_id = params[:product_id].to_s
-    quantity = params[:quantity].to_i
-    @cart[product_id] ||= { "quantity" => 0 }
-    @cart[product_id]["quantity"] += quantity
-    save_cart
-    save_snapshot
-    redirect_to cart_index_path, notice: "Produs adăugat în coș."
+def add
+  product_id = params[:product_id].to_s
+  quantity   = params[:quantity].to_i
+  product    = Product.find(product_id)
+
+  if product.track_inventory
+    # ✅ Permitem oricât, chiar dacă stock <= 0
+    current_quantity = @cart[product_id] ? @cart[product_id]["quantity"] : 0
+    new_quantity     = current_quantity + quantity
+    # aici nu limităm nimic
+  else
+    # ✅ Dacă nu se urmărește inventarul, respectăm strict stocul
+    if product.stock <= 0
+      redirect_to carti_path, alert: "Produsul nu mai este disponibil."
+      return
+    end
+
+    current_quantity = @cart[product_id] ? @cart[product_id]["quantity"] : 0
+    new_quantity     = current_quantity + quantity
+
+    if new_quantity > product.stock
+      new_quantity = product.stock
+    end
   end
+
+  @cart[product_id] ||= { "quantity" => 0 }
+  @cart[product_id]["quantity"] = new_quantity
+  save_cart
+  save_snapshot
+
+  redirect_to cart_index_path, notice: "Produs adăugat în coș."
+end
+
+
 
   def update
     product_id = params[:product_id].to_s

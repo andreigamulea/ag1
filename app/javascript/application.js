@@ -4,5 +4,6 @@ import "controllers"
 import "./autocomplete"
 import Rails from "@rails/ujs"
 Rails.start()
+console.log("application.js încărcat! Stimulus disponibil?", window.Stimulus);
 
 

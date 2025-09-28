@@ -22,22 +22,34 @@
     <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei") %></p>
 
     <% if product.track_inventory %>
-      <% if product.stock > 5 %>
-        <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
-      <% elsif product.stock > 0 %>
-        <p class="stock yellow">Stoc: <%= product.stock %> Permite comenzi în așteptare</p>
-      <% else %>
-        <p class="stock red">Stoc: 0 Nu mai este pe stoc</p>
-      <% end %>
-    <% else %>
-      <p class="stock">Stoc: Netransmis</p>
-    <% end %>
+  <% if product.stock > 5 %>
+    <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
+  <% elsif product.stock > 0 %>
+    <p class="stock yellow">Stoc: <%= product.stock %> Cantitate limitată</p>
+  <% else %>
+    <p class="stock red">Stoc: 0 (Se poate comanda, livrarea va fi făcută când revine în stoc)</p>
+  <% end %>
+<% else %>
+  <% if product.stock > 0 %>
+    <p class="stock green">Stoc disponibil: <%= product.stock %></p>
+  <% else %>
+    <p class="stock red">Stoc: 0 (indisponibil)</p>
+  <% end %>
+<% end %>
+
 
     <div class="add-to-cart-form">
   <%= form_with url: add_cart_index_path, method: :post, local: true do %>
     <%= hidden_field_tag :product_id, product.id %>
-    <%= number_field_tag :quantity, 1, class: "qty-input", min: 1 %>
-    <%= submit_tag "Adaugă în coș", class: "add-to-cart-btn", disabled: product.track_inventory && product.stock <= 0 %>
+    <%= number_field_tag :quantity, 1, 
+      class: "qty-input", 
+      min: 1, 
+      max: (product.track_inventory ? nil : product.stock) %>
+
+    <%= submit_tag "Adaugă în coș", 
+      class: "add-to-cart-btn", 
+      disabled: (!product.track_inventory && product.stock <= 0) %>
+
   <% end %>
 </div>
 

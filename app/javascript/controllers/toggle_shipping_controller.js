@@ -4,10 +4,14 @@ export default class extends Controller {
   static targets = ["checkbox", "fields"]
 
   connect() {
-    this.toggle()
+    console.log("ToggleShipping controller CONECTAT! Checkbox găsit?", !!this.checkboxTarget, "Fields găsit?", !!this.fieldsTarget);  // Log să vezi dacă rulează
+
+    this.toggle();
   }
 
   toggle() {
+    console.log("Toggle apelat! Checked?", this.checkboxTarget.checked);  // Log starea
+
     if (this.checkboxTarget.checked) {
       this.fieldsTarget.style.display = "block"
     } else {

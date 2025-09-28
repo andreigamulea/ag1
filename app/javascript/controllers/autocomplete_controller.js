@@ -9,9 +9,14 @@ export default class extends Controller {
   static targets = ["input", "dropdown"]
 
   connect() {
+    console.log("Autocomplete CONNECTAT! ID input:", this.inputTarget.id, "Endpoint:", this.endpointValue, "Dropdown găsit?", !!this.dropdownTarget);  // Log conectare
+
     this.validSuggestions = []
 
-    if (!this.inputTarget || !this.dropdownTarget) return
+    if (!this.inputTarget || !this.dropdownTarget) {
+      console.error("Eroare: inputTarget sau dropdownTarget NU GĂSIT!");
+      return
+    }
 
     this.inputTarget.dataset.selected = "false"
 
@@ -25,9 +30,12 @@ export default class extends Controller {
     this.inputTarget.dataset.selected = "false"
 
     const isRomania = this.getTaraValue().toLowerCase() === "romania"
+    console.log("onInput: Query tastat:", query, "Is Romania?", isRomania, "ID input:", this.inputTarget.id);  // Log input și condiție
+
     if ((this.inputTarget.id.includes("judet") || this.inputTarget.id.includes("localitate")) && !isRomania) {
       this.dropdownTarget.innerHTML = ''
       this.dropdownTarget.style.display = 'none'
+      console.log("Dropdown ASCUNS – țara NU e Romania");
       return
     }
 
@@ -37,11 +45,16 @@ export default class extends Controller {
         const filterInput = document.getElementById(this.filterIdValue)
         const filterValue = filterInput?.value?.trim()
         if (filterValue) url += `&filter=${encodeURIComponent(filterValue)}`
+        console.log("Filter aplicat:", filterValue);  // Log filter
       }
+
+      console.log("Fetch URL cerut:", url);  // Log URL
 
       fetch(url)
         .then(res => res.json())
         .then(data => {
+          console.log("Date PRIMITE de la backend:", data);  // Log date primite
+
           this.validSuggestions = data
           this.dropdownTarget.innerHTML = ''
           if (data.length > 0) {
@@ -63,9 +76,11 @@ export default class extends Controller {
             this.dropdownTarget.style.display = 'none'
           }
         })
+        .catch(error => console.error("Eroare FETCH:", error));  // Log erori fetch
     } else {
       this.validSuggestions = []
       this.dropdownTarget.style.display = 'none'
+      console.log("Query prea scurt – dropdown ascuns");
     }
   }
 
@@ -74,6 +89,8 @@ export default class extends Controller {
       const selected = this.inputTarget.dataset.selected === "true"
       const isRomania = this.getTaraValue().toLowerCase() === "romania"
       const id = this.inputTarget.id
+
+      console.log("onBlur: Selected?", selected, "Is Romania?", isRomania, "ID:", id);  // Log blur
 
       if (!selected) {
         if (
@@ -97,6 +114,7 @@ export default class extends Controller {
   onClickOutside(event) {
     if (!this.dropdownTarget.contains(event.target) && event.target !== this.inputTarget) {
       this.dropdownTarget.style.display = 'none'
+      console.log("Click outside – dropdown ascuns");
     }
   }
 
