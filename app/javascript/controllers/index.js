@@ -6,5 +6,5 @@ import AutocompleteController from "./autocomplete_controller"
 application.register("autocomplete", AutocompleteController)
 import ToggleShippingController from "./toggle_shipping_controller"
 application.register("toggle-shipping", ToggleShippingController)
-
-
+import CategorySelectController from "./category_select_controller"
+application.register("category-select", CategorySelectController)
