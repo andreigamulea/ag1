@@ -1,5 +1,3 @@
-
-
 <%= form_with(model: product, local: true, html: { multipart: true }) do |form| %>
 
   <% if product.errors.any? %>
@@ -193,6 +191,7 @@
 
 
 
+
 <div class="mb-3" data-controller="category-select">
   <%= form.label :category_ids, "Categorii" %>
   <div id="category-options" class="d-flex flex-wrap gap-2 mb-2">
@@ -201,7 +200,6 @@
       <span class="badge category-badge <%= selected ? 'bg-primary' : 'bg-secondary' %> text-white"
             data-id="<%= category.id %>"
             data-category-select-target="badge"
-            data-action="click->category-select#toggle"  # Asta leagă click-ul la controller
             style="cursor: pointer;">
         <%= category.name %>
       </span>
@@ -339,26 +337,38 @@ document.addEventListener("turbo:load", () => {
 
 <script>
 document.addEventListener("turbo:load", () => {
-  // console.log("Turbo:load declanșat.");
-
+  console.log("Turbo:load s-a declanșat! Încep să atașez event listeners pentru categorii.");
+  
   const badges = document.querySelectorAll(".category-badge");
-  // console.log("Badge-uri găsite:", badges.length);
-
-  const hiddenInputsWrapper = document.getElementById("category-hidden-inputs");
-
-  function toggleBadge(event) {
-    // Logica ta de toggle aici (copiază din codul curat)
-    const badge = event.currentTarget;
-    const id = badge.dataset.id;
-    // ... restul ...
-  }
-
+  console.log("Număr de badge-uri găsite:", badges.length);  // Ar trebui să fie >0 dacă HTML-ul e încărcat
+  
   badges.forEach(badge => {
-    badge.removeEventListener("click", toggleBadge);  // Curăță vechi
-    badge.addEventListener("click", toggleBadge);  // Adaugă nou
-  });
+    badge.addEventListener("click", () => {
+      console.log("Click detectat pe badge cu ID:", badge.dataset.id);
+      
+      const id = badge.dataset.id;
+      const hiddenInputsWrapper = document.getElementById("category-hidden-inputs");
+      const existingInputs = hiddenInputsWrapper.querySelectorAll(`input[value='${id}']`);
 
-  // console.log("Listeners atașate.");
+      if (existingInputs.length > 0) {
+        existingInputs.forEach(input => input.remove());
+        badge.classList.remove("bg-primary");
+        badge.classList.add("bg-secondary");
+        console.log("Badge dezactivat:", id);
+      } else {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "product[category_ids][]";
+        input.value = id;
+        hiddenInputsWrapper.appendChild(input);
+        badge.classList.remove("bg-secondary");
+        badge.classList.add("bg-primary");
+        console.log("Badge activat:", id);
+      }
+    });
+  });
+  
+  console.log("Event listeners atașate pentru toate badge-urile.");
 });
 </script>
 
