@@ -200,6 +200,7 @@
       <span class="badge category-badge <%= selected ? 'bg-primary' : 'bg-secondary' %> text-white"
             data-id="<%= category.id %>"
             data-category-select-target="badge"
+            data-action="click->category-select#toggle"
             style="cursor: pointer;">
         <%= category.name %>
       </span>
@@ -207,7 +208,6 @@
   </div>
 
   <div id="category-hidden-inputs" data-category-select-target="hiddenInputsWrapper">
-    <!-- Input ascuns gol pentru a trimite category_ids ca [] -->
     <input type="hidden" name="product[category_ids][]" value="">
     <% product.category_ids.each do |cat_id| %>
       <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">
@@ -336,39 +336,34 @@ document.addEventListener("turbo:load", () => {
 </script>
 
 <script>
-document.addEventListener("turbo:load", () => {
-  console.log("Turbo:load s-a declanșat! Încep să atașez event listeners pentru categorii.");
-  
+document.addEventListener("DOMContentLoaded", () => {
   const badges = document.querySelectorAll(".category-badge");
-  console.log("Număr de badge-uri găsite:", badges.length);  // Ar trebui să fie >0 dacă HTML-ul e încărcat
-  
-  badges.forEach(badge => {
-    badge.addEventListener("click", () => {
-      console.log("Click detectat pe badge cu ID:", badge.dataset.id);
-      
-      const id = badge.dataset.id;
-      const hiddenInputsWrapper = document.getElementById("category-hidden-inputs");
-      const existingInputs = hiddenInputsWrapper.querySelectorAll(`input[value='${id}']`);
+  const hiddenInputsWrapper = document.getElementById("category-hidden-inputs");
 
-      if (existingInputs.length > 0) {
-        existingInputs.forEach(input => input.remove());
-        badge.classList.remove("bg-primary");
-        badge.classList.add("bg-secondary");
-        console.log("Badge dezactivat:", id);
-      } else {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "product[category_ids][]";
-        input.value = id;
-        hiddenInputsWrapper.appendChild(input);
-        badge.classList.remove("bg-secondary");
-        badge.classList.add("bg-primary");
-        console.log("Badge activat:", id);
-      }
-    });
+  function toggleBadge(event) {
+    const badge = event.currentTarget;
+    const id = badge.dataset.id;
+    const existingInputs = hiddenInputsWrapper.querySelectorAll(`input[value='${id}']`);
+
+    if (existingInputs.length > 0) {
+      existingInputs.forEach(input => input.remove());
+      badge.classList.remove("bg-primary");
+      badge.classList.add("bg-secondary");
+    } else {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "product[category_ids][]";
+      input.value = id;
+      hiddenInputsWrapper.appendChild(input);
+      badge.classList.remove("bg-secondary");
+      badge.classList.add("bg-primary");
+    }
+  }
+
+  badges.forEach(badge => {
+    badge.removeEventListener("click", toggleBadge);  // Opțional, dacă nu mai ai duplicates fără Turbo
+    badge.addEventListener("click", toggleBadge);
   });
-  
-  console.log("Event listeners atașate pentru toate badge-urile.");
 });
 </script>
 
