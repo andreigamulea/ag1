@@ -217,7 +217,7 @@ def autocomplete_tara
     logger.info "Autocomplete_tara - Query: '#{query}', Total taris: #{Tari.count}, Sample nume: #{Tari.pluck(:nume).first(5).inspect}, Results: #{results.inspect}"
     render json: results, status: :ok
   else
-    render json: [], status :ok
+    render json: [], status: :ok
   end
 end
 
@@ -236,14 +236,13 @@ def autocomplete_localitate
   query = params[:q].to_s.strip
   filter = params[:filter].to_s.strip # Județul selectat
   if query.present? && filter.present?
-    results = Localitati.where("denumire ILIKE ? AND denj ILIKE ?", "%#{query}%", "%#{filter}%").pluck(:denumire) # Added % for filter to make it case-insensitive
+    results = Localitati.where("denumire ILIKE ? AND denj ILIKE ?", "%#{query}%", "%#{filter}%").pluck(:denumire) # Made filter case-insensitive with %
     logger.info "Autocomplete_localitate - Query: '#{query}', Filter: '#{filter}', Total localitatis: #{Localitati.count}, Sample denumire: #{Localitati.pluck(:denumire).first(5).inspect}, Results: #{results.inspect}"
     render json: results, status: :ok
   else
     render json: [], status: :ok
   end
 end
-
 
 
 
