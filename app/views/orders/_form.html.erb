@@ -196,7 +196,7 @@
 
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("turbo:load", () => {
     function setupAutocomplete(inputId, dropdownId, endpoint, filterId = null, taraInputId = "tara_input") {
       const input = document.getElementById(inputId);
       const dropdown = document.getElementById(dropdownId);
@@ -223,8 +223,15 @@
             url += `&filter=${encodeURIComponent(filterValue)}`;
           }
           fetch(url)
-            .then((response) => response.json())
+            .then((response) => {
+              if (!response.ok) {
+                console.error("Fetch error: ", response.status);
+                throw new Error("Network response not ok");
+              }
+              return response.json();
+            })
             .then((data) => {
+              console.log("Received data for " + inputId + ": ", data); // Log to see what's returned
               validSuggestions = data; // Actualizăm lista sugestiilor valide
               if (data.length > 0) {
                 dropdown.style.display = 'block';
@@ -346,6 +353,8 @@
     });
   });
 </script>
+
+
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
