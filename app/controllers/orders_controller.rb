@@ -211,35 +211,38 @@ end
 
 
 def autocomplete_tara
-    query = params[:q].to_s.downcase.strip
-    if query.present?
-      results = Tari.where("LOWER(nume) LIKE ?", "%#{query}%").pluck(:nume)
-      render json: results, status: :ok
-    else
-      render json: [], status: :ok
-    end
+  query = params[:q].to_s.strip
+  if query.present?
+    results = Tari.where("nume ILIKE ?", "%#{query}%").pluck(:nume)
+    logger.info "Autocomplete_tara - Query: '#{query}', Total taris: #{Tari.count}, Sample nume: #{Tari.pluck(:nume).first(5).inspect}, Results: #{results.inspect}"
+    render json: results, status: :ok
+  else
+    render json: [], status: :ok
   end
-#
-  def autocomplete_judet
-    query = params[:q].to_s.downcase.strip
-    if query.present?
-      results = Judet.where("LOWER(denjud) LIKE ?", "%#{query}%").pluck(:denjud)
-      render json: results, status: :ok
-    else
-      render json: [], status: :ok
-    end
-  end
+end
 
-  def autocomplete_localitate
-    query = params[:q].to_s.downcase.strip
-    filter = params[:filter].to_s.downcase.strip # Județul selectat
-    if query.present? && filter.present?
-      results = Localitati.where("LOWER(denumire) LIKE ? AND LOWER(denj) = ?", "%#{query}%", filter).pluck(:denumire)
-      render json: results, status: :ok
-    else
-      render json: [], status: :ok
-    end
+def autocomplete_judet
+  query = params[:q].to_s.strip
+  if query.present?
+    results = Judet.where("denjud ILIKE ?", "%#{query}%").pluck(:denjud)
+    logger.info "Autocomplete_judet - Query: '#{query}', Total judets: #{Judet.count}, Sample denjud: #{Judet.pluck(:denjud).first(5).inspect}, Results: #{results.inspect}"
+    render json: results, status: :ok
+  else
+    render json: [], status: :ok
   end
+end
+
+def autocomplete_localitate
+  query = params[:q].to_s.strip
+  filter = params[:filter].to_s.strip # Județul selectat
+  if query.present? && filter.present?
+    results = Localitati.where("denumire ILIKE ? AND denj ILIKE ?", "%#{query}%", filter).pluck(:denumire)
+    logger.info "Autocomplete_localitate - Query: '#{query}', Filter: '#{filter}', Total localitatis: #{Localitati.count}, Sample denumire: #{Localitati.pluck(:denumire).first(5).inspect}, Results: #{results.inspect}"
+    render json: results, status: :ok
+  else
+    render json: [], status: :ok
+  end
+end
 
 
 
