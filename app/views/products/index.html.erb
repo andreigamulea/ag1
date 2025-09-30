@@ -6,34 +6,40 @@
   </div>
 
   <div class="table-wrapper">
-    <table class="styled-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nume</th>
-          <th>Preț</th>
-          <th>Stoc</th>
-          <th>Status</th>
-          <th>Acțiuni</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @products.each do |product| %>
-          <tr>
-            <td><%= product.id %></td>
-            <td><%= product.name %></td>
-            <td><%= number_to_currency(product.price, unit: "RON ") %></td>
-            <td><%= product.stock %></td>
-            <td><%= product.status.capitalize %></td>
-            <td class="table-actions">
-              <%= link_to "Detalii", product_path(product), class: "table-button neutral" %>
-              <%= link_to "Editează", edit_product_path(product), class: "table-button primary" %>
-              <%= link_to "Șterge", product_path(product), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi acest produs?" }, class: "table-button danger" %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+<table class="styled-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nume</th>
+      <th>Preț</th>
+      <th>Stoc</th>
+      <th>Status</th>
+      <th>Acțiuni</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @products.each do |product| %>
+      <tr>
+        <td><%= product.id %></td>
+        <td><%= product.name %></td>
+        <td><%= number_to_currency(product.price, unit: "RON ") %></td>
+        <td><%= product.stock %></td>
+        <td><%= product.status.capitalize %></td>
+        <td class="table-actions">
+          <%= link_to "Detalii", product_path(product), class: "table-button neutral" %>
+          <%= link_to "Editează", edit_product_path(product), class: "table-button primary" %>
+          <%= button_to "Șterge", product_path(product), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi acest produs?" }, class: "table-button danger", form: { class: "d-inline-block m-0" } %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+
+
+
+
+
   </div>
 </div>
 
