@@ -196,7 +196,7 @@
 
 
 <script>
-  document.addEventListener("turbo:load", () => {
+  document.addEventListener("DOMContentLoaded", () => {
     function setupAutocomplete(inputId, dropdownId, endpoint, filterId = null, taraInputId = "tara_input") {
       const input = document.getElementById(inputId);
       const dropdown = document.getElementById(dropdownId);
