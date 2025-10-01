@@ -16,7 +16,8 @@
 /storage_local/*
 !/storage_local/.keep
 
-
+server.crt
+server.key
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
