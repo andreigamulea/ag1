@@ -3,28 +3,48 @@
 
   <!-- Lista articolelor din coș -->
   <% if @cart_items.any? %>
-    <section class="cart-items">
-      <ul class="cart-item-list">
-        <% @cart_items.each do |item| %>
-          <li class="cart-item">
-            <div class="cart-item-details">
-              <span class="cart-item-name">
-                <%= link_to item[:product].name, product_path(item[:product]), class: "product-link" %>
-              </span>
-              <span class="cart-item-quantity"><%= item[:quantity] %> buc</span>
-              <span class="cart-item-price">
-                x <%= number_to_currency(item[:product].price, unit: "lei", format: "%n %u") %>
-              </span>
-              <span class="cart-item-subtotal">
-                = <%= number_to_currency(item[:subtotal], unit: "lei", format: "%n %u") %>
-              </span>
-            </div>
-            <%= button_to "X", remove_cart_index_path(product_id: item[:product].id), method: :post, class: "btn btn-danger cart-item-delete" %>
-          </li>
-        <% end %>
-      </ul>
-      <%= button_to "Golește", clear_cart_index_path, method: :post, class: "btn btn-subtle clear-cart-btn", data: { confirm: "Ești sigur că vrei să golești coșul?" } %>
-    </section>
+    <%= form_tag update_all_cart_index_path, method: :post, class: "cart-form", data: { turbo: false } do %>
+      <section class="cart-items">
+        <ul class="cart-item-list">
+          <% @cart_items.each do |item| %>
+            <li class="cart-item">
+              <div class="cart-item-details">
+                <span class="cart-item-name">
+                  <%= link_to item[:product].name, item[:product]&.persisted? ? carti_path(item[:product]) : root_path, class: "product-link", data: { turbo: false } %>
+                </span>
+                
+                <!-- Counter pentru cantitate -->
+                <div class="quantity-counter">
+                  <button type="button" class="qty-btn qty-minus" data-product-id="<%= item[:product].id %>">−</button>
+                  <%= number_field_tag "quantities[#{item[:product].id}]", 
+                      item[:quantity], 
+                      min: 1, 
+                      class: "qty-input",
+                      data: { product_id: item[:product].id } %>
+                  <button type="button" class="qty-btn qty-plus" data-product-id="<%= item[:product].id %>">+</button>
+                </div>
+                
+                <span class="cart-item-price">
+                  x <%= number_to_currency(item[:product].price, unit: "lei", format: "%n %u") %>
+                </span>
+                <span class="cart-item-subtotal">
+                  = <%= number_to_currency(item[:subtotal], unit: "lei", format: "%n %u") %>
+                </span>
+              </div>
+              <button type="button" 
+                      class="btn btn-danger cart-item-delete" 
+                      data-product-id="<%= item[:product].id %>"
+                      data-remove-product>X</button>
+            </li>
+          <% end %>
+        </ul>
+        
+        <!-- Butonul Actualizează Coșul mutat cât mai la dreapta -->
+        <div class="update-cart-container">
+          <%= submit_tag "ACTUALIZEAZĂ COȘUL", class: "btn btn-update" %>
+        </div>
+      </section>
+    <% end %>
   <% else %>
     <p class="empty-cart">Coșul este gol.</p>
   <% end %>
@@ -206,7 +226,7 @@
     background: #adb5bd;
     border: 1px solid #adb5bd;
     color: #333;
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 5px;
     font-size: 12px;
     font-weight: normal;
@@ -220,10 +240,31 @@
     color: #333;
 }
 
-.cart-container .clear-cart-btn {
-    display: block;
-    margin: 10px 0 10px auto;
-    width: max-content;
+.cart-container .btn-update {
+    background: #8b0000;
+    border: 1px solid #8b0000;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.cart-container .btn-update:hover {
+    background: #6d0000;
+    border-color: #6d0000;
+}
+
+.cart-container .update-cart-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    margin-left: auto;
+    width: 100px;
+    margin-right: 8px; /* Potrivește cu margin-left al butonului X */
 }
 
 .cart-container .cart-items {
@@ -271,10 +312,45 @@
     text-decoration: underline;
 }
 
-.cart-container .cart-item-quantity {
-    font-size: 13px;
-    color: #555;
-    min-width: 60px;
+.cart-container .quantity-counter {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 120px;
+}
+
+.cart-container .qty-btn {
+    background: #8b0000;
+    border: 1px solid #8b0000;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease-in-out;
+}
+
+.cart-container .qty-btn:hover {
+    background: #6d0000;
+}
+
+.cart-container .qty-input {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #8b0000;
+    border-radius: 4px;
+    padding: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.cart-container .qty-input:focus {
+    outline: 2px solid #8b0000;
 }
 
 .cart-container .cart-item-price {
@@ -378,7 +454,8 @@
     .cart-container .cart-item-details {
         flex-direction: column;
         align-items: flex-start;
-        gap: 5px;
+        gap: 10px;
+        width: 100%;
     }
 
     .cart-container .cart-item-name {
@@ -386,8 +463,9 @@
         flex: 1 1 100%;
     }
 
-    .cart-container .cart-item-quantity {
-        font-size: 12px;
+    .cart-container .quantity-counter {
+        min-width: 100%;
+        justify-content: flex-start;
     }
 
     .cart-container .cart-item-price {
@@ -405,8 +483,14 @@
         min-width: unset;
     }
 
-    .cart-container .clear-cart-btn {
-        margin: 10px auto;
+    .cart-container .update-cart-container {
+        flex-direction: column;
+        align-items: center;
+        padding-right: 0; /* Elimină padding-ul pe ecrane mici */
+    }
+
+    .cart-container .btn-update {
+        width: 100%;
     }
 
     .cart-container .cart-summary {
@@ -448,10 +532,142 @@
 
     .cart-container .btn-success,
     .cart-container .btn-danger,
-    .cart-container .btn-subtle,
+    .cart-container .btn-update,
     .cart-container .btn-primary {
         width: 100%;
         text-align: center;
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('=== CART SCRIPT START ===');
+
+  // Funcționalitate pentru butoanele +/-
+  const qtyMinusButtons = document.querySelectorAll('.qty-minus');
+  const qtyPlusButtons = document.querySelectorAll('.qty-plus');
+
+  qtyMinusButtons.forEach((btn, index) => {
+    const newButton = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newButton, btn);
+    console.log(`Minus Button ${index}:`, newButton, 'Product ID:', newButton.dataset.productId);
+
+    newButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const productId = this.dataset.productId;
+      const input = document.querySelector(`input[data-product-id="${productId}"]`);
+      const currentValue = parseInt(input.value) || 1;
+      console.log(`Minus clicked for Product ID ${productId}, Current Value: ${currentValue}`);
+      if (currentValue > 1) {
+        input.value = currentValue - 1;
+        console.log(`New Value: ${input.value}`);
+      }
+    });
+  });
+
+  qtyPlusButtons.forEach((btn, index) => {
+    const newButton = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newButton, btn);
+    console.log(`Plus Button ${index}:`, newButton, 'Product ID:', newButton.dataset.productId);
+
+    newButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const productId = this.dataset.productId;
+      const input = document.querySelector(`input[data-product-id="${productId}"]`);
+      const currentValue = parseInt(input.value) || 1;
+      console.log(`Plus clicked for Product ID ${productId}, Current Value: ${currentValue}`);
+      input.value = currentValue + 1;
+      console.log(`New Value: ${input.value}`);
+    });
+  });
+
+  // Submit cu AJAX pentru actualizarea coșului
+  const form = document.querySelector('.cart-form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+      fetch(this.action, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Accept': 'application/json'
+        },
+        body: formData,
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert('A apărut o eroare. Vă rugăm încercați din nou.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('A apărut o eroare. Vă rugăm încercați din nou.');
+      });
+    });
+  }
+
+  // Funcționalitate pentru ștergere produs cu AJAX fără confirmare
+  console.log('Initializing remove buttons...');
+  const removeButtons = document.querySelectorAll('[data-remove-product]');
+  console.log('Found remove buttons:', removeButtons.length);
+
+  removeButtons.forEach((btn, index) => {
+    const newButton = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newButton, btn);
+    newButton.removeAttribute('data-confirm');
+    console.log(`Remove Button ${index}:`, newButton, 'Product ID:', newButton.dataset.productId);
+
+    newButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const productId = this.dataset.productId;
+      console.log('=== CLICK PE X ===');
+      console.log('Product ID:', productId);
+      console.log('Button:', this);
+
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      console.log('CSRF Token:', csrfToken);
+      console.log('Trimit request pentru ștergere produs...');
+
+      fetch('/cart/remove', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ product_id: productId }),
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        console.log('Remove Response status:', response.status);
+        console.log('Remove Response ok:', response.ok);
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert('A apărut o eroare la ștergerea produsului. Vă rugăm încercați din nou.');
+        }
+      })
+      .catch(error => {
+        console.error('Remove Error:', error);
+        alert('A apărut o eroare la ștergerea produsului. Vă rugăm încercați din nou.');
+      });
+    });
+  });
+});
+</script>

@@ -16,6 +16,7 @@ resources :coupons
   resources :cart, only: [:index] do
     post :add, on: :collection
     post :update, on: :collection
+    post :update_all, on: :collection
     post :remove, on: :collection
     post :clear, on: :collection
   end
