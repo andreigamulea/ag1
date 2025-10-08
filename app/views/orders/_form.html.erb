@@ -61,36 +61,29 @@
       <div class="col"><%= f.label :email, "Email" %><br><%= f.email_field :email, required: true %></div>
     </div>
 
-<div class="mb-3">
-  <%= f.label :country, "Țara", class: "form-label" %>
-  <div class="position-relative">
-    <%= f.text_field :country, class: "form-control", id: "tara_input", placeholder: "Selectează țara...", autocomplete: "off" %>
-    <div id="tara_dropdown" class="dropdown-menu w-100 shadow"></div>
-  </div>
-</div>
+    <div class="mb-3">
+      <%= f.label :country, "Țara", class: "form-label" %>
+      <div class="position-relative">
+        <%= f.text_field :country, class: "form-control", id: "tara_input", placeholder: "Click pentru a schimba țara...", autocomplete: "off", value: "Romania" %>
+        <div id="tara_dropdown" class="dropdown-menu w-100 shadow"></div>
+      </div>
+    </div>
 
-<div class="mb-3">
-  <%= f.label :county, "Județ", class: "form-label" %>
-  <div class="position-relative">
-    <%= f.text_field :county, class: "form-control", id: "judet_input", placeholder: "Selectează județul...", autocomplete: "off", disabled: true %>
-    <div id="judet_dropdown" class="dropdown-menu w-100 shadow"></div>
-  </div>
-</div>
+    <div class="mb-3">
+      <%= f.label :county, "Județ", class: "form-label" %>
+      <div class="position-relative">
+        <%= f.text_field :county, class: "form-control", id: "judet_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: false %>
+        <div id="judet_dropdown" class="dropdown-menu w-100 shadow"></div>
+      </div>
+    </div>
 
-<div class="mb-3">
-  <%= f.label :city, "Localitate", class: "form-label" %>
-  <div class="position-relative">
-    <%= f.text_field :city, class: "form-control", id: "localitate_input", placeholder: "Selectează localitatea...", autocomplete: "off", disabled: true %>
-    <div id="localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
-  </div>
-</div>
-
-
-
-
-
-
-
+    <div class="mb-3">
+      <%= f.label :city, "Localitate", class: "form-label" %>
+      <div class="position-relative">
+        <%= f.text_field :city, class: "form-control", id: "localitate_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: true %>
+        <div id="localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
+      </div>
+    </div>
 
     <div class="row">
       <div class="col"><%= f.label :postal_code, "Cod poștal" %><br><%= f.text_field :postal_code, required: true %></div>
@@ -109,76 +102,65 @@
   <hr>
 
   <div data-controller="toggle-shipping">
-  <div style="margin: 20px 0;">
-
-
-    <div class="field">
-  <%= f.check_box :use_different_shipping, id: "toggle-shipping" %>
-  <%= f.label :use_different_shipping, "Adresa de livrare este diferită" %>
-</div>
-
-
-
-
-
-  </div>
-
-  <div id="shipping-fields" data-toggle-shipping-target="fields" style="display: none;">
-    <fieldset>
-      <legend><strong>Date de livrare</strong></legend>
-
-      <div class="row">
-        <div class="col"><%= f.label :shipping_first_name, "Prenume livrare" %><br><%= f.text_field :shipping_first_name %></div>
-        <div class="col"><%= f.label :shipping_last_name, "Nume livrare" %><br><%= f.text_field :shipping_last_name %></div>
+    <div style="margin: 20px 0;">
+      <div class="field">
+        <%= f.check_box :use_different_shipping, id: "toggle-shipping" %>
+        <%= f.label :use_different_shipping, "Adresa de livrare este diferită" %>
       </div>
-
-      <div class="row">
-        <div class="col"><%= f.label :shipping_company_name, "Companie livrare" %><br><%= f.text_field :shipping_company_name %></div>
-      </div>
-
-      <div class="mb-3">
-    <%= f.label :shipping_country, "Țara livrare", class: "form-label" %>
-    <div class="position-relative">
-      <%= f.text_field :shipping_country, class: "form-control", id: "shipping_tara_input", placeholder: "Selectează țara...", autocomplete: "off" %>
-      <div id="shipping_tara_dropdown" class="dropdown-menu w-100 shadow"></div>
     </div>
-  </div>
 
-  <div class="mb-3">
-    <%= f.label :shipping_county, "Județ livrare", class: "form-label" %>
-    <div class="position-relative">
-      <%= f.text_field :shipping_county, class: "form-control", id: "shipping_judet_input", placeholder: "Selectează județul...", autocomplete: "off", disabled: true %>
-      <div id="shipping_judet_dropdown" class="dropdown-menu w-100 shadow"></div>
+    <div id="shipping-fields" data-toggle-shipping-target="fields" style="display: none;">
+      <fieldset>
+        <legend><strong>Date de livrare</strong></legend>
+
+        <div class="row">
+          <div class="col"><%= f.label :shipping_first_name, "Prenume livrare" %><br><%= f.text_field :shipping_first_name %></div>
+          <div class="col"><%= f.label :shipping_last_name, "Nume livrare" %><br><%= f.text_field :shipping_last_name %></div>
+        </div>
+
+        <div class="row">
+          <div class="col"><%= f.label :shipping_company_name, "Companie livrare" %><br><%= f.text_field :shipping_company_name %></div>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :shipping_country, "Țara livrare", class: "form-label" %>
+          <div class="position-relative">
+            <%= f.text_field :shipping_country, class: "form-control", id: "shipping_tara_input", placeholder: "Click pentru a schimba țara...", autocomplete: "off", value: "Romania" %>
+            <div id="shipping_tara_dropdown" class="dropdown-menu w-100 shadow"></div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :shipping_county, "Județ livrare", class: "form-label" %>
+          <div class="position-relative">
+            <%= f.text_field :shipping_county, class: "form-control", id: "shipping_judet_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: false %>
+            <div id="shipping_judet_dropdown" class="dropdown-menu w-100 shadow"></div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :shipping_city, "Localitate livrare", class: "form-label" %>
+          <div class="position-relative">
+            <%= f.text_field :shipping_city, class: "form-control", id: "shipping_localitate_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: true %>
+            <div id="shipping_localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col"><%= f.label :shipping_postal_code, "Cod poștal livrare" %><br><%= f.text_field :shipping_postal_code %></div>
+        </div>
+
+        <div class="row">
+          <div class="col"><%= f.label :shipping_street, "Stradă livrare" %><br><%= f.text_field :shipping_street %></div>
+          <div class="col"><%= f.label :shipping_street_number, "Număr livrare" %><br><%= f.text_field :shipping_street_number %></div>
+        </div>
+
+        <div class="row">
+          <div class="col"><%= f.label :shipping_block_details, "Bloc/Etaj/Apt livrare" %><br><%= f.text_field :shipping_block_details %></div>
+          <div class="col"><%= f.label :shipping_phone, "Telefon livrare" %><br><%= f.text_field :shipping_phone %></div>
+        </div>
+      </fieldset>
     </div>
-  </div>
-
-  <div class="mb-3">
-    <%= f.label :shipping_city, "Localitate livrare", class: "form-label" %>
-    <div class="position-relative">
-      <%= f.text_field :shipping_city, class: "form-control", id: "shipping_localitate_input", placeholder: "Selectează localitatea...", autocomplete: "off", disabled: true %>
-      <div id="shipping_localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
-    </div>
-  </div>
-
-
-
-
-
-
-      <div class="row">
-        <div class="col"><%= f.label :shipping_postal_code, "Cod poștal livrare" %><br><%= f.text_field :shipping_postal_code %></div>
-      </div>
-
-      <div class="row">
-        <div class="col"><%= f.label :shipping_street, "Stradă livrare" %><br><%= f.text_field :shipping_street %></div>
-        <div class="col"><%= f.label :shipping_street_number, "Număr livrare" %><br><%= f.text_field :shipping_street_number %></div>
-      </div>
-
-      <div class="row">
-        <div class="col"><%= f.label :shipping_block_details, "Bloc/Etaj/Apt livrare" %><br><%= f.text_field :shipping_block_details %></div>
-        <div class="col"><%= f.label :shipping_phone, "Telefon livrare" %><br><%= f.text_field :shipping_phone %></div>
-      </div>
-    </fieldset>
   </div>
 
   <div class="row">
@@ -193,49 +175,18 @@
   </div>
 <% end %>
 
-
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     function setupAutocomplete(inputId, dropdownId, endpoint, filterId = null, taraInputId = "tara_input") {
       const input = document.getElementById(inputId);
       const dropdown = document.getElementById(dropdownId);
       let validSuggestions = [];
-      let allOptions = []; // Pentru a stoca toate opțiunile
-      let lastFilter = null;
+      let allOptions = [];
 
-      function updateDropdown(query, filterValue = null, showAll = false) {
-        const taraInput = document.getElementById(taraInputId);
-        const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
-
-        if ((inputId.endsWith("judet_input") || inputId.endsWith("localitate_input")) && !isRomania) {
-          dropdown.innerHTML = '';
-          dropdown.style.display = 'none';
-          return;
-        }
-
+      function updateDropdown(query, filterValue = null) {
         dropdown.innerHTML = '';
         
-        // Dacă showAll este true, avem opțiuni și filtrul nu s-a schimbat, le afișăm
-        if (showAll && allOptions.length > 0 && filterValue === lastFilter) {
-          displayOptions(allOptions);
-          return;
-        }
-
-        // Pentru a obține toate rezultatele, folosim strategii diferite
-        let searchQuery = query;
-        if (showAll || query.length === 0) {
-          // Pentru județe, încercăm diverse strategii
-          if (inputId.endsWith("judet_input")) {
-            // Încercăm fără query sau cu un caracter comun în județe
-            searchQuery = '*'; // Sau poți încerca '', 'u', 'i', etc.
-          } else if (inputId.endsWith("localitate_input")) {
-            searchQuery = '*';
-          } else {
-            searchQuery = 'a'; // Pentru țări folosim 'a'
-          }
-        }
-
-        let url = `${endpoint}?q=${encodeURIComponent(searchQuery)}`;
+        let url = `${endpoint}?q=${encodeURIComponent(query)}`;
         if (filterValue) {
           url += `&filter=${encodeURIComponent(filterValue)}`;
         }
@@ -251,7 +202,7 @@
           .then((data) => {
             console.log("Received data for " + inputId + ": ", data);
             
-            // Pentru țară, punem România prima
+            // Pentru țară, pune România prima
             if (inputId.endsWith("tara_input")) {
               const romaniaIndex = data.findIndex(item => item.toLowerCase() === "romania");
               if (romaniaIndex > -1) {
@@ -261,8 +212,7 @@
             }
             
             validSuggestions = data;
-            allOptions = data; // Salvăm toate opțiunile
-            lastFilter = filterValue;
+            allOptions = data;
             displayOptions(data);
           })
           .catch((error) => console.error("Eroare la încărcarea sugestiilor:", error));
@@ -290,90 +240,89 @@
         }
       }
 
-      // La click în input, arată toate opțiunile
-      input.addEventListener('click', () => {
-        const filterValue = filterId ? document.getElementById(filterId)?.value.trim() : null;
-        
-        // Șterge valoarea existentă când dai click (pentru a putea reselecta)
-        const taraInput = document.getElementById(taraInputId);
-        const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
-        
-        if (inputId.endsWith("tara_input")) {
-          input.value = ''; // Resetează pentru a putea selecta din nou
+      // Pentru ȚARĂ: click pentru a deschide lista
+      if (inputId.endsWith("tara_input")) {
+        input.addEventListener('click', () => {
+          input.value = '';
           disableNextFields(inputId);
-        } else if (isRomania && (inputId.endsWith("judet_input") || inputId.endsWith("localitate_input"))) {
-          input.value = ''; // Resetează pentru a putea selecta din nou
-          disableNextFields(inputId);
-        }
-        
-        if (input.value.trim() === '') {
-          updateDropdown('', filterValue, true);
-        } else {
-          updateDropdown(input.value.trim(), filterValue, false);
-        }
-      });
+          updateDropdown('a'); // Încarcă toate țările
+        });
 
-      // La focus, arată toate opțiunile
-      input.addEventListener('focus', () => {
-        const filterValue = filterId ? document.getElementById(filterId)?.value.trim() : null;
-        
-        // Dacă e România și județ/localitate, arată lista
+        input.addEventListener('focus', () => {
+          if (input.value === '' || input.value === 'Romania') {
+            updateDropdown('a');
+          }
+        });
+
+        input.addEventListener('blur', () => {
+          setTimeout(() => {
+            if (!validSuggestions.includes(input.value)) {
+              input.value = 'Romania'; // Revine la România dacă nu e selectat nimic
+              enableNextFields(inputId, 'Romania');
+            }
+            dropdown.style.display = 'none';
+          }, 200);
+        });
+
+        // Blochează tastarea pentru țară
+        input.addEventListener('keydown', (e) => {
+          e.preventDefault();
+        });
+      }
+
+      // Pentru JUDEȚ și LOCALITATE
+      if (inputId.endsWith("judet_input") || inputId.endsWith("localitate_input")) {
         const taraInput = document.getElementById(taraInputId);
-        const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
         
-        if (inputId.endsWith("tara_input") || (isRomania && (inputId.endsWith("judet_input") || inputId.endsWith("localitate_input")))) {
-          updateDropdown('', filterValue, true);
-        } else if (input.value.trim() === '') {
-          updateDropdown('', filterValue, true);
-        }
-      });
-
-      // Când utilizatorul tastează
-      input.addEventListener('input', () => {
-        const taraInput = document.getElementById(taraInputId);
-        const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
-        
-        // BLOCHEAZĂ tastarea pentru țară și pentru România la județ și localitate
-        if (inputId.endsWith("tara_input") || (isRomania && (inputId.endsWith("judet_input") || inputId.endsWith("localitate_input")))) {
-          // Previne orice tastare - doar selecție din listă
-          input.value = ''; // Resetează imediat orice încercare de tastare
-          return;
-        }
-        
-        // Pentru alte cazuri, permite tastare și filtrare
-        const query = input.value.trim();
-        const filterValue = filterId ? document.getElementById(filterId)?.value.trim() : null;
-        
-        if (query === '') {
-          updateDropdown('', filterValue, true);
-        } else {
-          const filtered = allOptions.filter(item => 
-            item.toLowerCase().includes(query.toLowerCase())
-          );
-          validSuggestions = filtered;
-          displayOptions(filtered);
-        }
-      });
-
-      // Când se pierde focalizarea
-      input.addEventListener('blur', () => {
-        setTimeout(() => {
-          // Pentru țări și județe/localități din România, verificăm lista
-          const taraInput = document.getElementById(taraInputId);
+        input.addEventListener('input', () => {
           const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
           
-          // Validare STRICTĂ pentru țară și pentru România - OBLIGATORIU din listă
-          if (inputId.endsWith("tara_input") || (isRomania && (inputId.endsWith("judet_input") || inputId.endsWith("localitate_input")))) {
-            if (!validSuggestions.includes(input.value)) {
-              input.value = ''; // Șterge dacă nu e din listă
+          // Pentru ROMÂNIA: comportament cu max 2 caractere
+          if (isRomania) {
+            let value = input.value;
+            
+            // Limitează la 2 caractere
+            if (value.length > 2) {
+              input.value = value.substring(0, 2);
+              return;
+            }
+            
+            // Dacă are 1-2 caractere, filtrează lista
+            if (value.length > 0) {
+              const filterValue = filterId ? document.getElementById(filterId)?.value.trim() : null;
+              updateDropdown(value, filterValue);
+            } else {
+              // Dacă e gol, arată toate
+              const filterValue = filterId ? document.getElementById(filterId)?.value.trim() : null;
+              updateDropdown('*', filterValue);
+            }
+          } else {
+            // Pentru ALTE ȚĂRI: nu face nimic special, permite tastare liberă
+            // Nu încarcă dropdown, doar lasă utilizatorul să scrie liber
+          }
+        });
+
+        // La focus, pentru România arată toate opțiunile
+        input.addEventListener('focus', () => {
+          const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
+          if (isRomania) {
+            const filterValue = filterId ? document.getElementById(filterId)?.value.trim() : null;
+            updateDropdown('*', filterValue);
+          }
+        });
+
+        // La blur, validează selecția DOAR pentru România
+        input.addEventListener('blur', () => {
+          setTimeout(() => {
+            const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
+            if (isRomania && !validSuggestions.includes(input.value)) {
+              input.value = '';
               disableNextFields(inputId);
             }
-          }
-          // Pentru alte țări (non-România), permitem input liber pentru județ și localitate
-          
-          dropdown.style.display = 'none';
-        }, 200);
-      });
+            dropdown.style.display = 'none';
+          }, 200);
+        });
+      }
 
       // Click în afara dropdown-ului
       document.addEventListener('click', (event) => {
@@ -391,23 +340,21 @@
         const localitateInput = document.getElementById(`${prefix}localitate_input`);
         
         if (tara === "romania") {
-          // Pentru România, activăm județul cu autocomplete și READONLY pentru a preveni tastarea
+          // Pentru România: autocomplete cu max 2 caractere
           judetInput.disabled = false;
-          judetInput.readOnly = true; // READONLY = doar click și selecție
+          judetInput.readOnly = false;
           localitateInput.disabled = true;
-          localitateInput.readOnly = true;
+          localitateInput.readOnly = false;
           judetInput.value = "";
           localitateInput.value = "";
-          judetInput.placeholder = "Click pentru a selecta județul...";
-          localitateInput.placeholder = "Click pentru a selecta localitatea...";
-          
-          // Stilizare pentru a arăta că e clickable, nu editabil
-          judetInput.style.cursor = "pointer";
-          localitateInput.style.cursor = "pointer";
+          judetInput.placeholder = "Tastează max 2 litere și selectează...";
+          localitateInput.placeholder = "Tastează max 2 litere și selectează...";
+          judetInput.style.cursor = "text";
+          localitateInput.style.cursor = "text";
           judetInput.style.backgroundColor = "#fff";
           localitateInput.style.backgroundColor = "#fff";
         } else {
-          // Pentru alte țări, activăm ambele câmpuri cu input liber
+          // Pentru alte țări: input liber, fără autocomplete
           judetInput.disabled = false;
           judetInput.readOnly = false;
           localitateInput.disabled = false;
@@ -424,15 +371,17 @@
       } else if (inputId.endsWith("judet_input")) {
         const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
         const localitateInput = document.getElementById(`${prefix}localitate_input`);
-        localitateInput.disabled = false;
-        localitateInput.value = "";
-        
-        // Verifică dacă e România pentru a seta readonly
         const taraInput = document.getElementById(prefix ? `${prefix}tara_input` : "tara_input");
         const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
+        
+        localitateInput.disabled = false;
+        localitateInput.value = "";
+        localitateInput.style.cursor = "text";
+        
         if (isRomania) {
-          localitateInput.readOnly = true;
-          localitateInput.style.cursor = "pointer";
+          localitateInput.placeholder = "Tastează max 2 litere și selectează...";
+        } else {
+          localitateInput.placeholder = "Introduceți localitatea...";
         }
       }
     }
@@ -440,11 +389,17 @@
     function disableNextFields(inputId) {
       if (inputId.endsWith("tara_input")) {
         const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
-        document.getElementById(`${prefix}judet_input`).disabled = true;
-        document.getElementById(`${prefix}localitate_input`).disabled = true;
+        const judetInput = document.getElementById(`${prefix}judet_input`);
+        const localitateInput = document.getElementById(`${prefix}localitate_input`);
+        judetInput.disabled = true;
+        judetInput.value = "";
+        localitateInput.disabled = true;
+        localitateInput.value = "";
       } else if (inputId.endsWith("judet_input")) {
         const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
-        document.getElementById(`${prefix}localitate_input`).disabled = true;
+        const localitateInput = document.getElementById(`${prefix}localitate_input`);
+        localitateInput.disabled = true;
+        localitateInput.value = "";
       }
     }
 
@@ -453,13 +408,28 @@
       const judetInput = document.getElementById(`${prefix}judet_input`);
       const localitateInput = document.getElementById(`${prefix}localitate_input`);
 
-      if (taraInput.value.trim()) {
-        const tara = taraInput.value.trim().toLowerCase();
-        judetInput.disabled = tara !== "romania";
-        if (tara === "romania" && judetInput.value.trim()) {
-          localitateInput.disabled = false;
-        }
+      // Setează România by default
+      if (!taraInput.value || taraInput.value === '') {
+        taraInput.value = "Romania";
       }
+      
+      // Activează județul pentru România
+      const tara = taraInput.value.trim().toLowerCase();
+      if (tara === "romania") {
+        judetInput.disabled = false;
+        judetInput.placeholder = "Tastează max 2 litere și selectează...";
+        localitateInput.disabled = true;
+        localitateInput.placeholder = "Tastează max 2 litere și selectează...";
+      } else if (tara) {
+        judetInput.disabled = false;
+        localitateInput.disabled = false;
+        judetInput.placeholder = "Introduceți județul/regiunea...";
+        localitateInput.placeholder = "Introduceți localitatea...";
+      }
+      
+      // Țara poate fi schimbată prin click
+      taraInput.style.cursor = "pointer";
+      taraInput.style.backgroundColor = "#f8f9fa";
     }
 
     // Configurează autocomplete pentru Facturare
@@ -472,30 +442,9 @@
     setupAutocomplete("shipping_judet_input", "shipping_judet_dropdown", "/autocomplete_judet", null, "shipping_tara_input");
     setupAutocomplete("shipping_localitate_input", "shipping_localitate_dropdown", "/autocomplete_localitate", "shipping_judet_input", "shipping_tara_input");
 
-    // Setează câmpurile pentru țară ca read-only și clickable
-    const taraInputs = [document.getElementById("tara_input"), document.getElementById("shipping_tara_input")];
-    taraInputs.forEach(taraInput => {
-      if (taraInput) {
-        taraInput.readOnly = true;
-        taraInput.style.cursor = "pointer";
-        taraInput.placeholder = "Click pentru a selecta țara...";
-      }
-    });
-
-    // Inițializează starea câmpurilor la load
+    // Inițializează starea câmpurilor la load cu România by default
     initializeFields();
     initializeFields("shipping_");
-
-    // Gestionăm activarea/dezactivarea în funcție de țară
-    const taraInput = document.getElementById("tara_input");
-    taraInput.addEventListener("input", function () {
-      enableNextFields("tara_input", taraInput.value);
-    });
-
-    const shippingTaraInput = document.getElementById("shipping_tara_input");
-    shippingTaraInput.addEventListener("input", function () {
-      enableNextFields("shipping_tara_input", shippingTaraInput.value);
-    });
   });
 </script>
 
