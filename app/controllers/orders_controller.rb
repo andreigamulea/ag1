@@ -224,7 +224,7 @@ end
 def autocomplete_judet
   query = params[:q].to_s.strip
   if query.present? && query != '*'
-    results = Judet.where("denjud ILIKE ?", "%#{query}%").pluck(:denjud)
+    results = Judet.where("denjud ILIKE ?", "#{query}%").pluck(:denjud)
   else
     # Returnează toate județele când query e gol sau '*'
     results = Judet.order(:denjud).pluck(:denjud)
@@ -239,7 +239,7 @@ def autocomplete_localitate
   
   if filter.present?
     if query.present? && query != '*'
-      results = Localitati.where("denumire ILIKE ? AND denj ILIKE ?", "%#{query}%", "%#{filter}%").pluck(:denumire)
+      results = Localitati.where("denumire ILIKE ? AND denj ILIKE ?", "#{query}%", "%#{filter}%").pluck(:denumire)
     else
       # Returnează toate localitățile din județul respectiv
       results = Localitati.where("denj ILIKE ?", "%#{filter}%").order(:denumire).pluck(:denumire)
