@@ -223,27 +223,33 @@ end
 
 def autocomplete_judet
   query = params[:q].to_s.strip
-  if query.present?
+  if query.present? && query != '*'
     results = Judet.where("denjud ILIKE ?", "%#{query}%").pluck(:denjud)
-    logger.info "Autocomplete_judet - Query: '#{query}', Total judets: #{Judet.count}, Sample denjud: #{Judet.pluck(:denjud).first(5).inspect}, Results: #{results.inspect}"
-    render json: results, status: :ok
   else
-    render json: [], status: :ok
+    # Returnează toate județele când query e gol sau '*'
+    results = Judet.order(:denjud).pluck(:denjud)
   end
+  logger.info "Autocomplete_judet - Query: '#{query}', Total judets: #{Judet.count}, Results count: #{results.count}"
+  render json: results, status: :ok
 end
 
 def autocomplete_localitate
   query = params[:q].to_s.strip
   filter = params[:filter].to_s.strip # Județul selectat
-  if query.present? && filter.present?
-    results = Localitati.where("denumire ILIKE ? AND denj ILIKE ?", "%#{query}%", "%#{filter}%").pluck(:denumire) # Made filter case-insensitive with %
-    logger.info "Autocomplete_localitate - Query: '#{query}', Filter: '#{filter}', Total localitatis: #{Localitati.count}, Sample denumire: #{Localitati.pluck(:denumire).first(5).inspect}, Results: #{results.inspect}"
+  
+  if filter.present?
+    if query.present? && query != '*'
+      results = Localitati.where("denumire ILIKE ? AND denj ILIKE ?", "%#{query}%", "%#{filter}%").pluck(:denumire)
+    else
+      # Returnează toate localitățile din județul respectiv
+      results = Localitati.where("denj ILIKE ?", "%#{filter}%").order(:denumire).pluck(:denumire)
+    end
+    logger.info "Autocomplete_localitate - Query: '#{query}', Filter: '#{filter}', Results count: #{results.count}"
     render json: results, status: :ok
   else
     render json: [], status: :ok
   end
 end
-
 
 
 

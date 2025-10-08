@@ -22,13 +22,15 @@
             <td><%= category.name %></td>
             <td><%= category.slug %></td>
             <td class="table-actions">
-              <%= link_to "Vezi", show_standalone_category_products_path(id: category.id), class: "table-button neutral" %>
-              <%= link_to "Editare", edit_standalone_category_products_path(id: category.id), class: "table-button primary" %>
-              <%= link_to "Ștergere", delete_standalone_category_products_path(id: category.id),
-                  method: :delete,
-                  data: { confirm: "Ești sigur că vrei să ștergi această categorie?" },
-                  class: "table-button danger" %>
-            </td>
+  <%= link_to "Vezi", show_standalone_category_products_path(id: category.id), class: "table-button neutral" %>
+  <%= link_to "Editare", edit_standalone_category_products_path(id: category.id), class: "table-button primary" %>
+  <%= button_to "Ștergere", delete_standalone_category_products_path(id: category.id),
+        method: :delete,
+        data: { confirm: "Ești sigur că vrei să ștergi această categorie?" },
+        class: "table-button danger",
+        form: { style: "display:inline-block;" } %>
+</td>
+
           </tr>
         <% end %>
       </tbody>
