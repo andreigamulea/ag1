@@ -53,6 +53,8 @@ end
 
 
 
+# În OrdersController, înlocuiește metoda create cu aceasta (cu debugging îmbunătățit):
+
 def create
   @order = Order.new(order_params)
   @order.user = current_user if user_signed_in?
@@ -61,6 +63,9 @@ def create
   @order.use_different_shipping = params[:order][:use_different_shipping]
 
   apply_coupon_if_present
+
+  Rails.logger.debug "=== CREATE ORDER DEBUG ==="
+  Rails.logger.debug "Coupon aplicat: #{@order.coupon.present? ? @order.coupon.code : 'NONE'}"
 
   # Copiem adresa de facturare în adresa de livrare dacă nu e bifată opțiunea
   unless @order.use_different_shipping == "1"
@@ -103,19 +108,44 @@ def create
     render :new, status: :unprocessable_entity and return
   end
 
+  # === Calculează subtotalul produselor (înainte de discount și transport)
+  subtotal = @order.order_items.sum(&:total_price)
+  Rails.logger.debug "Subtotal produse: #{subtotal}"
+
   # === Adaugă linia de discount dacă există cupon
   if @order.coupon.present?
-    subtotal = @order.order_items.sum(&:total_price)
+    coupon = @order.coupon
+    Rails.logger.debug "Procesare cupon: #{coupon.code}"
 
-    discount_value =
-      if @order.coupon.discount_type == "percentage"
-        (subtotal * (@order.coupon.discount_value.to_f / 100.0)).round(2)
-      elsif @order.coupon.discount_type == "fixed"
-        @order.coupon.discount_value.to_f
-      else
-        0
-      end
+    target_subtotal = subtotal
+    target_quantity = @order.order_items.sum(&:quantity)
 
+    # Dacă cuponul e pentru un produs specific
+    # Dacă cuponul e pentru un produs specific
+if coupon.product_id.present?
+  target_item = @order.order_items.find { |item| item.product_id == coupon.product_id }
+  if target_item
+    target_subtotal = target_item.total_price
+    target_quantity = target_item.quantity
+    Rails.logger.debug "Cupon specific produs ID #{coupon.product_id}: subtotal=#{target_subtotal}, qty=#{target_quantity}"
+  else
+    target_subtotal = 0
+    target_quantity = 0
+    Rails.logger.debug "Produs #{coupon.product_id} nu găsit în comandă"
+  end
+end
+
+    # Calculează discount_value
+    discount_value = 0
+    if coupon.discount_type == "percentage"
+      discount_value = (target_subtotal * (coupon.discount_value.to_f / 100.0)).round(2)
+    elsif coupon.discount_type == "fixed"
+      discount_value = [coupon.discount_value.to_f, target_subtotal].min
+    end
+
+    Rails.logger.debug "Discount calculat: #{discount_value} (tip: #{coupon.discount_type}, valoare: #{coupon.discount_value})"
+
+    # Adaugă discount ca order_item DACĂ discount_value > 0
     if discount_value > 0
       @order.order_items.build(
         product: nil,
@@ -125,11 +155,17 @@ def create
         vat: 0,
         total_price: -discount_value
       )
+      Rails.logger.debug "✅ Discount item adăugat: -#{discount_value}"
+    else
+      Rails.logger.debug "⚠️ Discount value = 0, nu se adaugă item"
     end
+  else
+    Rails.logger.debug "❌ Nu există cupon aplicat"
   end
 
   # === Adaugă linia de transport dacă e cazul
   transport_cost = session[:shipping_cost].to_f
+  Rails.logger.debug "Transport cost din sesiune: #{transport_cost}"
 
   if transport_cost > 0
     @order.order_items.build(
@@ -140,35 +176,42 @@ def create
       vat: 0,
       total_price: transport_cost
     )
+    Rails.logger.debug "✅ Transport item adăugat: #{transport_cost}"
+  else
+    # Chiar dacă e 0, adăugăm pentru consistență
+    @order.order_items.build(
+      product: nil,
+      product_name: "Transport",
+      quantity: 1,
+      price: 0,
+      vat: 0,
+      total_price: 0
+    )
+    Rails.logger.debug "✅ Transport gratuit adăugat"
   end
 
   # Recalculare total final (inclusiv transport și discount)
   @order.total = @order.order_items.sum(&:total_price)
   @order.vat_amount = calculate_vat_total
 
-  puts "Order valid? #{@order.valid?}"
-  puts "Errors: #{@order.errors.full_messages.join(', ')}"
+  Rails.logger.debug "Order items înainte de save:"
+  @order.order_items.each do |item|
+    Rails.logger.debug "  - #{item.product_name}: qty=#{item.quantity}, price=#{item.price}, total=#{item.total_price}"
+  end
+  Rails.logger.debug "Total final: #{@order.total}"
 
   if @order.save
-    # Actualizează stocul dacă e cazul
-    @order.order_items.each do |item|
-      #if item.product && item.product.track_inventory
-        #item.product.update(stock: item.product.stock - item.quantity)
-      #end
-    end
-
+    Rails.logger.debug "✅ Comanda salvată cu succes! ID: #{@order.id}"
+    
     # Marcăm cuponul ca utilizat
     @order.coupon.increment!(:usage_count) if @order.coupon.present?
 
-    # Marcare snapshot ca „converted”
+    # Marcare snapshot ca „converted"
     CartSnapshot.where(session_id: session.id.to_s).update_all(status: "converted")
-
-    # Lasă sesiunile active pt redirect spre plată, NU le ștergem încă
-    # session[:cart] = {}
-    # session[:coupon_code] = nil
 
     redirect_to thank_you_orders_path(id: @order.id)
   else
+    Rails.logger.debug "❌ Eroare la salvare: #{@order.errors.full_messages.join(', ')}"
     flash.now[:alert] = "Comanda nu a putut fi plasată. Verifică datele și încearcă din nou."
     render :new, status: :unprocessable_entity
   end
@@ -261,20 +304,23 @@ end
  
 
   def apply_coupon_if_present
-    return unless session[:coupon_code].present?
+  return unless session[:coupon_code].present?
 
-    coupon = Coupon.find_by(code: session[:coupon_code].strip.downcase)
-    return unless coupon&.active
+  coupon = Coupon.find_by("UPPER(code) = ?", session[:coupon_code].strip.upcase)
+  return unless coupon&.active
 
-    now = Time.current
+  now = Time.current
 
-    if (coupon.starts_at.nil? || now >= coupon.starts_at) &&
-       (coupon.expires_at.nil? || now <= coupon.expires_at) &&
-       (coupon.usage_limit.nil? || coupon.usage_count.to_i < coupon.usage_limit)
+  if (coupon.starts_at.nil? || now >= coupon.starts_at) &&
+     (coupon.expires_at.nil? || now <= coupon.expires_at) &&
+     (coupon.usage_limit.nil? || coupon.usage_count.to_i < coupon.usage_limit)
 
-      @order.coupon = coupon
-    end
+    @order.coupon = coupon
+    Rails.logger.debug "✅ Cupon atașat la order: #{coupon.code}"
+  else
+    Rails.logger.debug "⚠️ Cupon invalid sau expirat"
   end
+end
 
   def calculate_total
     @cart.sum do |product_id, data|
@@ -334,16 +380,23 @@ def calculate_discount
   subtotal = calculate_subtotal
   total_quantity = @cart.sum { |_id, data| data["quantity"].to_i }
 
+  target_subtotal = subtotal
+  if coupon.product_id.present?
+    product = Product.find_by(id: coupon.product_id)
+    quantity = @cart[coupon.product_id.to_s] ? @cart[coupon.product_id.to_s]["quantity"].to_i : 0
+    target_subtotal = product ? product.price * quantity : 0
+  end
+
   valid = true
-  valid &&= subtotal >= coupon.minimum_cart_value.to_f if coupon.minimum_cart_value.present?
+  valid &&= target_subtotal >= coupon.minimum_cart_value.to_f if coupon.minimum_cart_value.present?
   valid &&= total_quantity >= coupon.minimum_quantity.to_i if coupon.minimum_quantity.present?
   valid &&= @cart.keys.map(&:to_i).include?(coupon.product_id) if coupon.product_id.present?
 
   if valid
     if coupon.discount_type == "percentage"
-      return subtotal * (coupon.discount_value.to_f / 100.0)
+      return target_subtotal * (coupon.discount_value.to_f / 100.0)
     elsif coupon.discount_type == "fixed"
-      return coupon.discount_value.to_f
+      return [coupon.discount_value.to_f, target_subtotal].min
     end
   end
 

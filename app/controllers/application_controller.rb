@@ -30,18 +30,34 @@ class ApplicationController < ActionController::Base
          (coupon.starts_at.nil? || coupon.starts_at <= Time.current) &&
          (coupon.expires_at.nil? || coupon.expires_at >= Time.current)
 
-        total_quantity = @cart.sum { |_id, data| data["quantity"].to_i }
+        # Calculăm subtotal și quantity în funcție de dacă e produs specific
+        if coupon.product_id.present?
+          product_key = coupon.product_id.to_s
+          found = @cart.key?(product_key)
+          if found
+            product = @cart_products[coupon.product_id]
+            quantity = @cart[product_key]["quantity"].to_i
+            target_subtotal = product ? product.price * quantity : 0
+            target_quantity = quantity
+          else
+            target_subtotal = 0
+            target_quantity = 0
+          end
+        else
+          target_subtotal = @subtotal
+          target_quantity = @cart.sum { |_id, data| data["quantity"].to_i }
+        end
 
         valid = true
-        valid &&= @subtotal >= coupon.minimum_cart_value.to_f if coupon.minimum_cart_value.present?
-        valid &&= total_quantity >= coupon.minimum_quantity.to_i if coupon.minimum_quantity.present?
+        valid &&= target_subtotal >= coupon.minimum_cart_value.to_f if coupon.minimum_cart_value.present?
+        valid &&= target_quantity >= coupon.minimum_quantity.to_i if coupon.minimum_quantity.present?
         valid &&= product_ids.include?(coupon.product_id) if coupon.product_id.present?
 
         if valid
           if coupon.discount_type == "percentage"
-            @discount = @subtotal * (coupon.discount_value.to_f / 100.0)
+            @discount = target_subtotal * (coupon.discount_value.to_f / 100.0)
           elsif coupon.discount_type == "fixed"
-            @discount = coupon.discount_value.to_f
+            @discount = [coupon.discount_value.to_f, target_subtotal].min
           end
         end
       end
@@ -57,6 +73,10 @@ class ApplicationController < ActionController::Base
                      else
                        0
                      end
+
+    if session[:applied_coupon] && valid && coupon.free_shipping
+      @shipping_cost = 0
+    end
 
     @cart_total = [@subtotal - @discount + @shipping_cost, 0].max
 
@@ -79,24 +99,42 @@ class ApplicationController < ActionController::Base
     @total = 0
   end
 
-  def calculate_totals_from_order
-    items = @order.order_items
+  # În ApplicationController, înlocuiește metoda calculate_totals_from_order cu aceasta:
 
-    @subtotal = items
-                  .where.not(product_name: ["Transport", "Discount"])
-                  .sum(&:total_price)
+def calculate_totals_from_order
+  return unless @order.present?
+  
+  items = @order.order_items
 
-    @transport = items
-                   .where(product_name: "Transport")
-                   .sum(&:total_price)
+  # Subtotal - exclude Transport și Discount
+  @subtotal = items
+                .where.not(product_name: ["Transport", "Discount"])
+                .sum(&:total_price).to_f
 
-    @discount = items
-                  .where(product_name: "Discount")
-                  .sum(&:total_price).abs # facem pozitiv
+  # Transport
+  @transport = items
+                 .where(product_name: "Transport")
+                 .sum(&:total_price).to_f
 
-    @vat = @order.vat_amount || 0
-    @total = @order.total || 0
-  end
+  # Discount - IMPORTANT: suma va fi negativă în DB, deci o facem pozitivă cu .abs
+  discount_sum = items
+                   .where(product_name: "Discount")
+                   .sum(&:total_price).to_f
+  
+  @discount = discount_sum.abs  # Convertim în pozitiv pentru afișare
+  
+  # Debugging
+  Rails.logger.debug "=== calculate_totals_from_order DEBUG ==="
+  Rails.logger.debug "Discount items: #{items.where(product_name: 'Discount').pluck(:product_name, :total_price).inspect}"
+  Rails.logger.debug "Discount sum (raw): #{discount_sum}"
+  Rails.logger.debug "@discount (abs): #{@discount}"
+
+  @vat = @order.vat_amount || 0
+  @total = @order.total || 0
+  
+  # Verificare finală
+  Rails.logger.debug "Subtotal: #{@subtotal}, Transport: #{@transport}, Discount: #{@discount}, Total: #{@total}"
+end
 
   private
 

@@ -315,9 +315,13 @@
         input.addEventListener('blur', () => {
           setTimeout(() => {
             const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
-            if (isRomania && !validSuggestions.includes(input.value)) {
-              input.value = '';
-              disableNextFields(inputId);
+            if (isRomania) {
+              const normalizedInput = input.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              const isValid = validSuggestions.some(sug => sug.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedInput);
+              if (!isValid) {
+                input.value = '';
+                disableNextFields(inputId);
+              }
             }
             dropdown.style.display = 'none';
           }, 200);
@@ -345,8 +349,6 @@
           judetInput.readOnly = false;
           localitateInput.disabled = true;
           localitateInput.readOnly = false;
-          judetInput.value = "";
-          localitateInput.value = "";
           judetInput.placeholder = "Tastează max 2 litere și selectează...";
           localitateInput.placeholder = "Tastează max 2 litere și selectează...";
           judetInput.style.cursor = "text";
@@ -359,8 +361,6 @@
           judetInput.readOnly = false;
           localitateInput.disabled = false;
           localitateInput.readOnly = false;
-          judetInput.value = "";
-          localitateInput.value = "";
           judetInput.placeholder = "Introduceți județul/regiunea...";
           localitateInput.placeholder = "Introduceți localitatea...";
           judetInput.style.cursor = "text";
@@ -375,7 +375,6 @@
         const isRomania = taraInput && taraInput.value.trim().toLowerCase() === "romania";
         
         localitateInput.disabled = false;
-        localitateInput.value = "";
         localitateInput.style.cursor = "text";
         
         if (isRomania) {
@@ -392,14 +391,14 @@
         const judetInput = document.getElementById(`${prefix}judet_input`);
         const localitateInput = document.getElementById(`${prefix}localitate_input`);
         judetInput.disabled = true;
-        judetInput.value = "";
+        judetInput.value = '';
         localitateInput.disabled = true;
-        localitateInput.value = "";
+        localitateInput.value = '';
       } else if (inputId.endsWith("judet_input")) {
         const prefix = inputId.startsWith("shipping_") ? "shipping_" : "";
         const localitateInput = document.getElementById(`${prefix}localitate_input`);
         localitateInput.disabled = true;
-        localitateInput.value = "";
+        localitateInput.value = '';
       }
     }
 
@@ -418,13 +417,20 @@
       if (tara === "romania") {
         judetInput.disabled = false;
         judetInput.placeholder = "Tastează max 2 litere și selectează...";
-        localitateInput.disabled = true;
         localitateInput.placeholder = "Tastează max 2 litere și selectează...";
       } else if (tara) {
         judetInput.disabled = false;
         localitateInput.disabled = false;
         judetInput.placeholder = "Introduceți județul/regiunea...";
         localitateInput.placeholder = "Introduceți localitatea...";
+      }
+
+      // Dacă sunt precompletate, dezactivează disabled
+      if (judetInput.value.trim() !== '') {
+        judetInput.disabled = false;
+      }
+      if (localitateInput.value.trim() !== '') {
+        localitateInput.disabled = false;
       }
       
       // Țara poate fi schimbată prin click

@@ -75,27 +75,52 @@
     <% end %>
   </section>
 
-  <!-- Mesaj pentru cupon aplicat -->
-  <% if session[:applied_coupon] && @discount.positive? %>
+  <!-- Mesaj pentru cupon aplicat și erori -->
+  <% if session[:applied_coupon] %>
     <div class="coupon-message">
       <p>
-        ✅ Cupon aplicat: <strong><%= session[:applied_coupon]["code"] %></strong> –
-        reducere
-        <% if session[:applied_coupon]["discount_type"] == "percentage" %>
-          <%= session[:applied_coupon]["discount_value"] %>%
+        Cupon: <strong><%= session[:applied_coupon]["code"] %></strong>
+        <% if @discount.positive? %>
+          ✅ aplicat – reducere
+          <% if session[:applied_coupon]["discount_type"] == "percentage" %>
+            <%= session[:applied_coupon]["discount_value"] %>%
+          <% else %>
+            <%= number_to_currency(@discount, unit: "lei", format: "%n %u") %>
+          <% end %>
+          (<%= number_to_currency(@discount, unit: "lei", format: "%n %u") %>)
         <% else %>
-          <%= number_to_currency(@discount, unit: "lei", format: "%n %u") %>
+          – nu se aplică în prezent.
         <% end %>
-        (<%= number_to_currency(@discount, unit: "lei", format: "%n %u") %>)
       </p>
       <%= button_to "Șterge cupon", remove_coupon_path, method: :post, class: "btn btn-danger" %>
+    </div>
+
+    <% if @coupon_errors.any? %>
+      <div class="coupon-errors">
+        <p><strong>Motive pentru care reducerea nu se aplică:</strong></p>
+        <ul>
+          <% @coupon_errors.each do |error| %>
+            <li><%= error %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  <% elsif @coupon_errors.any? %>
+    <div class="coupon-errors">
+      <p><strong>Motive pentru care cuponul nu poate fi aplicat:</strong></p>
+      <ul>
+        <% @coupon_errors.each do |error| %>
+          <li><%= error %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
 
   <!-- Butoane pentru continuarea cumpărăturilor și finalizarea comenzii -->
   <% if @cart_items.any? %>
     <div class="checkout-container">
-      <%= link_to "Continuă cumpărăturile", request.referer || products_path, class: "btn btn-primary continue-shopping-btn" %>
+      <%= link_to "Continuă cumpărăturile", carti_index_path, class: "btn btn-primary continue-shopping-btn" %>
+
       <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-primary checkout-btn" %>
     </div>
   <% end %>
@@ -420,6 +445,23 @@
     background: #e69500;
     border-color: #e69500;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cart-container .coupon-errors {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #dc3545; /* Roșu pentru erori */
+}
+
+.cart-container .coupon-errors p {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.cart-container .coupon-errors ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    font-size: 13px;
 }
 
 /* Responsive Design */
