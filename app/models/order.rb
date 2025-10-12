@@ -2,7 +2,7 @@ class Order < ApplicationRecord
   belongs_to :user, optional: true
   has_many :order_items, dependent: :destroy
   belongs_to :coupon, optional: true
-
+  has_one :invoice
   attr_accessor :use_different_shipping
   attr_accessor :shipping_cost
 
@@ -28,7 +28,14 @@ class Order < ApplicationRecord
 
   before_validation :ensure_cnp_fallback
 
-  after_create :decrement_stock_on_order
+  #after_create :decrement_stock_on_order
+
+
+  def finalize_order!
+    decrement_stock_on_order
+    coupon.increment!(:usage_count) if coupon.present?
+    # Adaugă alte acțiuni finale (ex: trimite email)
+  end
 
   def total_items
     order_items.sum(:quantity)
@@ -41,6 +48,8 @@ class Order < ApplicationRecord
   def shipping_address_different?
     shipping_first_name.present? || shipping_street.present? || shipping_city.present?
   end
+
+
 
   private
 

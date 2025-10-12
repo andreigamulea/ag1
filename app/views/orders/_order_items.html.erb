@@ -1,0 +1,33 @@
+<!-- app/views/orders/_order_items.html.erb (versiune actualizată) -->
+<% if order_items.any? %>
+  <h3>Produse pentru Ordin #<%= order.id %></h3>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Nume Produs</th>
+        <th>Cantitate</th>
+        <th>Preț Unitate</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% order_items.each do |item| %>
+        <tr>
+          <td><%= item.product_name %></td>
+          <td><%= item.quantity %></td>
+          <td><%= item.price %> RON</td> <!-- Schimbat din unit_price în price, deoarece unit_price e nil -->
+          <td><%= item.total_price %> RON</td>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3"><strong>Total Ordin:</strong></td>
+        <td><strong><%= order.total %> RON</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+  <%= link_to 'Înapoi la lista de ordine', orders_path, class: 'btn btn-secondary' %>
+<% else %>
+  <p>Nu există produse pentru acest ordin.</p>
+<% end %>

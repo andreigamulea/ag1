@@ -1,0 +1,76 @@
+<!-- app/views/orders/index.html.erb -->
+<div class="container">
+  <div class="row">
+    <!-- Tabelul cu ordine (3/4 lățime, e.g., col-md-9) -->
+    <div class="col-md-9">
+      <h2>Toate Ordinele</h2>
+      <table class="table table-striped table-sm"> <!-- table-sm pentru compactare -->
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nume </th> <!-- Specificat ca din datele de facturare -->
+            <th>Email</th> <!-- Adăugat coloană pentru email -->
+            <th>Telefon</th> <!-- Adăugat coloană pentru telefon -->
+            <th>Data Creării</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @orders.each do |order| %>
+            <tr>
+              <td><%= order.id %></td>
+              <td><%= "#{order.first_name} #{order.last_name}" %></td> <!-- Nume din datele de facturare (first_name + last_name) -->
+              <td><%= order.email %></td> <!-- Email din order -->
+              <td><%= order.phone %></td> <!-- Telefon din order -->
+              <td><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+              <td><%= order.total %> RON</td> <!-- Presupun că totalul este în RON, ajustează după nevoie -->
+              <td><%= order.status %></td>
+              <td>
+                <div class="d-flex gap-2"> <!-- Folosit d-flex cu gap-2 pentru spațiu între butoane -->
+                  <%= button_to "Afișează Produse", show_items_order_path(order), remote: true, class: "btn btn-primary btn-sm", data: { target: order.id } %>
+                  <% if order.invoice.present? %>
+                    <%= link_to "Descarcă Factură", invoice_order_path(order, format: :pdf), class: "btn btn-secondary btn-sm" %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <%= paginate @orders %>
+    </div>
+
+    <!-- Secțiunea din dreapta pentru detalii items (1/4 lățime, e.g., col-md-3) -->
+    <div class="col-md-3" id="order-items-container">
+      <!-- Aici se va injecta conținutul via AJAX -->
+      <h2>Detalii Ordin</h2>
+      <p>Selectează un ordin pentru a vedea produsele.</p>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript pentru a gestiona încărcarea AJAX -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('button[data-target]').forEach(button => {
+      button.addEventListener('click', function(event) {
+        event.preventDefault(); // Oprește comportamentul default dacă e button_to
+        const orderId = this.dataset.target;
+        const url = `/orders/${orderId}/show_items`;
+
+        fetch(url, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('order-items-container').innerHTML = html;
+        })
+        .catch(error => console.error('Error:', error));
+      });
+    });
+  });
+</script>

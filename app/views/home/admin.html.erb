@@ -6,15 +6,9 @@
     <li><%= link_to "🛒 Gestionare produse", products_path %></li>
     <li><%= link_to "📂 Vezi categorii", categories_index_products_path %></li>
     <li><%= link_to "👤 Utilizatori", users_path %></li>
-    <li><%= link_to "🏷️ Gestionare cupoane", coupons_path %></li>
-    
+    <li><%= link_to "🏷️ Gestionare cupoane", coupons_path %></li>  
 
-     <li><%= link_to "Utilizare RAM", mem_path %></li>
-     <li><%= link_to "📈 Istoric RAM", ram_logs_path %></li>
-
-     <li><%= link_to "🧹 Curăță RAM (GC)", force_gc_products_path %></li>
-
-<%= button_to "Simulează GC și eliberare RAM", simulate_memory_usage_and_gc_path, method: :post, data: { turbo: false } %>
+     <li><%= link_to 'Lista de ordine', orders_path %></li>
 
 
   </ul>

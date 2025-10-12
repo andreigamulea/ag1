@@ -239,6 +239,7 @@ GEM
       racc (~> 1.4)
     orm_adapter (0.5.0)
     ostruct (0.6.2)
+    pdfkit (0.8.7.3)
     pg (1.5.9)
     pg (1.5.9-x64-mingw-ucrt)
     pp (0.6.2)
@@ -323,6 +324,10 @@ GEM
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     stringio (3.1.7)
+    stripe (8.7.0)
+    stripe_event (2.12.0)
+      activesupport (>= 3.1)
+      stripe (>= 2.8, < 16)
     sys-proctable (1.3.0)
       ffi (~> 1.1)
     thor (1.3.2)
@@ -347,6 +352,10 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    wicked_pdf (2.8.2)
+      activesupport
+      ostruct
+    wkhtmltopdf-binary (0.12.6.10)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.7.3)
@@ -372,6 +381,7 @@ DEPENDENCIES
   jbuilder
   kaminari (~> 1.2, >= 1.2.2)
   memory_profiler
+  pdfkit (~> 0.8.7.3)
   pg (~> 1.1)
   puma (>= 5.0)
   rails (~> 7.1.5, >= 7.1.5.1)
@@ -379,10 +389,14 @@ DEPENDENCIES
   selenium-webdriver
   sprockets-rails
   stimulus-rails
+  stripe (~> 8.5)
+  stripe_event (~> 2.7)
   sys-proctable (~> 1.3)
   turbo-rails
   tzinfo-data
   web-console
+  wicked_pdf (~> 2.8)
+  wkhtmltopdf-binary (~> 0.12.6.6)
 
 RUBY VERSION
    ruby 3.3.9p170
