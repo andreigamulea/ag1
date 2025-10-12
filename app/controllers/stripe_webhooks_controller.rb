@@ -44,19 +44,24 @@ class StripeWebhooksController < ActionController::Base
   end
 
   private
+def create_invoice_for_order(order)
+  last_invoice = Invoice.order(:invoice_number).last
+  next_number = last_invoice ? last_invoice.invoice_number + 1 : 10001
 
-  def create_invoice_for_order(order)
-    last_invoice = Invoice.order(:invoice_number).last
-    next_number = last_invoice ? last_invoice.invoice_number + 1 : 10001
+  emitted_time = Time.current  # Folosit pentru emitted_at și due_date
 
-    Invoice.create!(
-      order: order,
-      invoice_number: next_number,
-      emitted_at: Time.current,
-      status: 'emitted',
-      total: order.total,
-      vat_amount: order.vat_amount,
-      notes: order.notes
-    )
-  end
+  Invoice.create!(
+    order: order,
+    invoice_number: next_number,
+    emitted_at: emitted_time,
+    due_date: emitted_time,  # Setat la aceeași valoare ca emitted_at
+    status: 'emitted',
+    series: 'AYG',
+    payment_method: 'card-Stripe',
+    currency: 'RON',
+    total: order.total,
+    vat_amount: order.vat_amount,
+    notes: order.notes
+  )
+end
 end
