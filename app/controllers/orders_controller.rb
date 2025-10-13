@@ -161,7 +161,7 @@ class OrdersController < ApplicationController
     )
 
     # Recalculare total final
-    @order.total = @order.order_items.sum(&:total_price)
+    @order.total = @order.order_items.sum(:total_price)
     @order.vat_amount = calculate_vat_total
 
     # În OrdersController#create, după al doilea @order.save (după adăugare items)
@@ -336,36 +336,46 @@ class OrdersController < ApplicationController
     end
   end
 
+  def invoice
+    @order = Order.find(params[:id])
+    @invoice = @order.invoice  # Presupunând că ai has_one :invoice în model Order
 
+    if @invoice.nil?
+      flash[:alert] = "Factură disponibilă doar pentru ordine plătite."
+      redirect_to orders_path and return
+    end
 
-# app/controllers/orders_controller.rb (actualizează acțiunea invoice)
-# app/controllers/orders_controller.rb (actualizează acțiunea invoice)
-def invoice
-  @order = Order.find(params[:id])
-  @invoice = @order.invoice  # Presupunând că ai has_one :invoice în model Order
+    respond_to do |format|
+      format.pdf do
+        html = render_to_string(
+          template: 'orders/invoice',
+          layout: 'pdf',
+          formats: [:pdf],
+          locals: { order: @order, invoice: @invoice }  # Pasează invoice pentru numărul facturii
+        )
+        pdf = WickedPdf.new.pdf_from_string(html, encoding: 'UTF8')
 
-  if @invoice.nil?
-    flash[:alert] = "Factură disponibilă doar pentru ordine plătite."
-    redirect_to orders_path and return
-  end
+        send_data pdf,
+                  filename: "factura_#{@invoice.invoice_number}.pdf",
+                  type: 'application/pdf',
+                  disposition: 'attachment'
+      end
+      format.xml do
+        xml = render_to_string(
+          template: 'orders/invoice',
+          formats: [:xml],
+          handlers: [:builder],
+          locals: { order: @order, invoice: @invoice }
+        )
 
-  respond_to do |format|
-    format.pdf do
-      html = render_to_string(
-        template: 'orders/invoice',
-        layout: 'pdf',
-        formats: [:pdf],
-        locals: { order: @order, invoice: @invoice }  # Pasează invoice pentru numărul facturii
-      )
-      pdf = WickedPdf.new.pdf_from_string(html, encoding: 'UTF8')
-
-      send_data pdf,
-                filename: "factura_#{@invoice.invoice_number}.pdf",
-                type: 'application/pdf',
-                disposition: 'attachment'
+        send_data xml,
+                  filename: "factura_#{@invoice.invoice_number}.xml",
+                  type: 'application/xml',
+                  disposition: 'attachment'
+      end
     end
   end
-end
+
   private
 
   def apply_coupon_if_present

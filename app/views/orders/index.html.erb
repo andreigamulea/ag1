@@ -29,9 +29,10 @@
               <td><%= order.status %></td>
               <td>
                 <div class="d-flex gap-2"> <!-- Folosit d-flex cu gap-2 pentru spațiu între butoane -->
-                  <%= button_to "Afișează Produse", show_items_order_path(order), remote: true, class: "btn btn-primary btn-sm", data: { target: order.id } %>
+                  <%= button_to "Produse", show_items_order_path(order), remote: true, class: "btn btn-primary btn-sm", data: { target: order.id } %>
                   <% if order.invoice.present? %>
-                    <%= link_to "Descarcă Factură", invoice_order_path(order, format: :pdf), class: "btn btn-secondary btn-sm" %>
+                    <%= link_to "PDF", invoice_order_path(order, format: :pdf), class: "btn btn-secondary btn-sm" %>
+                    <%= link_to "XML", invoice_order_path(order, format: :xml), class: "btn btn-info btn-sm" %>
                   <% end %>
                 </div>
               </td>
