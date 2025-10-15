@@ -1,31 +1,161 @@
 <script>
-  function setupMobileMenu() {
-    const hamburger = document.getElementById("hamburger");
-    const navWrapper = document.getElementById("nav-wrapper");
-    const closeBtn = document.getElementById("close-menu");
-    if (!hamburger || !navWrapper || !closeBtn) return;
+/**
+ * Mobile Menu Handler
+ * Professional implementation with proper state management
+ */
 
-    hamburger.onclick = () => {
-      navWrapper.classList.add("open");
-      document.body.classList.add("menu-open");
-    };
-
-    closeBtn.onclick = () => {
-      navWrapper.classList.remove("open");
-      document.body.classList.remove("menu-open");
-    };
-
-    const navLinks = navWrapper.querySelectorAll("a, .link-button");
-    navLinks.forEach(link => {
-      link.onclick = () => {
-        navWrapper.classList.remove("open");
-        document.body.classList.remove("menu-open");
-      };
-    });
+function setupMobileMenu() {
+  const hamburger = document.getElementById("hamburger");
+  const navWrapper = document.getElementById("nav-wrapper");
+  const closeBtn = document.getElementById("close-menu");
+  
+  // Verificare existență elemente
+  if (!hamburger || !navWrapper || !closeBtn) {
+    console.warn('Mobile menu elements not found');
+    return () => {};
   }
 
-  document.addEventListener("turbo:load", setupMobileMenu);
+  /**
+   * Deschide meniul mobil
+   */
+  const openMenu = () => {
+    navWrapper.classList.add("open");
+    document.body.classList.add("menu-open");
+    
+    // Accessibility
+    hamburger.setAttribute('aria-expanded', 'true');
+    navWrapper.setAttribute('aria-hidden', 'false');
+    
+    // Focus pe butonul de închidere
+    closeBtn.focus();
+  };
+
+  /**
+   * Închide meniul mobil
+   */
+  const closeMenu = () => {
+    navWrapper.classList.remove("open");
+    document.body.classList.remove("menu-open");
+    
+    // Accessibility
+    hamburger.setAttribute('aria-expanded', 'false');
+    navWrapper.setAttribute('aria-hidden', 'true');
+    
+    // Returnează focus-ul la hamburger
+    hamburger.focus();
+  };
+
+  /**
+   * Event Handlers
+   */
+  
+  // Click pe hamburger
+  const handleHamburgerClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openMenu();
+  };
+
+  // Click pe butonul X
+  const handleCloseClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMenu();
+  };
+
+  // Taste (Escape pentru închidere)
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && navWrapper.classList.contains("open")) {
+      e.preventDefault();
+      closeMenu();
+    }
+  };
+
+  // Click pe link-uri din meniu
+  const handleLinkClick = () => {
+    // Delay mic pentru a permite navigarea
+    setTimeout(closeMenu, 150);
+  };
+
+  /**
+   * Atașare event listeners
+   */
+  hamburger.addEventListener('click', handleHamburgerClick);
+  closeBtn.addEventListener('click', handleCloseClick);
+  document.addEventListener('keydown', handleKeyDown);
+
+  // Atașare pe toate link-urile și butoanele din meniu
+  const menuLinks = navWrapper.querySelectorAll('a, .link-button, button');
+  menuLinks.forEach(link => {
+    link.addEventListener('click', handleLinkClick);
+  });
+
+  /**
+   * Inițializare atribute accessibility
+   */
+  hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.setAttribute('aria-controls', 'nav-wrapper');
+  hamburger.setAttribute('aria-label', 'Deschide meniul');
+  
+  closeBtn.setAttribute('aria-label', 'Închide meniul');
+  
+  navWrapper.setAttribute('aria-hidden', 'true');
+
+  /**
+   * Cleanup function pentru a elimina event listeners
+   */
+  return () => {
+    hamburger.removeEventListener('click', handleHamburgerClick);
+    closeBtn.removeEventListener('click', handleCloseClick);
+    document.removeEventListener('keydown', handleKeyDown);
+    
+    menuLinks.forEach(link => {
+      link.removeEventListener('click', handleLinkClick);
+    });
+  };
+}
+
+/**
+ * Inițializare meniu
+ */
+let cleanupFunction = () => {};
+
+function initMenu() {
+  // Curăță event listeners anteriori
+  cleanupFunction();
+  
+  // Setup nou și salvează cleanup function
+  cleanupFunction = setupMobileMenu();
+}
+
+/**
+ * Pornire la încărcarea paginii
+ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMenu);
+} else {
+  initMenu();
+}
+
+/**
+ * Re-inițializare la resize pentru a preveni probleme
+ */
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    // Închide meniul dacă trecem la desktop
+    if (window.innerWidth > 922) {
+      const navWrapper = document.getElementById("nav-wrapper");
+      if (navWrapper && navWrapper.classList.contains("open")) {
+        navWrapper.classList.remove("open");
+        document.body.classList.remove("menu-open");
+      }
+    }
+  }, 250);
+});
 </script>
+
 
 <div class="header_container">
   <header>
@@ -48,11 +178,28 @@
 
       <nav>
         <%= link_to "Acasă", root_path %>
-        <%= link_to "Articole", "#" %>
-        <%= link_to "Resurse Digitale", "#" %>
-        <%= link_to "Despre", "#" %>
-        <%= link_to "Contact", contact_path, class: "admin-link" %>
         <%= link_to "Cărți", carti_index_path, class: "admin-link" %>
+       
+
+
+
+       
+        <%= link_to "Contact", contact_path, class: "admin-link" %>
+
+        <% if current_user %>
+          <%= button_to "Logout", destroy_user_session_path,
+              method: :delete,
+              form: { class: "inline" },
+              class: "link-button" %>
+        <% else %>
+          <%= link_to "Login", new_user_session_path %>
+        <% end %> 
+
+        
+         <% if @shipping_cost == 0 && @cart_items_count.to_i > 0 %>
+          <p style="color: green; font-size: 12px; margin-top: 2px;">🎁 Transport gratuit!</p>
+        <% end %>
+
 
         <!-- Coșul de cumpărături -->
         <%= link_to cart_index_path, style: "display: inline-block; background-color: #ffa500; color: white; padding: 10px 15px; border-radius: 6px; position: relative;" do %>
@@ -62,23 +209,12 @@
           🛒 
           <%= number_to_currency(@cart_total || 0, unit: "lei") %>
         <% end %>
-
-        <% if @shipping_cost == 0 && @cart_items_count.to_i > 0 %>
-          <p style="color: green; font-size: 12px; margin-top: 2px;">🎁 Transport gratuit!</p>
-        <% end %>
-
         <% if current_user&.admin? %>
           <%= link_to "Admin", admin_path, class: "admin-link" %>
         <% end %>
 
-        <% if current_user %>
-          <%= button_to "Logout", destroy_user_session_path,
-              method: :delete,
-              form: { class: "inline" },
-              class: "link-button" %>
-        <% else %>
-          <%= link_to "Login", new_user_session_path %>
-        <% end %>
+
+        
       </nav>
 
       <!-- Buton închidere meniu pe mobil -->
@@ -86,3 +222,4 @@
     </div>
   </header>
 </div>
+
