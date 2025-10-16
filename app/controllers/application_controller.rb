@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  before_action :store_user_location!, if: :storable_location?
   protect_from_forgery with: :exception, prepend: true
   
   helper CdnHelper
@@ -151,4 +152,24 @@ end
     CartSnapshot.where(session_id: session.id.to_s, user_id: nil).update_all(user_id: resource.id)
     super
   end
+
+
+  # ✅ Memorăm URL-ul doar pentru cererile GET non-AJAX și non-Devise
+  def storable_location?
+    request.get? && is_navigational_format? && !devise_controller? && !request.xhr?
+  end
+
+  # ✅ Salvăm ultima locație accesată
+  def store_user_location!
+    store_location_for(:user, request.fullpath)
+  end
+
+  # ✅ După login, redirecționează către ultima locație memorată
+  def after_sign_in_path_for(resource_or_scope)
+    stored_location_for(resource_or_scope) || super
+  end
+  def after_sign_out_path_for(_resource_or_scope)
+    request.referer || root_path
+  end
+  
 end
