@@ -1,34 +1,257 @@
+<style>
+/* ===================================
+   FOOTER STYLES - WHITE BACKGROUND
+   =================================== */
+
+footer {
+    width: 100%;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    margin-top: 0;
+    padding: 40px 0 20px 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.footer-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ===================================
+   FOOTER ROW - 5 COLUMNS
+   =================================== */
+
+.footer-row2 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-column li {
+    margin-bottom: 6px;
+    line-height: 1;
+}
+
+.footer-column h2 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+    color: #8b0000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===================================
+   HR LINE STYLES
+   =================================== */
+
+.footer-divider {
+    width: 61.8%;
+    margin: 15px auto;
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #333, transparent);
+}
+
+/* Mobile - mai strâns */
+@media (max-width: 768px) {
+    .footer-divider {
+        width: 50%;
+        margin: 10px auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-divider {
+        width: 40%;
+        margin: 8px auto;
+    }
+}
+
+.footer-column a {
+    color: black;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-block;
+}
+
+.footer-column a:hover {
+    color: #8b0000;
+}
+
+/* Stilizare buton logout */
+.footer-column button#logout_link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #555;
+    font-size: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.2s ease;
+    display: inline-block;
+}
+
+.footer-column button#logout_link:hover {
+    color: #8b0000;
+}
+
+.footer-column form {
+    display: inline;
+    margin: 0;
+}
+
+/* ===================================
+   FOOTER COLUMN 5 - IMAGES
+   =================================== */
+
+.footer-column-images {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-column-images h2 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 5px 0;
+    color: #8b0000;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.footer-column-images a {
+    display: block;
+}
+
+.footer-column-images img {
+    max-width: 100%;
+    height: auto;
+    transition: opacity 0.2s ease;
+}
+
+.footer-column-images a:hover img {
+    opacity: 1;
+}
+
+/* ===================================
+   FOOTER COPYRIGHT
+   =================================== */
+
+.footer-copyright {
+    text-align: center;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 13px;
+    color: black;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN - 5 → 2 → 1 COLUMNS
+   =================================== */
+
+/* Tablets și mai jos - TRECE DIRECT LA 2 COLOANE */
+@media (max-width: 1100px) {
+    .footer-row2 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .footer-column-images {
+        grid-column: span 2;
+        flex-direction: row;
+        justify-content: center;
+            align-items: center;
+        gap: 20px;
+    }
+}
+
+/* Mobile - 1 COLOANĂ */
+@media (max-width: 768px) {
+    footer {
+        padding: 30px 0 20px 0;
+    }
+
+    .footer-row2 {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .footer-column {
+        text-align: center;
+    }
+
+    .footer-column h2 {
+        font-size: 15px;
+    }
+
+    .footer-column li {
+        font-size: 13px;
+    }
+
+    .footer-column-images {
+        grid-column: 1;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .footer-content {
+        padding: 0 15px;
+    }
+
+    .footer-column-images img {
+        max-width: 170px;
+    }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+
+.footer-column a:focus-visible,
+.footer-column button:focus-visible,
+.footer-column-images a:focus-visible {
+    outline: 2px solid #8b0000;
+    outline-offset: 2px;
+}
+</style>
+
 <footer>
   <div class="footer-content">
-    <div class="footer-row1">
-      <div class="img-right">
-        <a href="https://ec.europa.eu/consumers/odr/main/index.cfm?event=main.home.chooseLanguage" target="_blank" rel="noopener">
-          <img src="image1.png" alt="European Consumer Online Dispute Resolution Platform" width="201" height="50">
-        </a>
-      </div>
-      <div class="img-left">
-        <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener">
-          <img src="image2.png" alt="Informații despre Sistemul Alternativ de Soluționare a Litigiilor" width="201" height="50">
-        </a>
-      </div>
-    </div>
-
     <div class="footer-row2">
       <div class="footer-column">
         <ul>
           <li><h2>Contul meu</h2></li>
-
+          <li><hr class="footer-divider"></li>
           <li><a href="/users/edit" class="nav-item no-turbo">Contul meu</a></li>
-
           <li>
             <form action="/users/sign_out" method="post" class="no-turbo" style="display:inline;">
               <input type="hidden" name="_method" value="delete">
-              <button type="submit" id="logout_link" class="nav-link no-turbo" style="background:none;border:none;padding:0;cursor:pointer;">Ieși din cont</button>
+              <button type="submit" id="logout_link" class="nav-link no-turbo">Ieși din cont</button>
             </form>
           </li>
-
           <li><a href="/facturas" class="nav-item no-turbo">Facturile mele</a></li>
-
           <li><a href="/users/sign_in">Login</a></li>
           <li><a href="/users/sign_up">Creează cont</a></li>
         </ul>
@@ -36,7 +259,8 @@
 
       <div class="footer-column">
         <ul>
-          <li><h2>Ayush Cell Romania</h2></li>
+          <li><h2>Ayus Grup Romania</h2></li>
+          <li><hr class="footer-divider"></li>
           <li><a href="/termeni_conditii" class="no-turbo">Termeni și condiții</a></li>
           <li><a href="/politica_confidentialitate" class="no-turbo">Politica de confidențialitate</a></li>
           <li><a href="/politica_cookies" class="no-turbo">Politica de cookies</a></li>
@@ -47,20 +271,38 @@
       <div class="footer-column">
         <ul>
           <li><h2>Resurse</h2></li>
+          <li><hr class="footer-divider"></li>
           <li><a href="https://amnromania.ro/" target="_blank" rel="noopener">amnromania.ro</a></li>
           <li><a href="https://animaplant.ro/" target="_blank" rel="noopener">animaplant.ro</a></li>
+          <li><a href="https://ayushcell.ro/" target="_blank" rel="noopener">ayushcell.ro</a></li>
         </ul>
       </div>
 
       <div class="footer-column">
         <ul>
           <li><h2>Contact</h2></li>
+          <li><hr class="footer-divider"></li>
           <li>Adresa: Str. Ostașilor nr. 15, sector 1,</li>
           <li>București, România</li>
           <li>Tel. 0749 079 619 (Luni–Vineri 09–16)</li>
-          <li>Email: ayushcellromania@gmail.com (timp răspuns max. o zi lucrătoare)</li>
+          <li>Email: ayushcellromania@gmail.com</li>
         </ul>
       </div>
+
+      <div class="footer-column-images">
+        <h2>Asistență Legală</h2>
+       
+        <a href="https://ec.europa.eu/consumers/odr/main/index.cfm?event=main.home.chooseLanguage" target="_blank" rel="noopener">
+          <img src="<%= asset_path 'image1.png' %>" alt="European Consumer Online Dispute Resolution Platform" width="201" height="50">
+        </a>
+        <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener">
+          <img src="<%= asset_path 'image2.png' %>" alt="Informații despre Sistemul Alternativ de Soluționare a Litigiilor" width="201" height="50">
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-copyright">
+      <p>&copy; 2025 Ayus Grup Romania. Toate drepturile rezervate.</p>
     </div>
   </div>
 </footer>
