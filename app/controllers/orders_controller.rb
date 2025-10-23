@@ -54,182 +54,200 @@ class OrdersController < ApplicationController
     @total = [@subtotal - @discount + @shipping_cost, 0].max
   end
 
-  def create
-    @order = Order.new(order_params)
-    @order.user = current_user if user_signed_in?
-    @order.status = "pending"
-    @order.placed_at = Time.current
-    @order.use_different_shipping = params[:order][:use_different_shipping] == "1"
+def create
+  @order = Order.new(order_params)
+  @order.user = current_user if user_signed_in?
+  @order.status = "pending"
+  @order.placed_at = Time.current
+  @order.use_different_shipping = params[:order][:use_different_shipping] == "1"
 
-    apply_coupon_if_present
+  apply_coupon_if_present
 
-    Rails.logger.debug "=== CREATE ORDER DEBUG ==="
-    Rails.logger.debug "Coupon aplicat: #{@order.coupon.present? ? @order.coupon.code : 'NONE'}"
+  Rails.logger.debug "=== CREATE ORDER DEBUG ==="
+  Rails.logger.debug "Coupon aplicat: #{@order.coupon.present? ? @order.coupon.code : 'NONE'}"
 
-    # Copiem adresa de facturare în adresa de livrare dacă nu e bifată opțiunea
-    unless @order.use_different_shipping
-      @order.shipping_first_name    = @order.first_name
-      @order.shipping_last_name     = @order.last_name
-      @order.shipping_street        = @order.street
-      @order.shipping_street_number = @order.street_number
-      @order.shipping_block_details = @order.block_details
-      @order.shipping_city          = @order.city
-      @order.shipping_county        = @order.county
-      @order.shipping_country       = @order.country
-      @order.shipping_postal_code   = @order.postal_code
-      @order.shipping_phone         = @order.phone
-    end
+  # Copiem adresa de facturare în adresa de livrare dacă nu e bifată opțiunea
+  unless @order.use_different_shipping
+    @order.shipping_first_name    = @order.first_name
+    @order.shipping_last_name     = @order.last_name
+    @order.shipping_street        = @order.street
+    @order.shipping_street_number = @order.street_number
+    @order.shipping_block_details = @order.block_details
+    @order.shipping_city          = @order.city
+    @order.shipping_county        = @order.county
+    @order.shipping_country       = @order.country
+    @order.shipping_postal_code   = @order.postal_code
+    @order.shipping_phone         = @order.phone
+  end
 
-    # Adaugă produsele comandate
-    items_added = false
-    @cart.each do |product_id, data|
-      product = Product.find_by(id: product_id)
-      unless product
-        flash.now[:alert] = "Produs invalid în coș (ID: #{product_id})."
-        render :new, status: :unprocessable_entity and return
-      end
-
-      quantity = data["quantity"].to_i
-
-      @order.order_items.build(
-        product: product,
-        product_name: product.name,
-        quantity: quantity,
-        price: product.price,
-        vat: product.vat || 0,
-        total_price: product.price * quantity
-      )
-      items_added = true
-    end
-
-    if !items_added
-      flash.now[:alert] = "Nu s-au putut adăuga produsele din coș. Verifică coșul."
+  # Adaugă produsele comandate
+  items_added = false
+  @cart.each do |product_id, data|
+    product = Product.find_by(id: product_id)
+    unless product
+      flash.now[:alert] = "Produs invalid în coș (ID: #{product_id})."
       render :new, status: :unprocessable_entity and return
     end
 
-    # === Calculează subtotalul produselor
-    subtotal = @order.order_items.sum(&:total_price)
-    Rails.logger.debug "Subtotal produse: #{subtotal}"
+    quantity = data["quantity"].to_i
 
-    # === Adaugă linia de discount dacă există cupon
-    if @order.coupon.present?
-      coupon = @order.coupon
-      Rails.logger.debug "Procesare cupon: #{coupon.code}"
+    @order.order_items.build(
+      product: product,
+      product_name: product.name,
+      quantity: quantity,
+      price: product.price,
+      vat: product.vat || 0,
+      total_price: product.price * quantity
+    )
+    items_added = true
+  end
 
-      target_subtotal = subtotal
-      target_quantity = @order.order_items.sum(&:quantity)
+  if !items_added
+    flash.now[:alert] = "Nu s-au putut adăuga produsele din coș. Verifică coșul."
+    render :new, status: :unprocessable_entity and return
+  end
 
-      if coupon.product_id.present?
-        target_item = @order.order_items.find { |item| item.product_id == coupon.product_id }
-        if target_item
-          target_subtotal = target_item.total_price
-          target_quantity = target_item.quantity
-        else
-          target_subtotal = 0
-          target_quantity = 0
-        end
-      end
+  # === Calculează subtotalul produselor (din items în memorie)
+  subtotal = @order.order_items.sum(&:total_price)
+  Rails.logger.debug "Subtotal produse: #{subtotal}"
 
-      discount_value = 0
-      if coupon.discount_type == "percentage"
-        discount_value = (target_subtotal * (coupon.discount_value.to_f / 100.0)).round(2)
-      elsif coupon.discount_type == "fixed"
-        discount_value = [coupon.discount_value.to_f, target_subtotal].min
-      end
+  # === Adaugă linia de discount dacă există cupon
+  if @order.coupon.present?
+    coupon = @order.coupon
+    Rails.logger.debug "Procesare cupon: #{coupon.code}"
 
-      if discount_value > 0
-        @order.order_items.build(
-          product: nil,
-          product_name: "Discount",
-          quantity: 1,
-          price: -discount_value,
-          vat: 0,
-          total_price: -discount_value
-        )
+    target_subtotal = subtotal
+    target_quantity = @order.order_items.sum(&:quantity)
+
+    if coupon.product_id.present?
+      target_item = @order.order_items.find { |item| item.product_id == coupon.product_id }
+      if target_item
+        target_subtotal = target_item.total_price
+        target_quantity = target_item.quantity
+      else
+        target_subtotal = 0
+        target_quantity = 0
       end
     end
 
-    # === Adaugă linia de transport
-    transport_cost = session[:shipping_cost].to_f
-    @order.order_items.build(
-      product: nil,
-      product_name: "Transport",
-      quantity: 1,
-      price: transport_cost,
-      vat: 0,
-      total_price: transport_cost
-    )
+    discount_value = 0
+    if coupon.discount_type == "percentage"
+      discount_value = (target_subtotal * (coupon.discount_value.to_f / 100.0)).round(2)
+    elsif coupon.discount_type == "fixed"
+      discount_value = [coupon.discount_value.to_f, target_subtotal].min
+    end
 
-    # Recalculare total final
-    @order.total = @order.order_items.sum(:total_price)
-    @order.vat_amount = calculate_vat_total
-
-    # În OrdersController#create, după al doilea @order.save (după adăugare items)
-    if @order.save
-      # Calculează discount_value pentru Stripe (absolut, pozitiv)
-      discount_item = @order.order_items.find_by(product_name: "Discount")
-      discount_amount = discount_item ? (discount_item.total_price.abs * 100).to_i : 0
-
-      # Creează coupon temporar în Stripe dacă există discount
-      stripe_coupon_id = nil
-      if discount_amount > 0
-        stripe_coupon = Stripe::Coupon.create(
-          amount_off: discount_amount,  # În cenți (RON * 100)
-          currency: 'ron',
-          duration: 'once',  # Aplică o singură dată
-          id: "discount_#{@order.id}"  # ID unic temporar
-        )
-        stripe_coupon_id = stripe_coupon.id
-      end
-
-      # Construiește line_items doar pentru item-uri non-negative (exclude discount)
-      line_items = @order.order_items.map do |item|
-        next if item.price < 0  # Skip discount negativ
-
-        Rails.logger.debug "=== DEBUG: Generare item pentru Stripe - Name: #{item.product_name}, Price: #{item.price}, Quantity: #{item.quantity}, Unit amount: #{(item.price.to_f * 100).to_i} ==="
-        {
-          price_data: {
-            currency: 'ron',
-            product_data: { name: item.product_name || 'Produs' },
-            unit_amount: (item.price.to_f * 100).to_i
-          },
-          quantity: item.quantity
-        }
-      end.compact  # Elimină nil-urile de la skip
-
-      Rails.logger.debug "=== DEBUG: Line items final: #{line_items.inspect} ==="
-
-      if line_items.blank?
-        Rails.logger.error "=== DEBUG: Line items gol - nu se creează sesiune Stripe ==="
-        flash.now[:alert] = "Coș gol sau eroare la items - nu se poate iniția plata."
-        render :new, status: :unprocessable_entity and return
-      end
-
-      # Pregătește discounts array
-      discounts = stripe_coupon_id ? [{ coupon: stripe_coupon_id }] : []
-
-      stripe_session = Stripe::Checkout::Session.create(
-        payment_method_types: ['card'],
-        line_items: line_items,
-        discounts: discounts,  # Adaugă discount-ul aici
-        mode: 'payment',
-        customer_email: @order.email,
-        metadata: { order_id: @order.id },
-        success_url: "#{request.base_url}/orders/success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url: "#{request.base_url}/orders/new"
+    if discount_value > 0
+      @order.order_items.build(
+        product: nil,
+        product_name: "Discount",
+        quantity: 1,
+        price: -discount_value,
+        vat: 0,
+        total_price: -discount_value
       )
-
-      Rails.logger.debug "=== DEBUG: Session Stripe creată cu ID #{stripe_session.id}, Success URL: #{stripe_session.success_url} ==="
-
-      @order.update(stripe_session_id: stripe_session.id)
-
-      redirect_to stripe_session.url, allow_other_host: true
-    else
-      Rails.logger.error "=== DEBUG: Order nu s-a salvat - erori: #{@order.errors.full_messages} ==="
-      flash.now[:alert] = "Comanda nu a putut fi plasată. Verifică datele."
-      render :new, status: :unprocessable_entity
     end
   end
+
+  # === Adaugă linia de transport
+  transport_cost = session[:shipping_cost].to_f
+  @order.order_items.build(
+    product: nil,
+    product_name: "Transport",
+    quantity: 1,
+    price: transport_cost,
+    vat: 0,
+    total_price: transport_cost
+  )
+
+  # ✅ IMPORTANT: Calculează și SETEAZĂ valorile ÎNAINTE de primul save
+  calculated_total = @order.order_items.sum(&:total_price)
+  calculated_vat = calculate_vat_total
+  
+  @order.total = calculated_total
+  @order.vat_amount = calculated_vat
+  
+  Rails.logger.debug "=== BEFORE SAVE: Total calculat: #{calculated_total}, VAT: #{calculated_vat} ==="
+
+  # Primul save - salvează comanda cu valorile calculate
+  if @order.save
+    # ✅ DUPĂ save, recalculează din baza de date pentru a fi sigur
+    @order.reload
+    actual_total = @order.order_items.sum(&:total_price)
+    actual_vat = calculate_vat_total
+    
+    # Actualizează comanda cu valorile reale din DB
+    @order.update_columns(
+      total: actual_total,
+      vat_amount: actual_vat
+    )
+    
+    Rails.logger.debug "=== AFTER SAVE: Total actualizat: #{actual_total}, VAT: #{actual_vat} ==="
+
+    # Calculează discount_value pentru Stripe (absolut, pozitiv)
+    discount_item = @order.order_items.find_by(product_name: "Discount")
+    discount_amount = discount_item ? (discount_item.total_price.abs * 100).to_i : 0
+
+    # Creează coupon temporar în Stripe dacă există discount
+    stripe_coupon_id = nil
+    if discount_amount > 0
+      stripe_coupon = Stripe::Coupon.create(
+        amount_off: discount_amount,
+        currency: 'ron',
+        duration: 'once',
+        id: "discount_#{@order.id}"
+      )
+      stripe_coupon_id = stripe_coupon.id
+    end
+
+    # Construiește line_items doar pentru item-uri non-negative (exclude discount)
+    line_items = @order.order_items.map do |item|
+      next if item.price < 0  # Skip discount negativ
+
+      Rails.logger.debug "=== DEBUG: Generare item pentru Stripe - Name: #{item.product_name}, Price: #{item.price}, Quantity: #{item.quantity}, Unit amount: #{(item.price.to_f * 100).to_i} ==="
+      {
+        price_data: {
+          currency: 'ron',
+          product_data: { name: item.product_name || 'Produs' },
+          unit_amount: (item.price.to_f * 100).to_i
+        },
+        quantity: item.quantity
+      }
+    end.compact
+
+    Rails.logger.debug "=== DEBUG: Line items final: #{line_items.inspect} ==="
+
+    if line_items.blank?
+      Rails.logger.error "=== DEBUG: Line items gol - nu se creează sesiune Stripe ==="
+      flash.now[:alert] = "Coș gol sau eroare la items - nu se poate iniția plata."
+      render :new, status: :unprocessable_entity and return
+    end
+
+    # Pregătește discounts array
+    discounts = stripe_coupon_id ? [{ coupon: stripe_coupon_id }] : []
+
+    stripe_session = Stripe::Checkout::Session.create(
+      payment_method_types: ['card'],
+      line_items: line_items,
+      discounts: discounts,
+      mode: 'payment',
+      customer_email: @order.email,
+      metadata: { order_id: @order.id },
+      success_url: "#{request.base_url}/orders/success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "#{request.base_url}/orders/new"
+    )
+
+    Rails.logger.debug "=== DEBUG: Session Stripe creată cu ID #{stripe_session.id}, Success URL: #{stripe_session.success_url} ==="
+
+    @order.update(stripe_session_id: stripe_session.id)
+
+    redirect_to stripe_session.url, allow_other_host: true
+  else
+    Rails.logger.error "=== DEBUG: Order nu s-a salvat - erori: #{@order.errors.full_messages} ==="
+    flash.now[:alert] = "Comanda nu a putut fi plasată. Verifică datele."
+    render :new, status: :unprocessable_entity
+  end
+end
 
   def success
     Rails.logger.debug "=== DEBUG success: Primit session_id: #{params[:session_id]} ==="
@@ -337,45 +355,50 @@ class OrdersController < ApplicationController
   end
 
   def invoice
-    @order = Order.find(params[:id])
-    @invoice = @order.invoice  # Presupunând că ai has_one :invoice în model Order
+  @order = Order.find(params[:id])
+  @invoice = @order.invoice  # Presupunând că ai has_one :invoice în model Order
 
-    if @invoice.nil?
-      flash[:alert] = "Factură disponibilă doar pentru ordine plătite."
-      redirect_to orders_path and return
-    end
-
-    respond_to do |format|
-      format.pdf do
-        html = render_to_string(
-          template: 'orders/invoice',
-          layout: 'pdf',
-          formats: [:pdf],
-          locals: { order: @order, invoice: @invoice }  # Pasează invoice pentru numărul facturii
-        )
-        pdf = WickedPdf.new.pdf_from_string(html, encoding: 'UTF8')
-
-        send_data pdf,
-                  filename: "factura_#{@invoice.invoice_number}.pdf",
-                  type: 'application/pdf',
-                  disposition: 'attachment'
-      end
-      format.xml do
-        xml = render_to_string(
-          template: 'orders/invoice',
-          formats: [:xml],
-          handlers: [:builder],
-          locals: { order: @order, invoice: @invoice }
-        )
-
-        send_data xml,
-                  filename: "factura_#{@invoice.invoice_number}.xml",
-                  type: 'application/xml',
-                  disposition: 'attachment'
-      end
-    end
+  if @invoice.nil?
+    flash[:alert] = "Factură disponibilă doar pentru ordine plătite."
+    redirect_to orders_path and return
   end
 
+  respond_to do |format|
+    format.pdf do
+      html = render_to_string(
+        template: 'orders/invoice',
+        layout: 'pdf',
+        formats: [:pdf],
+        locals: { order: @order, invoice: @invoice }  # Pasează invoice pentru numărul facturii
+      )
+      pdf = WickedPdf.new.pdf_from_string(html, encoding: 'UTF8')
+
+      # Numele fișierului în formatul: Factura_240962_din_30.09.2025.pdf
+      filename = "Factura_#{@invoice.invoice_number}_din_#{@invoice.emitted_at.strftime('%d.%m.%Y')}.pdf"
+
+      send_data pdf,
+                filename: filename,
+                type: 'application/pdf',
+                disposition: 'attachment'
+    end
+    format.xml do
+      xml = render_to_string(
+        template: 'orders/invoice',
+        formats: [:xml],
+        handlers: [:builder],
+        locals: { order: @order, invoice: @invoice }
+      )
+
+      # Numele fișierului XML în formatul similar
+      filename = "Factura_#{@invoice.invoice_number}_din_#{@invoice.emitted_at.strftime('%d.%m.%Y')}.xml"
+
+      send_data xml,
+                filename: filename,
+                type: 'application/xml',
+                disposition: 'attachment'
+    end
+  end
+end
   private
 
   def apply_coupon_if_present

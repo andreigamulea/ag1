@@ -6,7 +6,7 @@ Rails.application.configure do
   config.eager_load = false
   
   config.consider_all_requests_local = true
-  Rails.application.config.hosts << "f33a2e440de4.ngrok-free.app"
+  Rails.application.config.hosts << "fe83d1c5d3a8.ngrok-free.app"
   
 
   config.server_timing = true

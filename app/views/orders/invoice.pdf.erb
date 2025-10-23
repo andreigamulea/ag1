@@ -3,83 +3,298 @@
 <html lang="ro">
 <head>
   <meta charset="UTF-8">
-  <title>Factură #<%= invoice.invoice_number %></title> <!-- Schimbat să folosească invoice_number -->
+  <title>Factură Seria <%= invoice.series %> Nr. <%= invoice.invoice_number %></title>
   <style>
-    body { font-family: Arial, sans-serif; font-size: 12pt; margin: 20mm; }
-    h1 { text-align: center; }
-    .info { margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    .total { font-weight: bold; }
-    .footer { text-align: center; font-size: 10pt; }
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20mm;
+      width: 210mm;
+      height: 297mm;
+      box-sizing: border-box;
+      background: #f9f9f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .invoice-container {
+      width: 100%;
+      max-width: 800px;
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #64025e;
+      padding-bottom: 30px;
+      margin-bottom: 20px;
+      margin-top: -50px;
+    }
+
+    .header-logo img {
+      max-height: 100px;
+      margin-top: -60px;
+    }
+
+    .header-details {
+      text-align: right;
+      font-size: 0.95em;
+      color: #4c0347;
+      margin-bottom: 5px;
+    }
+
+    .header-details p {
+      margin: 5px 0;
+    }
+
+    .details {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f5eff8;
+      border-left: 5px solid #64025e;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    .details-row {
+      display: table-row;
+    }
+
+    .details-cell {
+      display: table-cell;
+      width: 50%;
+      font-size: 0.9em;
+      line-height: 1.3;
+      color: #4c0347;
+      padding: 0 15px;
+      vertical-align: top;
+    }
+
+    .details strong {
+      color: #64025e;
+      font-weight: bold;
+    }
+
+    .details p {
+      margin: 3px 0;
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #64025e;
+      margin-bottom: 5px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #64025e;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.8em;
+      color: #64025e;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    .factura-title {
+      text-align: center;
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    .factura-info {
+      text-align: center;
+      font-size: 1em;
+      color: #4c0347;
+      font-weight: 600;
+      margin-top: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.85em;
+    }
+
+    .table th, .table td {
+      border: 1px solid #ddd;
+      padding: 5px 10px !important;
+      text-align: center;
+    }
+
+    .table th {
+      background: #64025e !important;
+      color: #fff;
+      text-transform: none;
+      font-weight: 600;
+    }
+
+    .table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    .total-table {
+      width: 50%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85em;
+      margin-left: auto;
+      margin-top: 20px;
+    }
+
+    .total-table td {
+      border: 1px solid #ddd;
+      padding: 5px 10px !important;
+    }
+
+    .footer {
+      width: calc(100% - 50px);
+      text-align: center;
+      margin-top: 25px;
+      margin-left: 0;
+      margin-right: 0;
+      font-size: 0.85em;
+      color: #4c0347;
+      background: #f5eff8;
+      padding: 12px;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    .footer p {
+      margin: 0 auto;
+      word-wrap: break-word;
+    }
   </style>
 </head>
 <body>
-  <h1>Factură #<%= invoice.invoice_number %></h1> <!-- Schimbat să folosească invoice_number -->
+  <div class="invoice-container">
+    <div class="factura-title">
+      <h1>FACTURA</h1>
+    </div>
+    <p class="factura-info">Seria: <strong><%= invoice.series %></strong> Nr. <strong><%= invoice.invoice_number %></strong></p>
+    <br>
 
-  <div class="info">
-    <p><strong>Data emisă:</strong> <%= order.created_at.strftime("%d/%m/%Y") %></p>
-    <p><strong>Cumpărător:</strong> <%= "#{order.first_name} #{order.last_name}" %></p>
-    <% if order.company_name.present? %>
-      <p><strong>Companie:</strong> <%= order.company_name %></p>
-      <p><strong>CUI:</strong> <%= order.cui %></p>
-    <% end %>
-    <% if order.cnp.present? %>
-      <p><strong>CNP:</strong> <%= order.cnp %></p>
-    <% end %>
-    <p><strong>Adresă facturare:</strong> <%= "#{order.street} #{order.street_number}, #{order.block_details}, #{order.city}, #{order.county}, #{order.postal_code}, #{order.country}" %></p>
-    <p><strong>Email:</strong> <%= order.email %></p>
-    <p><strong>Telefon:</strong> <%= order.phone %></p>
-    <% if order.use_different_shipping %>
-      <p><strong>Adresă livrare:</strong> <%= "#{order.shipping_street} #{order.shipping_street_number}, #{order.shipping_block_details}, #{order.shipping_city}, #{order.shipping_county}, #{order.shipping_postal_code}, #{order.shipping_country}" %></p>
-      <p><strong>Telefon livrare:</strong> <%= order.shipping_phone %></p>
-    <% end %>
-    <p><strong>Note:</strong> <%= order.notes %></p>
-  </div>
+    <div class="header">
+      <div class="header-logo">
+        <img src="<%= asset_url 'ayus_logo1.jpg' %>" alt="Logo AYUS">
+      </div>
+      <div class="header-details">
+        <p><strong>Număr comandă:</strong> <%= order.id %></p>
+        <p><strong>Data:</strong> <%= invoice.emitted_at.strftime("%d/%m/%Y") %></p>
+      </div>
+    </div>
 
-  <h2>Detalii Comandă</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Produs</th>
-        <th>Cantitate</th>
-        <th>Preț Unitate (RON)</th>
-        <th>Total (RON)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% order.order_items.each do |item| %>
+    <div class="details">
+      <div class="details-row">
+        <div class="details-cell">
+          <p class="section-title">FURNIZOR:</p>
+          <p><strong>AYUS GRUP SRL</strong></p>
+          <p>CUI: 15768237</p>
+          <p>J40/12819/2003</p>
+          <p style="margin-top:10px;">Municipiul București, Sector 5,</p>
+          <p>Intr. Ferentari, Nr.72, Bl.4b, Sc.D, Et.3, Ap.32</p>
+          <p style="margin-top:10px;">Banca ING BANK:</p>
+          <p>RO86INGB0000999902964556</p>
+          <p style="margin-top:10px;">Email: contact@ayus.ro</p>
+        </div>
+
+        <div class="details-cell">
+          <p class="section-title">BENEFICIAR:</p>
+          
+          <% if order.company_name.present? %>
+            <p><strong><%= order.company_name %></strong></p>
+            <p>CUI/CIF: <%= order.cui %></p>
+          <% end %>
+          
+          <p style="margin-top:10px;">Nume: <%= "#{order.first_name} #{order.last_name}" %></p>
+          
+          <% if order.cnp.present? %>
+            <p>CNP: <%= order.cnp %></p>
+          <% end %>
+          
+          <p style="margin-top:10px;"><strong>Adresa de facturare:</strong></p>
+          <p><%= "#{order.street} #{order.street_number}" %><%= ", #{order.block_details}" if order.block_details.present? %></p>
+          <p><%= "#{order.city}, #{order.county}, #{order.postal_code}" %></p>
+          
+          <% if order.use_different_shipping %>
+            <p style="margin-top:10px;"><strong>Adresa de livrare:</strong></p>
+            <p><%= "#{order.shipping_street} #{order.shipping_street_number}" %><%= ", #{order.shipping_block_details}" if order.shipping_block_details.present? %></p>
+            <p><%= "#{order.shipping_city}, #{order.shipping_county}, #{order.shipping_postal_code}" %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <table class="table">
+      <thead>
         <tr>
-          <td><%= item.product_name %></td>
-          <td><%= item.quantity %></td>
-          <td><%= sprintf("%.2f", item.price) %></td>
-          <td><%= sprintf("%.2f", item.total_price) %></td>
+          <th>Produs</th>
+          <th>Cant.</th>
+          <th>Preț</th>
+          <th>Valoare totală</th>
         </tr>
-      <% end %>
-    </tbody>
-    <tfoot>
-      <tr class="total">
-        <td colspan="3">Subtotal:</td>
-        <td><%= sprintf("%.2f", order.order_items.where.not(product_name: ["Discount", "Transport"]).sum(:total_price)) %></td>
-      </tr>
-      <tr class="total">
-        <td colspan="3">Discount:</td>
-        <td><%= sprintf("%.2f", order.order_items.find_by(product_name: "Discount")&.total_price || 0) %></td>
-      </tr>
-      <tr class="total">
-        <td colspan="3">Transport:</td>
-        <td><%= sprintf("%.2f", order.order_items.find_by(product_name: "Transport")&.total_price || 0) %></td>
-      </tr>
-      <tr class="total">
-        <td colspan="3">Total:</td>
-        <td><%= sprintf("%.2f", order.total) %></td>
-      </tr>
-    </tfoot>
-  </table>
+      </thead>
+      <tbody>
+        <% order.order_items.where.not(product_name: ["Discount", "Transport"]).each do |item| %>
+          <tr>
+            <td style="text-align: left;"><%= item.product_name %></td>
+            <td><%= item.quantity %></td>
+            <td><%= sprintf("%.2f lei", item.price) %></td>
+            <td><%= sprintf("%.2f lei", item.total_price) %></td>
+          </tr>
+        <% end %>
+        
+        <% transport_item = order.order_items.find_by(product_name: "Transport") %>
+        <% if transport_item && transport_item.total_price > 0 %>
+          <tr>
+            <td style="text-align: left;">Transport</td>
+            <td>1</td>
+            <td><%= sprintf("%.2f lei", transport_item.price) %></td>
+            <td><%= sprintf("%.2f lei", transport_item.total_price) %></td>
+          </tr>
+        <% end %>
+        
+        <% discount_item = order.order_items.find_by(product_name: "Discount") %>
+        <% if discount_item && discount_item.total_price < 0 %>
+          <tr>
+            <td style="text-align: left;">Discount</td>
+            <td>1</td>
+            <td><%= sprintf("%.2f lei", discount_item.price) %></td>
+            <td><%= sprintf("%.2f lei", discount_item.total_price) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
 
-  <div class="footer">
-    <p>Mulțumim pentru comandă! Pentru întrebări, contactați-ne la [email magazin].</p>
+    <table class="total-table">
+      <tbody>
+        <tr>
+          <td>Total de plată</td>
+          <td style="text-align:center;"><%= sprintf("%.2f lei", order.total) %></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <p>Mulțumim pentru colaborare! Pentru întrebări, vă rugăm să ne contactați la adresa de email contact@ayus.ro</p>
+    </div>
   </div>
 </body>
 </html>
