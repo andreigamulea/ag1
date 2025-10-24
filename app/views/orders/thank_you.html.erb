@@ -1,91 +1,419 @@
-<h1>Mulțumim pentru comandă!</h1>
-<p>Comanda #<%= @order.id %> a fost plasată cu succes.</p>
+<style>
+/* ===================================
+   THANK YOU PAGE STYLES
+   =================================== */
 
-<h2>Detalii client:</h2>
-<ul>
-  <li><strong>Nume:</strong> <%= @order.last_name %> <%= @order.first_name %></li>
-  <li><strong>Email:</strong> <%= @order.email %></li>
-  <li><strong>Adresă:</strong> <%= [@order.street, "nr #{@order.street_number}", @order.block_details, @order.city, @order.county, @order.country].compact.join(', ') %> (Cod poștal: <%= @order.postal_code %>)</li>
-  <li><strong>Telefon:</strong> <%= @order.phone %></li>
-</ul>
+.thank-you-wrapper {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 40px;
+    background: white;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
 
-<% if @order.shipping_address_different? %>
-  <h2>Adresă de livrare:</h2>
-  <ul>
-    <li><strong>Nume:</strong> <%= @order.shipping_last_name %> <%= @order.shipping_first_name %></li>
-    <li><strong>Adresă:</strong> <%= [@order.shipping_street, "nr #{@order.shipping_street_number}", @order.shipping_block_details, @order.shipping_city, @order.shipping_county, @order.shipping_country].compact.join(', ') %> (Cod poștal: <%= @order.shipping_postal_code %>)</li>
-    <li><strong>Telefon:</strong> <%= @order.shipping_phone %></li>
-  </ul>
-<% end %>
+.success-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px 20px;
+    background: #fdfaf5;
+    border-radius: 8px;
+    border: 1px solid #e0d5c7;
+}
 
-<h2>Produse comandate:</h2>
-<table style="width: 100%; border-collapse: collapse;">
-  <thead>
-    <tr>
-      <th style="text-align: left; border-bottom: 1px solid #ccc;">Produs</th>
-      <th style="text-align: left; border-bottom: 1px solid #ccc;">Cantitate</th>
-      <th style="text-align: left; border-bottom: 1px solid #ccc;">Preț unitar</th>
-      <th style="text-align: left; border-bottom: 1px solid #ccc;">Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% transport_item = @order.order_items.find { |i| i.product_name == "Transport" } %>
+.success-header h1 {
+    font-size: 28px;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    color: #8b0000;
+}
 
-    <% @order.order_items.each do |item| %>
-      <% next if item.product_name == "Transport" %>
-      <tr>
-        <td><%= item.product_name %></td>
-        <td><%= item.quantity %></td>
-        <td>
-          <% unit_price = item.total_price.to_f / item.quantity.to_i rescue 0 %>
-          <% if item.product_name == "Discount" %>
-            -<%= number_with_precision(unit_price.abs, precision: 2) %> lei
+.success-header .order-number {
+    font-size: 16px;
+    color: #666;
+}
+
+.success-icon {
+    font-size: 25px;
+    margin-bottom: 0px;
+    opacity: 0.8;
+}
+
+/* ===================================
+   SECTIONS
+   =================================== */
+
+.info-section {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #e0d5c7;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.info-section h2 {
+    color: #8b0000;
+    font-size: 18px;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    border-bottom: 1px solid #e0d5c7;
+    padding-bottom: 10px;
+}
+
+.info-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-section li {
+    padding: 5px 0;
+    font-size: 15px;
+    line-height: 1;
+}
+
+.info-section li strong {
+    color: #8b0000;
+    display: inline-block;
+    min-width: 120px;
+}
+
+/* ===================================
+   PRODUCTS TABLE
+   =================================== */
+
+.products-section {
+    margin-bottom: 30px;
+}
+
+.products-section h2 {
+    color: #8b0000;
+    font-size: 20px;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0d5c7;
+}
+
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 15px;
+}
+
+.products-table thead {
+    background: #8b0000;
+    color: white;
+}
+
+.products-table th {
+    padding: 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.products-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.products-table tbody tr:hover {
+    background: #fdfaf5;
+    transition: 0.2s ease;
+}
+
+.products-table tbody tr:last-child {
+    font-weight: bold;
+    background: #fff5f5;
+}
+
+.products-table .discount-row {
+    color: green;
+    font-weight: bold;
+}
+
+.products-table .transport-free {
+    color: green;
+    font-weight: bold;
+}
+
+/* ===================================
+   PAYMENT SUMMARY
+   =================================== */
+
+.payment-summary {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #e0d5c7;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.payment-summary h3 {
+    color: #8b0000;
+    font-size: 18px;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+}
+
+.payment-summary ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.payment-summary li {
+    padding: 10px 0;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+.payment-summary li:last-child {
+    border-bottom: none;
+    padding-top: 15px;
+    margin-top: 10px;
+    border-top: 1px solid #e0d5c7;
+}
+
+.payment-summary li strong {
+    color: #8b0000;
+}
+
+.payment-summary .total-amount {
+    font-size: 20px;
+    color: #8b0000;
+}
+
+.payment-summary .discount-amount {
+    color: green;
+    font-weight: bold;
+}
+
+.payment-summary .free-shipping {
+    color: green;
+    font-weight: bold;
+}
+
+/* ===================================
+   CONFIRMATION MESSAGE
+   =================================== */
+
+.confirmation-message {
+    text-align: center;
+    padding: 18px;
+    background: #f5f9f5;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #d4e7d4;
+}
+
+.confirmation-message p {
+    margin: 0;
+    font-size: 15px;
+    color: #4a774a;
+    font-weight: 500;
+}
+
+/* ===================================
+   BACK BUTTON
+   =================================== */
+
+.back-button-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-back {
+    display: inline-block;
+    padding: 10px 25px;
+    background: #8b0000;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: #6d0000;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(139, 0, 0, 0.2);
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 768px) {
+    .thank-you-wrapper {
+        padding: 20px;
+        margin: 15px;
+    }
+
+    .success-header h1 {
+        font-size: 24px;
+    }
+
+    .success-header .order-number {
+        font-size: 16px;
+    }
+
+    .products-table {
+        font-size: 13px;
+    }
+
+    .products-table th,
+    .products-table td {
+        padding: 8px 5px;
+    }
+
+    .info-section li strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .thank-you-wrapper {
+        padding: 15px;
+        margin: 10px;
+        border-radius: 0;
+    }
+
+    .success-header {
+        padding: 15px;
+    }
+
+    .success-icon {
+        font-size: 36px;
+    }
+
+    .products-table {
+        font-size: 12px;
+    }
+}
+</style>
+
+<div class="thank-you-wrapper">
+  <!-- SUCCESS HEADER -->
+  <div class="success-header">
+    <div class="success-icon">✅</div>
+    <h1>Mulțumim pentru comandă!</h1>
+    <p class="order-number">Comanda #<%= @order.id %> a fost plasată cu succes.</p>
+  </div>
+
+  <!-- CLIENT DETAILS -->
+  <div class="info-section">
+    <h2>Detalii client</h2>
+    <ul>
+      <li><strong>Nume:</strong> <%= @order.last_name %> <%= @order.first_name %></li>
+      <li><strong>Email:</strong> <%= @order.email %></li>
+      <li><strong>Telefon:</strong> <%= @order.phone %></li>
+      <li><strong>Adresă:</strong> <%= [@order.street, "nr #{@order.street_number}", @order.block_details, @order.city, @order.county, @order.country].compact.join(', ') %> (Cod poștal: <%= @order.postal_code %>)</li>
+    </ul>
+  </div>
+
+  <!-- SHIPPING ADDRESS (if different) -->
+  <% if @order.shipping_address_different? %>
+    <div class="info-section">
+      <h2>Adresă de livrare</h2>
+      <ul>
+        <li><strong>Nume:</strong> <%= @order.shipping_last_name %> <%= @order.shipping_first_name %></li>
+        <li><strong>Telefon:</strong> <%= @order.shipping_phone %></li>
+        <li><strong>Adresă:</strong> <%= [@order.shipping_street, "nr #{@order.shipping_street_number}", @order.shipping_block_details, @order.shipping_city, @order.shipping_county, @order.shipping_country].compact.join(', ') %> (Cod poștal: <%= @order.shipping_postal_code %>)</li>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- PRODUCTS TABLE -->
+  <div class="products-section">
+    <h2>Produse comandate</h2>
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Produs</th>
+          <th>Cantitate</th>
+          <th>Preț unitar</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% transport_item = @order.order_items.find { |i| i.product_name == "Transport" } %>
+
+        <% @order.order_items.each do |item| %>
+          <% next if item.product_name == "Transport" %>
+          <tr class="<%= 'discount-row' if item.product_name == 'Discount' %>">
+            <td><%= item.product_name %></td>
+            <td><%= item.quantity %></td>
+            <td>
+              <% unit_price = item.total_price.to_f / item.quantity.to_i rescue 0 %>
+              <% if item.product_name == "Discount" %>
+                -<%= number_with_precision(unit_price.abs, precision: 2) %> lei
+              <% else %>
+                <%= number_with_precision(unit_price, precision: 2) %> lei
+              <% end %>
+            </td>
+            <td>
+              <% if item.product_name == "Discount" %>
+                -<%= number_with_precision(item.total_price.to_f.abs, precision: 2) %> lei
+              <% else %>
+                <%= number_with_precision(item.total_price.to_f, precision: 2) %> lei
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+
+        <!-- Transport Row -->
+        <tr>
+          <td>Transport</td>
+          <td>1</td>
+          <% if transport_item && transport_item.total_price.to_f > 0 %>
+            <td><%= number_with_precision(transport_item.total_price.to_f, precision: 2) %> lei</td>
+            <td><%= number_with_precision(transport_item.total_price.to_f, precision: 2) %> lei</td>
           <% else %>
-            <%= number_with_precision(unit_price, precision: 2) %> lei
+            <td class="transport-free">Gratuit</td>
+            <td>0.00 lei</td>
           <% end %>
-        </td>
-        <td>
-          <% if item.product_name == "Discount" %>
-            -<%= number_with_precision(item.total_price.to_f.abs, precision: 2) %> lei
-          <% else %>
-            <%= number_with_precision(item.total_price.to_f, precision: 2) %> lei
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-    <%# Forțăm afișarea transportului, chiar și dacă e gratuit sau lipsit %>
-    <tr>
-      <td>Transport</td>
-      <td>1</td>
-      <% if transport_item && transport_item.total_price.to_f > 0 %>
-        <td><%= number_with_precision(transport_item.total_price.to_f, precision: 2) %> lei</td>
-        <td><%= number_with_precision(transport_item.total_price.to_f, precision: 2) %> lei</td>
-      <% else %>
-        <td style="color: green;">Gratuit</td>
-        <td>0.00 lei</td>
+  <!-- PAYMENT SUMMARY -->
+  <div class="payment-summary">
+    <h3>Rezumat plată</h3>
+    <ul>
+      <li>Subtotal: <%= number_with_precision(@subtotal || 0, precision: 2) %> lei</li>
+
+      <% if @discount.to_f != 0 %>
+        <li class="discount-amount">Reducere: -<%= number_with_precision(@discount.to_f.abs, precision: 2) %> lei</li>
       <% end %>
-    </tr>
-  </tbody>
-</table>
 
-<h3>Rezumat plată:</h3>
-<ul>
-  <li>Subtotal: <%= number_with_precision(@subtotal || 0, precision: 2) %> lei</li>
+      <% if @transport.to_f != 0 %>
+        <li>Transport: <%= number_with_precision(@transport, precision: 2) %> lei</li>
+      <% else %>
+        <li class="free-shipping">Transport: Gratuit</li>
+      <% end %>
 
-  <% if @discount.to_f != 0 %>
-    <li>Reducere: -<%= number_with_precision(@discount.to_f.abs, precision: 2) %> lei</li>
-  <% end %>
+      <li class="total-amount"><strong>Total de plată: <%= number_with_precision(@total || 0, precision: 2) %> lei</strong></li>
+    </ul>
+  </div>
 
-  <% if @transport.to_f != 0 %>
-    <li>Transport: <%= number_with_precision(@transport, precision: 2) %> lei</li>
-  <% else %>
-    <li>Transport: Gratuit</li>
-  <% end %>
+  <!-- CONFIRMATION MESSAGE -->
+  <div class="confirmation-message">
+    <p>✉️ Vei primi un email de confirmare cu detaliile comenzii în curând.</p>
+  </div>
 
-  <li><strong>Total de plată: <%= number_with_precision(@total || 0, precision: 2) %> lei</strong></li>
-</ul>
-
-<p>Vei primi un email de confirmare cu detaliile comenzii în curând.</p>
-
-<%= link_to "Înapoi la homepage", root_path, class: "btn btn-primary mt-3" %>
+  <!-- BACK BUTTON -->
+  <div class="back-button-container">
+    <%= link_to "Înapoi la homepage", root_path, class: "btn-back" %>
+  </div>
+</div>

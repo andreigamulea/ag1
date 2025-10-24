@@ -5,6 +5,7 @@
 /* Application styles */
 body {
     font-family: 'Lora', serif;
+    /*font-family: 'Roboto', sans-serif;*/
     margin: 0;
     padding: 0;
     background: #fdfaf5;
@@ -136,9 +137,9 @@ nav a:hover,
 .close-menu:focus,
 nav a:focus,
 nav button:focus {
-    outline: 2px solid #8b0000;
-    outline-offset: 2px;
+    outline: none;
 }
+
 
 /* ===================================
    NAVIGATION - MOBILE

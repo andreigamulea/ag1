@@ -39,125 +39,147 @@
     </div>
   <% end %>
 
+  <!-- ADRESA DE LIVRARE - PRIMA -->
   <fieldset>
-    <legend><strong>Date de facturare</strong></legend>
+    <legend><strong>Date de livrare</strong></legend>
 
     <div class="row">
-      <div class="col"><%= f.label :first_name, "Prenume" %><br><%= f.text_field :first_name, required: true %></div>
-      <div class="col"><%= f.label :last_name, "Nume" %><br><%= f.text_field :last_name, required: true %></div>
+      <div class="col"><%= f.label :shipping_last_name, "Nume" %>
+      <%= f.text_field :shipping_last_name, required: true %></div>
+      <div class="col"><%= f.label :shipping_first_name, "Prenume" %>
+      <%= f.text_field :shipping_first_name, required: true %></div>
     </div>
 
     <div class="row">
-      <div class="col"><%= f.label :company_name, "Companie (opțional)" %><br><%= f.text_field :company_name %></div>
-      <div class="col"><%= f.label :cui, "CUI (opțional)" %><br><%= f.text_field :cui %></div>
-    </div>
-
-    <div class="row">
-      <div class="col"><%= f.label :cnp, "CNP" %><br><%= f.text_field :cnp, placeholder: "0000000000000" %></div>
-      <div class="col"><%= f.label :phone, "Telefon" %><br><%= f.telephone_field :phone, required: true %></div>
-    </div>
-
-    <div class="row">
-      <div class="col"><%= f.label :email, "Email" %><br><%= f.email_field :email, required: true %></div>
+      <div class="col"><%= f.label :shipping_company_name, "Companie (opțional)" %>
+      <%= f.text_field :shipping_company_name %></div>
+      <div class="col"><%= f.label :shipping_phone, "Telefon" %>
+      <%= f.telephone_field :shipping_phone, required: true %></div>
     </div>
 
     <div class="mb-3">
-      <%= f.label :country, "Țara", class: "form-label" %>
+      <%= f.label :shipping_country, "Țara", class: "form-label" %>
       <div class="position-relative">
-        <%= f.text_field :country, class: "form-control", id: "tara_input", placeholder: "Click pentru a schimba țara...", autocomplete: "off", value: "Romania" %>
-        <div id="tara_dropdown" class="dropdown-menu w-100 shadow"></div>
+        <%= f.text_field :shipping_country, class: "form-control", id: "shipping_tara_input", placeholder: "Click pentru a schimba țara...", autocomplete: "off", value: "Romania" %>
+        <div id="shipping_tara_dropdown" class="dropdown-menu w-100 shadow"></div>
       </div>
     </div>
 
     <div class="mb-3">
-      <%= f.label :county, "Județ", class: "form-label" %>
+      <%= f.label :shipping_county, "Județ", class: "form-label" %>
       <div class="position-relative">
-        <%= f.text_field :county, class: "form-control", id: "judet_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: false %>
-        <div id="judet_dropdown" class="dropdown-menu w-100 shadow"></div>
+        <%= f.text_field :shipping_county, class: "form-control", id: "shipping_judet_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: false %>
+        <div id="shipping_judet_dropdown" class="dropdown-menu w-100 shadow"></div>
       </div>
     </div>
 
     <div class="mb-3">
-      <%= f.label :city, "Localitate", class: "form-label" %>
+      <%= f.label :shipping_city, "Localitate", class: "form-label" %>
       <div class="position-relative">
-        <%= f.text_field :city, class: "form-control", id: "localitate_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: true %>
-        <div id="localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
+        <%= f.text_field :shipping_city, class: "form-control", id: "shipping_localitate_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: true %>
+        <div id="shipping_localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
       </div>
     </div>
 
     <div class="row">
-      <div class="col"><%= f.label :postal_code, "Cod poștal" %><br><%= f.text_field :postal_code, required: true %></div>
+      <div class="col"><%= f.label :shipping_postal_code, "Cod poștal" %>
+      <%= f.text_field :shipping_postal_code, required: true %></div>
     </div>
 
     <div class="row">
-      <div class="col"><%= f.label :street, "Stradă" %><br><%= f.text_field :street, required: true %></div>
-      <div class="col"><%= f.label :street_number, "Număr" %><br><%= f.text_field :street_number %></div>
+      <div class="col"><%= f.label :shipping_street, "Stradă" %>
+      <%= f.text_field :shipping_street, required: true %></div>
+      <div class="col"><%= f.label :shipping_street_number, "Număr" %>
+      <%= f.text_field :shipping_street_number %></div>
     </div>
 
     <div class="row">
-      <div class="col"><%= f.label :block_details, "Bloc/Etaj/Apt (opțional)" %><br><%= f.text_field :block_details %></div>
+      <div class="col"><%= f.label :shipping_block_details, "Bloc/Etaj/Apt (opțional)" %>
+      <%= f.text_field :shipping_block_details %></div>
     </div>
   </fieldset>
 
   <hr>
 
-  <div data-controller="toggle-shipping">
+  <!-- CHECKBOX PENTRU ADRESA DE FACTURARE DIFERITĂ -->
+  <div data-controller="toggle-billing">
     <div style="margin: 20px 0;">
       <div class="field">
-        <%= f.check_box :use_different_shipping, id: "toggle-shipping" %>
-        <%= f.label :use_different_shipping, "Adresa de livrare este diferită" %>
+        <%= f.check_box :use_different_billing, id: "toggle-billing" %>
+        <%= f.label :use_different_billing, "Adresa de facturare este diferită" %>
       </div>
     </div>
 
-    <div id="shipping-fields" data-toggle-shipping-target="fields" style="display: none;">
+    <!-- ADRESA DE FACTURARE - AFIȘATĂ DOAR DACĂ E BIFAT CHECKBOX-UL -->
+    <div id="billing-fields" data-toggle-billing-target="fields" style="display: none;">
       <fieldset>
-        <legend><strong>Date de livrare</strong></legend>
+        <legend><strong>Date de facturare</strong></legend>
 
         <div class="row">
-          <div class="col"><%= f.label :shipping_first_name, "Prenume livrare" %><br><%= f.text_field :shipping_first_name %></div>
-          <div class="col"><%= f.label :shipping_last_name, "Nume livrare" %><br><%= f.text_field :shipping_last_name %></div>
+          <div class="col"><%= f.label :last_name, "Nume" %>
+          <%= f.text_field :last_name %></div>
+          <div class="col"><%= f.label :first_name, "Prenume" %>
+          <%= f.text_field :first_name %></div>
         </div>
 
         <div class="row">
-          <div class="col"><%= f.label :shipping_company_name, "Companie livrare" %><br><%= f.text_field :shipping_company_name %></div>
+          <div class="col"><%= f.label :company_name, "Companie (opțional)" %>
+          <%= f.text_field :company_name %></div>
+          <div class="col"><%= f.label :cui, "CUI (opțional)" %>
+          <%= f.text_field :cui %></div>
+        </div>
+
+        <div class="row">
+          <div class="col"><%= f.label :cnp, "CNP (opțional)" %>
+          <%= f.text_field :cnp, placeholder: "0000000000000" %></div>
+          <div class="col"><%= f.label :phone, "Telefon" %>
+          <%= f.telephone_field :phone %></div>
+        </div>
+
+        <div class="row">
+          <div class="col"><%= f.label :email, "Email" %>
+          <%= f.email_field :email, required: true %></div>
         </div>
 
         <div class="mb-3">
-          <%= f.label :shipping_country, "Țara livrare", class: "form-label" %>
+          <%= f.label :country, "Țara", class: "form-label" %>
           <div class="position-relative">
-            <%= f.text_field :shipping_country, class: "form-control", id: "shipping_tara_input", placeholder: "Click pentru a schimba țara...", autocomplete: "off", value: "Romania" %>
-            <div id="shipping_tara_dropdown" class="dropdown-menu w-100 shadow"></div>
+            <%= f.text_field :country, class: "form-control", id: "tara_input", placeholder: "Click pentru a schimba țara...", autocomplete: "off", value: "Romania" %>
+            <div id="tara_dropdown" class="dropdown-menu w-100 shadow"></div>
           </div>
         </div>
 
         <div class="mb-3">
-          <%= f.label :shipping_county, "Județ livrare", class: "form-label" %>
+          <%= f.label :county, "Județ", class: "form-label" %>
           <div class="position-relative">
-            <%= f.text_field :shipping_county, class: "form-control", id: "shipping_judet_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: false %>
-            <div id="shipping_judet_dropdown" class="dropdown-menu w-100 shadow"></div>
+            <%= f.text_field :county, class: "form-control", id: "judet_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: false %>
+            <div id="judet_dropdown" class="dropdown-menu w-100 shadow"></div>
           </div>
         </div>
 
         <div class="mb-3">
-          <%= f.label :shipping_city, "Localitate livrare", class: "form-label" %>
+          <%= f.label :city, "Localitate", class: "form-label" %>
           <div class="position-relative">
-            <%= f.text_field :shipping_city, class: "form-control", id: "shipping_localitate_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: true %>
-            <div id="shipping_localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
+            <%= f.text_field :city, class: "form-control", id: "localitate_input", placeholder: "Tastează max 2 litere...", autocomplete: "off", disabled: true %>
+            <div id="localitate_dropdown" class="dropdown-menu w-100 shadow"></div>
           </div>
         </div>
 
         <div class="row">
-          <div class="col"><%= f.label :shipping_postal_code, "Cod poștal livrare" %><br><%= f.text_field :shipping_postal_code %></div>
+          <div class="col"><%= f.label :postal_code, "Cod poștal" %>
+          <%= f.text_field :postal_code %></div>
         </div>
 
         <div class="row">
-          <div class="col"><%= f.label :shipping_street, "Stradă livrare" %><br><%= f.text_field :shipping_street %></div>
-          <div class="col"><%= f.label :shipping_street_number, "Număr livrare" %><br><%= f.text_field :shipping_street_number %></div>
+          <div class="col"><%= f.label :street, "Stradă" %>
+          <%= f.text_field :street %></div>
+          <div class="col"><%= f.label :street_number, "Număr" %>
+          <%= f.text_field :street_number %></div>
         </div>
 
         <div class="row">
-          <div class="col"><%= f.label :shipping_block_details, "Bloc/Etaj/Apt livrare" %><br><%= f.text_field :shipping_block_details %></div>
-          <div class="col"><%= f.label :shipping_phone, "Telefon livrare" %><br><%= f.text_field :shipping_phone %></div>
+          <div class="col"><%= f.label :block_details, "Bloc/Etaj/Apt (opțional)" %>
+          <%= f.text_field :block_details %></div>
         </div>
       </fieldset>
     </div>
@@ -165,7 +187,7 @@
 
   <div class="row">
     <div class="col">
-      <%= f.label :notes, "Note comandă (opțional)" %><br>
+      <%= f.label :notes, "Note comandă (opțional)" %>
       <%= f.text_area :notes, rows: 3 %>
     </div>
   </div>
@@ -190,88 +212,65 @@
         if (filterValue) {
           url += `&filter=${encodeURIComponent(filterValue)}`;
         }
-        
+
         fetch(url)
-          .then((response) => {
-            if (!response.ok) {
-              console.error("Fetch error: ", response.status);
-              throw new Error("Network response not ok");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Received data for " + inputId + ": ", data);
-            
-            // Pentru țară, pune România prima
-            if (inputId.endsWith("tara_input")) {
-              const romaniaIndex = data.findIndex(item => item.toLowerCase() === "romania");
-              if (romaniaIndex > -1) {
-                const romania = data.splice(romaniaIndex, 1)[0];
-                data.unshift(romania);
-              }
-            }
-            
-            validSuggestions = data;
-            allOptions = data;
-            displayOptions(data);
-          })
-          .catch((error) => console.error("Eroare la încărcarea sugestiilor:", error));
-      }
-
-      function displayOptions(data) {
-        dropdown.innerHTML = '';
-        if (data.length > 0) {
-          dropdown.style.display = 'block';
-          data.forEach((item) => {
-            const option = document.createElement('a');
-            option.classList.add('dropdown-item');
-            option.textContent = item;
-            option.href = '#';
-            option.addEventListener('click', (e) => {
-              e.preventDefault();
-              input.value = item;
+          .then(response => response.json())
+          .then(data => {
+            if (data.length === 0) {
               dropdown.style.display = 'none';
-              enableNextFields(inputId, item);
+              return;
+            }
+
+            allOptions = data;
+            validSuggestions = data.map(item => typeof item === 'string' ? item : item.name);
+
+            data.forEach(item => {
+              const div = document.createElement('div');
+              div.className = 'dropdown-item';
+              div.textContent = typeof item === 'string' ? item : item.name;
+
+              div.addEventListener('click', () => {
+                input.value = div.textContent;
+                dropdown.style.display = 'none';
+                enableNextFields(inputId, div.textContent);
+              });
+
+              dropdown.appendChild(div);
             });
-            dropdown.appendChild(option);
+
+            dropdown.style.display = 'block';
+          })
+          .catch(error => {
+            console.error('Eroare fetch:', error);
+            dropdown.style.display = 'none';
           });
-        } else {
-          dropdown.style.display = 'none';
-        }
       }
 
-      // Pentru ȚARĂ: click pentru a deschide lista
+      // Setup pentru țară
       if (inputId.endsWith("tara_input")) {
         input.addEventListener('click', () => {
-          input.value = '';
-          disableNextFields(inputId);
-          updateDropdown('a'); // Încarcă toate țările
+          updateDropdown('*');
         });
 
-        input.addEventListener('focus', () => {
-          if (input.value === '' || input.value === 'Romania') {
-            updateDropdown('a');
-          }
+        input.addEventListener('input', () => {
+          const query = input.value.trim() || '*';
+          updateDropdown(query);
         });
 
         input.addEventListener('blur', () => {
           setTimeout(() => {
-            if (!validSuggestions.includes(input.value)) {
-              input.value = 'Romania'; // Revine la România dacă nu e selectat nimic
-              enableNextFields(inputId, 'Romania');
+            const normalizedInput = input.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const isValid = validSuggestions.some(sug => sug.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedInput);
+            if (!isValid) {
+              input.value = '';
+              disableNextFields(inputId);
             }
             dropdown.style.display = 'none';
           }, 200);
         });
 
-        // Blochează tastarea pentru țară
-        input.addEventListener('keydown', (e) => {
-          e.preventDefault();
-        });
-      }
-
-      // Pentru JUDEȚ și LOCALITATE
-      if (inputId.endsWith("judet_input") || inputId.endsWith("localitate_input")) {
+      } else {
+        // Setup pentru județ/localitate
         const taraInput = document.getElementById(taraInputId);
         
         input.addEventListener('input', () => {
@@ -438,26 +437,26 @@
       taraInput.style.backgroundColor = "#f8f9fa";
     }
 
-    // Configurează autocomplete pentru Facturare
-    setupAutocomplete("tara_input", "tara_dropdown", "/autocomplete_tara");
-    setupAutocomplete("judet_input", "judet_dropdown", "/autocomplete_judet");
-    setupAutocomplete("localitate_input", "localitate_dropdown", "/autocomplete_localitate", "judet_input");
-
-    // Configurează autocomplete pentru Shipping
+    // Configurează autocomplete pentru Shipping (PRIMA)
     setupAutocomplete("shipping_tara_input", "shipping_tara_dropdown", "/autocomplete_tara", null, "shipping_tara_input");
     setupAutocomplete("shipping_judet_input", "shipping_judet_dropdown", "/autocomplete_judet", null, "shipping_tara_input");
     setupAutocomplete("shipping_localitate_input", "shipping_localitate_dropdown", "/autocomplete_localitate", "shipping_judet_input", "shipping_tara_input");
 
+    // Configurează autocomplete pentru Facturare (OPȚIONALĂ)
+    setupAutocomplete("tara_input", "tara_dropdown", "/autocomplete_tara");
+    setupAutocomplete("judet_input", "judet_dropdown", "/autocomplete_judet");
+    setupAutocomplete("localitate_input", "localitate_dropdown", "/autocomplete_localitate", "judet_input");
+
     // Inițializează starea câmpurilor la load cu România by default
-    initializeFields();
     initializeFields("shipping_");
+    initializeFields();
   });
 </script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const checkbox = document.getElementById("toggle-shipping");
-    const fields = document.getElementById("shipping-fields");
+    const checkbox = document.getElementById("toggle-billing");
+    const fields = document.getElementById("billing-fields");
 
     if (checkbox && fields) {
       fields.style.display = checkbox.checked ? "block" : "none";

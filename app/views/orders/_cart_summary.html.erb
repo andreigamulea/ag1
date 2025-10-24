@@ -14,22 +14,22 @@
     <tr>
       <td><%= product.name %></td>
       <td><%= quantity %></td>
-      <td><%= number_to_currency(product.price, unit: "lei") %></td>
-      <td><%= number_to_currency(product.price * quantity, unit: "lei") %></td>
+      <td><%= number_to_currency(product.price, unit: "") %> lei</td>
+      <td><%= number_to_currency(product.price * quantity, unit: "") %> lei</td>
     </tr>
   <% end %>
 </table>
 
-<p><strong>Subtotal:</strong> <%= number_to_currency(@subtotal, unit: "lei") %></p>
+<p><strong>Subtotal:</strong> <%= number_to_currency(@subtotal, unit: "") %> lei</p>
 
 <% if @discount.positive? %>
-  <p style="color: green;">✅ Discount: -<%= number_to_currency(@discount, unit: "lei") %></p>
+  <p style="color: green;">✅ Discount: -<%= number_to_currency(@discount, unit: "") %> lei</p>
 <% end %>
 
 <% if @shipping_cost > 0 %>
-  <p><strong>Transport:</strong> <%= number_to_currency(@shipping_cost, unit: "lei") %></p>
+  <p><strong>Transport:</strong> <%= number_to_currency(@shipping_cost, unit: "") %> lei</p>
 <% else %>
   <p><strong>Transport:</strong> Gratuit</p>
 <% end %>
 
-<p><strong>Total estimat:</strong> <%= number_to_currency(@total, unit: "lei") %></p>
+<p><strong>Total estimat:</strong> <%= number_to_currency(@total, unit: "") %> lei</p>
