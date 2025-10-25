@@ -207,7 +207,7 @@ window.addEventListener('resize', () => {
             <%= @cart_items_count || 0 %>
           </span>
           🛒 
-          <%= number_to_currency(@cart_total || 0, unit: "lei") %>
+          <%= number_to_currency(@cart_total || 0, unit: "lei", format: "%n %u") %>
         <% end %>
         <% if current_user&.admin? %>
           <%= link_to "Admin", admin_path, class: "admin-link" %>

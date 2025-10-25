@@ -92,7 +92,7 @@
           – nu se aplică în prezent.
         <% end %>
       </p>
-      <%= button_to "Șterge cupon", remove_coupon_path, method: :post, class: "btn btn-danger" %>
+      <%= button_to "Șterge cupon", remove_coupon_path, method: :post, class: "btn btn-danger btn-remove-coupon" %>
     </div>
 
     <% if @coupon_errors.any? %>
@@ -119,10 +119,9 @@
   <!-- Butoane pentru continuarea cumpărăturilor și finalizarea comenzii -->
   <% if @cart_items.any? %>
     <div class="checkout-container">
-      <%= link_to "Continuă cumpărăturile", carti_index_path, class: "btn btn-primary continue-shopping-btn" %>
-
       <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-primary checkout-btn" %>
-    </div>
+      <%= link_to "Continuă cumpărăturile", carti_index_path, class: "btn btn-primary continue-shopping-btn" %>
+     </div>
   <% end %>
 </div>
 
@@ -232,6 +231,13 @@
 .cart-container .btn-danger:hover {
     background: #5a6268;
     border-color: #5a6268;
+}
+
+.cart-container .btn-remove-coupon {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
 }
 
 .cart-container .cart-item-delete {

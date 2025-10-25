@@ -1,63 +1,858 @@
 <!-- app/views/orders/index.html.erb -->
-<div class="container">
-  <div class="row">
-    <!-- Tabelul cu ordine (3/4 lățime, e.g., col-md-9) -->
-    <div class="col-md-9">
-      <h2>Toate Ordinele</h2>
-      <table class="table table-striped table-sm"> <!-- table-sm pentru compactare -->
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nume </th> <!-- Specificat ca din datele de facturare -->
-            <th>Email</th> <!-- Adăugat coloană pentru email -->
-            <th>Telefon</th> <!-- Adăugat coloană pentru telefon -->
-            <th>Data Creării</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Acțiuni</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @orders.each do |order| %>
-            <tr>
-              <td><%= order.id %></td>
-              <td><%= "#{order.first_name} #{order.last_name}" %></td> <!-- Nume din datele de facturare (first_name + last_name) -->
-              <td><%= order.email %></td> <!-- Email din order -->
-              <td><%= order.phone %></td> <!-- Telefon din order -->
-              <td><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-              <td><%= order.total %> RON</td> <!-- Presupun că totalul este în RON, ajustează după nevoie -->
-              <td><%= order.status %></td>
-              <td>
-                <div class="d-flex gap-2"> <!-- Folosit d-flex cu gap-2 pentru spațiu între butoane -->
-                  <%= button_to "Produse", show_items_order_path(order), remote: true, class: "btn btn-primary btn-sm", data: { target: order.id } %>
-                  <% if order.invoice.present? %>
-                    <%= link_to "PDF", invoice_order_path(order, format: :pdf), class: "btn btn-secondary btn-sm" %>
-                    <%= link_to "XML", invoice_order_path(order, format: :xml), class: "btn btn-info btn-sm" %>
-                  <% end %>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <%= paginate @orders %>
-    </div>
+<div class="orders-page-wrapper">
+  <!-- Titlul principal pe toată lățimea -->
+  <div class="page-header">
+    <h1>Administrare Comenzi</h1>
+  </div>
 
-    <!-- Secțiunea din dreapta pentru detalii items (1/4 lățime, e.g., col-md-3) -->
-    <div class="col-md-3" id="order-items-container">
-      <!-- Aici se va injecta conținutul via AJAX -->
-      <h2>Detalii Ordin</h2>
-      <p>Selectează un ordin pentru a vedea produsele.</p>
+  <!-- Containerul cu cele două coloane -->
+  <div class="orders-container">
+    <div class="orders-row">
+      <!-- Coloana stângă: Tabelul cu ordine -->
+      <div class="orders-table-column">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nume</th>
+              <th>Email</th>
+              <th>Telefon</th>
+              <th>Data Creării</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Acțiuni</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @orders.each do |order| %>
+              <tr>
+                <td><%= order.id %></td>
+                <td><%= "#{order.first_name} #{order.last_name}" %></td>
+                <td><%= order.email %></td>
+                <td><%= order.phone %></td>
+                <td><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td><%= order.total %> RON</td>
+                <td><%= order.status %></td>
+                <td>
+                  <div class="action-buttons">
+                    <%= button_to "Produse", show_items_order_path(order), remote: true, class: "btn btn-primary btn-sm", data: { target: order.id } %>
+                    <% if order.invoice.present? %>
+                      <%= link_to "PDF", invoice_order_path(order, format: :pdf), class: "btn btn-secondary btn-sm" %>
+                      <%= link_to "XML", invoice_order_path(order, format: :xml), class: "btn btn-info btn-sm" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <div class="orders-pagination-wrapper">
+          <%= paginate @orders %>
+        </div>
+      </div>
+
+      <!-- Coloana dreaptă: Detalii ordin -->
+      <div class="order-details-column" id="order-items-container">
+        <h2>Detalii Ordin</h2>
+        <p>Selectează un ordin pentru a vedea produsele.</p>
+      </div>
     </div>
   </div>
 </div>
+
+<style>
+/* ----------- ORDERS PAGE STYLING ----------- */
+
+/* Wrapper principal */
+.orders-page-wrapper {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header cu titlul pe toată lățimea */
+.page-header {
+  width: 100%;
+  margin-bottom: 25px;
+}
+
+.page-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #8b0000;
+  margin: 0;
+  padding: 20px 0 15px 0;
+  border-bottom: 3px solid #8b0000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Container pentru coloane */
+.orders-container {
+  width: 100%;
+}
+
+.orders-row {
+  display: flex;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+/* Coloana stângă - Tabel */
+.orders-table-column {
+  flex: 0 0 60%;
+  max-width: 60%;
+}
+
+/* Coloana dreaptă - Detalii */
+.order-details-column {
+  flex: 0 0 calc(40% - 25px);
+  max-width: calc(40% - 25px);
+  position: sticky;
+  top: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 300px;
+  overflow: hidden;
+}
+
+.order-details-column h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  padding: 25px 25px 20px 25px;
+  border-bottom: 3px solid #8b0000;
+  text-transform: none;
+  letter-spacing: 0;
+  background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
+}
+
+.order-details-column h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  padding: 20px 25px 15px 25px;
+  border-bottom: none;
+}
+
+.order-details-column p {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 30px 25px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Stiluri pentru conținutul detaliilor ordinului */
+.order-details-column table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.order-details-column table thead {
+  background: linear-gradient(135deg, #8b0000 0%, #a01010 100%);
+}
+
+.order-details-column table thead th {
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px 20px;
+  text-align: left;
+  border: none;
+}
+
+.order-details-column table thead th:nth-child(2) {
+  text-align: center;
+}
+
+.order-details-column table thead th:nth-child(3),
+.order-details-column table thead th:nth-child(4) {
+  text-align: right;
+}
+
+.order-details-column table td {
+  padding: 14px 20px;
+  font-size: 14px;
+  border-bottom: none;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+/* Prima coloană - numele produsului */
+.order-details-column table td:first-child {
+  color: #8b0000;
+  font-weight: 600;
+  width: 40%;
+  padding-right: 15px;
+}
+
+/* A doua coloană - cantitatea */
+.order-details-column table td:nth-child(2) {
+  color: #666;
+  text-align: center;
+  width: 15%;
+  font-size: 14px;
+}
+
+/* A treia coloană - preț unitar */
+.order-details-column table td:nth-child(3) {
+  color: #666;
+  text-align: right;
+  width: 22%;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+/* A patra coloană - total */
+.order-details-column table td:nth-child(4) {
+  color: #333;
+  font-weight: 600;
+  text-align: right;
+  width: 23%;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+/* Rândul cu Transport - fără bordură specială */
+.order-details-column table tr:nth-last-child(2) td:first-child {
+  color: #333;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Total Ordin - doar acesta are bordură sus */
+.order-details-column table tr:last-child {
+  border-top: 3px solid #8b0000;
+  background: linear-gradient(to bottom, #fff8f8 0%, #ffffff 100%);
+}
+
+.order-details-column table tr:last-child td {
+  padding: 18px 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.order-details-column table tr:last-child td:first-child {
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.order-details-column table tr:last-child td:last-child {
+  color: #8b0000;
+  font-size: 17px;
+}
+
+/* Butonul Înapoi la Lista */
+.order-details-column form,
+.order-details-column .back-button-container {
+  padding: 25px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.order-details-column input[type="submit"],
+.order-details-column button,
+.order-details-column .back-button,
+.order-details-column .btn,
+.order-details-column .btn-secondary {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 6px rgba(108, 117, 125, 0.25);
+  width: 100%;
+  max-width: 100%;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+
+.order-details-column input[type="submit"]:hover,
+.order-details-column button:hover,
+.order-details-column .back-button:hover,
+.order-details-column .btn:hover,
+.order-details-column .btn-secondary:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  box-shadow: 0 5px 12px rgba(108, 117, 125, 0.35);
+  transform: translateY(-2px);
+}
+
+
+/* Table Styling */
+.table {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 20px;
+}
+
+.table thead {
+  background: linear-gradient(135deg, #8b0000 0%, #a01010 100%);
+}
+
+.table thead th {
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px 12px;
+  text-align: left;
+  border: none;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #fff8f8;
+  transform: translateX(2px);
+  box-shadow: 0 2px 4px rgba(139, 0, 0, 0.1);
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody td {
+  padding: 14px 12px;
+  font-size: 14px;
+  color: #333;
+  vertical-align: middle;
+}
+
+.table tbody td:first-child {
+  font-weight: 600;
+  color: #8b0000;
+}
+
+/* Button Styles */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 11px;
+}
+
+.btn-primary {
+  background: #8b0000;
+  color: white;
+  box-shadow: 0 2px 4px rgba(139, 0, 0, 0.2);
+}
+
+.btn-primary:hover {
+  background: #6d0000;
+  box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+  box-shadow: 0 2px 4px rgba(23, 162, 184, 0.2);
+}
+
+.btn-info:hover {
+  background: #138496;
+  box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Pagination Styling - SPECIFIC pentru pagina de ordine */
+.orders-pagination-wrapper .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 25px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+.orders-pagination-wrapper .pagination a,
+.orders-pagination-wrapper .pagination span,
+.orders-pagination-wrapper .pagination .page a,
+.orders-pagination-wrapper .pagination .page span,
+.orders-pagination-wrapper .pagination .current,
+.orders-pagination-wrapper .pagination .prev a,
+.orders-pagination-wrapper .pagination .next a,
+.orders-pagination-wrapper .pagination .first a,
+.orders-pagination-wrapper .pagination .last a,
+.orders-pagination-wrapper .pagination .gap {
+  display: inline-block;
+  padding: 5px 9px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+  color: #8b0000;
+  background: white;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
+}
+
+.orders-pagination-wrapper .pagination a:hover,
+.orders-pagination-wrapper .pagination .page a:hover,
+.orders-pagination-wrapper .pagination .prev a:hover,
+.orders-pagination-wrapper .pagination .next a:hover,
+.orders-pagination-wrapper .pagination .first a:hover,
+.orders-pagination-wrapper .pagination .last a:hover {
+  background: #8b0000;
+  color: white;
+  border-color: #8b0000;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(139, 0, 0, 0.2);
+}
+
+.orders-pagination-wrapper .pagination .current,
+.orders-pagination-wrapper .pagination span.current,
+.orders-pagination-wrapper .pagination .page.current span {
+  background: #8b0000;
+  color: white;
+  border-color: #8b0000;
+  font-weight: 600;
+}
+
+.orders-pagination-wrapper .pagination .disabled,
+.orders-pagination-wrapper .pagination .disabled a,
+.orders-pagination-wrapper .pagination .prev.disabled a,
+.orders-pagination-wrapper .pagination .next.disabled a {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #f8f9fa;
+  color: #6c757d;
+}
+
+.orders-pagination-wrapper .pagination .gap,
+.orders-pagination-wrapper .pagination span.gap {
+  border: none;
+  pointer-events: none;
+  background: transparent;
+  color: #6c757d;
+}
+
+/* Stiluri pentru butoanele First, Prev, Next, Last */
+.orders-pagination-wrapper .pagination .first a,
+.orders-pagination-wrapper .pagination .prev a,
+.orders-pagination-wrapper .pagination .next a,
+.orders-pagination-wrapper .pagination .last a {
+  font-weight: 600;
+}
+
+/* Status Badge Styling */
+.table tbody td:nth-child(7) {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Responsive Design */
+
+/* Desktop mare - mai mult de 1400px */
+@media (min-width: 1401px) {
+  .orders-table-column {
+    flex: 0 0 60%;
+    max-width: 60%;
+  }
+  
+  .order-details-column {
+    flex: 0 0 calc(40% - 25px);
+    max-width: calc(40% - 25px);
+  }
+}
+
+/* Mobile și tablet - sub 1400px */
+@media (max-width: 1400px) {
+  .orders-row {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .orders-table-column,
+  .order-details-column {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .order-details-column {
+    position: static;
+    margin-top: 0;
+  }
+  
+  .order-details-column table {
+    width: 100%;
+    display: table;
+  }
+  
+  .order-details-column table thead th {
+    font-size: 12px;
+    padding: 12px 15px;
+    white-space: nowrap;
+  }
+  
+  .page-header h1 {
+    font-size: 26px;
+    padding: 18px 0 14px 0;
+  }
+  
+  .table {
+    font-size: 13px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 12px 10px;
+  }
+}
+
+/* Tablet și mobile mare - sub 920px - PAGINATION ORIZONTALĂ */
+@media (max-width: 920px) {
+  /* Override pentru navigație - păstrăm culorile desktop */
+  nav {
+    background-color: transparent !important;
+  }
+  
+  nav a,
+  nav button,
+  nav .nav-link {
+    color: inherit !important;
+    background-color: transparent !important;
+  }
+  
+  nav a:hover,
+  nav button:hover,
+  nav .nav-link:hover {
+    color: inherit !important;
+    background-color: transparent !important;
+  }
+  
+  /* Forțare pagination orizontală - SPECIFIC pentru orders page */
+  .orders-pagination-wrapper .pagination {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    gap: 5px;
+    padding: 15px 0;
+    margin-top: 20px;
+    justify-content: flex-start;
+  }
+  
+  .orders-pagination-wrapper .pagination > *,
+  .orders-pagination-wrapper .pagination .page,
+  .orders-pagination-wrapper .pagination .first,
+  .orders-pagination-wrapper .pagination .prev,
+  .orders-pagination-wrapper .pagination .next,
+  .orders-pagination-wrapper .pagination .last,
+  .orders-pagination-wrapper .pagination .gap,
+  .orders-pagination-wrapper .pagination .current {
+    display: inline-block !important;
+    float: none !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .orders-pagination-wrapper .pagination a,
+  .orders-pagination-wrapper .pagination span,
+  .orders-pagination-wrapper .pagination .page a,
+  .orders-pagination-wrapper .pagination .page span,
+  .orders-pagination-wrapper .pagination .prev a,
+  .orders-pagination-wrapper .pagination .next a,
+  .orders-pagination-wrapper .pagination .first a,
+  .orders-pagination-wrapper .pagination .last a,
+  .orders-pagination-wrapper .pagination .current,
+  .orders-pagination-wrapper .pagination span.current,
+  .orders-pagination-wrapper .pagination .page.current span,
+  .orders-pagination-wrapper .pagination .disabled,
+  .orders-pagination-wrapper .pagination .disabled a,
+  .orders-pagination-wrapper .pagination .prev.disabled a,
+  .orders-pagination-wrapper .pagination .next.disabled a,
+  .orders-pagination-wrapper .pagination .gap,
+  .orders-pagination-wrapper .pagination span.gap {
+    padding: 8px 14px !important;
+  }
+  
+  .orders-pagination-wrapper .pagination a,
+  .orders-pagination-wrapper .pagination .page a,
+  .orders-pagination-wrapper .pagination .prev a,
+  .orders-pagination-wrapper .pagination .next a,
+  .orders-pagination-wrapper .pagination .first a,
+  .orders-pagination-wrapper .pagination .last a {
+    font-size: 13px !important;
+    min-width: 40px !important;
+    margin: 0 !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .orders-page-wrapper {
+    padding: 0 15px;
+  }
+  
+  .page-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-header h1 {
+    font-size: 24px;
+    padding: 12px 0 10px 0;
+    border-bottom: 2px solid #8b0000;
+  }
+  
+  .order-details-column h2 {
+    font-size: 20px;
+    padding: 20px 20px 16px 20px;
+  }
+  
+  .order-details-column h3 {
+    font-size: 17px;
+    padding: 18px 20px 14px 20px;
+  }
+  
+  .order-details-column p {
+    padding: 25px 20px;
+    font-size: 13px;
+  }
+  
+  .order-details-column table td {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .order-details-column table thead th {
+    font-size: 11px;
+    padding: 14px 16px;
+  }
+  
+  .order-details-column table tr:last-child td {
+    padding: 16px 16px;
+    font-size: 15px;
+  }
+  
+  .order-details-column table tr:last-child td:last-child {
+    font-size: 16px;
+  }
+  
+  .order-details-column form,
+  .order-details-column .back-button-container {
+    padding: 20px;
+  }
+  
+  .order-details-column input[type="submit"],
+  .order-details-column button,
+  .order-details-column .back-button,
+  .order-details-column .btn,
+  .order-details-column .btn-secondary {
+    font-size: 12px;
+    padding: 12px 24px;
+  }
+  
+  .table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 12px;
+  }
+  
+  .table thead th {
+    font-size: 11px;
+    padding: 12px 6px;
+    white-space: nowrap;
+  }
+  
+  .table tbody td {
+    font-size: 12px;
+    padding: 10px 6px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 5px;
+    align-items: stretch;
+  }
+  
+  .btn-sm {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+  
+  /* Pagination 768px - compactă și rafinată */
+  .orders-pagination-wrapper .pagination {
+    gap: 4px;
+    padding: 12px 0;
+    margin-top: 15px;
+  }
+  
+  .orders-pagination-wrapper .pagination a,
+  .orders-pagination-wrapper .pagination span,
+  .orders-pagination-wrapper .pagination .page a,
+  .orders-pagination-wrapper .pagination .page span,
+  .orders-pagination-wrapper .pagination .current,
+  .orders-pagination-wrapper .pagination .prev a,
+  .orders-pagination-wrapper .pagination .next a,
+  .orders-pagination-wrapper .pagination .first a,
+  .orders-pagination-wrapper .pagination .last a,
+  .orders-pagination-wrapper .pagination .gap {
+    padding: 7px 12px !important;
+    font-size: 13px !important;
+    min-width: 36px !important;
+  }
+}
+
+/* Mobile mic */
+@media (max-width: 480px) {
+  .orders-page-wrapper {
+    padding: 0 10px;
+  }
+  
+  .page-header h1 {
+    font-size: 20px;
+    padding: 10px 0 8px 0;
+  }
+  
+  .order-details-column h2 {
+    font-size: 18px;
+    padding: 18px 15px 14px 15px;
+  }
+  
+  .order-details-column h3 {
+    font-size: 16px;
+    padding: 16px 15px 12px 15px;
+  }
+  
+  .order-details-column p {
+    padding: 20px 15px;
+    font-size: 12px;
+  }
+  
+  .order-details-column table td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  
+  .order-details-column table thead th {
+    font-size: 10px;
+    padding: 10px 12px;
+  }
+  
+  .order-details-column table tr:last-child td {
+    padding: 14px 12px;
+    font-size: 14px;
+  }
+  
+  .order-details-column table tr:last-child td:last-child {
+    font-size: 15px;
+  }
+  
+  .order-details-column form,
+  .order-details-column .back-button-container {
+    padding: 15px;
+  }
+  
+  .order-details-column input[type="submit"],
+  .order-details-column button,
+  .order-details-column .back-button,
+  .order-details-column .btn,
+  .order-details-column .btn-secondary {
+    font-size: 11px;
+    padding: 10px 20px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    font-size: 10px;
+    padding: 8px 4px;
+  }
+  
+  /* Pagination 480px - foarte compactă */
+  .orders-pagination-wrapper .pagination {
+    gap: 3px;
+    padding: 10px 0;
+    margin-top: 12px;
+  }
+  
+  .orders-pagination-wrapper .pagination a,
+  .orders-pagination-wrapper .pagination span,
+  .orders-pagination-wrapper .pagination .page a,
+  .orders-pagination-wrapper .pagination .page span,
+  .orders-pagination-wrapper .pagination .current,
+  .orders-pagination-wrapper .pagination .prev a,
+  .orders-pagination-wrapper .pagination .next a,
+  .orders-pagination-wrapper .pagination .first a,
+  .orders-pagination-wrapper .pagination .last a,
+  .orders-pagination-wrapper .pagination .gap {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    min-width: 34px !important;
+  }
+}
+</style>
 
 <!-- JavaScript pentru a gestiona încărcarea AJAX -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('button[data-target]').forEach(button => {
       button.addEventListener('click', function(event) {
-        event.preventDefault(); // Oprește comportamentul default dacă e button_to
+        event.preventDefault();
         const orderId = this.dataset.target;
         const url = `/orders/${orderId}/show_items`;
 
