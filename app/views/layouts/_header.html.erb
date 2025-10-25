@@ -116,6 +116,37 @@ function setupMobileMenu() {
 }
 
 /**
+ * Account Dropdown Handler
+ */
+function setupAccountDropdown() {
+  const accountToggle = document.getElementById('account-toggle');
+  const accountDropdown = document.getElementById('account-dropdown');
+  
+  if (!accountToggle || !accountDropdown) return;
+
+  // Toggle dropdown
+  accountToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    accountDropdown.classList.toggle('show');
+  });
+
+  // Închide dropdown când se dă click în afară
+  document.addEventListener('click', (e) => {
+    if (!accountToggle.contains(e.target) && !accountDropdown.contains(e.target)) {
+      accountDropdown.classList.remove('show');
+    }
+  });
+
+  // Închide cu Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      accountDropdown.classList.remove('show');
+    }
+  });
+}
+
+/**
  * Inițializare meniu
  */
 let cleanupFunction = () => {};
@@ -126,6 +157,9 @@ function initMenu() {
   
   // Setup nou și salvează cleanup function
   cleanupFunction = setupMobileMenu();
+  
+  // Setup account dropdown
+  setupAccountDropdown();
 }
 
 /**
@@ -156,6 +190,129 @@ window.addEventListener('resize', () => {
 });
 </script>
 
+<style>
+/* Account Dropdown Styles */
+.account-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.account-toggle {
+  background: none;
+  border: none;
+  color: #8b0000; /* Aceeași culoare ca celelalte link-uri */
+  font-size: 16px; /* Aceeași dimensiune ca celelalte link-uri */
+  font-family: 'Lora', serif; /* Același font ca celelalte link-uri */
+  font-weight: 700; /* Bold ca celelalte link-uri */
+  text-transform: uppercase; /* Uppercase ca celelalte link-uri */
+  letter-spacing: 0.5px; /* Spacing ca celelalte link-uri */
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  transition: color 0.3s ease; /* Tranziție la hover */
+}
+
+.account-toggle:hover {
+  color: #6d0000; /* Culoare mai închisă la hover */
+}
+
+/* Săgeata dropdown */
+.account-toggle .arrow {
+  font-size: 0.7em;
+  margin-left: 2px;
+}
+
+.account-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 220px;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.account-dropdown.show {
+  display: block;
+}
+
+.account-dropdown a,
+.account-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  color: #333;
+  text-decoration: none;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+  transition: background 0.2s;
+}
+
+.account-dropdown a:hover,
+.account-dropdown button:hover {
+  background: #f8f9fa;
+  color: #8b0000;
+}
+
+.account-dropdown .divider {
+  height: 1px;
+  background: #e9ecef;
+  margin: 5px 0;
+}
+
+.account-dropdown .user-info {
+  padding: 12px 20px;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.account-dropdown form {
+  margin: 0;
+}
+
+/* Mobile adjustments */
+@media (max-width: 922px) {
+  .account-menu {
+    width: 100%;
+  }
+  
+  .account-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 5px 0;
+  }
+  
+  .account-dropdown {
+    position: static;
+    box-shadow: none;
+    border: none;
+    border-left: 3px solid #8b0000;
+    margin-left: 15px;
+    margin-top: 5px;
+    background: rgba(139, 0, 0, 0.05);
+  }
+  
+  .account-dropdown.show {
+    display: block;
+  }
+}
+</style>
 
 <div class="header_container">
   <header>
@@ -179,27 +336,41 @@ window.addEventListener('resize', () => {
       <nav>
         <%= link_to "Acasă", root_path %>
         <%= link_to "Cărți", carti_index_path, class: "admin-link" %>
-       
-
-
-
-       
         <%= link_to "Contact", contact_path, class: "admin-link" %>
 
         <% if current_user %>
-          <%= button_to "Logout", destroy_user_session_path,
-              method: :delete,
-              form: { class: "inline" },
-              class: "link-button" %>
+          <!-- Dropdown pentru Cont -->
+          <div class="account-menu">
+            <button class="account-toggle" id="account-toggle">
+              👤 Cont <span class="arrow">▼</span>
+            </button>
+            <div class="account-dropdown" id="account-dropdown">
+              <div class="user-info">
+                <%= current_user.email %>
+              </div>
+              
+              <%= link_to "👤 Contul meu", edit_user_registration_path %>
+              <%= link_to "📦 Comenzile mele", orders_path %>
+              <%= link_to "📄 Facturile mele", orders_path %>
+              
+              <% if current_user.role == 1 %>
+                <div class="divider"></div>
+                <%= link_to "⚙️ Admin", admin_path %>
+              <% end %>
+              
+              <div class="divider"></div>
+              <%= button_to "🚪 Logout", destroy_user_session_path,
+                  method: :delete,
+                  form: { style: "margin: 0;" } %>
+            </div>
+          </div>
         <% else %>
           <%= link_to "Login", new_user_session_path %>
         <% end %> 
 
-        
-         <% if @shipping_cost == 0 && @cart_items_count.to_i > 0 %>
+        <% if @shipping_cost == 0 && @cart_items_count.to_i > 0 %>
           <p style="color: green; font-size: 12px; margin-top: 2px;">🎁 Transport gratuit!</p>
         <% end %>
-
 
         <!-- Coșul de cumpărături -->
         <%= link_to cart_index_path, style: "display: inline-block; background-color: #ffa500; color: white; padding: 10px 15px; border-radius: 6px; position: relative;" do %>
@@ -209,12 +380,6 @@ window.addEventListener('resize', () => {
           🛒 
           <%= number_to_currency(@cart_total || 0, unit: "lei", format: "%n %u") %>
         <% end %>
-        <% if current_user&.admin? %>
-          <%= link_to "Admin", admin_path, class: "admin-link" %>
-        <% end %>
-
-
-        
       </nav>
 
       <!-- Buton închidere meniu pe mobil -->
@@ -222,4 +387,3 @@ window.addEventListener('resize', () => {
     </div>
   </header>
 </div>
-

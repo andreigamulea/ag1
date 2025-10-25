@@ -1,0 +1,105 @@
+<div style="max-width: 1400px; margin: 40px auto; padding: 0 20px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div>
+      <h1 style="color: #8b0000; margin: 0 0 10px 0;">Listă Abonați Newsletter</h1>
+      <p style="font-size: 18px; margin: 0; color: #666;">
+        Total abonați: <strong style="color: #8b0000;"><%= @nr_inscrisi %></strong>
+      </p>
+    </div>
+    <div>
+      <%= link_to "← Înapoi la Admin", admin_path, style: "display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 6px; margin-right: 10px;" %>
+      <%= link_to "📥 Export CSV", "#", onclick: "exportToCSV(); return false;", style: "display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 6px;" %>
+    </div>
+  </div>
+
+  <% if @lista.any? %>
+    <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+      <table id="newsletter-table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #8b0000; color: white;">
+            <th style="padding: 15px; text-align: left; font-weight: 600;">Nr.</th>
+            <th style="padding: 15px; text-align: left; font-weight: 600;">Nume</th>
+            <th style="padding: 15px; text-align: left; font-weight: 600;">Email</th>
+            <th style="padding: 15px; text-align: center; font-weight: 600;">Validat</th>
+            <th style="padding: 15px; text-align: left; font-weight: 600;">Data înregistrării</th>
+            <th style="padding: 15px; text-align: center; font-weight: 600;">Acțiuni</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @lista.each do |abonat| %>
+            <% @n += 1 %>
+            <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+              <td style="padding: 15px;"><%= @n %></td>
+              <td style="padding: 15px; font-weight: 500;"><%= abonat.nume %></td>
+              <td style="padding: 15px; color: #495057;"><%= abonat.email %></td>
+              <td style="padding: 15px; text-align: center;">
+                <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; <%= abonat.validat ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' %>">
+                  <%= abonat.validat ? '✓ Validat' : '✗ Nevalidat' %>
+                </span>
+              </td>
+              <td style="padding: 15px; color: #6c757d;">
+                <%= abonat.created_at.strftime('%d.%m.%Y, %H:%M') %>
+              </td>
+              <td style="padding: 15px; text-align: center;">
+                <%= link_to "✏️ Editează", 
+                    edit_newsletter_path(abonat), 
+                    style: "display: inline-block; background: #ffc107; color: #000; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; margin-right: 5px;" %>
+                <%= button_to "🗑️ Șterge", 
+                    delete_newsletter_path(abonat), 
+                    method: :delete, 
+                    data: { confirm: "Sigur vrei să ștergi abonatul #{abonat.nume}?" },
+                    style: "background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;",
+                    form: { style: "display: inline;" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div style="padding: 40px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+      <p style="font-size: 18px; color: #6c757d; margin: 0;">
+        📭 Nu există abonați încă.
+      </p>
+    </div>
+  <% end %>
+</div>
+
+<script>
+function exportToCSV() {
+  var table = document.getElementById('newsletter-table');
+  var rows = table.querySelectorAll('tr');
+  var csv = [];
+  
+  // Header
+  var headerCols = rows[0].querySelectorAll('th');
+  var headerRow = [];
+  for (var i = 0; i < headerCols.length - 1; i++) { // -1 to skip "Acțiuni"
+    headerRow.push(headerCols[i].textContent.trim());
+  }
+  csv.push(headerRow.join(','));
+  
+  // Data rows
+  for (var i = 1; i < rows.length; i++) {
+    var cols = rows[i].querySelectorAll('td');
+    var row = [];
+    for (var j = 0; j < cols.length - 1; j++) { // -1 to skip "Acțiuni"
+      var text = cols[j].textContent.trim().replace(/,/g, ';');
+      row.push('"' + text + '"');
+    }
+    csv.push(row.join(','));
+  }
+  
+  // Download
+  var csvContent = csv.join('\n');
+  var blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'newsletter_abonati_' + new Date().toISOString().split('T')[0] + '.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+</script>

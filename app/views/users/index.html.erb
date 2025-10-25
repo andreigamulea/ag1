@@ -10,6 +10,7 @@
           <th>ID</th>
           <th>Email</th>
           <th>Rol</th>
+          <th>Status</th>
           <th>Creat la</th>
           <th>Acțiuni</th>
         </tr>
@@ -27,11 +28,29 @@
                   else "Necunoscut"
                   end %>
             </td>
+            <td>
+              <% if user.active? %>
+                <span class="status-badge active">✓ Activ</span>
+              <% else %>
+                <span class="status-badge inactive">✗ Inactiv</span>
+              <% end %>
+            </td>
             <td><%= user.created_at.strftime("%Y-%m-%d %H:%M") %></td>
             <td class="table-actions">
               <%= link_to "Detalii", user_path(user), class: "table-button neutral" %>
-              <%= link_to "Editează", edit_user_path(user), class: "table-button primary" %>
-              <%= link_to "Șterge", user_path(user), method: :delete, data: { confirm: "Ești sigur?" }, class: "table-button danger" %>
+              <%= link_to "Editează", admin_edit_user_path(user), class: "table-button primary" %>
+              
+              <% unless user.active? %>
+                <%= button_to "🔓 Reactivează", 
+                    reactivate_user_path(user), 
+                    method: :patch,
+                    class: "table-button success",
+                    form: { style: "display: inline;" } %>
+              <% end %>
+              
+              <% if user != current_user %>
+                <%= link_to "Șterge", user_path(user), method: :delete, data: { confirm: "Ești sigur?" }, class: "table-button danger" %>
+              <% end %>
             </td>
           </tr>
         <% end %>
@@ -39,6 +58,7 @@
     </table>
   </div>
 </div>
+
 <style>
 /* Titlu listă utilizatori */
 .admin-title {
@@ -46,7 +66,7 @@
   color: #8b0000;
   text-align: center;
   margin-bottom: 20px;
-  padding-top:20px;
+  padding-top: 20px;
 }
 
 /* Buton general reutilizabil */
@@ -94,6 +114,25 @@
   background: #fef3dc;
 }
 
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
 /* Acțiuni din tabel */
 .table-actions {
   white-space: nowrap;
@@ -108,6 +147,8 @@
   margin-right: 5px;
   display: inline-block;
   transition: background-color 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
 }
 
 .table-button.secondary {
@@ -120,11 +161,21 @@
   color: white;
 }
 
+.table-button.success {
+  background: #28a745;
+  color: white;
+}
+
+.table-button.success:hover {
+  background: #218838;
+}
+
 .table-button.danger {
   background: #bc2c2c;
   color: white;
 }
-  .table-button.neutral {
+
+.table-button.neutral {
   background-color: #f5f5f5;
   color: #8b0000;
   border: 1px solid #8b0000;
@@ -136,9 +187,7 @@
   border-color: #fbc02d;
 }
 
-
 .table-button:hover {
   opacity: 0.9;
 }
-
 </style>

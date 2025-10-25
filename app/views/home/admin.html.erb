@@ -6,11 +6,9 @@
     <li><%= link_to "🛒 Produse", products_path %></li>
     <li><%= link_to "📂 Categorii", categories_index_products_path %></li>
     <li><%= link_to "👤 Utilizatori", users_path %></li>
-    <li><%= link_to "🏷️ Cupoane", coupons_path %></li>  
-
-     <li><%= link_to 'Ordine', orders_path %></li>
-
-
+    <li><%= link_to "🏷️ Cupoane", coupons_path %></li>
+    <li><%= link_to "📦 Ordine", orders_path %></li>
+    <li><%= link_to "📧 Newsletter (#{Newsletter.count})", lista_newsletter_path %></li>
   </ul>
 </div>
 

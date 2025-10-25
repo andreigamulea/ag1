@@ -1,7 +1,14 @@
 # config/routes.rb
 Rails.application.routes.draw do
 
-  post '/stripe/webhooks', to: 'stripe_webhooks#create' # Nou pentru webhook
+  get 'newsletter', to: 'home#newsletter'
+  post '/newsletter', to: 'home#newsletter'
+  get 'home/lista_newsletter', to: 'home#lista_newsletter', as: 'lista_newsletter'
+  get 'home/newsletter/:id/edit', to: 'home#edit_newsletter', as: 'edit_newsletter' 
+  patch 'home/newsletter/:id', to: 'home#update_newsletter', as: 'update_newsletter' 
+  delete 'home/newsletter/:id', to: 'home#delete_newsletter', as: 'delete_newsletter'
+
+  post '/stripe/webhooks', to: 'stripe_webhooks#create'
 
   get '/autocomplete_tara', to: 'orders#autocomplete_tara'
   get '/autocomplete_judet', to: 'orders#autocomplete_judet'
@@ -19,27 +26,43 @@ Rails.application.routes.draw do
     post :clear, on: :collection
   end
 
-  
-# Actualizează blocul resources :orders astfel:
-resources :orders, only: [:index, :new, :create] do
-  member do
-    get :show_items  # Asta creează ruta GET /orders/:id/show_items -> orders#show_items
-    get :invoice  # Nou: GET /orders/:id/invoice -> orders#invoice (descarcă PDF)
+  resources :orders, only: [:index, :new, :create] do
+    member do
+      get :show_items
+      get :invoice
+    end
+    collection do
+      get :thank_you
+      get :success, as: :success
+    end
   end
-  collection do
-    get :thank_you
-    get :success, as: :success  # Nou pentru /orders/success
-  end
-end
 
   get "/uploads/presign", to: "uploads#presign"
   post "/uploads/presign", to: "uploads#presign" 
   post "/uploads/upload_bunny", to: "uploads#upload_bunny"
 
   get 'memory_logs/index'
-  # Autentificare Devise (înainte de orice alte rute care pot intra în conflict)
-  devise_for :users
-  # Rute RESTful pentru administrarea utilizatorilor și produse
+  
+  # Autentificare Devise cu controller custom (fără modul Users::)
+  devise_for :users, controllers: {
+    registrations: 'custom_registrations'
+  }
+  
+  # Rută personalizată pentru dezactivare
+  devise_scope :user do
+    patch 'users/deactivate', to: 'custom_registrations#deactivate', as: 'deactivate_user_registration'
+  end
+  
+  # Rute pentru administrarea utilizatorilor
+  # Rute pentru administrarea utilizatorilor
+resources :users, except: [:edit, :update] do
+  member do
+    get 'admin_edit', to: 'users#edit', as: 'admin_edit'
+    patch 'admin_update', to: 'users#update', as: 'admin_update'
+    patch :reactivate
+  end
+end
+  
   resources :carti, only: [:index, :show]
 
   get "/mem", to: "monitoring#mem", as: :mem
@@ -48,8 +71,7 @@ end
   get "/cdn/:signed_id", to: "cdn_proxy#proxy", as: :cdn_proxy
 
   get '/products/force_gc', to: 'products#force_gc', as: 'force_gc_products'
-
-  resources :users
+  
   resources :products do
     member do
       delete 'purge_image/:image_id', to: 'products#purge_image', as: :purge_image
@@ -65,7 +87,6 @@ end
 
     collection do
       post :force_gc
-      #post :force_gc # va apela metoda `force_gc` din controller
       get :categories_index
       get :new_standalone_category
       get :show_standalone_category
@@ -82,6 +103,5 @@ end
   get 'contact', to: 'home#contact'
   get 'up' => 'rails/health#show', as: :rails_health_check
 
-  # Rădăcina aplicației
   root 'home#index'
 end

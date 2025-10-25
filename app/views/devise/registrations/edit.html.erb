@@ -1,43 +1,243 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
+<style>
+.edit-account-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+.edit-account-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 40px;
+}
 
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-  </div>
+.edit-account-title {
+  color: #8b0000;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 30px 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-  <% end %>
+.form-field {
+  margin-bottom: 25px;
+}
 
-  <div class="field">
-    <%= f.label :password %> <i>(leave blank if you don't want to change it)</i><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-    <% if @minimum_password_length %>
-      <br />
-      <em><%= @minimum_password_length %> characters minimum</em>
+.form-field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 15px;
+}
+
+.form-field input[type="email"],
+.form-field input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: 'Lora', serif;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: #8b0000;
+}
+
+.form-hint {
+  font-size: 13px;
+  color: #666;
+  font-style: italic;
+  margin-top: 5px;
+  display: block;
+}
+
+.form-info {
+  background: #e8f4f8;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0c5460;
+  margin-top: 10px;
+}
+
+.form-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-update {
+  background: #8b0000;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-update:hover {
+  background: #6d0000;
+}
+
+.btn-back {
+  color: #6c757d;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background: #f8f9fa;
+}
+
+.cancel-account-section {
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 2px solid #e9ecef;
+}
+
+.cancel-account-title {
+  color: #dc3545;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.cancel-account-warning {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.cancel-account-warning p {
+  margin: 0;
+  color: #856404;
+  font-size: 14px;
+}
+
+.btn-cancel-account {
+  background: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel-account:hover {
+  background: #c82333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .edit-account-card {
+    padding: 30px 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .btn-update,
+  .btn-back {
+    width: 100%;
+    text-align: center;
+  }
+}
+</style>
+
+<div class="edit-account-container">
+  <div class="edit-account-card">
+    <h2 class="edit-account-title">👤 Editează Contul</h2>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="form-field">
+        <%= f.label :email, "Adresa de email" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+      </div>
+
+      <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+        <div class="form-info">
+          🕐 În așteptarea confirmării pentru: <%= resource.unconfirmed_email %>
+        </div>
+      <% end %>
+
+      <div class="form-field">
+        <%= f.label :password, "Parolă nouă" %>
+        <span class="form-hint">(lasă gol dacă nu vrei să o modifici)</span>
+        <%= f.password_field :password, autocomplete: "new-password" %>
+        <% if @minimum_password_length %>
+          <span class="form-hint">
+            🔒 Minim <%= @minimum_password_length %> caractere
+          </span>
+        <% end %>
+      </div>
+
+      <div class="form-field">
+        <%= f.label :password_confirmation, "Confirmă parola nouă" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+      </div>
+
+      <div class="form-field">
+        <%= f.label :current_password, "Parola curentă" %>
+        <span class="form-hint">(necesară pentru confirmarea modificărilor)</span>
+        <%= f.password_field :current_password, autocomplete: "current-password" %>
+      </div>
+
+      <div class="form-actions">
+        <%= link_to "← Înapoi", :back, class: "btn-back" %>
+        <%= f.submit "💾 Actualizează", class: "btn-update" %>
+      </div>
     <% end %>
+
+    <div class="cancel-account-section">
+  <h3 class="cancel-account-title">⚠️ Dezactivează contul</h3>
+  
+  <div class="cancel-account-warning">
+    <p><strong>Atenție!</strong> Contul tău va deveni inactiv și nu vei mai putea să te autentifici. Poți reactiva contul oricând contactând echipa de suport.</p>
   </div>
 
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+  <%= form_with url: deactivate_user_registration_path, method: :patch, local: true, scope: :user do |f| %>
+    <div class="form-field" style="margin-top: 20px;">
+      <%= f.label :current_password, "Confirmă parola curentă pentru a dezactiva contul" %>
+      <%= f.password_field :current_password, 
+          autocomplete: "current-password", 
+          required: true, 
+          style: "margin-top: 8px;" %>
+    </div>
+
+    <%= f.submit "🔒 Dezactivează contul meu", 
+        data: { 
+          confirm: "Ești sigur că vrei să dezactivezi contul? Vei putea să-l reactivezi contactând echipa de suport.", 
+          turbo_confirm: "Ești sigur că vrei să dezactivezi contul?" 
+        }, 
+        class: "btn-cancel-account",
+        style: "margin-top: 15px;" %>
+  <% end %>
+</div>
   </div>
-
-  <div class="field">
-    <%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i><br />
-    <%= f.password_field :current_password, autocomplete: "current-password" %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Update" %>
-  </div>
-<% end %>
-
-<h3>Cancel my account</h3>
-
-<div>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete %></div>
-
-<%= link_to "Back", :back %>
+</div>

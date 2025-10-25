@@ -192,14 +192,18 @@
 }
 </style>
 
+<style>
+/* ... păstrează tot CSS-ul existent ... */
+</style>
+
 <div class="news">
     <div class="newsletter-container">
         <div class="newsletter-prompt">
             <p>Abonează-te la newsletter-ul nostru pentru a primi ultimele noutăți și informații!</p>
         </div>
-        <form id="newsletter-form" class="newsletter-form">
+        <form id="newsletter-form" class="newsletter-form" data-turbo="false">
             <div class="form-inputs">
-                <input type="text" id="name" name="name" placeholder="Numele tău">
+                <input type="text" id="name" name="name" placeholder="Numele tău" required>
                 <input type="email" id="email" name="email" placeholder="Adresa ta de email" required>
             </div>
             <div class="form-action">
@@ -210,24 +214,52 @@
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    initNewsletterForm();
+});
+
 document.addEventListener("turbo:load", function() {
+    initNewsletterForm();
+});
+
+function initNewsletterForm() {
     var form = document.getElementById('newsletter-form');
     if (!form) return;
     
+    // Remove existing listener to prevent duplicates
+    form.onsubmit = null;
+    
     form.onsubmit = function(e) {
         e.preventDefault();
+        e.stopPropagation();
+        
         var submitButton = form.querySelector('button[type="submit"]');
         var originalButtonText = submitButton.textContent;
+        
+        // Disable button to prevent double submission
         submitButton.disabled = true;
         submitButton.textContent = 'Se trimite...';
 
+        var nameValue = document.getElementById('name').value.trim();
+        var emailValue = document.getElementById('email').value.trim();
+
+        // Validation
+        if (!nameValue || !emailValue) {
+            alert('Te rugăm să completezi toate câmpurile!');
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+            return false;
+        }
+
         var jsonToSend = {
             newsletter: {
-                nume: document.getElementById('name').value,
-                email: document.getElementById('email').value,
+                nume: nameValue,
+                email: emailValue,
                 validat: true
             }
         };
+
+        console.log('Trimit date:', jsonToSend);
 
         fetch('/newsletter', {
             method: 'POST',
@@ -238,30 +270,57 @@ document.addEventListener("turbo:load", function() {
             body: JSON.stringify(jsonToSend),
         })
         .then(response => {
+            console.log('Response status:', response.status);
             if (response.ok) {
                 return response.json();
             } else {
-                throw new Error('A apărut o problemă la trimiterea formularului.');
+                return response.json().then(err => {
+                    throw new Error(err.errors ? err.errors.join(', ') : 'A apărut o problemă la trimiterea formularului.');
+                });
             }
         })
         .then(data => {
-            if (!document.getElementById('thank-you-message')) {
-                var thankYouMessage = document.createElement('div');
-                thankYouMessage.id = 'thank-you-message';
-                thankYouMessage.innerHTML = '<p>Mulțumim pentru înscriere! Te-ai abonat cu succes!</p>';
-                var newsElement = document.querySelector('.news');
-                newsElement.insertAdjacentElement('afterend', thankYouMessage);
-                form.reset();
+            console.log('Success:', data);
+            
+            // Remove existing thank you message if present
+            var existingMessage = document.getElementById('thank-you-message');
+            if (existingMessage) {
+                existingMessage.remove();
             }
+            
+            // Create and show thank you message
+            var thankYouMessage = document.createElement('div');
+            thankYouMessage.id = 'thank-you-message';
+            thankYouMessage.innerHTML = '<p>Mulțumim pentru înscriere! Te-ai abonat cu succes!</p>';
+            var newsElement = document.querySelector('.news');
+            newsElement.insertAdjacentElement('afterend', thankYouMessage);
+            
+            // Reset form
+            form.reset();
+            
+            // Re-enable button
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
+            
+            // Auto-hide message after 5 seconds
+            setTimeout(function() {
+                if (thankYouMessage && thankYouMessage.parentNode) {
+                    thankYouMessage.style.transition = 'opacity 0.5s';
+                    thankYouMessage.style.opacity = '0';
+                    setTimeout(function() {
+                        thankYouMessage.remove();
+                    }, 500);
+                }
+            }, 5000);
         })
         .catch(error => {
             console.error('Eroare:', error);
-            alert('A apărut o eroare la trimiterea formularului. Te rugăm să încerci din nou.');
+            alert(error.message || 'A apărut o eroare la trimiterea formularului. Te rugăm să încerci din nou.');
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
         });
+        
+        return false;
     };
-});
+}
 </script>

@@ -237,6 +237,11 @@ footer {
 }
 </style>
 
+
+<style>
+/* ... păstrează tot CSS-ul existent ... */
+</style>
+
 <footer>
   <div class="footer-content">
     <div class="footer-row2">
@@ -244,16 +249,26 @@ footer {
         <ul>
           <li><h2>Contul meu</h2></li>
           <li><hr class="footer-divider"></li>
-          <li><a href="/users/edit" class="nav-item no-turbo">Contul meu</a></li>
-          <li>
-            <form action="/users/sign_out" method="post" class="no-turbo" style="display:inline;">
-              <input type="hidden" name="_method" value="delete">
-              <button type="submit" id="logout_link" class="nav-link no-turbo">Ieși din cont</button>
-            </form>
-          </li>
-          <li><a href="/facturas" class="nav-item no-turbo">Facturile mele</a></li>
-          <li><a href="/users/sign_in">Login</a></li>
-          <li><a href="/users/sign_up">Creează cont</a></li>
+          
+          <% if current_user %>
+            <!-- Utilizator autentificat -->
+            <li><%= link_to "Contul meu", edit_user_registration_path, class: "nav-item" %></li>
+            <li><%= link_to "Comenzile mele", orders_path, class: "nav-item" %></li>
+            <% if current_user.role == 1 %>
+              <li><%= link_to "Admin", admin_path, class: "nav-item" %></li>
+            <% end %>
+            <li>
+              <%= button_to "Ieși din cont", destroy_user_session_path,
+                  method: :delete,
+                  id: "logout_link",
+                  form: { style: "display: inline;" } %>
+            </li>
+          <% else %>
+            <!-- Utilizator neautentificat -->
+            <li><%= link_to "Login", new_user_session_path %></li>
+            <li><%= link_to "Creează cont", new_user_registration_path %></li>
+            <li><%= link_to "Despre noi", "#" %></li>
+          <% end %>
         </ul>
       </div>
 

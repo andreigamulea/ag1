@@ -1,9 +1,19 @@
 # app/controllers/orders_controller.rb
 class OrdersController < ApplicationController
-
+  before_action :authenticate_user!, only: [:index, :show_items, :invoice]
+  before_action :set_order, only: [:show_items, :invoice]
+  before_action :check_order_access, only: [:show_items, :invoice]
   def index
-    @orders = Order.page(params[:page]).per(10).order(created_at: :desc)
+  if current_user.role == 1
+    # Admin vede toate comenzile cu paginare
+    @orders = Order.order(created_at: :desc).page(params[:page]).per(25)
+  else
+    # Utilizatorii normali văd doar comenzile lor cu paginare
+    @orders = Order.where(user_id: current_user.id)
+                   .order(created_at: :desc)
+                   .page(params[:page]).per(25)
   end
+end
 
   def show_items
     @order = Order.find(params[:id])
@@ -355,7 +365,9 @@ end
   end
 
   def invoice
-  @order = Order.find(params[:id])
+  # Nu mai trebuie @order = Order.find(params[:id])
+  # pentru că before_action :set_order face asta automat
+  
   @invoice = @order.invoice  # Presupunând că ai has_one :invoice în model Order
 
   if @invoice.nil?
@@ -399,6 +411,8 @@ end
     end
   end
 end
+
+
   private
 
   def apply_coupon_if_present
@@ -522,5 +536,19 @@ end
       :notes
     )
   end
+
+  def set_order
+    @order = Order.find(params[:id])
+  end
+
+def check_order_access
+  # Admin poate vedea toate comenzile
+  return if current_user.role == 1
+  
+  # Utilizatorii normali pot vedea doar comenzile lor
+  unless @order.user_id == current_user.id
+    redirect_to orders_path, alert: "Nu ai permisiunea să accesezi această comandă."
+  end
+end
 
 end

@@ -2,7 +2,7 @@
 <div style="max-width:680px; margin: 0 auto;">
   <h1 class="admin-title">✏️ Modifică utilizator</h1>
 
-  <%= form_with(model: @user, local: true) do |form| %>
+  <%= form_for @user, url: admin_update_user_path(@user), method: :patch do |f| %>
     <% if @user.errors.any? %>
       <div class="form-errors">
         <h2><%= pluralize(@user.errors.count, "eroare") %>:</h2>
@@ -15,17 +15,30 @@
     <% end %>
 
     <div class="form-group">
-      <%= form.label :email, "Email" %>
-      <%= form.text_field :email, readonly: true, class: "form-control readonly" %>
+      <%= f.label :email, "Email" %>
+      <%= f.text_field :email, readonly: true, class: "form-control readonly" %>
     </div>
 
     <div class="form-group">
-      <%= form.label :role, "Rol" %>
-      <%= form.select :role, [["Client", 0], ["Administrator", 1], ["Manager", 2]], {}, class: "form-control" %>
+      <%= f.label :role, "Rol" %>
+      <%= f.select :role, [["Client", 0], ["Administrator", 1], ["Manager", 2]], {}, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :active, "Status cont" %>
+      <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+        <%= f.check_box :active, style: "width: 20px; height: 20px; cursor: pointer;" %>
+        <span style="font-size: 14px; color: #666;">
+          <%= @user.active? ? "✓ Cont activ" : "✗ Cont inactiv" %>
+        </span>
+      </div>
+      <p style="font-size: 13px; color: #888; margin-top: 8px; font-style: italic;">
+        Debifează pentru a dezactiva contul utilizatorului. Utilizatorul nu va mai putea să se autentifice.
+      </p>
     </div>
 
     <div class="form-actions">
-      <%= form.submit "💾 Salvează modificările", class: "form-button" %>
+      <%= f.submit "💾 Salvează modificările", class: "form-button" %>
     </div>
   <% end %>
 
@@ -126,7 +139,8 @@
 .link-button:hover {
   color: #fbc02d;
 }
-  .user-form > div {
+
+.user-form > div {
   animation: fadeIn 0.6s ease-out;
 }
 
@@ -134,5 +148,4 @@
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 </style>
