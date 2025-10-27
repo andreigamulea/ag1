@@ -7,21 +7,33 @@
 
 
   <div class="product-grid <%= 'no-thumbnails' unless @product.external_image_urls.present? && @product.external_image_urls.any? %>">
-    <!-- Column 1: Thumbnails (hidden if no secondary images) -->
+    <!-- Column 1: Thumbnails (includem și imaginea principală) -->
     <% if @product.external_image_urls.present? && @product.external_image_urls.any? %>
       <div class="product-thumbnails">
+        <!-- ADĂUGĂM IMAGINEA PRINCIPALĂ ÎN THUMBNAILS -->
+        <% if @product.external_image_url.present? %>
+          <% main_thumb_url = "#{@product.external_image_url}?width=600&height=600&quality=95" %>
+          <% main_full_url = "#{@product.external_image_url}?width=2000&height=2000&quality=95" %>
+          <%= image_tag main_thumb_url, class: "thumb main-thumb", data: { full: main_full_url }, alt: "Imagine principală" %>
+        <% end %>
+        
+        <!-- THUMBNAILS SECUNDARE -->
         <% @product.external_image_urls.each do |url| %>
-  <% thumb_url = "#{url}?width=150&height=150&quality=70" %>
-  <% full_url  = "#{url}?width=1600&height=1600&quality=95" %>
-  <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "Thumbnail" %>
-<% end %>
+          <% thumb_url = "#{url}?width=600&height=600&quality=95" %>
+          <% full_url  = "#{url}?width=2000&height=2000&quality=95" %>
+          <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "Thumbnail" %>
+        <% end %>
       </div>
     <% end %>
 
     <!-- Column 2: Main Image -->
     <div class="product-image">
       <% if @product.external_image_url.present? %>
-        <%= image_tag @product.external_image_url, alt: @product.name, class: "main-image popup-trigger", data: { full: @product.external_image_url } %>
+        <% display_url = "#{@product.external_image_url}?width=600&height=600&quality=85" %>
+        <% main_full_url = "#{@product.external_image_url}?width=2000&height=2000&quality=95" %>
+        <div class="image-container">
+          <%= image_tag display_url, alt: @product.name, class: "main-image popup-trigger", data: { full: main_full_url } %>
+        </div>
       <% else %>
         <%= image_tag "placeholder.png", alt: "Fără imagine", class: "main-image popup-trigger" %>
       <% end %>
@@ -139,7 +151,7 @@
   width: 80px;
   height: 80px;
   object-fit: cover;
-  border: 1px solid #ddd;
+  border: 2px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
   transition: border-color 0.3s ease-in-out, transform 0.3s ease-in-out;
@@ -150,22 +162,44 @@
   transform: scale(1.05);
 }
 
+.thumb.active {
+  border-color: #8b0000;
+  border-width: 3px;
+  box-shadow: 0 0 8px rgba(139, 0, 0, 0.4);
+}
+
 .product-image {
   text-align: center;
+  position: relative;
+}
+
+.image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  cursor: zoom-in;
 }
 
 .main-image {
-  width: 100%;
-  max-height: 300px;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
   border-radius: 8px;
-  cursor: zoom-in;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out;
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+  transition: transform 0.1s ease-out;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  transform-origin: center center;
 }
 
-.main-image:hover {
-  transform: scale(1.02);
+/* ZOOM activ la hover */
+.image-container:hover .main-image {
+  transform: scale(2);
 }
 
 .product-details {
@@ -395,6 +429,12 @@
   .product-grid.no-thumbnails .product-actions {
     grid-column: 2 / 3;
   }
+  .image-container {
+    height: 300px;
+  }
+  .main-image {
+    max-height: 300px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -418,6 +458,9 @@
   .thumb {
     width: 60px;
     height: 60px;
+  }
+  .image-container {
+    height: 250px;
   }
   .main-image {
     max-height: 250px;
@@ -467,44 +510,43 @@
 
 <script>
 document.addEventListener('turbo:load', initializeBindings);
-document.addEventListener('DOMContentLoaded', initializeBindings); // Fallback pentru a asigura încărcarea
+document.addEventListener('DOMContentLoaded', initializeBindings);
 
 function initializeBindings() {
   bindLightbox();
   bindQuantityControls();
   bindThumbnailClick();
-  console.log('Initialize bindings executed, binding events to page elements');
+  console.log('Initialize bindings executed');
 }
 
 function bindLightbox() {
   const overlay = document.getElementById('lightbox-overlay');
   const lightboxImage = document.getElementById('lightbox-image');
   const closeBtn = document.getElementById('lightbox-close');
-  const mainImage = document.querySelector('.main-image');
 
-  if (!overlay || !lightboxImage || !closeBtn || !mainImage) {
+  if (!overlay || !lightboxImage || !closeBtn) {
     console.warn('Lightbox elements not fully found, skipping binding');
     return;
   }
 
-  // Elimină event listener-urile existente prin clonare
   const newOverlay = overlay.cloneNode(true);
   overlay.parentNode.replaceChild(newOverlay, overlay);
   const newCloseBtn = newOverlay.querySelector('#lightbox-close');
   const newLightboxImage = newOverlay.querySelector('#lightbox-image');
 
-  document.querySelectorAll('.popup-trigger').forEach(img => {
-    img.addEventListener('click', () => {
-      newLightboxImage.src = img.dataset.full || img.src;
+  // Lightbox pe click la imaginea principală
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('main-image')) {
+      const fullUrl = e.target.dataset.full || e.target.src;
+      newLightboxImage.src = fullUrl;
       newOverlay.style.display = 'flex';
-      console.log('Lightbox triggered with image: ', img.dataset.full || img.src);
-    });
+      console.log('Lightbox opened with:', fullUrl);
+    }
   });
 
   function closeLightbox() {
     newOverlay.style.display = 'none';
     newLightboxImage.src = '';
-    console.log('Lightbox closed');
   }
 
   newCloseBtn.addEventListener('click', closeLightbox);
@@ -517,62 +559,72 @@ function bindLightbox() {
 
 function bindThumbnailClick() {
   const mainImage = document.querySelector('.main-image');
+  const imageContainer = document.querySelector('.image-container');
   const thumbs = document.querySelectorAll('.thumb');
-  const originalSrc = mainImage ? mainImage.dataset.full || mainImage.src : null; // Salvează imaginea principală inițială
-
+  
   if (!mainImage) {
-    console.error('Main image element (.main-image) not found');
+    console.error('Main image not found');
     return;
   }
   if (!thumbs || thumbs.length === 0) {
-    console.warn('No thumbnail elements (.thumb) found');
+    console.warn('No thumbnails found');
     return;
   }
 
-  console.log(`Found ${thumbs.length} thumbnails, binding hover events to main image`);
+  console.log(`Found ${thumbs.length} thumbnails (including main image)`);
 
-  thumbs.forEach(thumb => {
-    // Actualizare imagine principală la hover
-    thumb.addEventListener('mouseenter', () => {
-      console.log(`Hover on thumbnail with src: ${thumb.src}, data-full: ${thumb.dataset.full}`);
-      updateMainImage(thumb);
+  // Marchează primul thumbnail (imaginea principală) ca activ
+  if (thumbs.length > 0) {
+    thumbs[0].classList.add('active');
+  }
+
+  // ZOOM cu urmărire mouse
+  if (imageContainer) {
+    imageContainer.addEventListener('mousemove', (e) => {
+      const rect = imageContainer.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      mainImage.style.transformOrigin = `${x}% ${y}%`;
     });
 
-    // Revenire la imaginea principală la ieșirea din hover
-    thumb.addEventListener('mouseleave', () => {
-      console.log(`Leaving thumbnail, reverting to original image: ${originalSrc}`);
-      if (originalSrc) {
-        mainImage.style.opacity = '0';
-        mainImage.src = `${originalSrc}?t=${Date.now()}`; // Forțează reîncărcare cu timestamp
-        mainImage.dataset.full = originalSrc;
-        mainImage.onload = () => {
+    imageContainer.addEventListener('mouseleave', () => {
+      mainImage.style.transformOrigin = 'center center';
+    });
+  }
+
+  thumbs.forEach((thumb, index) => {
+    // CLICK pentru a schimba imaginea permanent
+    thumb.addEventListener('click', (e) => {
+      e.preventDefault();
+      const fullResUrl = thumb.dataset.full;
+      
+      console.log(`[Thumb ${index}] CLICKED - Switching to:`, fullResUrl);
+      
+      if (fullResUrl) {
+        // Îndepărtăm clasa active de la toate thumbnailurile
+        thumbs.forEach(t => t.classList.remove('active'));
+        // Adăugăm clasa active la thumbnailul curent
+        thumb.classList.add('active');
+        
+        // Schimbăm imaginea principală
+        mainImage.style.opacity = '0.5';
+        
+        const newImage = new Image();
+        newImage.onload = () => {
+          mainImage.src = fullResUrl;
+          mainImage.dataset.full = fullResUrl;
           mainImage.style.opacity = '1';
-          console.log(`Reverted to original image: ${originalSrc}`);
+          console.log(`[Thumb ${index}] ✓ Image switched successfully`);
         };
-        mainImage.onerror = () => {
-          console.error(`Failed to load original image: ${originalSrc}`);
+        newImage.onerror = () => {
+          console.error(`[Thumb ${index}] ✗ Failed to load image:`, fullResUrl);
           mainImage.style.opacity = '1';
         };
+        newImage.src = fullResUrl;
       }
     });
   });
-
-  function updateMainImage(thumb) {
-    const newSrc = thumb.dataset.full || thumb.src;
-    if (newSrc && newSrc !== originalSrc) { // Evită actualizarea inutilă
-      mainImage.style.opacity = '0'; // Ascunde temporar pentru a preveni flicker
-      mainImage.src = `${newSrc}?t=${Date.now()}`; // Adaugă timestamp pentru a evita cache
-      mainImage.dataset.full = newSrc;
-      mainImage.onload = () => {
-        mainImage.style.opacity = '1'; // Arată imaginea după încărcare
-        console.log(`Main image updated and loaded to: ${newSrc}`);
-      };
-      mainImage.onerror = () => {
-        console.error(`Failed to load image: ${newSrc}`);
-        mainImage.style.opacity = '1'; // Revenire la vizibilitate în caz de eroare
-      };
-    }
-  }
 }
 
 function bindQuantityControls() {
@@ -581,7 +633,7 @@ function bindQuantityControls() {
   const increaseBtn = document.querySelector('.quantity-increase');
 
   if (!input || !decreaseBtn || !increaseBtn) {
-    console.warn('Quantity controls not fully found, skipping binding');
+    console.warn('Quantity controls not found');
     return;
   }
 
@@ -589,7 +641,6 @@ function bindQuantityControls() {
     let value = parseInt(input.value, 10) || 1;
     value = Math.max(1, value + delta);
     input.value = value;
-    console.log(`Quantity adjusted to: ${value}`);
   }
 
   decreaseBtn.addEventListener('click', () => adjustQty(-1));
