@@ -11,8 +11,10 @@
     <% if @product.external_image_urls.present? && @product.external_image_urls.any? %>
       <div class="product-thumbnails">
         <% @product.external_image_urls.each do |url| %>
-          <%= image_tag url, class: "thumb", data: { full: url }, alt: "Thumbnail" %>
-        <% end %>
+  <% thumb_url = "#{url}?width=150&height=150&quality=70" %>
+  <% full_url  = "#{url}?width=1600&height=1600&quality=95" %>
+  <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "Thumbnail" %>
+<% end %>
       </div>
     <% end %>
 

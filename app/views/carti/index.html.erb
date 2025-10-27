@@ -21,22 +21,39 @@
         <% end %>
 
         <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei") %></p>
-
+            
         <% if product.track_inventory %>
-          <% if product.stock > 5 %>
-            <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
-          <% elsif product.stock > 0 %>
-            <p class="stock yellow">Stoc: <%= product.stock %> Cantitate limitată</p>
-          <% else %>
-            <p class="stock red">Stoc: 0 (Se poate comanda, livrarea va fi făcută când revine în stoc)</p>
-          <% end %>
-        <% else %>
-          <% if product.stock > 0 %>
-            <p class="stock green">Stoc disponibil: <%= product.stock %></p>
-          <% else %>
-            <p class="stock red">Stoc: 0 (indisponibil)</p>
-          <% end %>
-        <% end %>
+  <% if current_user && current_user.role == 1 %>
+    <% if product.stock > 5 %>
+      <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
+    <% elsif product.stock > 0 %>
+      <p class="stock yellow">Stoc: <%= product.stock %> Cantitate limitată</p>
+    <% else %>
+      <p class="stock red">Stoc: 0 (Se poate comanda, livrarea va fi făcută când revine în stoc)</p>
+    <% end %>
+  <% else %>
+    <% if product.stock > 0 %>
+      <p class="stock green">Disponibil</p>
+    <% else %>
+      <p class="stock red">Indisponibil temporar</p>
+    <% end %>
+  <% end %>
+<% else %>
+  <% if current_user && current_user.role == 1 %>
+    <% if product.stock > 0 %>
+      <p class="stock green">Stoc disponibil: <%= product.stock %></p>
+    <% else %>
+      <p class="stock red">Stoc: 0 (indisponibil)</p>
+    <% end %>
+  <% else %>
+    <% if product.stock > 0 %>
+      <p class="stock green">Disponibil</p>
+    <% else %>
+      <p class="stock red">Indisponibil temporar</p>
+    <% end %>
+  <% end %>
+<% end %>
+
       </div>
 
       <div class="add-to-cart-form">
