@@ -1,367 +1,732 @@
-<%= form_with(model: product, local: true, html: { multipart: true }) do |form| %>
-
-  <% if product.errors.any? %>
-    <div class="alert alert-danger">
-      <h4><%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h4>
-      <ul>
-        <% product.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="mb-3">
-    <%= form.label :name %>
-    <%= form.text_field :name, class: "form-control" %>
-  </div>
-
-  <div>
-    <%= form.label :slug %>
-    <%= form.text_field :slug %>
-  </div>
-
-  <div>
-    <%= form.label :description_title %>
-    <%= form.text_field :description_title %>
-  </div>
-
-  <div>
-    <%= form.label :description %>
-    <%= form.text_area :description %>
-  </div>
-
-  <div>
-    <%= form.label :price %>
-    <%= form.number_field :price, step: 0.01 %>
-  </div>
-
-  <div>
-  <%= form.label :vat, "TVA (%)" %>
-  <%= form.number_field :vat, min: 0, class: "form-control" %>
-</div>
-
-
-  <div>
-    <%= form.label :cost_price %>
-    <%= form.number_field :cost_price, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= form.label :discount_price %>
-    <%= form.number_field :discount_price, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= form.label :sku %>
-    <%= form.text_field :sku %>
-  </div>
-
-  <div>
-    <%= form.label :stock %>
-    <%= form.number_field :stock %>
-  </div>
-
-  <div>
-    <%= form.label :track_inventory %>
-    <%= form.check_box :track_inventory %>
-  </div>
-
-  <div>
-    <%= form.label :stock_status %>
-    <%= form.select :stock_status, Product.stock_statuses.keys.map { |k| [k.humanize, k] } %>
-  </div>
-
-  <div>
-    <%= form.label :sold_individually %>
-    <%= form.check_box :sold_individually %>
-  </div>
-
-  <div>
-    <%= form.label :available_on %>
-    <%= form.date_field :available_on %>
-  </div>
-
-  <div>
-    <%= form.label :discontinue_on %>
-    <%= form.date_field :discontinue_on %>
-  </div>
-
-  <div>
-  <%= form.label :height, "Height (mm)" %>
-  <%= form.number_field :height, step: 1, min: 0 %>
-</div>
-
-<div>
-  <%= form.label :width, "Width (mm)" %>
-  <%= form.number_field :width, step: 1, min: 0 %>
-</div>
-
-<div>
-  <%= form.label :depth, "Depth (mm)" %>
-  <%= form.number_field :depth, step: 1, min: 0 %>
-</div>
-
-<div>
-  <%= form.label :weight, "Weight (g)" %>
-  <%= form.number_field :weight, step: 1, min: 0 %>
-</div>
-
-
-  <div>
-    <%= form.label :meta_title %>
-    <%= form.text_field :meta_title %>
-  </div>
-
-  <div>
-    <%= form.label :meta_description %>
-    <%= form.text_field :meta_description %>
-  </div>
-
-  <div>
-    <%= form.label :meta_keywords %>
-    <%= form.text_field :meta_keywords %>
-  </div>
-
-  <div>
-    <%= form.label :status %>
-    <%= form.select :status, ["active", "inactive"] %>
-  </div>
-
-  <div>
-    <%= form.label :featured %>
-    <%= form.check_box :featured %>
-  </div>
-
-<div class="field">
-  <%= form.label :requires_login, "Doar utilizatori logați pot cumpăra?" %>
-  <%= form.check_box :requires_login %>
-</div>
-
-<div class="field">
-  <%= form.label :product_type, "Tip produs" %>
-  <%= form.select :product_type, Product.product_types.keys.map { |t| [t.titleize, t] } %>
-</div>
-
-<div class="field">
-  <%= form.label :delivery_method, "Mod de livrare" %>
-  <%= form.select :delivery_method, Product.delivery_methods.keys.map { |k| [k.titleize, k] } %>
-</div>
-
-<div class="field">
-  <%= form.label :visible_to_guests, "Vizibil pentru utilizatori neautentificați" %>
-  <%= form.check_box :visible_to_guests %>
-</div>
-
-
-<div class="field">
-  <%= form.label :taxable, "Se aplică TVA" %>
-  <%= form.check_box :taxable %>
-</div>
-
-<div class="field">
-  <%= form.label :coupon_applicable, "Se aplică cupon de reducere" %>
-  <%= form.check_box :coupon_applicable %>
-</div>
-
-
-<div class="mb-3">
-  <label for="bunny-files-upload">Fișiere atașate (Bunny)</label>
-  <input type="file" id="bunny-files-upload" class="form-control" multiple />
-  <div id="bunny-files-preview" class="mt-2 d-flex flex-column gap-2">
-    <% if @product.external_file_urls.present? %>
-      <% @product.external_file_urls.each do |url| %>
-        <div class="position-relative border rounded p-2">
-          <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener", class: "text-decoration-none d-block" %>
-          <button type="button"
-                  class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-bunny-file"
-                  data-url="<%= url %>">×</button>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
-</div>
-
-<div id="external-file-hidden-inputs">
-  <% (@product.external_file_urls || []).each do |url| %>
-    <%= hidden_field_tag 'product[external_file_urls][]', url %>
-  <% end %>
-</div>
-
-
-
-
-
-<div class="mb-3" data-controller="category-select">
-  <%= form.label :category_ids, "Categorii" %>
-  <div id="category-options" class="d-flex flex-wrap gap-2 mb-2">
-    <% Category.all.each do |category| %>
-      <% selected = product.category_ids.include?(category.id) %>
-      <span class="badge category-badge <%= selected ? 'bg-primary' : 'bg-secondary' %> text-white"
-            data-id="<%= category.id %>"
-            data-category-select-target="badge"
-            data-action="click->category-select#toggle"
-            style="cursor: pointer;">
-        <%= category.name %>
-      </span>
-    <% end %>
-  </div>
-
-  <div id="category-hidden-inputs" data-category-select-target="hiddenInputsWrapper">
-    <input type="hidden" name="product[category_ids][]" value="">
-    <% product.category_ids.each do |cat_id| %>
-      <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">
-    <% end %>
-  </div>
-</div>
-
-
-
-
-<button type="button" onclick="testPresign()">Testează presign</button>
-
-
-
-
-
-
- <div class="mb-3">
-  <%= form.label :custom_attributes, "Atribute personalizate (JSON)", class: "form-label" %>
-  <%= form.text_area :custom_attributes, class: "form-control", rows: 5 %>
-</div>
-
-
-
- 
-
-   <div class="mb-3">
-    <label for="bunny-direct-upload">Imagine principală (direct Bunny)</label>
-    <input type="file" id="bunny-direct-upload" class="form-control" accept="image/*" />
-    <input type="hidden" name="product[external_image_url]" id="external_image-url" value="<%= @product.external_image_url %>" />
-    <div id="main-preview">
-      <% if @product.external_image_url.present? %>
-        <div class="bunny-preview" data-type="main">
-          <img src="<%= @product.external_image_url %>" class="img-thumbnail" style="max-height: 150px;">
-          <button type="button" class="btn btn-sm btn-danger remove-bunny-image" data-target="main">×</button>
-        </div>
-      <% end %>
-    </div>
-  </div>
-
-  <div class="mb-3">
-    <label for="bunny-secondary-upload">Imagini secundare (direct Bunny)</label>
-    <input type="file" id="bunny-secondary-upload" class="form-control" multiple accept="image/*" />
-    <div id="bunny-secondary-preview" class="mt-2 d-flex flex-wrap gap-2">
-      <% if @product.external_image_urls.present? %>
-        <% @product.external_image_urls.each_with_index do |url, index| %>
-          <div class="bunny-preview position-relative" data-index="<%= index %>">
-            <img src="<%= url %>" class="img-thumbnail me-2" width="100">
-            <button type="button"
-                    class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-bunny-image"
-                    data-target="secondary"
-                    data-index="<%= index %>">×</button>
-          </div>
-        <% end %>
-      <% end %>
-    </div>
-  </div>
-<div id="external-hidden-inputs">
-  
-  <% (@product.external_image_urls || []).each do |url| %>
-    <%= hidden_field_tag 'product[external_image_urls][]', url %>
-  <% end %>
-</div>
-
-  
-  
-
-  <%= form.submit "Salvează produsul", class: "btn btn-primary" %>
-<% end %>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const input = document.getElementById("secondary-images");
-  const wrapper = document.getElementById("image-badges-wrapper");
-  const form = document.querySelector("form");
-  const maxSize = 5 * 1024 * 1024; // 5 MB
-  const maxFiles = 10; // Maxim 10 imagini secundare
-
-  let allFiles = [];
-
-  input.addEventListener("change", () => {
-    const newFiles = Array.from(input.files);
-
-    // Validare dimensiune și număr
-    if (allFiles.length + newFiles.length > maxFiles) {
-      alert(`Poți încărca maxim ${maxFiles} imagini secundare.`);
-      input.value = "";
-      return;
-    }
-
-    newFiles.forEach(file => {
-      if (file.size > maxSize) {
-        alert(`Fișierul ${file.name} este prea mare. Dimensiunea maximă este 5MB.`);
-      } else if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
-        allFiles.push(file);
-      }
-    });
-
-    renderBadges();
-    input.value = ""; // Resetăm pentru a permite reîncărcarea aceleiași imagini
-
-    // Refacem input.files
-    const dt = new DataTransfer();
-    allFiles.forEach(file => dt.items.add(file));
-    input.files = dt.files;
-  });
-
-  function renderBadges() {
-    wrapper.innerHTML = "";
-    allFiles.forEach((file, index) => {
-      const badge = document.createElement("span");
-      badge.className = "badge bg-primary text-white me-2 mb-2";
-      badge.innerHTML = `${file.name} <span onclick="removeFile(${index})" style="cursor:pointer; margin-left:6px;">×</span>`;
-      wrapper.appendChild(badge);
-    });
+<style>
+  .form-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
   }
 
-  window.removeFile = function(index) {
-    allFiles.splice(index, 1);
-    renderBadges();
-    const dt = new DataTransfer();
-    allFiles.forEach(file => dt.items.add(file));
-    input.files = dt.files;
-  };
-});
-</script>
+  .form-section {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-header.primary { background: #4a90e2; }
+  .section-header.success { background: #52c41a; }
+  .section-header.info { background: #13c2c2; }
+  .section-header.warning { background: #faad14; color: #000; }
+  .section-header.secondary { background: #8c8c8c; }
+  .section-header.dark { background: #262626; }
+  .section-header.danger { background: #f5222d; }
+
+  .section-body {
+    padding: 20px;
+  }
+
+  .form-row {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .form-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .form-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .form-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .form-row.cols-1 { grid-template-columns: 1fr; }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-field label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .form-field input[type="text"],
+  .form-field input[type="number"],
+  .form-field input[type="date"],
+  .form-field textarea,
+  .form-field select {
+    padding: 8px 12px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+
+  .form-field input:focus,
+  .form-field textarea:focus,
+  .form-field select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+  }
+
+  .form-field textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+
+  .input-group {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .input-group input {
+    flex: 1;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .input-group-text {
+    padding: 8px 12px;
+    background: #fafafa;
+    border: 1px solid #d9d9d9;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    color: #666;
+  }
+
+  .checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .checkbox-field input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+
+  .checkbox-field label {
+    font-size: 14px;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .category-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .category-badge {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .category-badge.active {
+    background: #4a90e2;
+    color: #fff;
+  }
+
+  .category-badge.inactive {
+    background: #f0f0f0;
+    color: #666;
+  }
+
+  .category-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .image-preview-item {
+    position: relative;
+    display: inline-block;
+  }
+
+  .image-preview-item img {
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #f5222d;
+    color: #fff;
+    border: 2px solid #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .image-preview-item:hover .remove-btn {
+    opacity: 1;
+  }
+
+  .file-preview-item {
+    position: relative;
+    padding: 10px 12px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .file-preview-item a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .file-preview-item .remove-btn {
+    position: static;
+    opacity: 1;
+    margin-left: 10px;
+  }
+
+  .alert-danger {
+    background: #fff2f0;
+    border: 1px solid #ffccc7;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .alert-danger h4 {
+    color: #f5222d;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+  }
+
+  .alert-danger ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #666;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background: #4a90e2;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #3a7bc8;
+  }
+
+  .btn-secondary {
+    background: #fff;
+    color: #666;
+    border: 1px solid #d9d9d9;
+  }
+
+  .btn-secondary:hover {
+    border-color: #4a90e2;
+    color: #4a90e2;
+  }
+
+  .btn-danger {
+    background: #f5222d;
+    color: #fff;
+  }
+
+  .btn-danger:hover {
+    background: #d9191c;
+  }
+
+  @media (max-width: 768px) {
+    .form-row.cols-2,
+    .form-row.cols-3,
+    .form-row.cols-4 {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="form-container">
+  <%= form_with(model: product, local: true, html: { multipart: true }) do |form| %>
+
+    <% if product.errors.any? %>
+      <div class="alert-danger">
+        <h4>⚠️ <%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h4>
+        <ul>
+          <% product.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <!-- Informații de bază -->
+    <div class="form-section">
+      <div class="section-header primary">
+        📋 Informații de bază
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-2">
+          <div class="form-field">
+            <%= form.label :name, "Nume produs" %>
+            <%= form.text_field :name, placeholder: "Nume produs" %>
+          </div>
+          <div class="form-field">
+            <%= form.label :slug, "URL Slug" %>
+            <%= form.text_field :slug, placeholder: "url-friendly-name" %>
+          </div>
+        </div>
+
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <%= form.label :description_title, "Titlu descriere" %>
+            <%= form.text_field :description_title, placeholder: "Titlu pentru secțiunea de descriere" %>
+          </div>
+        </div>
+
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <%= form.label :description, "Descriere" %>
+            <%= form.text_area :description, placeholder: "Descriere detaliată a produsului..." %>
+          </div>
+        </div>
+
+        <div class="form-row cols-3">
+          <div class="form-field">
+            <%= form.label :sku, "SKU" %>
+            <%= form.text_field :sku, placeholder: "SKU-12345" %>
+          </div>
+          <div class="form-field">
+            <%= form.label :status, "Status" %>
+            <%= form.select :status, ["active", "inactive"], {}, {} %>
+          </div>
+          <div class="checkbox-field" style="margin-top: 24px;">
+            <%= form.check_box :featured %>
+            <%= form.label :featured, "Produs promovat" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prețuri și Taxe -->
+    <div class="form-section">
+      <div class="section-header success">
+        💰 Prețuri și Taxe
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-4">
+          <div class="form-field">
+            <%= form.label :price, "Preț" %>
+            <div class="input-group">
+              <%= form.number_field :price, step: 0.01, placeholder: "0.00" %>
+              <span class="input-group-text">RON</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <%= form.label :cost_price, "Preț cost" %>
+            <div class="input-group">
+              <%= form.number_field :cost_price, step: 0.01, placeholder: "0.00" %>
+              <span class="input-group-text">RON</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <%= form.label :discount_price, "Preț redus" %>
+            <div class="input-group">
+              <%= form.number_field :discount_price, step: 0.01, placeholder: "0.00" %>
+              <span class="input-group-text">RON</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <%= form.label :vat, "TVA" %>
+            <div class="input-group">
+              <%= form.number_field :vat, min: 0, placeholder: "19" %>
+              <span class="input-group-text">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row cols-2">
+          <div class="checkbox-field">
+            <%= form.check_box :taxable %>
+            <%= form.label :taxable, "Se aplică TVA" %>
+          </div>
+          <div class="checkbox-field">
+            <%= form.check_box :coupon_applicable %>
+            <%= form.label :coupon_applicable, "Se aplică cupon de reducere" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventar și Stoc -->
+    <div class="form-section">
+      <div class="section-header info">
+        📦 Inventar și Stoc
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-3">
+          <div class="form-field">
+            <%= form.label :stock, "Stoc" %>
+            <%= form.number_field :stock, placeholder: "0" %>
+          </div>
+          <div class="form-field">
+            <%= form.label :stock_status, "Status stoc" %>
+            <%= form.select :stock_status, Product.stock_statuses.keys.map { |k| [k.humanize, k] } %>
+          </div>
+          <div class="checkbox-field" style="margin-top: 24px;">
+            <%= form.check_box :track_inventory %>
+            <%= form.label :track_inventory, "Urmărește inventarul" %>
+          </div>
+        </div>
+
+        <div class="form-row cols-1">
+          <div class="checkbox-field">
+            <%= form.check_box :sold_individually %>
+            <%= form.label :sold_individually, "Se vinde individual" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dimensiuni și Greutate -->
+    <div class="form-section">
+      <div class="section-header warning">
+        📏 Dimensiuni și Greutate
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-4">
+          <div class="form-field">
+            <%= form.label :height, "Înălțime" %>
+            <div class="input-group">
+              <%= form.number_field :height, step: 1, min: 0, placeholder: "0" %>
+              <span class="input-group-text">mm</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <%= form.label :width, "Lățime" %>
+            <div class="input-group">
+              <%= form.number_field :width, step: 1, min: 0, placeholder: "0" %>
+              <span class="input-group-text">mm</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <%= form.label :depth, "Adâncime" %>
+            <div class="input-group">
+              <%= form.number_field :depth, step: 1, min: 0, placeholder: "0" %>
+              <span class="input-group-text">mm</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <%= form.label :weight, "Greutate" %>
+            <div class="input-group">
+              <%= form.number_field :weight, step: 1, min: 0, placeholder: "0" %>
+              <span class="input-group-text">g</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disponibilitate -->
+    <div class="form-section">
+      <div class="section-header secondary">
+        📅 Disponibilitate
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-2">
+          <div class="form-field">
+            <%= form.label :available_on, "Disponibil din" %>
+            <%= form.date_field :available_on %>
+          </div>
+          <div class="form-field">
+            <%= form.label :discontinue_on, "Se întrerupe la" %>
+            <%= form.date_field :discontinue_on %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configurări Produs -->
+    <div class="form-section">
+      <div class="section-header dark">
+        ⚙️ Configurări Produs
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-2">
+          <div class="form-field">
+            <%= form.label :product_type, "Tip produs" %>
+            <%= form.select :product_type, Product.product_types.keys.map { |t| [t.titleize, t] } %>
+          </div>
+          <div class="form-field">
+            <%= form.label :delivery_method, "Mod de livrare" %>
+            <%= form.select :delivery_method, Product.delivery_methods.keys.map { |k| [k.titleize, k] } %>
+          </div>
+        </div>
+
+        <div class="form-row cols-2">
+          <div class="checkbox-field">
+            <%= form.check_box :requires_login %>
+            <%= form.label :requires_login, "Doar utilizatori logați pot cumpăra" %>
+          </div>
+          <div class="checkbox-field">
+            <%= form.check_box :visible_to_guests %>
+            <%= form.label :visible_to_guests, "Vizibil pentru utilizatori neautentificați" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEO și Metadata -->
+    <div class="form-section">
+      <div class="section-header primary">
+        🔍 SEO și Metadata
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <%= form.label :meta_title, "Titlu SEO" %>
+            <%= form.text_field :meta_title, placeholder: "Titlu pentru motoarele de căutare" %>
+          </div>
+        </div>
+
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <%= form.label :meta_description, "Descriere SEO" %>
+            <%= form.text_field :meta_description, placeholder: "Descriere pentru motoarele de căutare" %>
+          </div>
+        </div>
+
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <%= form.label :meta_keywords, "Cuvinte cheie" %>
+            <%= form.text_field :meta_keywords, placeholder: "cuvânt1, cuvânt2, cuvânt3" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Imagini Produs -->
+    <div class="form-section">
+      <div class="section-header success">
+        🖼️ Imagini Produs
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <label for="bunny-direct-upload">⭐ Imagine principală</label>
+            <input type="file" id="bunny-direct-upload" accept="image/*" style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;" />
+            <input type="hidden" name="product[external_image_url]" id="external_image-url" value="<%= @product.external_image_url %>" />
+            <div id="main-preview" class="image-preview-container">
+              <% if @product.external_image_url.present? %>
+                <div class="image-preview-item bunny-preview" data-type="main">
+                  <img src="<%= @product.external_image_url %>" style="max-height: 120px;">
+                  <button type="button" class="remove-btn remove-bunny-image" data-target="main">×</button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <label for="bunny-secondary-upload">🖼️ Imagini secundare (galerie)</label>
+            <input type="file" id="bunny-secondary-upload" accept="image/*" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;" />
+            <div id="bunny-secondary-preview" class="image-preview-container">
+              <% if @product.external_image_urls.present? %>
+                <% @product.external_image_urls.each_with_index do |url, idx| %>
+                  <div class="image-preview-item bunny-preview" data-type="secondary" data-index="<%= idx %>">
+                    <img src="<%= url %>" style="width: 100px;">
+                    <button type="button" class="remove-btn remove-bunny-image" data-target="secondary" data-index="<%= idx %>">×</button>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div id="external-hidden-inputs">
+          <% (@product.external_image_urls || []).each do |url| %>
+            <%= hidden_field_tag 'product[external_image_urls][]', url %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fișiere Atașate -->
+    <div class="form-section">
+      <div class="section-header info">
+        📎 Fișiere Atașate
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <label for="bunny-files-upload">Fișiere atașate (Bunny)</label>
+            <input type="file" id="bunny-files-upload" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;" />
+            <div id="bunny-files-preview" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+              <% if @product.external_file_urls.present? %>
+                <% @product.external_file_urls.each do |url| %>
+                  <div class="file-preview-item">
+                    <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener" %>
+                    <button type="button" class="remove-btn remove-bunny-file" data-url="<%= url %>">×</button>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="external-file-hidden-inputs">
+      <% (@product.external_file_urls || []).each do |url| %>
+        <%= hidden_field_tag 'product[external_file_urls][]', url %>
+      <% end %>
+    </div>
+
+    <!-- Categorii -->
+    <div class="form-section" data-controller="category-select">
+      <div class="section-header warning">
+        🏷️ Categorii
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <%= form.label :category_ids, "Selectează categoriile" %>
+            <div id="category-options" class="category-badges">
+              <% Category.all.each do |category| %>
+                <% selected = product.category_ids.include?(category.id) %>
+                <span class="category-badge <%= selected ? 'active' : 'inactive' %>"
+                      data-id="<%= category.id %>"
+                      data-category-select-target="badge"
+                      data-action="click->category-select#toggle">
+                  <%= category.name %>
+                </span>
+              <% end %>
+            </div>
+
+            <div id="category-hidden-inputs" data-category-select-target="hiddenInputsWrapper">
+              <input type="hidden" name="product[category_ids][]" value="">
+              <% product.category_ids.each do |cat_id| %>
+                <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Atribute Personalizate -->
+    <div class="form-section">
+      <div class="section-header secondary">
+        💻 Atribute Personalizate
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-1">
+          <div class="form-field">
+            <%= form.label :custom_attributes, "Atribute personalizate (JSON)" %>
+            <%= form.text_area :custom_attributes, placeholder: '{"key": "value"}', style: "font-family: monospace;" %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug / Test -->
+    <div class="form-section">
+      <div class="section-header danger">
+        🔧 Debug / Test
+      </div>
+      <div class="section-body">
+        <button type="button" class="btn btn-danger" onclick="testPresign()">
+          Testează presign
+        </button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <%= link_to "Anulează", products_path, class: "btn btn-secondary" %>
+      <%= form.submit "Salvează produsul", class: "btn btn-primary" %>
+    </div>
+
+  <% end %>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const badges = document.querySelectorAll(".category-badge");
   const hiddenInputsWrapper = document.getElementById("category-hidden-inputs");
 
-  function toggleBadge(event) {
-    const badge = event.currentTarget;
+  function toggleBadge(e) {
+    const badge = e.target;
     const id = badge.dataset.id;
-    const existingInputs = hiddenInputsWrapper.querySelectorAll(`input[value='${id}']`);
+    const existingInputs = [...hiddenInputsWrapper.querySelectorAll(`input[value="${id}"]`)];
 
     if (existingInputs.length > 0) {
       existingInputs.forEach(input => input.remove());
-      badge.classList.remove("bg-primary");
-      badge.classList.add("bg-secondary");
+      badge.classList.remove("active");
+      badge.classList.add("inactive");
     } else {
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = "product[category_ids][]";
       input.value = id;
       hiddenInputsWrapper.appendChild(input);
-      badge.classList.remove("bg-secondary");
-      badge.classList.add("bg-primary");
+      badge.classList.remove("inactive");
+      badge.classList.add("active");
     }
   }
 
   badges.forEach(badge => {
-    badge.removeEventListener("click", toggleBadge);  // Opțional, dacă nu mai ai duplicates fără Turbo
+    badge.removeEventListener("click", toggleBadge);
     badge.addEventListener("click", toggleBadge);
   });
 });
@@ -377,20 +742,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const secondaryInput = document.getElementById("bunny-secondary-upload");
   const secondaryPreview = document.getElementById("bunny-secondary-preview");
 
-  // Creează un preview cu imagine + buton ștergere
   const createImageElement = (url, type, index = null) => {
     const div = document.createElement("div");
-    div.className = "bunny-preview position-relative";
+    div.className = "image-preview-item bunny-preview";
     div.dataset.type = type;
     if (index !== null) div.dataset.index = index;
 
     const img = document.createElement("img");
     img.src = url;
-    img.className = "img-thumbnail me-2";
-    img.style.width = "100px";
+    if (type === "main") {
+      img.style.maxHeight = "120px";
+    } else {
+      img.style.width = "100px";
+    }
 
     const btn = document.createElement("button");
-    btn.className = "btn btn-sm btn-danger position-absolute top-0 end-0 remove-bunny-image";
+    btn.className = "remove-btn remove-bunny-image";
     btn.textContent = "×";
     btn.type = "button";
     btn.dataset.target = type;
@@ -401,7 +768,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return div;
   };
 
-  // Upload imagine principală
   if (mainInput) {
     mainInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
@@ -430,7 +796,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Upload imagini secundare
   if (secondaryInput) {
     secondaryInput.addEventListener("change", async () => {
       const existingInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
@@ -453,12 +818,10 @@ document.addEventListener("DOMContentLoaded", () => {
           const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
           const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
-          // ⚠️ Verificăm dacă deja există acea imagine
           const existingImgs = secondaryPreview.querySelectorAll("img");
           const alreadyExists = Array.from(existingImgs).some(img => img.src === cdnUrl);
           if (alreadyExists) continue;
 
-          // creează input hidden
           const hidden = document.createElement("input");
           hidden.type = "hidden";
           hidden.name = "product[external_image_urls][]";
@@ -466,17 +829,15 @@ document.addEventListener("DOMContentLoaded", () => {
           const externalContainer = document.getElementById("external-hidden-inputs");
           externalContainer.appendChild(hidden);
 
-          // previzualizare
           secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
           currentIndex++;
         }
       }
 
-      secondaryInput.value = ""; // reset
+      secondaryInput.value = "";
     });
   }
 
-  // Ștergere imagine principală sau secundară
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("remove-bunny-image")) {
       const target = e.target.dataset.target;
@@ -491,7 +852,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const img = container.querySelector("img");
         const url = img.src;
 
-        // Eliminăm input-ul hidden cu acel URL
         const hiddenInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
         hiddenInputs.forEach(input => {
           if (input.value === url) input.remove();
@@ -504,10 +864,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-
-
-
-
 <script>
   function testPresign() {
     fetch("/uploads/presign?filename=test_bunny.png")
@@ -516,9 +872,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(error => console.error("Eroare:", error));
   }
 </script>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // === Upload fișiere pe Bunny ===
   const fileInput = document.getElementById("bunny-files-upload");
   const filePreview = document.getElementById("bunny-files-preview");
   const fileHiddenInputs = document.getElementById("external-file-hidden-inputs");
@@ -526,7 +882,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (fileInput) {
     fileInput.addEventListener("change", async () => {
       for (const file of fileInput.files) {
-        // Fă filename unique ca să eviți overwrite (adaugă timestamp)
         const uniqueFilename = `${Date.now()}_${encodeURIComponent(file.name)}`;
 
         const res = await fetch(`/uploads/presign?filename=${uniqueFilename}`);
@@ -545,53 +900,50 @@ document.addEventListener("DOMContentLoaded", () => {
           const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
           const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
-          // Verificăm dacă deja există (acum cu unique, e improbabil, dar păstrăm)
           const exists = [...fileHiddenInputs.querySelectorAll("input")].some(input => input.value === cdnUrl);
           if (exists) continue;
 
-          // Hidden input
           const hidden = document.createElement("input");
           hidden.type = "hidden";
           hidden.name = "product[external_file_urls][]";
           hidden.value = cdnUrl;
           fileHiddenInputs.appendChild(hidden);
 
-          // Previzualizare vizuală (adaugă "position-relative" pentru ștergere corectă)
           const wrapper = document.createElement("div");
-          wrapper.className = "position-relative bunny-preview-file mb-2 d-flex align-items-center justify-content-between border p-2 rounded";  // Adaugă position-relative
+          wrapper.className = "file-preview-item";
 
-          const nameSpan = document.createElement("span");
-          nameSpan.textContent = file.name;
+          const link = document.createElement("a");
+          link.href = cdnUrl;
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.textContent = file.name;
 
           const removeBtn = document.createElement("button");
-          removeBtn.className = "btn btn-sm btn-danger remove-bunny-file position-absolute top-0 end-0 m-1";  // Adaugă position-absolute
+          removeBtn.className = "remove-btn remove-bunny-file";
           removeBtn.textContent = "×";
           removeBtn.type = "button";
           removeBtn.dataset.url = cdnUrl;
 
-          wrapper.appendChild(nameSpan);
+          wrapper.appendChild(link);
           wrapper.appendChild(removeBtn);
           filePreview.appendChild(wrapper);
         }
       }
 
-      fileInput.value = "";  // Reset input pentru adaugări viitoare
+      fileInput.value = "";
     });
   }
 
-  // === Ștergere fișier Bunny (din preview + input ascuns) ===
   document.addEventListener("click", function (e) {
     if (e.target.classList.contains("remove-bunny-file")) {
       const url = e.target.dataset.url;
 
-      // Elimină hidden input cu acel URL
       const hiddenInputs = document.querySelectorAll("input[name='product[external_file_urls][]']");
       hiddenInputs.forEach(input => {
         if (input.value === url) input.remove();
       });
 
-      // Elimină vizual cardul (acum cu .position-relative)
-      const card = e.target.closest(".position-relative");
+      const card = e.target.closest(".file-preview-item");
       if (card) card.remove();
     }
   });
