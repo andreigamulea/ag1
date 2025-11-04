@@ -98,7 +98,7 @@
 <style>
 /* ----------- PRODUCT PAGE STYLING ----------- */
 .container_content.product-view {
-  max-width: 1200px;
+  max-width: 1680px;
   margin: 20px auto;
   padding: 20px;
   background: white;
@@ -126,17 +126,19 @@
   margin: 0 auto;
 }
 
+/* ============= GRID LAYOUT – DESCRIERE MAXIMĂ ============= */
 .product-grid {
   display: grid;
-  grid-template-columns: 100px 1fr 1.5fr 1fr;
+  grid-template-columns: 100px 1fr 2fr max-content; /* descriere ia 2fr = spațiu maxim */
   gap: 15px;
   align-items: start;
 }
 
 .product-grid.no-thumbnails {
-  grid-template-columns: 1fr 1.5fr 1fr;
+  grid-template-columns: 1fr 2fr max-content; /* fără thumbnails: imagine 1fr, descriere 2fr */
 }
 
+/* ============= THUMBNAILS ============= */
 .product-thumbnails {
   display: flex;
   flex-direction: column;
@@ -168,6 +170,7 @@
   box-shadow: 0 0 8px rgba(139, 0, 0, 0.4);
 }
 
+/* ============= MAIN IMAGE ============= */
 .product-image {
   text-align: center;
   position: relative;
@@ -190,23 +193,23 @@
   max-height: 400px;
   object-fit: contain;
   border-radius: 8px;
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
   transition: transform 0.1s ease-out;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   transform-origin: center center;
 }
 
-/* ZOOM activ la hover */
 .image-container:hover .main-image {
   transform: scale(2);
 }
 
+/* ============= PRODUCT DETAILS – SPAȚIU MAXIM ============= */
 .product-details {
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0; /* esențial pentru 2fr în grid */
 }
 
 .product-author,
@@ -231,7 +234,7 @@
 
 .product-description {
   line-height: 1.5;
-  max-height: 200px;
+  max-height: 255px;
   overflow-y: auto;
 }
 
@@ -266,13 +269,19 @@
   height: 16px;
 }
 
+/* ============= PRODUCT ACTIONS – FIX, ALINIAT LA STÂNGA ============= */
 .product-actions {
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: flex-start;
+  align-items: stretch;
   grid-column: 4 / 5;
+  max-width: 280px;
+  width: max-content;     /* cât e necesar */
+  min-width: 220px;       /* minim pentru butoane */
+  margin-left: 0;
+  justify-self: start;    /* aliniere perfectă la stânga în coloana grid */
 }
 
 .product-grid.no-thumbnails .product-actions {
@@ -381,6 +390,7 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
+/* ============= LIGHTBOX ============= */
 #lightbox-overlay {
   position: fixed;
   top: 0;
@@ -414,20 +424,20 @@
   color: #ffa500;
 }
 
-/* Responsive Design */
+/* ============= RESPONSIVE ============= */
 @media (max-width: 992px) {
   .product-grid {
-    grid-template-columns: 80px 1fr 1fr;
+    grid-template-columns: 80px 1fr 2fr max-content;
     gap: 10px;
   }
   .product-grid.no-thumbnails {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 2fr max-content;
   }
   .product-actions {
-    grid-column: 3 / 4;
+    grid-column: 4 / 5;
   }
   .product-grid.no-thumbnails .product-actions {
-    grid-column: 2 / 3;
+    grid-column: 3 / 4;
   }
   .image-container {
     height: 300px;
@@ -444,9 +454,7 @@
   .section-title h1 {
     font-size: 20px;
   }
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
+  .product-grid,
   .product-grid.no-thumbnails {
     grid-template-columns: 1fr;
   }
@@ -483,6 +491,10 @@
   }
   .product-actions {
     grid-column: auto;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    justify-self: stretch;
   }
 }
 

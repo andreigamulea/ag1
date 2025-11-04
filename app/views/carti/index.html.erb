@@ -1,4 +1,15 @@
-<h1 style="text-align: center; margin-top:30px;">Cărți în format fizic și digital</h1>
+<div class="elegant-header">
+  <h1 class="refined-title">
+    <span class="deco-left">⋯</span>
+    Cărți în format fizic și digital
+    <span class="deco-right">⋯</span>
+  </h1>
+  <div class="subline"></div>
+</div>
+
+
+
+
 
 <div class="product-grid">
   <% @products.each do |product| %>
@@ -20,7 +31,7 @@
           <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
         <% end %>
 
-        <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "lei") %></p>
+        <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "", delimiter: ".", separator: ",") %> lei</p>
             
         <% if product.track_inventory %>
   <% if current_user && current_user.role == 1 %>
@@ -138,11 +149,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <style>
 .product-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  justify-content: center;
-  padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    padding: 20px;
+    max-width: 1900px;
+    margin: 0 auto;
 }
 
 .product-card {
@@ -241,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
   text-align: center;
   border: 1px solid #ccc;
   border-radius: 4px;
-  height: 30px;
+  height: 38px;
 }
 
 .add-to-cart-btn {
@@ -320,5 +333,80 @@ document.addEventListener('DOMContentLoaded', function() {
   .image-wrapper {
     height: 180px;
   }
+}
+</style>
+<style>
+.elegant-header {
+  text-align: center;
+  margin: 60px auto 50px;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.refined-title {
+  position: relative;
+  display: inline-block;
+  font-size: 2.4rem;
+  font-weight: 400;
+  color: #2c1e1a;           /* maro-ciocolată */
+  letter-spacing: 3px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Puncte discrete stânga/dreapta */
+.deco-left,
+.deco-right {
+  position: absolute;
+  top: 50%;
+  font-size: 1.2rem;
+  color: #b51e1e;
+  opacity: 0.6;
+}
+.deco-left  { left: -70px; transform: translateY(-50%); }
+.deco-right { right: -70px; transform: translateY(-50%); }
+
+/* Linia fină de sub titlu */
+.subline {
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    #b51e1e 30%, 
+    #d4af37 50%,   /* auriu subtil */
+    #b51e1e 70%, 
+    transparent);
+  margin: 30px auto 0;
+  max-width: 280px;
+  position: relative;
+}
+
+/* Ornament central mic */
+.subline::before {
+  content: "✧";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  color: #d4af37;
+  background: #fff;
+  padding: 0 8px;
+}
+
+/* Responsiv delicat */
+@media (max-width: 768px) {
+  .refined-title { font-size: 2rem; letter-spacing: 2px; }
+  .deco-left  { left: -50px; }
+  .deco-right { right: -50px; }
+  .elegant-header {
+    text-align: center;
+    margin: 20px auto 0px; padding: 0 20px;}
+  .subline {
+    margin: 10px auto 0;
+  }
+}
+@media (max-width: 480px) {
+  .refined-title { font-size: 1.7rem; }
+  .deco-left, .deco-right { display: none; } /* dispare pe telefon */
 }
 </style>
