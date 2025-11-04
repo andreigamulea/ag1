@@ -336,77 +336,87 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 <style>
+/* H1 Rafinat - Centrat și Elegant */
 .elegant-header {
   text-align: center;
   margin: 60px auto 50px;
-  max-width: 800px;
+  max-width: 900px;
   padding: 0 20px;
 }
 
 .refined-title {
   position: relative;
   display: inline-block;
-  font-size: 2.4rem;
-  font-weight: 400;
-  color: #2c1e1a;           /* maro-ciocolată */
-  letter-spacing: 3px;
-  line-height: 1.4;
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #b51e1e;
+  letter-spacing: 5px;
+  line-height: 1.5;
   margin: 0;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  text-shadow: 0 2px 4px rgba(181, 30, 30, 0.05);
 }
 
-/* Puncte discrete stânga/dreapta */
+/* Ornamente laterale fine */
 .deco-left,
 .deco-right {
   position: absolute;
   top: 50%;
-  font-size: 1.2rem;
-  color: #b51e1e;
-  opacity: 0.6;
+  font-size: 1rem;
+  color: #d4af37;
+  opacity: 0.7;
+  letter-spacing: 5px;
+  transform: translateY(-50%);
 }
-.deco-left  { left: -70px; transform: translateY(-50%); }
-.deco-right { right: -70px; transform: translateY(-50%); }
 
-/* Linia fină de sub titlu */
+.deco-left  { left: -70px; }
+.deco-right { right: -70px; }
+
+/* Linia decorativă sub titlu */
 .subline {
   height: 1px;
   background: linear-gradient(90deg, 
     transparent, 
-    #b51e1e 30%, 
-    #d4af37 50%,   /* auriu subtil */
-    #b51e1e 70%, 
+    rgba(181, 30, 30, 0.3) 20%,
+    #d4af37 50%,
+    rgba(181, 30, 30, 0.3) 80%, 
     transparent);
-  margin: 30px auto 0;
-  max-width: 280px;
+  margin: 25px auto 0;
+  max-width: 350px;
   position: relative;
 }
 
-/* Ornament central mic */
+/* Ornament central pe linie */
 .subline::before {
-  content: "✧";
+  content: "◆";
   position: absolute;
-  top: -10px;
+  top: -9px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1rem;
-  color: #d4af37;
+  font-size: 0.9rem;
+  color: #b51e1e;
   background: #fff;
-  padding: 0 8px;
+  padding: 0 10px;
 }
 
-/* Responsiv delicat */
+/* Responsive */
 @media (max-width: 768px) {
-  .refined-title { font-size: 2rem; letter-spacing: 2px; }
-  .deco-left  { left: -50px; }
-  .deco-right { right: -50px; }
-  .elegant-header {
-    text-align: center;
-    margin: 20px auto 0px; padding: 0 20px;}
-  .subline {
-    margin: 10px auto 0;
+  .elegant-header { margin: 40px auto 30px; }
+  .refined-title { 
+    font-size: 2.2rem; 
+    letter-spacing: 3px; 
   }
+  .deco-left  { left: -50px; font-size: 0.9rem; }
+  .deco-right { right: -50px; font-size: 0.9rem; }
+  .subline { max-width: 280px; margin: 20px auto 0; }
 }
+
 @media (max-width: 480px) {
-  .refined-title { font-size: 1.7rem; }
-  .deco-left, .deco-right { display: none; } /* dispare pe telefon */
+  .refined-title { 
+    font-size: 1.8rem; 
+    letter-spacing: 2px; 
+  }
+  .deco-left, .deco-right { display: none; }
+  .subline { max-width: 220px; }
 }
 </style>
