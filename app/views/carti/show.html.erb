@@ -83,8 +83,10 @@
           </div>
         </div>
         <%= f.submit "Adaugă în coș", class: "btn btn-primary add-to-cart-btn" %>
+<% end %>
+      <% if @cart_has_items %>
+        <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-checkout" %>
       <% end %>
-      <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-checkout" %>
       <%= link_to "Continuă cumpărăturile", carti_index_path, class: "btn btn-secondary continue-shopping-btn" %>
     </div>
   </div>

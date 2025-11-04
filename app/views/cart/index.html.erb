@@ -117,12 +117,13 @@
   <% end %>
 
   <!-- Butoane pentru continuarea cumpărăturilor și finalizarea comenzii -->
+  <!-- Butoane pentru continuarea cumpărăturilor și finalizarea comenzii -->
+<div class="checkout-container">
   <% if @cart_items.any? %>
-    <div class="checkout-container">
-      <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-primary checkout-btn" %>
-      <%= link_to "Continuă cumpărăturile", carti_index_path, class: "btn btn-primary continue-shopping-btn" %>
-     </div>
+    <%= link_to "Finalizează comanda", new_order_path, class: "btn btn-primary checkout-btn" %>
   <% end %>
+  <%= link_to "Continuă cumpărăturile", carti_index_path, class: "btn btn-primary continue-shopping-btn" %>
+</div>
 </div>
 
 <style>

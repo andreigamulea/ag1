@@ -10,8 +10,11 @@ class CartiController < ApplicationController
   end
 
   def show
-    @product = Product
-      .select(:id, :name, :price, :description, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls)
-      .find(params[:id])
-  end
+  @product = Product
+    .select(:id, :name, :price, :description, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls)
+    .find(params[:id])
+  
+  # Verifică dacă există produse în coș
+  @cart_has_items = session[:cart].present? && session[:cart].any?
+end
 end
