@@ -1,9 +1,160 @@
-<!-- app/views/order_mailer/admin_new_order.html.erb -->
-<h2>Plată nouă pe Ayus.ro</h2>
-<p><strong>Comanda:</strong> #<%= @order.id %></p>
-<p><strong>Client:</strong> <%= [@order.first_name, @order.last_name].join(" ") %> (<%= @order.email %>)</p>
-<p><strong>Total plătit:</strong> <%= @order.total %> RON</p>
-<p><strong>Factură generată:</strong> <%= @order.invoice&.invoice_number || "în curs" %></p>
-<p><strong>Ora:</strong> <%= l Time.current, format: :long %></p>
-<hr>
-<p>Notificare automată – nu răspunde la acest email</p>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #8b0000 0%, #a01010 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .content {
+      background: #ffffff;
+      padding: 30px;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+    }
+    .section-title {
+      color: #8b0000;
+      font-weight: bold;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .order-details {
+      background: #f9f9f9;
+      padding: 15px;
+      border-left: 4px solid #8b0000;
+      margin: 15px 0;
+    }
+    .product-list {
+      margin: 10px 0;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #8b0000;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    .alert-badge {
+      display: inline-block;
+      background: #8b0000;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <div class="content">
+    <div style="text-align: center;">
+      <span class="alert-badge">🔔 PLATĂ NOUĂ</span>
+    </div>
+    
+    <p>Dragă Administrator,</p>
+    
+    <p>O nouă comandă a fost plasată și plătită cu succes pe <strong>Ayus.ro</strong>. Iată detaliile comenzii:</p>
+    
+    <div class="section-title">Detalii Comandă</div>
+    <div class="order-details">
+      <strong>Numărul Comenzii:</strong> #<%= @order.id %><br>
+      <strong>Data Comenzii:</strong> <%= l @order.created_at, format: :long %><br>
+      <strong>Status:</strong> <%= @order.status %><br>
+      <% if @order.invoice.present? %>
+        <strong>Factură generată:</strong> <%= @order.invoice.invoice_number %><br>
+      <% end %>
+      <strong>Produse Comandate:</strong>
+      <div class="product-list">
+        <% @order.order_items.each do |item| %>
+          • <%= item.quantity %> x <%= item.product_name %> - <%= number_to_currency(item.price, unit: "RON ", separator: ",", delimiter: ".") %> = <%= number_to_currency(item.total_price, unit: "RON ", separator: ",", delimiter: ".") %><br>
+        <% end %>
+      </div>
+      <strong>Total Plătit:</strong> <%= number_to_currency(@order.total, unit: "RON ", separator: ",", delimiter: ".") %>
+    </div>
+    
+    <div class="section-title">Date Client</div>
+    <div class="order-details">
+      <strong>Nume:</strong> <%= [@order.first_name, @order.last_name].join(" ") %><br>
+      <strong>Email:</strong> <%= @order.email %><br>
+      <strong>Telefon:</strong> <%= @order.phone %><br>
+      <% if @order.company_name.present? %>
+        <strong>Companie:</strong> <%= @order.company_name %><br>
+      <% end %>
+      <% if @order.cui.present? %>
+        <strong>CUI:</strong> <%= @order.cui %><br>
+      <% end %>
+      <% if @order.cnp.present? %>
+        <strong>CNP:</strong> <%= @order.cnp %><br>
+      <% end %>
+    </div>
+    
+    <div class="section-title">Adresă de Facturare</div>
+    <div class="order-details">
+      <%= @order.street %> <%= @order.street_number %><%= ", #{@order.block_details}" if @order.block_details.present? %><br>
+      <%= @order.city %>, <%= @order.county %>, <%= @order.postal_code %><br>
+      <%= @order.country %>
+    </div>
+    
+    <% 
+      shipping_different = @order.shipping_first_name.present? && (
+        @order.shipping_first_name != @order.first_name ||
+        @order.shipping_street != @order.street ||
+        @order.shipping_city != @order.city
+      )
+    %>
+    
+    <% if shipping_different %>
+      <div class="section-title">Adresă de Livrare (diferită)</div>
+      <div class="order-details">
+        <strong>Nume:</strong> <%= @order.shipping_first_name %> <%= @order.shipping_last_name %><br>
+        <% if @order.shipping_company_name.present? %>
+          <strong>Companie:</strong> <%= @order.shipping_company_name %><br>
+        <% end %>
+        <strong>Telefon:</strong> <%= @order.shipping_phone %><br>
+        <strong>Adresă:</strong><br>
+        <%= @order.shipping_street %> <%= @order.shipping_street_number %><%= ", #{@order.shipping_block_details}" if @order.shipping_block_details.present? %><br>
+        <%= @order.shipping_city %>, <%= @order.shipping_county %>, <%= @order.shipping_postal_code %><br>
+        <%= @order.shipping_country %>
+      </div>
+    <% else %>
+      <div class="section-title">Adresă de Livrare</div>
+      <div class="order-details" style="background: #f0fff4; border-left-color: #28a745;">
+        <em style="color: #28a745;">✓ Livrare la aceeași adresă cu facturarea</em>
+      </div>
+    <% end %>
+    
+    <% if @order.notes.present? %>
+      <div class="section-title">Observații Client</div>
+      <div class="order-details">
+        <%= @order.notes %>
+      </div>
+    <% end %>
+    
+    <div class="section-title">Acțiuni Necesare</div>
+    <p>Te rugăm să verifici comanda în panoul de administrare și să procesezi livrarea în cel mai scurt timp posibil.</p>
+    
+    <div class="footer">
+      <strong>Notificare automată – nu răspunde la acest email</strong><br>
+      Echipa Ayus.ro<br>
+      <a href="mailto:comenzi@ayus.ro" style="color: #8b0000;">comenzi@ayus.ro</a><br>
+      <a href="https://ayus.ro" style="color: #8b0000;">www.ayus.ro</a>
+    </div>
+  </div>
+</body>
+</html>

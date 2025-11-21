@@ -1,16 +1,106 @@
-<!-- app/views/order_mailer/payment_success.html.erb -->
-<p>Salut<%= @user&.name.present? ? " #{@user.name.split.first}" : "" %>,</p>
-
-<p>Plata pentru comanda ta de pe <strong>Ayus.ro</strong> a fost realizată cu succes!</p>
-
-<p><strong>Comanda:</strong> #<%= @order.id %><br>
-   <strong>Total plătit:</strong> <%= @order.total %> RON<br>
-   <strong>Data:</strong> <%= l Time.current, format: :long %></p>
-
-<p>Factura ta a fost generată automat și o poți descărca din contul tău în câteva minute.</p>
-
-<p>Mulțumim că ai ales Ayus.ro!</p>
-
-<br>
-<p>Echipa Ayus.ro<br>
-<a href="mailto:contact@ayus.ro">contact@ayus.ro</a></p>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #8b0000 0%, #a01010 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px 8px 0 0;
+    }
+    .content {
+      background: #ffffff;
+      padding: 30px;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+    }
+    .section-title {
+      color: #8b0000;
+      font-weight: bold;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .order-details {
+      background: #f9f9f9;
+      padding: 15px;
+      border-left: 4px solid #8b0000;
+      margin: 15px 0;
+    }
+    .product-list {
+      margin: 10px 0;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #8b0000;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    .button {
+      display: inline-block;
+      background: #8b0000;
+      color: white;
+      padding: 12px 25px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 style="margin: 0;">Ayus.ro</h1>
+  </div>
+  
+  <div class="content">
+    <p>Dragă <%= [@order.first_name, @order.last_name].join(" ") %>,</p>
+    
+    <p>Îți mulțumim că ai ales <strong>Ayus.ro</strong>! Suntem încântați să îți confirmăm că procesarea comenzii tale a fost finalizată cu succes. Iată detaliile comenzii tale:</p>
+    
+    <div class="section-title">Detalii Comandă</div>
+    <div class="order-details">
+      <strong>Numărul Comenzii:</strong> #<%= @order.id %><br>
+      <strong>Data Comenzii:</strong> <%= l @order.created_at, format: :long %><br>
+      <strong>Produse Comandate:</strong>
+      <div class="product-list">
+        <% @order.order_items.where.not(product_name: ["Transport", "Discount"]).each do |item| %>
+          • <%= item.quantity %> x <%= item.product_name %><br>
+        <% end %>
+      </div>
+      <strong>Total Achitat:</strong> <%= number_to_currency(@order.total, unit: "RON ", separator: ",", delimiter: ".") %>
+    </div>
+    
+    <% if @order.invoice.present? %>
+      <p>Factura asociată acestei plăți poate fi accesată pe pagina ta de comenzi.</p>
+    <% end %>
+    
+    <div class="section-title">Acces la Resurse</div>
+    <p>Pentru a accesa produsele sau resursele asociate acestora, fiind logat în cont, te rugăm să accesezi link-ul produsului/produselor pentru care ai realizat plata.</p>
+    
+    <div class="section-title">Asistență Tehnică</div>
+    <p>Dacă întâmpini dificultăți în accesarea produselor sau ai alte întrebări, te rugăm să nu eziti să ne contactezi la adresa de email: <a href="mailto:comenzi@ayus.ro" style="color: #8b0000;">comenzi@ayus.ro</a>. Echipa noastră de suport este aici pentru a te asista!</p>
+    
+    <p style="margin-top: 25px;">Îți mulțumim încă o dată pentru alegerea făcută și îți dorim să ai o experiență cât mai plăcută!</p>
+    
+    <div class="footer">
+      <strong>Cu respect,</strong><br>
+      Echipa Ayus.ro<br>
+      <a href="mailto:comenzi@ayus.ro" style="color: #8b0000;">comenzi@ayus.ro</a><br>
+      <a href="https://ayus.ro" style="color: #8b0000;">www.ayus.ro</a>
+    </div>
+  </div>
+</body>
+</html>
