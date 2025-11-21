@@ -6,7 +6,7 @@ Rails.application.configure do
   config.eager_load = false
   
   config.consider_all_requests_local = true
-  Rails.application.config.hosts << "fe83d1c5d3a8.ngrok-free.app"
+  Rails.application.config.hosts << "0dbb5b3048d0.ngrok-free.app"
   
 
   config.server_timing = true
@@ -33,13 +33,30 @@ Rails.application.configure do
   # === MAILER ===
   #config.action_mailer.raise_delivery_errors = false
   config.action_mailer.perform_caching = false
-  config.action_mailer.default_url_options = { host: "localhost:3000" }
+ config.action_mailer.default_url_options = { host: "localhost:3000" }
+
+config.action_mailer.delivery_method = :smtp
+config.action_mailer.smtp_settings = {
+  address: "mail.ayus.ro",
+  port: 465,
+  authentication: :plain,
+  user_name: "comenzi@ayus.ro",
+  password: Rails.application.credentials[:email_password],
+  domain: "ayus.ro",
+  ssl: true,                    # ← SSL explicit pe port 465
+  enable_starttls_auto: false,  # ← Dezactivează STARTTLS
+  open_timeout: 10,             # Timeout conexiune (secunde)
+  read_timeout: 10              # Timeout citire (secunde)
+}
+
+
+
 
   # Mail settings pentru development
   
-  config.action_mailer.delivery_method = :letter_opener
-  config.action_mailer.perform_deliveries = true
-  config.action_mailer.raise_delivery_errors = true
+  #config.action_mailer.delivery_method = :letter_opener
+  #config.action_mailer.perform_deliveries = true
+  #config.action_mailer.raise_delivery_errors = true
 
 
   # === DEPRECATIONS & LOGGING ===

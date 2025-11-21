@@ -1,12 +1,13 @@
-<!-- app/views/orders/_order_items.html.erb (versiune actualizată) -->
+<!-- app/views/orders/_order_items.html.erb -->
 <% if order_items.any? %>
-  <h3>Produse pentru Ordin #<%= order.id %></h3>
-  <table class="table table-bordered">
+  <h2>Produse Comandă #<%= order.id %></h2>
+  
+  <table>
     <thead>
       <tr>
-        <th>Nume Produs</th>
-        <th>Cantitate</th>
-        <th>Preț Unitate</th>
+        <th>Produs</th>
+        <th>Cant.</th>
+        <th>Preț</th>
         <th>Total</th>
       </tr>
     </thead>
@@ -15,19 +16,90 @@
         <tr>
           <td><%= item.product_name %></td>
           <td><%= item.quantity %></td>
-          <td><%= item.price %> RON</td> <!-- Schimbat din unit_price în price, deoarece unit_price e nil -->
-          <td><%= item.total_price %> RON</td>
+          <td><%= number_to_currency(item.price, unit: "RON ", separator: ",", delimiter: ".") %></td>
+          <td><%= number_to_currency(item.total_price, unit: "RON ", separator: ",", delimiter: ".") %></td>
         </tr>
       <% end %>
-    </tbody>
-    <tfoot>
       <tr>
-        <td colspan="3"><strong>Total Ordin:</strong></td>
-        <td><strong><%= order.total %> RON</strong></td>
+        <td colspan="3">Total Ordin:</td>
+        <td><%= number_to_currency(order.total, unit: "RON ", separator: ",", delimiter: ".") %></td>
       </tr>
-    </tfoot>
+    </tbody>
   </table>
-  <%= link_to 'Înapoi la lista de ordine', orders_path, class: 'btn btn-secondary' %>
+
+  <!-- Date de Facturare - TOATE câmpurile pe o linie -->
+  <div style="padding: 15px 20px; border-top: 1px solid #e9ecef; font-size: 12px; line-height: 1.8;">
+    <strong style="color: #8b0000;">📄 Facturare:</strong>
+    <%= order.first_name %> <%= order.last_name %>
+    <% if order.company_name.present? %>
+      • Companie: <%= order.company_name %>
+    <% end %>
+    <% if order.cui.present? %>
+      • CUI: <%= order.cui %>
+    <% end %>
+    <% if order.cnp.present? %>
+      • CNP: <%= order.cnp %>
+    <% end %>
+    • <%= order.email %>
+    • <%= order.phone %>
+    • <%= order.street %> <%= order.street_number %>
+    <% if order.block_details.present? %>
+      , <%= order.block_details %>
+    <% end %>
+    • <%= order.city %>, <%= order.county %>, <%= order.postal_code %>
+    • <%= order.country %>
+  </div>
+
+  <!-- Date de Livrare - cu indicator vizual -->
+  <% 
+    shipping_different = order.shipping_first_name.present? && (
+      order.shipping_first_name != order.first_name ||
+      order.shipping_street != order.street ||
+      order.shipping_city != order.city
+    )
+  %>
+
+  <% if shipping_different %>
+    <!-- Adrese DIFERITE - roșu -->
+    <div style="padding: 15px 20px; border-top: 1px solid #e9ecef; border-left: 4px solid #dc3545; background-color: #fff5f5; font-size: 12px; line-height: 1.8;">
+      <div style="margin-bottom: 8px;">
+        <span style="display: inline-block; background-color: #dc3545; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+          🔴 Adresă de livrare diferită
+        </span>
+      </div>
+      <strong style="color: #8b0000;">📦 Livrare:</strong>
+      <%= order.shipping_first_name %> <%= order.shipping_last_name %>
+      <% if order.shipping_company_name.present? %>
+        • Companie: <%= order.shipping_company_name %>
+      <% end %>
+      • <%= order.shipping_phone %>
+      • <%= order.shipping_street %> <%= order.shipping_street_number %>
+      <% if order.shipping_block_details.present? %>
+        , <%= order.shipping_block_details %>
+      <% end %>
+      • <%= order.shipping_city %>, <%= order.shipping_county %>, <%= order.shipping_postal_code %>
+      • <%= order.shipping_country %>
+    </div>
+  <% else %>
+    <!-- Adrese IDENTICE - verde -->
+    <div style="padding: 15px 20px; border-top: 1px solid #e9ecef; border-left: 4px solid #28a745; background-color: #f0fff4; font-size: 12px;">
+      <span style="display: inline-block; background-color: #28a745; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+        🟢 Adresă unică
+      </span>
+      <span style="color: #28a745; font-weight: 500; margin-left: 8px;">
+        Livrare și facturare la aceeași adresă
+      </span>
+    </div>
+  <% end %>
+
+  <div class="back-button-container">
+    <%= link_to 'Înapoi la Lista', orders_path, class: 'btn btn-secondary' %>
+  </div>
+
 <% else %>
+  <h2>Detalii Ordin</h2>
   <p>Nu există produse pentru acest ordin.</p>
+  <div class="back-button-container">
+    <%= link_to 'Înapoi la Lista', orders_path, class: 'btn btn-secondary' %>
+  </div>
 <% end %>

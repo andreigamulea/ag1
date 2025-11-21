@@ -23,7 +23,30 @@ class StripeWebhooksController < ActionController::Base
           order.update(status: 'paid')
           create_invoice_for_order(order)
           order.finalize_order! if order.respond_to?(:finalize_order!)
-          Rails.logger.debug "=== Webhook: Finalizat order #{order.id} cu factură generată ==="
+
+          # AICI TRIMITEM EMAIL-URILE – 100% ca la tine
+          user = order.user
+
+          # 1. Email către client + BCC către tine
+          if user
+            begin
+              OrderMailer.payment_success(order).deliver_now
+              Rails.logger.info "Email confirmare trimis clientului pentru comanda #{order.id}"
+            rescue => e
+              Rails.logger.error "Eroare email client comanda #{order.id}: #{e.message}"
+              puts "Eroare trimitere email client: #{e.message}"
+            end
+          end
+
+          # 2. Email doar către tine (opțional, dar util)
+          begin
+            OrderMailer.admin_new_order(order).deliver_now
+            Rails.logger.info "Email admin trimis pentru comanda #{order.id}"
+          rescue => e
+            Rails.logger.error "Eroare email admin comanda #{order.id}: #{e.message}"
+          end
+
+          Rails.logger.debug "=== Webhook: Finalizat order #{order.id} cu factură și notificări ==="
         end
       when 'payment_intent.payment_failed'
         payment_intent = event.data.object

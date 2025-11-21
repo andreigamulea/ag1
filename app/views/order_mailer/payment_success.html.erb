@@ -1,0 +1,16 @@
+<!-- app/views/order_mailer/payment_success.html.erb -->
+<p>Salut<%= @user&.name.present? ? " #{@user.name.split.first}" : "" %>,</p>
+
+<p>Plata pentru comanda ta de pe <strong>Ayus.ro</strong> a fost realizată cu succes!</p>
+
+<p><strong>Comanda:</strong> #<%= @order.id %><br>
+   <strong>Total plătit:</strong> <%= @order.total %> RON<br>
+   <strong>Data:</strong> <%= l Time.current, format: :long %></p>
+
+<p>Factura ta a fost generată automat și o poți descărca din contul tău în câteva minute.</p>
+
+<p>Mulțumim că ai ales Ayus.ro!</p>
+
+<br>
+<p>Echipa Ayus.ro<br>
+<a href="mailto:contact@ayus.ro">contact@ayus.ro</a></p>

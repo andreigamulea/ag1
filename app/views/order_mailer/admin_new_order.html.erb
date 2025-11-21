@@ -1,0 +1,9 @@
+<!-- app/views/order_mailer/admin_new_order.html.erb -->
+<h2>Plată nouă pe Ayus.ro</h2>
+<p><strong>Comanda:</strong> #<%= @order.id %></p>
+<p><strong>Client:</strong> <%= [@order.first_name, @order.last_name].join(" ") %> (<%= @order.email %>)</p>
+<p><strong>Total plătit:</strong> <%= @order.total %> RON</p>
+<p><strong>Factură generată:</strong> <%= @order.invoice&.invoice_number || "în curs" %></p>
+<p><strong>Ora:</strong> <%= l Time.current, format: :long %></p>
+<hr>
+<p>Notificare automată – nu răspunde la acest email</p>

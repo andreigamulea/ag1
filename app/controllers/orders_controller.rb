@@ -65,29 +65,40 @@ end
   end
 
 def create
-  @order = Order.new(order_params)
+  # Exclude parametrii UI care nu există în DB
+  permitted_params = order_params.except(:use_different_shipping, :use_different_billing)
+  
+  @order = Order.new(permitted_params)
   @order.user = current_user if user_signed_in?
   @order.status = "pending"
   @order.placed_at = Time.current
-  @order.use_different_shipping = params[:order][:use_different_shipping] == "1"
+  
+  # Citește flag-ul UI pentru adresa de facturare diferită
+  use_different_billing = params[:order][:use_different_billing] == "1"
 
   apply_coupon_if_present
 
   Rails.logger.debug "=== CREATE ORDER DEBUG ==="
   Rails.logger.debug "Coupon aplicat: #{@order.coupon.present? ? @order.coupon.code : 'NONE'}"
+  Rails.logger.debug "Use different billing: #{use_different_billing}"
 
-  # Copiem adresa de facturare în adresa de livrare dacă nu e bifată opțiunea
-  unless @order.use_different_shipping
-    @order.shipping_first_name    = @order.first_name
-    @order.shipping_last_name     = @order.last_name
-    @order.shipping_street        = @order.street
-    @order.shipping_street_number = @order.street_number
-    @order.shipping_block_details = @order.block_details
-    @order.shipping_city          = @order.city
-    @order.shipping_county        = @order.county
-    @order.shipping_country       = @order.country
-    @order.shipping_postal_code   = @order.postal_code
-    @order.shipping_phone         = @order.phone
+  # ✅ Dacă NU e bifată, copiază din SHIPPING în BILLING
+  unless use_different_billing
+    @order.first_name    = @order.shipping_first_name
+    @order.last_name     = @order.shipping_last_name
+    @order.company_name  = @order.shipping_company_name
+    @order.street        = @order.shipping_street
+    @order.street_number = @order.shipping_street_number
+    @order.block_details = @order.shipping_block_details
+    @order.city          = @order.shipping_city
+    @order.county        = @order.shipping_county
+    @order.country       = @order.shipping_country
+    @order.postal_code   = @order.shipping_postal_code
+    @order.phone         = @order.shipping_phone
+    
+    Rails.logger.debug "✅ Billing copiat din shipping: #{@order.first_name} #{@order.last_name}"
+  else
+    Rails.logger.debug "✅ Billing diferit - folosim datele din formular"
   end
 
   # Adaugă produsele comandate
@@ -181,6 +192,10 @@ def create
 
   # Primul save - salvează comanda cu valorile calculate
   if @order.save
+    Rails.logger.debug "=== ORDER SAVED ==="
+    Rails.logger.debug "Shipping: #{@order.shipping_first_name} #{@order.shipping_last_name}, #{@order.shipping_street}"
+    Rails.logger.debug "Billing: #{@order.first_name} #{@order.last_name}, #{@order.street}"
+    
     # ✅ DUPĂ save, recalculează din baza de date pentru a fi sigur
     @order.reload
     actual_total = @order.order_items.sum(&:total_price)
@@ -193,6 +208,9 @@ def create
     )
     
     Rails.logger.debug "=== AFTER SAVE: Total actualizat: #{actual_total}, VAT: #{actual_vat} ==="
+
+    # ... restul codului Stripe rămâne identic
+  
 
     # Calculează discount_value pentru Stripe (absolut, pozitiv)
     discount_item = @order.order_items.find_by(product_name: "Discount")
@@ -524,18 +542,24 @@ end
   end
 
   def order_params
-    params.require(:order).permit(
-      :first_name, :last_name, :company_name, :cui, :cnp,
-      :address, :city, :county, :postal_code, :country,
-      :street, :street_number, :block_details,
-      :phone, :email, :use_different_shipping,
-      :shipping_first_name, :shipping_last_name, :shipping_company_name,
-      :shipping_country, :shipping_county, :shipping_city,
-      :shipping_street, :shipping_street_number, :shipping_block_details,
-      :shipping_postal_code, :shipping_phone,
-      :notes
-    )
-  end
+  params.require(:order).permit(
+    # Billing (facturare)
+    :first_name, :last_name, :company_name, :cui, :cnp,
+    :phone, :email, :country, :county, :city, :postal_code,
+    :street, :street_number, :block_details,
+    
+    # Shipping (livrare)
+    :shipping_first_name, :shipping_last_name, :shipping_company_name,
+    :shipping_country, :shipping_county, :shipping_city,
+    :shipping_street, :shipping_street_number, :shipping_block_details,
+    :shipping_postal_code, :shipping_phone,
+    
+    # Flags UI (permit dar nu salvez în DB)
+    :use_different_billing,
+    
+    :notes
+  )
+end
 
   def set_order
     @order = Order.find(params[:id])
