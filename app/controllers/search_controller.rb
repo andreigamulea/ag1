@@ -8,9 +8,10 @@ class SearchController < ApplicationController
       return
     end
     
-    # Căutare în produse
+    # Căutare în produse - DOAR ACTIVE
     @products = Product
       .select(:id, :name, :price, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url)
+      .where(status: 'active')
       .where("name ILIKE ? OR description ILIKE ?", "%#{@query}%", "%#{@query}%")
       .page(params[:page]).per(20)
     
