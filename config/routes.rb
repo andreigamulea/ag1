@@ -1,5 +1,6 @@
 # config/routes.rb
 Rails.application.routes.draw do
+  get 'search/index'
 
   get 'newsletter', to: 'home#newsletter'
   post '/newsletter', to: 'home#newsletter'

@@ -191,7 +191,88 @@ window.addEventListener('resize', () => {
 </script>
 
 <style>
-/* Account Dropdown Styles */
+/* ============================================
+   HEADER PRINCIPAL
+   ============================================ */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 30px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  gap: 20px;
+}
+
+.navbar-brand {
+  flex-shrink: 0;
+}
+
+.navbar-brand .logo {
+  height: 60px;
+  width: auto;
+}
+
+/* ============================================
+   SEARCH BOX STYLES
+   ============================================ */
+
+/* Search box pentru desktop */
+.search-box {
+  flex: 1;
+  max-width: 500px;
+  margin: 0 20px;
+  display: flex;
+}
+
+.search-form {
+  width: 100%;
+  display: flex;
+  gap: 5px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #8b0000;
+  border-radius: 25px;
+  font-size: 14px;
+  font-family: 'Lora', serif;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #6d0000;
+  box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+}
+
+.search-button {
+  background-color: #8b0000;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-button:hover {
+  background-color: #6d0000;
+}
+
+/* Search box pentru mobil - ascuns pe desktop */
+.mobile-search {
+  display: none;
+}
+
+/* ============================================
+   ACCOUNT DROPDOWN STYLES
+   ============================================ */
 .account-menu {
   position: relative;
   display: inline-block;
@@ -200,26 +281,25 @@ window.addEventListener('resize', () => {
 .account-toggle {
   background: none;
   border: none;
-  color: #8b0000; /* Aceeași culoare ca celelalte link-uri */
-  font-size: 16px; /* Aceeași dimensiune ca celelalte link-uri */
-  font-family: 'Lora', serif; /* Același font ca celelalte link-uri */
-  font-weight: 700; /* Bold ca celelalte link-uri */
-  text-transform: uppercase; /* Uppercase ca celelalte link-uri */
-  letter-spacing: 0.5px; /* Spacing ca celelalte link-uri */
+  color: #8b0000;
+  font-size: 16px;
+  font-family: 'Lora', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
   padding: 0;
   display: inline-flex;
   align-items: center;
   gap: 3px;
   text-decoration: none;
-  transition: color 0.3s ease; /* Tranziție la hover */
+  transition: color 0.3s ease;
 }
 
 .account-toggle:hover {
-  color: #6d0000; /* Culoare mai închisă la hover */
+  color: #6d0000;
 }
 
-/* Săgeata dropdown */
 .account-toggle .arrow {
   font-size: 0.7em;
   margin-left: 2px;
@@ -286,8 +366,32 @@ window.addEventListener('resize', () => {
   margin: 0;
 }
 
-/* Mobile adjustments */
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+
 @media (max-width: 922px) {
+  /* Ascunde search box-ul de pe desktop */
+  .search-box {
+    display: none;
+  }
+  
+  /* Arată search box-ul în meniul mobil */
+  .mobile-search {
+    display: block;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(139, 0, 0, 0.2);
+  }
+  
+  .mobile-search .search-form {
+    width: 100%;
+  }
+  
+  .mobile-search .search-input {
+    width: 100%;
+  }
+  
+  /* Account menu adjustments */
   .account-menu {
     width: 100%;
   }
@@ -312,6 +416,22 @@ window.addEventListener('resize', () => {
     display: block;
   }
 }
+
+@media (max-width: 768px) {
+  header {
+    padding: 15px 20px;
+  }
+  
+  .search-input {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  .search-button {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+}
 </style>
 
 <div class="header_container">
@@ -320,6 +440,19 @@ window.addEventListener('resize', () => {
     <a href="/" class="navbar-brand">
       <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
     </a>
+
+    <!-- FORMULAR DE CĂUTARE - DESKTOP -->
+    <div class="search-box">
+      <%= form_with url: search_index_path, method: :get, local: true, class: "search-form" do %>
+        <%= text_field_tag :q, params[:q], 
+            placeholder: "Caută produse...", 
+            class: "search-input",
+            autocomplete: "off" %>
+        <%= button_tag type: "submit", class: "search-button" do %>
+          🔍
+        <% end %>
+      <% end %>
+    </div>
 
     <!-- Buton hamburger pentru mobil -->
     <button class="hamburger" id="hamburger" aria-label="Deschide meniul">&#9776;</button>
@@ -331,6 +464,19 @@ window.addEventListener('resize', () => {
         <a href="/">
           <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" />
         </a>
+      </div>
+
+      <!-- FORMULAR DE CĂUTARE - MOBIL -->
+      <div class="mobile-search">
+        <%= form_with url: search_index_path, method: :get, local: true, class: "search-form" do %>
+          <%= text_field_tag :q, params[:q], 
+              placeholder: "Caută produse...", 
+              class: "search-input",
+              autocomplete: "off" %>
+          <%= button_tag type: "submit", class: "search-button" do %>
+            🔍
+          <% end %>
+        <% end %>
       </div>
 
       <nav>
