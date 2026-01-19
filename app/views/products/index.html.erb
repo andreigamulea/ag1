@@ -4,7 +4,7 @@
   <div class="product-actions">
     <%= link_to "➕ Adaugă produs", new_product_path, class: "form-button" %>
   </div>
-
+Codul maxim existent: <%= @products.pluck(:sku).max_by { |sku| sku.sub('cod', '').to_i } %>
   <div class="table-wrapper">
 <table class="styled-table">
   <thead>
