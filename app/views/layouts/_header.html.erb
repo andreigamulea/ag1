@@ -228,14 +228,16 @@ header {
 .search-form {
   width: 100%;
   display: flex;
-  gap: 5px;
+  gap: 0px;
 }
 
 .search-input {
   flex: 1;
   padding: 10px 15px;
   border: 2px solid #8b0000;
-  border-radius: 25px;
+
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
   font-size: 14px;
   font-family: 'Lora', serif;
   outline: none;
@@ -251,7 +253,9 @@ header {
   background-color: #8b0000;
   color: white;
   border: none;
-  border-radius: 25px;
+ 
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
