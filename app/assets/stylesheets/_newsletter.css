@@ -91,6 +91,7 @@
 
 .form-action button:hover {
   background: var(--color-primary-dark);
+  box-shadow: var(--shadow-hover);
 }
 
 /* Thank you message */

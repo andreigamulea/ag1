@@ -297,6 +297,12 @@ nav button:focus {
   border-radius: var(--radius-md);
   position: relative;
   text-decoration: none;
+  transition: box-shadow var(--transition-fast);
+}
+
+.cart-button:hover {
+  box-shadow: var(--shadow-hover);
+  color: var(--color-white);
 }
 
 .cart-button .cart-count {
@@ -350,7 +356,7 @@ nav button:focus {
   .nav-wrapper {
     position: fixed;
     top: 0;
-    left: -100%;
+    left: -120%;
     width: 100%;
     height: auto;
     max-height: 100vh;

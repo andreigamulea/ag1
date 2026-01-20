@@ -227,7 +227,7 @@
   text-decoration: none;
   cursor: pointer;
   transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
-  width: 100%;
+  width: fit-content;
   text-align: center;
   display: inline-block;
   box-sizing: border-box;
@@ -242,7 +242,7 @@
 .product-view .btn-primary:hover {
   background: #e69500;
   border-color: #e69500;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-hover);
 }
 
 .product-view .btn-secondary {

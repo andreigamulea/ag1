@@ -157,18 +157,18 @@
 
 .product-card .image-wrapper {
   width: 100%;
-  height: 200px;
+  height: auto;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-gray-100);
+  background: white;
+  min-height: 210px;;
 }
 
 .product-card .image-wrapper img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
   transition: transform var(--transition-base);
 }
 

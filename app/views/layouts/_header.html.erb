@@ -194,14 +194,15 @@ window.addEventListener('resize', () => {
   <header>
     <!-- Sigla principală -->
     <a href="/" class="navbar-brand">
-      <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
+      <img src="<%= image_path('ayus-grup.webp') %>" alt="Ayus Cell Romania" class="logo" />
     </a>
 
     <!-- FORMULAR DE CĂUTARE - DESKTOP -->
     <div class="search-box">
       <%= form_with url: search_index_path, method: :get, local: true, class: "search-form" do %>
-        <%= text_field_tag :q, params[:q], 
-            placeholder: "Caută produse...", 
+        <%= text_field_tag :q, params[:q],
+            id: "q_desktop",
+            placeholder: "Caută produse...",
             class: "search-input",
             autocomplete: "off" %>
         <%= button_tag type: "submit", class: "search-button" do %>
@@ -218,15 +219,16 @@ window.addEventListener('resize', () => {
       <!-- Sigla duplicată pentru mobil -->
       <div class="mobile-logo">
         <a href="/">
-          <img src="<%= image_path('Ayus Grup.webp') %>" alt="Ayus Cell Romania" />
+          <img src="<%= image_path('ayus-grup.webp') %>" alt="Ayus Cell Romania" />
         </a>
       </div>
 
       <!-- FORMULAR DE CĂUTARE - MOBIL -->
       <div class="mobile-search">
         <%= form_with url: search_index_path, method: :get, local: true, class: "search-form" do %>
-          <%= text_field_tag :q, params[:q], 
-              placeholder: "Caută produse...", 
+          <%= text_field_tag :q, params[:q],
+              id: "q_mobile",
+              placeholder: "Caută produse...",
               class: "search-input",
               autocomplete: "off" %>
           <%= button_tag type: "submit", class: "search-button" do %>
@@ -275,11 +277,11 @@ window.addEventListener('resize', () => {
         <% end %>
 
         <!-- Coșul de cumpărături -->
-        <%= link_to cart_index_path, style: "display: inline-block; background-color: #ffa500; color: white; padding: 10px 15px; border-radius: 6px; position: relative;" do %>
-          <span style="position: absolute; top: -5px; left: 5px; background-color: white; color: #ffa500; font-size: 12px; padding: 2px 5px; border-radius: 50%;">
+        <%= link_to cart_index_path, class: "cart-button" do %>
+          <span class="cart-count">
             <%= @cart_items_count || 0 %>
           </span>
-          🛒 
+          🛒
           <%= number_to_currency(@cart_total || 0, unit: "lei", format: "%n %u") %>
         <% end %>
       </nav>

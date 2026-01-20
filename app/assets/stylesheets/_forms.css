@@ -332,6 +332,7 @@ select.form-control {
 
 .add-to-cart-btn:hover:not(:disabled) {
   background-color: var(--color-primary);
+  box-shadow: var(--shadow-hover);
 }
 
 .add-to-cart-btn:disabled {
@@ -770,5 +771,6 @@ select.form-control {
   .add-to-cart-btn {
     width: 100%;
     padding: var(--spacing-sm);
+    margin-top:10px;
   }
 }
