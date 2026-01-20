@@ -1,0 +1,78 @@
+/* ===================================
+   TABLES
+   Stiluri pentru tabele
+   =================================== */
+
+/* Table wrapper pentru overflow */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+/* Styled table */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-lg);
+  font-size: var(--font-size-md);
+  text-align: left;
+}
+
+.styled-table thead {
+  background: var(--color-primary);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-gray-300);
+  vertical-align: middle;
+}
+
+.styled-table tbody tr:hover {
+  background: var(--color-accent);
+  color: var(--color-primary);
+  transition: var(--transition-base);
+}
+
+/* Alternative hover - mai subtil */
+.styled-table.subtle tbody tr:hover {
+  background: #fef3dc;
+}
+
+/* ===================================
+   RESPONSIVE
+   =================================== */
+
+@media (max-width: 600px) {
+  .styled-table {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ===================================
+   TABLE VARIANTS
+   =================================== */
+
+/* Bordered table */
+.styled-table.bordered th,
+.styled-table.bordered td {
+  border: 1px solid var(--color-gray-300);
+}
+
+/* Striped table */
+.styled-table.striped tbody tr:nth-child(even) {
+  background-color: var(--color-gray-100);
+}
+
+.styled-table.striped tbody tr:hover {
+  background: var(--color-accent);
+}
+
+/* Compact table */
+.styled-table.compact th,
+.styled-table.compact td {
+  padding: 8px;
+  font-size: var(--font-size-base);
+}

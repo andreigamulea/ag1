@@ -1,0 +1,97 @@
+/* ===================================
+   LAYOUT
+   Containers, grids, flex layouts
+   =================================== */
+
+/* Main container */
+.container {
+  max-width: 100% !important;
+  padding: 0;
+  margin-top: 0 !important;
+}
+
+/* Content container */
+.container_content {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  padding-top: 0px;
+  background: var(--color-white);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-lg);
+}
+
+/* Flex container - pentru articole + resurse */
+.flex-container {
+  display: flex;
+  gap: var(--spacing-lg);
+  justify-content: space-between;
+  padding-top: var(--spacing-lg);
+}
+
+/* Row/Col system */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.col {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Grid layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+}
+
+/* Table wrapper for overflow */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .flex-container {
+    flex-direction: column;
+    margin-top: var(--spacing-lg);
+    margin-bottom: -20px;
+  }
+
+  .container {
+    padding: 0;
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}

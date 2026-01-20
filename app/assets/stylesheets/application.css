@@ -1,33 +1,38 @@
 @charset "UTF-8";
 
 /*
- *= require base1
- *= require custom
- *= require_tree .
+ * Application Stylesheet Manifest
+ * ================================
+ * This file imports all CSS modules in the correct order.
+ *
+ * Structure:
+ * 1. Variables (colors, fonts, spacing)
+ * 2. Base styles (reset, typography)
+ * 3. Layout (containers, grids)
+ * 4. Components (header, footer, buttons, cards, tables, forms)
+ * 5. Utilities (animations, swiper)
+ * 6. Page-specific styles
+ *
+ *= require _variables
+ *= require _base
+ *= require _layout
+ *= require _header
+ *= require _footer
+ *= require _buttons
+ *= require _cards
+ *= require _tables
+ *= require _forms
+ *= require _animations
+ *= require _swiper
+ *= require _newsletter
+ *= require pages/_products
+ *= require pages/_product-detail
+ *= require pages/_cart
+ *= require pages/_checkout
+ *= require pages/_orders
+ *= require pages/_thank-you
+ *= require pages/_search
+ *= require pages/_auth
+ *= require pages/_admin
  *= require_self
-*/
-.existing-images {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.image-preview {
-  position: relative;
-  display: inline-block;
-}
-
-.img-thumbnail {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border: 1px solid #ccc;
-}
-
-.btn-danger {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  padding: 2px 8px;
-  font-size: 12px;
-}
+ */

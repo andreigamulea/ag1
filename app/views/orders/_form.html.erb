@@ -1,32 +1,3 @@
-<style>
-.dropdown-menu {
-  border: 1px solid #ccc;
-  background-color: white;
-  max-height: 200px;
-  overflow-y: auto;
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-}
-.dropdown-item {
-  padding: 8px;
-  cursor: pointer;
-}
-.dropdown-item:hover {
-  background-color: #f0f0f0;
-}
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 10px;
-}
-.col {
-  flex: 1;
-  min-width: 200px;
-}
-</style>
-
 <%= form_with model: @order, url: orders_path, method: :post, local: true do |f| %>
   <% if @order.errors.any? %>
     <div class="alert alert-danger">

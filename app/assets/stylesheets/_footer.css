@@ -1,0 +1,230 @@
+/* ===================================
+   FOOTER STYLES
+   =================================== */
+
+footer {
+  width: 100%;
+  background: var(--color-white);
+  color: var(--color-gray-800);
+  font-size: var(--font-size-base);
+  margin-top: 0;
+  padding: var(--spacing-3xl) 0 var(--spacing-lg) 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+.footer-content {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+/* ===================================
+   FOOTER ROW - 5 COLUMNS
+   =================================== */
+
+.footer-row2 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-2xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column li {
+  margin-bottom: var(--spacing-md);
+  line-height: 1;
+}
+
+.footer-column h2 {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===================================
+   HR LINE STYLES
+   =================================== */
+
+.footer-divider {
+  width: 61.8%;
+  margin: var(--spacing-md) auto;
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-gray-800), transparent);
+}
+
+.footer-column a {
+  color: var(--color-black);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  display: inline-block;
+}
+
+.footer-column a:hover {
+  color: var(--color-primary);
+}
+
+/* Stilizare buton logout */
+.footer-column button#logout_link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-gray-700);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: color var(--transition-fast);
+  display: inline-block;
+}
+
+.footer-column button#logout_link:hover {
+  color: var(--color-primary);
+}
+
+.footer-column form {
+  display: inline;
+  margin: 0;
+}
+
+/* ===================================
+   FOOTER COLUMN 5 - IMAGES
+   =================================== */
+
+.footer-column-images {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.footer-column-images h2 {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-column-images a {
+  display: block;
+}
+
+.footer-column-images img {
+  max-width: 100%;
+  height: auto;
+  transition: opacity var(--transition-fast);
+}
+
+.footer-column-images a:hover img {
+  opacity: 1;
+}
+
+/* ===================================
+   FOOTER COPYRIGHT
+   =================================== */
+
+.footer-copyright {
+  text-align: center;
+  padding-top: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  border-top: 1px solid #e0e0e0;
+  font-size: 13px;
+  color: var(--color-black);
+}
+
+/* ===================================
+   RESPONSIVE DESIGN - 5 → 2 → 1 COLUMNS
+   =================================== */
+
+/* Tablets și mai jos - TRECE DIRECT LA 2 COLOANE */
+@media (max-width: 1100px) {
+  .footer-row2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xl);
+  }
+
+  .footer-column-images {
+    grid-column: span 2;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+}
+
+/* Mobile - 1 COLOANĂ */
+@media (max-width: 768px) {
+  footer {
+    padding: var(--spacing-2xl) 0 var(--spacing-lg) 0;
+  }
+
+  .footer-row2 {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .footer-column {
+    text-align: center;
+  }
+
+  .footer-column h2 {
+    font-size: var(--font-size-md);
+  }
+
+  .footer-column li {
+    font-size: 13px;
+  }
+
+  .footer-column-images {
+    grid-column: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .footer-divider {
+    width: 50%;
+    margin: var(--spacing-sm) auto;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .footer-content {
+    padding: 0 var(--spacing-md);
+  }
+
+  .footer-column-images img {
+    max-width: 170px;
+  }
+
+  .footer-divider {
+    width: 40%;
+    margin: 8px auto;
+  }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+
+.footer-column a:focus-visible,
+.footer-column button:focus-visible,
+.footer-column-images a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

@@ -1,0 +1,298 @@
+/* ===================================
+   THANK YOU PAGE (orders/thank_you)
+   =================================== */
+
+.thank-you-wrapper {
+  max-width: 1000px;
+  margin: var(--spacing-2xl) auto;
+  padding: var(--spacing-3xl);
+  background: var(--color-white);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* ===================================
+   SUCCESS HEADER
+   =================================== */
+
+.success-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  border: 1px solid #e0d5c7;
+}
+
+.success-header h1 {
+  font-size: var(--font-size-3xl);
+  margin: 0 0 var(--spacing-sm) 0;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.success-header .order-number {
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-600);
+}
+
+.success-icon {
+  font-size: 25px;
+  margin-bottom: 0px;
+  opacity: 0.8;
+}
+
+/* ===================================
+   INFO SECTIONS
+   =================================== */
+
+.info-section {
+  background: var(--color-white);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid #e0d5c7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.info-section h2 {
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  margin: 0 0 var(--spacing-md) 0;
+  font-weight: 600;
+  border-bottom: 1px solid #e0d5c7;
+  padding-bottom: var(--spacing-sm);
+}
+
+.info-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-section li {
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-md);
+  line-height: 1;
+}
+
+.info-section li strong {
+  color: var(--color-primary);
+  display: inline-block;
+  min-width: 120px;
+}
+
+/* ===================================
+   PRODUCTS TABLE
+   =================================== */
+
+.products-section {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.products-section h2 {
+  color: var(--color-primary);
+  font-size: 20px;
+  margin: 0 0 var(--spacing-lg) 0;
+  font-weight: 600;
+  text-align: center;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid #e0d5c7;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-lg) 0;
+  font-size: var(--font-size-md);
+}
+
+.products-table thead {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.products-table th {
+  padding: var(--spacing-base);
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+.products-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-gray-300);
+}
+
+.products-table tbody tr:hover {
+  background: var(--color-background);
+  transition: var(--transition-fast);
+}
+
+.products-table tbody tr:last-child {
+  font-weight: bold;
+  background: #fff5f5;
+}
+
+.products-table .discount-row {
+  color: var(--color-success);
+  font-weight: bold;
+}
+
+.products-table .transport-free {
+  color: var(--color-success);
+  font-weight: bold;
+}
+
+/* ===================================
+   PAYMENT SUMMARY
+   =================================== */
+
+.payment-summary {
+  background: var(--color-white);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid #e0d5c7;
+  margin-bottom: var(--spacing-xl);
+}
+
+.payment-summary h2 {
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  margin: 0 0 var(--spacing-md) 0;
+  font-weight: 600;
+  border-bottom: 1px solid #e0d5c7;
+  padding-bottom: var(--spacing-sm);
+}
+
+.payment-summary p {
+  margin: var(--spacing-xs) 0;
+  font-size: var(--font-size-md);
+}
+
+.payment-summary strong {
+  color: var(--color-primary);
+}
+
+/* ===================================
+   CONFIRMATION MESSAGE
+   =================================== */
+
+.confirmation-message {
+  background: var(--color-success-light);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--color-success);
+  margin-top: var(--spacing-xl);
+}
+
+.confirmation-message p {
+  margin: var(--spacing-xs) 0;
+  font-size: var(--font-size-md);
+  color: #155724;
+}
+
+.confirmation-message strong {
+  color: #155724;
+}
+
+/* ===================================
+   BUTTONS
+   =================================== */
+
+.thank-you-wrapper .btn {
+  display: inline-block;
+  padding: 12px var(--spacing-xl);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  text-align: center;
+  cursor: pointer;
+  border: none;
+}
+
+.thank-you-wrapper .btn-primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.thank-you-wrapper .btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.thank-you-wrapper .btn-secondary {
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  border: 1px solid var(--color-gray-300);
+}
+
+.thank-you-wrapper .btn-secondary:hover {
+  background: var(--color-gray-200);
+}
+
+.thank-you-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+/* ===================================
+   RESPONSIVE
+   =================================== */
+
+@media (max-width: 768px) {
+  .thank-you-wrapper {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-md);
+  }
+
+  .success-header {
+    padding: var(--spacing-lg);
+  }
+
+  .success-header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .info-section {
+    padding: var(--spacing-md);
+  }
+
+  .products-table {
+    font-size: var(--font-size-base);
+  }
+
+  .products-table th,
+  .products-table td {
+    padding: var(--spacing-sm);
+  }
+
+  .thank-you-buttons {
+    flex-direction: column;
+  }
+
+  .thank-you-wrapper .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .thank-you-wrapper {
+    padding: var(--spacing-md);
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .success-header h1 {
+    font-size: 20px;
+  }
+
+  .products-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

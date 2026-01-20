@@ -1,0 +1,33 @@
+/* ===================================
+   SEARCH RESULTS PAGE (search/index)
+   =================================== */
+
+/* Search results info */
+.search-results-info {
+  text-align: center;
+  margin: var(--spacing-lg) 0;
+  font-size: 1.1em;
+}
+
+.search-results-info strong {
+  color: var(--color-primary);
+}
+
+/* No results message */
+.no-results {
+  text-align: center;
+  color: #b51e1e;
+  font-size: 1.2em;
+  margin: var(--spacing-3xl) 0;
+}
+
+/* Search prompt */
+.search-prompt {
+  text-align: center;
+  font-size: 1.1em;
+  margin: var(--spacing-3xl) 0;
+  color: var(--color-gray-600);
+}
+
+/* Note: Search page reuses product grid styles from _products.css */
+/* The elegant header styles are also in _products.css */

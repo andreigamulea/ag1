@@ -1,0 +1,542 @@
+/* ===================================
+   HEADER STYLES
+   Header principal, search, account dropdown
+   =================================== */
+
+/* Header container */
+.header_container {
+  width: 100%;
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: var(--z-sticky);
+  padding: 0;
+  margin: 0;
+}
+
+/* Header principal */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-2xl);
+  background-color: var(--color-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: var(--spacing-lg);
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  position: relative;
+}
+
+/* Pentru conținut centrat pe ecrane mari */
+@media (min-width: 1320px) {
+  header {
+    padding-left: calc((100% - 1280px) / 2 + 20px);
+    padding-right: calc((100% - 1280px) / 2 + 20px);
+  }
+}
+
+/* ============================================
+   LOGO
+   ============================================ */
+
+.navbar-brand {
+  flex-shrink: 0;
+}
+
+.navbar-brand img,
+.navbar-brand .logo {
+  max-height: 100px;
+  height: 60px;
+  width: auto;
+}
+
+/* Mobile logo - ascuns pe desktop */
+.mobile-logo {
+  display: none;
+}
+
+/* ============================================
+   SEARCH BOX
+   ============================================ */
+
+.search-box {
+  flex: 1;
+  max-width: 500px;
+  margin: 0 var(--spacing-lg);
+  display: flex;
+}
+
+.search-form {
+  width: 100%;
+  display: flex;
+  gap: 0px;
+}
+
+.search-input {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--color-primary);
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  font-size: var(--font-size-base);
+  font-family: var(--font-primary);
+  outline: none;
+  transition: all var(--transition-base);
+}
+
+.search-input:focus {
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+}
+
+.search-button {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Search box pentru mobil - ascuns pe desktop */
+.mobile-search {
+  display: none;
+}
+
+/* ============================================
+   NAVIGATION - DESKTOP
+   ============================================ */
+
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+nav a,
+nav .link-button {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: var(--font-size-base);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 2px solid transparent;
+  transition: color var(--transition-base), border-color var(--transition-base);
+  background: none;
+  cursor: pointer;
+}
+
+nav a:hover,
+nav .link-button:hover {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+/* ============================================
+   HAMBURGER MENU BUTTONS
+   ============================================ */
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  z-index: var(--z-modal-backdrop);
+}
+
+.close-menu {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 40px;
+  color: var(--color-primary);
+  cursor: pointer;
+  position: absolute;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  padding: var(--spacing-sm);
+  line-height: 1;
+  z-index: var(--z-modal);
+}
+
+/* Focus styles pentru accesibilitate */
+.hamburger:focus,
+.close-menu:focus,
+nav a:focus,
+nav button:focus {
+  outline: none;
+}
+
+/* ============================================
+   ACCOUNT DROPDOWN
+   ============================================ */
+
+.account-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.account-toggle {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+.account-toggle:hover {
+  color: var(--color-primary-dark);
+}
+
+.account-toggle .arrow {
+  font-size: 0.7em;
+  margin-left: 2px;
+}
+
+.account-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+  z-index: var(--z-fixed);
+  margin-top: 8px;
+}
+
+.account-dropdown.show {
+  display: block;
+}
+
+.account-dropdown a,
+.account-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 12px var(--spacing-lg);
+  color: var(--color-gray-800);
+  text-decoration: none;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+  transition: background var(--transition-fast);
+}
+
+.account-dropdown a:hover,
+.account-dropdown button:hover {
+  background: var(--color-gray-100);
+  color: var(--color-primary);
+}
+
+.account-dropdown .divider {
+  height: 1px;
+  background: var(--color-gray-200);
+  margin: var(--spacing-xs) 0;
+}
+
+.account-dropdown .user-info {
+  padding: 12px var(--spacing-lg);
+  border-bottom: 1px solid var(--color-gray-200);
+  font-size: 13px;
+  color: var(--color-gray-600);
+  font-weight: 500;
+}
+
+.account-dropdown form {
+  margin: 0;
+}
+
+/* ============================================
+   CART BUTTON
+   ============================================ */
+
+.cart-button {
+  display: inline-block;
+  background-color: #ffa500;
+  color: var(--color-white);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  position: relative;
+  text-decoration: none;
+}
+
+.cart-button .cart-count {
+  position: absolute;
+  top: -5px;
+  left: 5px;
+  background-color: var(--color-white);
+  color: #ffa500;
+  font-size: var(--font-size-sm);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--radius-full);
+}
+
+/* ============================================
+   NAVIGATION - MOBILE
+   ============================================ */
+
+@media (max-width: 922px) {
+  /* Hamburger vizibil pe mobil */
+  .hamburger {
+    display: block;
+    position: relative;
+  }
+
+  /* Ascunde hamburger când meniul e deschis */
+  body.menu-open .hamburger {
+    display: none;
+  }
+
+  /* Search box ascuns pe desktop */
+  .search-box {
+    display: none;
+  }
+
+  /* Arată search box-ul în meniul mobil */
+  .mobile-search {
+    display: block;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid rgba(139, 0, 0, 0.2);
+  }
+
+  .mobile-search .search-form {
+    width: 100%;
+  }
+
+  .mobile-search .search-input {
+    width: 100%;
+  }
+
+  /* Nav wrapper - meniu cu înălțime automată */
+  .nav-wrapper {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: auto;
+    max-height: 100vh;
+    background: var(--color-white);
+    z-index: var(--z-fixed);
+    flex-direction: column;
+    padding: var(--spacing-lg);
+    box-shadow: 5px 0 20px rgba(0, 0, 0, 0.3);
+    transition: left var(--transition-slow);
+    overflow-y: auto;
+    display: flex;
+  }
+
+  /* Meniu deschis - slide în viziune */
+  .nav-wrapper.open {
+    left: 0;
+  }
+
+  /* X vizibil când meniul e deschis */
+  .nav-wrapper.open .close-menu {
+    display: block;
+  }
+
+  /* Mobile logo vizibil */
+  .mobile-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    width: 100%;
+  }
+
+  .mobile-logo img {
+    max-width: 120px;
+    height: auto;
+  }
+
+  /* Navigație în meniu */
+  nav {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    background-color: #5e085f;
+    padding: 0;
+    margin: 0 0 var(--spacing-lg) 0;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    gap: 0px;
+  }
+
+  /* Toate elementele din nav pe mobil */
+  nav a,
+  nav .link-button,
+  nav form button {
+    width: 100%;
+    font-size: var(--font-size-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: left;
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-decoration: none;
+    display: block;
+    transition: background-color var(--transition-fast);
+    background: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: var(--font-primary);
+    color: white !important;
+  }
+
+  nav a:last-child,
+  nav form:last-child {
+    border-bottom: none;
+  }
+
+  nav form {
+    margin: 0;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  nav a:hover,
+  nav .link-button:hover,
+  nav form button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Account menu adjustments */
+  .account-menu {
+    width: 100%;
+  }
+
+  .account-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    padding: var(--spacing-xs) 0;
+  }
+
+  .account-dropdown {
+    position: static;
+    box-shadow: none;
+    border: none;
+    border-left: 3px solid var(--color-primary);
+    margin-left: var(--spacing-md);
+    margin-top: var(--spacing-xs);
+    background: rgba(139, 0, 0, 0.05);
+  }
+
+  .account-dropdown.show {
+    display: block;
+  }
+
+  /* Asigură clicabilitate */
+  .hamburger,
+  .close-menu,
+  nav a,
+  nav button,
+  .link-button {
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Landscape pe mobil */
+@media (max-width: 922px) and (orientation: landscape) {
+  .nav-wrapper {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .mobile-logo {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .mobile-logo img {
+    max-width: 80px;
+  }
+
+  nav {
+    margin-bottom: var(--spacing-md);
+  }
+
+  nav a,
+  nav .link-button,
+  nav form button {
+    padding: 12px var(--spacing-lg);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Ecrane foarte mici */
+@media (max-width: 375px) {
+  .mobile-logo img {
+    max-width: 100px;
+  }
+
+  nav a,
+  nav .link-button,
+  nav form button {
+    font-size: var(--font-size-md);
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .search-input {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .search-button {
+    padding: 8px var(--spacing-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-wrapper,
+  nav a,
+  nav .link-button,
+  nav form button {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,94 @@
+/* ===================================
+   CSS VARIABLES
+   Culori, fonturi, spacing reutilizabile
+   =================================== */
+
+:root {
+  /* Culori principale */
+  --color-primary: #8b0000;
+  --color-primary-dark: #6d0000;
+  --color-primary-light: #a01010;
+  --color-secondary: #bc2c2c;
+  --color-accent: #fbc02d;
+  --color-accent-hover: #e0a800;
+
+  /* Culori status */
+  --color-success: #28a745;
+  --color-success-light: #d4edda;
+  --color-danger: #dc3545;
+  --color-danger-light: #f8d7da;
+  --color-warning: #ffc107;
+  --color-warning-light: #fff3cd;
+  --color-info: #17a2b8;
+  --color-info-light: #d1ecf1;
+
+  /* Culori neutre */
+  --color-white: #ffffff;
+  --color-background: #fdfaf5;
+  --color-background-light: #fff8f8;
+  --color-background-alt: #f9f9f9;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e9ecef;
+  --color-gray-300: #ddd;
+  --color-gray-400: #ccc;
+  --color-gray-500: #999;
+  --color-gray-600: #666;
+  --color-gray-700: #555;
+  --color-gray-800: #333;
+  --color-black: #000;
+
+  /* Fonturi */
+  --font-primary: 'Lora', serif;
+  --font-secondary: 'Roboto', sans-serif;
+  --font-system: Arial, sans-serif;
+
+  /* Font sizes */
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 32px;
+
+  /* Spacing */
+  --spacing-xs: 5px;
+  --spacing-sm: 10px;
+  --spacing-md: 15px;
+  --spacing-lg: 20px;
+  --spacing-xl: 25px;
+  --spacing-2xl: 30px;
+  --spacing-3xl: 40px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0px 0px 15px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 4px 4px 15px rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease-in-out;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-index layers */
+  --z-dropdown: 100;
+  --z-sticky: 500;
+  --z-fixed: 1000;
+  --z-modal-backdrop: 1001;
+  --z-modal: 1002;
+
+  /* Container widths */
+  --container-max: 1280px;
+  --container-sm: 600px;
+  --container-md: 800px;
+}

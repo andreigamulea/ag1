@@ -1,0 +1,774 @@
+/* ===================================
+   FORMS
+   Input, select, textarea styling
+   =================================== */
+
+/* ===================================
+   FORM CONTROLS
+   =================================== */
+
+.form-control {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-gray-400);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-family: var(--font-primary);
+  transition: all var(--transition-fast);
+  background: var(--color-white);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+}
+
+.form-control::placeholder {
+  color: var(--color-gray-500);
+}
+
+/* Textarea */
+textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Select */
+select.form-control {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 35px;
+}
+
+/* ===================================
+   FORM FIELDS
+   =================================== */
+
+.form-field {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  color: var(--color-gray-800);
+  font-size: var(--font-size-base);
+}
+
+.form-field .required {
+  color: var(--color-danger);
+}
+
+/* ===================================
+   FORM ROWS
+   =================================== */
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===================================
+   FORM CONTAINER
+   =================================== */
+
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-2xl);
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===================================
+   FORM SECTIONS
+   =================================== */
+
+.form-section {
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin: calc(-1 * var(--spacing-lg));
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+}
+
+.section-header.primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.section-header.success {
+  background: var(--color-success);
+  color: var(--color-white);
+}
+
+.section-header.info {
+  background: var(--color-info);
+  color: var(--color-white);
+}
+
+.section-header.warning {
+  background: var(--color-warning);
+  color: var(--color-gray-800);
+}
+
+/* ===================================
+   FORM ERRORS
+   =================================== */
+
+.form-errors {
+  background: var(--color-danger-light);
+  color: #721c24;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid #f5c6cb;
+}
+
+.form-errors ul {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+}
+
+.form-errors li {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Field errors */
+.field-error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.form-control.error {
+  border-color: var(--color-danger);
+}
+
+/* ===================================
+   CHECKBOX & RADIO
+   =================================== */
+
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.form-check label {
+  cursor: pointer;
+  font-weight: normal;
+}
+
+/* ===================================
+   QUANTITY INPUT
+   =================================== */
+
+.quantity-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-alt);
+}
+
+.quantity-input {
+  width: 50px;
+  padding: 6px;
+  border: none;
+  text-align: center;
+  font-size: 13px;
+  background: transparent;
+}
+
+.quantity-btn {
+  background: #ffa500;
+  color: var(--color-white);
+  border: none;
+  padding: 6px var(--spacing-sm);
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.quantity-btn:hover {
+  background: #e69500;
+}
+
+.qty-input {
+  width: 40px;
+  padding: 2px;
+  text-align: center;
+  border: 1px solid var(--color-gray-400);
+  border-radius: var(--radius-sm);
+  height: 38px;
+}
+
+/* ===================================
+   DROPDOWN MENU
+   =================================== */
+
+.dropdown-menu {
+  border: 1px solid var(--color-gray-400);
+  background-color: var(--color-white);
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  z-index: var(--z-dropdown);
+  width: 100%;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+.dropdown-item {
+  padding: 8px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-gray-100);
+}
+
+/* ===================================
+   IMAGE PREVIEW (Admin forms)
+   =================================== */
+
+.existing-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.image-preview {
+  position: relative;
+  display: inline-block;
+}
+
+.img-thumbnail {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border: 1px solid var(--color-gray-400);
+  border-radius: var(--radius-sm);
+}
+
+/* ===================================
+   ADD-TO-CART FORM
+   =================================== */
+
+.add-to-cart-form {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  align-items: center;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-gray-200);
+  flex-shrink: 0;
+}
+
+.add-to-cart-btn {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+
+.add-to-cart-btn:hover:not(:disabled) {
+  background-color: var(--color-primary);
+}
+
+.add-to-cart-btn:disabled {
+  background-color: var(--color-gray-400);
+  cursor: not-allowed;
+}
+
+/* ===================================
+   ADMIN FORM ROWS
+   =================================== */
+
+.form-row {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-row.cols-1 { grid-template-columns: 1fr; }
+.form-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.form-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.form-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* ===================================
+   ADMIN FORM FIELD
+   =================================== */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-800);
+}
+
+.form-field input[type="text"],
+.form-field input[type="number"],
+.form-field input[type="date"],
+.form-field input[type="email"],
+.form-field input[type="password"],
+.form-field textarea,
+.form-field select {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+/* ===================================
+   SECTION BODY
+   =================================== */
+
+.section-body {
+  padding: var(--spacing-lg);
+}
+
+/* ===================================
+   SECTION HEADER VARIANTS
+   =================================== */
+
+.section-header.secondary {
+  background: #8c8c8c;
+  color: var(--color-white);
+}
+
+.section-header.dark {
+  background: #262626;
+  color: var(--color-white);
+}
+
+.section-header.danger {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+/* ===================================
+   INPUT GROUP
+   =================================== */
+
+.input-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.input-group input {
+  flex: 1;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.input-group-text {
+  padding: 8px 12px;
+  background: #fafafa;
+  border: 1px solid #d9d9d9;
+  border-left: none;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 13px;
+  color: var(--color-gray-600);
+}
+
+/* ===================================
+   CHECKBOX FIELD
+   =================================== */
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.checkbox-field input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-field label {
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* ===================================
+   ALERT DANGER
+   =================================== */
+
+.alert-danger {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: var(--radius-sm);
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.alert-danger h4 {
+  color: var(--color-danger);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.alert-danger ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-gray-600);
+}
+
+/* ===================================
+   FORM ACTIONS
+   =================================== */
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+/* ===================================
+   ADMIN FORM BUTTONS
+   =================================== */
+
+.btn {
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  background: var(--color-white);
+  color: var(--color-gray-600);
+  border: 1px solid #d9d9d9;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+.btn-danger:hover {
+  background: #d9191c;
+}
+
+.btn-info {
+  background: var(--color-info);
+  color: var(--color-white);
+}
+
+.btn-info:hover {
+  background: #0da5a5;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: var(--font-size-sm);
+}
+
+/* ===================================
+   FORM GROUP (Admin forms)
+   =================================== */
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.form-control.readonly {
+  background-color: #f3f3f3;
+  color: #777;
+  cursor: not-allowed;
+}
+
+/* ===================================
+   LINK BUTTON
+   =================================== */
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.link-button:hover {
+  color: var(--color-accent);
+}
+
+/* ===================================
+   USER DETAILS (Admin show page)
+   =================================== */
+
+.details-group {
+  font-size: var(--font-size-md);
+  color: var(--color-gray-700);
+  line-height: 1.8;
+  margin-bottom: 30px;
+  padding: 15px 20px;
+  background: var(--color-background-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.details-group p {
+  margin: 0 0 12px;
+}
+
+.details-group strong {
+  color: var(--color-primary);
+}
+
+.details-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+  display: inline-block;
+}
+
+.mt-2xl {
+  margin-top: var(--spacing-2xl);
+  display: inline-block;
+}
+
+/* ===================================
+   USER/CATEGORY FORM ANIMATION
+   =================================== */
+
+.user-form > div,
+.category-form > div {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===================================
+   IMAGE PREVIEW CONTAINER
+   =================================== */
+
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.image-preview-item {
+  position: relative;
+  display: inline-block;
+}
+
+.image-preview-item img {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-gray-300);
+}
+
+.remove-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: var(--color-white);
+  border: 2px solid var(--color-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.image-preview-item:hover .remove-btn {
+  opacity: 1;
+}
+
+/* ===================================
+   FILE PREVIEW ITEM
+   =================================== */
+
+.file-preview-item {
+  position: relative;
+  padding: 10px 12px;
+  background: #fafafa;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.file-preview-item a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--font-size-base);
+}
+
+.file-preview-item .remove-btn {
+  position: static;
+  opacity: 1;
+  margin-left: 10px;
+}
+
+/* ===================================
+   RESPONSIVE
+   =================================== */
+
+@media (max-width: 768px) {
+  .form-container {
+    padding: var(--spacing-lg);
+    max-width: 100%;
+  }
+
+  .form-row.cols-2,
+  .form-row.cols-3,
+  .form-row.cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .add-to-cart-form {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .qty-input {
+    width: 60px;
+  }
+
+  .add-to-cart-btn {
+    width: 100%;
+    padding: var(--spacing-sm);
+  }
+}

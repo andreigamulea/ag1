@@ -1,0 +1,91 @@
+/* ===================================
+   BASE STYLES
+   Reset, body, typography generală
+   =================================== */
+
+/* Body */
+body {
+  font-family: var(--font-primary);
+  margin: 0;
+  padding: 0;
+  background: var(--color-background);
+  color: var(--color-gray-800);
+  line-height: 1.6;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5 {
+  margin-top: 0;
+  color: var(--color-gray-800);
+}
+
+h6 {
+  all: unset;
+  font-size: 2.5rem;
+  color: red !important;
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  font-weight: bold;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* Utility classes */
+.inline {
+  display: inline;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Section titles */
+.section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: bold;
+  text-align: center;
+  padding: 8px;
+  margin-bottom: 1em;
+  padding-top: var(--spacing-2xl);
+  color: var(--color-primary);
+}
+
+.section-title h1 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: 0;
+}
+
+.separator {
+  width: 68%;
+  height: 1px;
+  background-color: var(--color-primary);
+  margin: 0 auto;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
