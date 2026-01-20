@@ -5,20 +5,19 @@
     <%= render "devise/shared/error_messages", resource: resource %>
 
     <div class="field">
-      <%= f.label :email %><br />
+      <%= f.label :email %>
       <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
     </div>
 
-<div class="field">
-  <%= f.label :password do %>
-    Parolă <em>(<%= @minimum_password_length %> caractere minim)</em>
-  <% end %><br />
-  <%= f.password_field :password, autocomplete: "new-password", class: "input-style" %>
-</div>
-
+    <div class="field">
+      <%= f.label :password do %>
+        Parolă <em>(<%= @minimum_password_length %> caractere minim)</em>
+      <% end %>
+      <%= f.password_field :password, autocomplete: "new-password", class: "input-style" %>
+    </div>
 
     <div class="field">
-      <%= f.label :password_confirmation %><br />
+      <%= f.label :password_confirmation %>
       <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input-style" %>
     </div>
 
