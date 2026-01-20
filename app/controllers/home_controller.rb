@@ -13,6 +13,15 @@ class HomeController < ApplicationController
     # pagina de contact
   end
 
+  def politica_confidentialitate
+  end
+
+  def politica_cookies
+  end
+
+  def termeni_conditii
+  end
+
   def newsletter #este o metoda de tip POST
     Rails.logger.debug "Params: #{params.inspect}"
    

@@ -102,6 +102,9 @@ end
   get 'admin', to: 'home#admin'
   get 'home/index'
   get 'contact', to: 'home#contact'
+  get 'politica-confidentialitate', to: 'home#politica_confidentialitate', as: :politica_confidentialitate
+  get 'politica-cookies', to: 'home#politica_cookies', as: :politica_cookies
+  get 'termeni-si-conditii', to: 'home#termeni_conditii', as: :termeni_conditii
   get 'up' => 'rails/health#show', as: :rails_health_check
 
   root 'home#index'
