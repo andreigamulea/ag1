@@ -34,5 +34,6 @@
  *= require pages/_search
  *= require pages/_auth
  *= require pages/_admin
+ *= require pages/_legal
  *= require_self
  */
