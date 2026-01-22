@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
     @cart ||= session[:cart] || {}
     @cart_items_count = @cart.values.sum { |data| data["quantity"].to_i }
 
-    # Caută toate produsele din coș
+    ## Caută toate produsele din coș
     product_ids = @cart.keys.map(&:to_i)
     @cart_products = Product.includes(:categories).where(id: product_ids).index_by(&:id)
 
