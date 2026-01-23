@@ -85,3 +85,6 @@ gem 'wicked_pdf', '~> 2.8'
 gem 'wkhtmltopdf-binary', '~> 0.12.6.6'
 gem 'pdfkit', '~> 0.8.7.3'
 #gem 'letter_opener', '~> 1.10'
+
+# Sitemap generator pentru SEO
+gem 'sitemap_generator', '~> 6.3'

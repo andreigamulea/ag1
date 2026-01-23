@@ -1,1 +1,46 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+# robots.txt pentru ayus.ro
+# Ultima actualizare: 23 ianuarie 2026
+
+User-agent: *
+Allow: /
+
+# === Zone administrative ===
+Disallow: /admin/
+Disallow: /mem
+Disallow: /ram_logs
+Disallow: /memory_logs/
+
+# === Zone utilizator privat ===
+Disallow: /users/
+Disallow: /cart
+Disallow: /orders/
+Disallow: /coupons/
+
+# === Autentificare ===
+Disallow: /users/sign_in
+Disallow: /users/sign_up
+Disallow: /users/password
+Disallow: /users/edit
+
+# === API endpoints ===
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /stripe/
+Disallow: /cdn/
+
+# === Autocomplete endpoints ===
+Disallow: /autocomplete_tara
+Disallow: /autocomplete_judet
+Disallow: /autocomplete_localitate
+
+# === Continut duplicat ===
+Disallow: /*?*
+Disallow: /search
+
+# === Newsletter admin ===
+Disallow: /home/lista_newsletter
+Disallow: /home/newsletter/
+
+Sitemap: https://ag1-eef1.onrender.com/sitemap.xml.gz
+# Cand treci pe domeniul final, schimba in:
+# Sitemap: https://ayus.ro/sitemap.xml.gz
