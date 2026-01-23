@@ -23,4 +23,7 @@ bundle exec rake assets:precompile
 echo "🗄 Migrez baza de date (dacă sunt modificări)..."
 bundle exec rake db:migrate || true
 
+echo "🗺 Generez sitemap.xml pentru SEO..."
+bundle exec rake sitemap:refresh:no_ping || true
+
 echo "✅ Build finalizat cu succes!"
