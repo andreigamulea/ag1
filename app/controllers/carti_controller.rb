@@ -1,16 +1,28 @@
 class CartiController < ApplicationController
   def index
-    @products = Product
-      .select(:id, :name, :price, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url)
+    # Produse care au ambele categorii 'carte' și 'fizic'
+    base_product_ids = Product
       .joins(:categories)
       .where(categories: { name: ['carte', 'fizic'] })
       .group('products.id')
       .having('COUNT(DISTINCT categories.name) >= 2')
+      .pluck(:id)
+
+    @products = Product
+      .select(:id, :name, :price, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url)
+      .where(id: base_product_ids)
 
     # Filtrare adițională după categorie (opțional)
     if params[:category].present?
-      @products = @products.joins(:categories).where(categories: { slug: params[:category] })
       @current_category = Category.find_by(slug: params[:category])
+      if @current_category
+        filtered_ids = Product
+          .joins(:categories)
+          .where(id: base_product_ids)
+          .where(categories: { id: @current_category.id })
+          .pluck(:id)
+        @products = @products.where(id: filtered_ids)
+      end
     end
 
     @products = @products.page(params[:page]).per(20)

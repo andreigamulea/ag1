@@ -13,15 +13,24 @@
 <div class="elegant-header">
   <h1 class="refined-title">
     <span class="deco-left">⋯</span>
-    Cărți în format fizic și digital
+    <% if @current_category %>
+      Cărți - <%= @current_category.name.capitalize %>
+    <% else %>
+      Cărți în format fizic și digital
+    <% end %>
     <span class="deco-right">⋯</span>
   </h1>
   <div class="subline"></div>
 </div>
 
-
-
-
+<% if @current_category %>
+  <div class="filter-container">
+    <div class="filter-active">
+      <p>Filtrare activă: <strong><%= @current_category.name %></strong></p>
+      <%= link_to "✕ Șterge filtrul", carti_index_path, class: "clear-filter" %>
+    </div>
+  </div>
+<% end %>
 
 <div class="product-grid">
   <% @products.each do |product| %>
