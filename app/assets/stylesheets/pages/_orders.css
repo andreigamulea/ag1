@@ -54,6 +54,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   min-height: 300px;
   overflow: hidden;
+  padding-bottom: var(--spacing-lg);
+  padding: 10px;
 }
 
 .order-details-column h2 {
@@ -246,7 +248,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: var(--spacing-lg) 12px;
+  padding: var(--spacing-lg) var(--spacing-lg);
   text-align: left;
   border: none;
 }
@@ -267,7 +269,7 @@
 }
 
 .orders-page-wrapper .table tbody td {
-  padding: var(--spacing-base) 12px;
+  padding: var(--spacing-md) var(--spacing-lg);
   font-size: var(--font-size-base);
   color: var(--color-gray-800);
   vertical-align: middle;
@@ -325,6 +327,7 @@
   background: #6c757d;
   color: var(--color-white);
   box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+  padding:5px;
 }
 
 .orders-page-wrapper .btn-secondary:hover {

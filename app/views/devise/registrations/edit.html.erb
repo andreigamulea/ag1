@@ -1,8 +1,11 @@
 <%= render 'shared/noindex' %>
-<div class="edit-account-container">
-  <div class="edit-account-card">
-    <h2 class="edit-account-title">👤 Editează Contul</h2>
+<div class="container_content">
+  <div class="section-title">
+    <h1>Editează Contul</h1>
+  </div>
+  <div class="separator"></div>
 
+  <div class="edit-account-form">
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
       <%= render "devise/shared/error_messages", resource: resource %>
 
@@ -13,62 +16,60 @@
 
       <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
         <div class="form-info">
-          🕐 În așteptarea confirmării pentru: <%= resource.unconfirmed_email %>
+          In asteptarea confirmarii pentru: <%= resource.unconfirmed_email %>
         </div>
       <% end %>
 
       <div class="form-field">
-        <%= f.label :password, "Parolă nouă" %>
-        <span class="form-hint">(lasă gol dacă nu vrei să o modifici)</span>
+        <%= f.label :password, "Parola noua" %>
+        <span class="form-hint">(lasa gol daca nu vrei sa o modifici)</span>
         <%= f.password_field :password, autocomplete: "new-password" %>
         <% if @minimum_password_length %>
           <span class="form-hint">
-            🔒 Minim <%= @minimum_password_length %> caractere
+            Minim <%= @minimum_password_length %> caractere
           </span>
         <% end %>
       </div>
 
       <div class="form-field">
-        <%= f.label :password_confirmation, "Confirmă parola nouă" %>
+        <%= f.label :password_confirmation, "Confirma parola noua" %>
         <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
       </div>
 
       <div class="form-field">
-        <%= f.label :current_password, "Parola curentă" %>
-        <span class="form-hint">(necesară pentru confirmarea modificărilor)</span>
+        <%= f.label :current_password, "Parola curenta" %>
+        <span class="form-hint">(necesara pentru confirmarea modificarilor)</span>
         <%= f.password_field :current_password, autocomplete: "current-password" %>
       </div>
 
       <div class="form-actions">
-        <%= link_to "← Înapoi", :back, class: "btn-back" %>
-        <%= f.submit "💾 Actualizează", class: "btn-update" %>
+        <%= link_to "Inapoi", :back, class: "btn-back" %>
+        <%= f.submit "Actualizeaza", class: "btn-update" %>
       </div>
     <% end %>
 
     <div class="cancel-account-section">
-  <h3 class="cancel-account-title">⚠️ Dezactivează contul</h3>
-  
-  <div class="cancel-account-warning">
-    <p><strong>Atenție!</strong> Contul tău va deveni inactiv și nu vei mai putea să te autentifici. Poți reactiva contul oricând contactând echipa de suport.</p>
-  </div>
+      <h3 class="cancel-account-title">Dezactiveaza contul</h3>
 
-  <%= form_with url: deactivate_user_registration_path, method: :patch, local: true, scope: :user do |f| %>
-    <div class="form-field" style="margin-top: 20px;">
-      <%= f.label :current_password, "Confirmă parola curentă pentru a dezactiva contul" %>
-      <%= f.password_field :current_password, 
-          autocomplete: "current-password", 
-          required: true, 
-          style: "margin-top: 8px;" %>
+      <div class="cancel-account-warning">
+        <p><strong>Atentie!</strong> Contul tau va deveni inactiv si nu vei mai putea sa te autentifici. Poti reactiva contul oricand contactand echipa de suport.</p>
+      </div>
+
+      <%= form_with url: deactivate_user_registration_path, method: :patch, local: true, scope: :user do |f| %>
+        <div class="form-field">
+          <%= f.label :current_password, "Confirma parola curenta pentru a dezactiva contul" %>
+          <%= f.password_field :current_password,
+              autocomplete: "current-password",
+              required: true %>
+        </div>
+
+        <%= f.submit "Dezactiveaza contul meu",
+            data: {
+              confirm: "Esti sigur ca vrei sa dezactivezi contul? Vei putea sa-l reactivezi contactand echipa de suport.",
+              turbo_confirm: "Esti sigur ca vrei sa dezactivezi contul?"
+            },
+            class: "btn-cancel-account" %>
+      <% end %>
     </div>
-
-    <%= f.submit "🔒 Dezactivează contul meu", 
-        data: { 
-          confirm: "Ești sigur că vrei să dezactivezi contul? Vei putea să-l reactivezi contactând echipa de suport.", 
-          turbo_confirm: "Ești sigur că vrei să dezactivezi contul?" 
-        }, 
-        class: "btn-cancel-account",
-        style: "margin-top: 15px;" %>
-  <% end %>
-</div>
   </div>
 </div>

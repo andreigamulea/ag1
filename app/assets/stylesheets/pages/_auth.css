@@ -7,34 +7,25 @@
    EDIT ACCOUNT
    =================================== */
 
-.edit-account-container {
-  max-width: var(--container-sm);
-  margin: var(--spacing-3xl) auto;
-  padding: 0 var(--spacing-lg);
+/* Edit account - separator spacing */
+.container_content .edit-account-form {
+  margin-top: 0;
 }
 
-.edit-account-card {
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: var(--spacing-3xl);
+.container_content:has(.edit-account-form) .separator {
+  margin-bottom: 10px;
 }
 
-.edit-account-title {
-  color: var(--color-primary);
-  font-size: var(--font-size-3xl);
-  font-weight: 700;
-  margin: 0 0 var(--spacing-2xl) 0;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+/* Edit account form - folosește container_content standard */
+.edit-account-form {
+  max-width: 600px;
 }
 
-.edit-account-card .form-field {
+.edit-account-form .form-field {
   margin-bottom: var(--spacing-xl);
 }
 
-.edit-account-card .form-field label {
+.edit-account-form .form-field label {
   display: block;
   font-weight: 600;
   margin-bottom: 8px;
@@ -42,9 +33,10 @@
   font-size: var(--font-size-md);
 }
 
-.edit-account-card .form-field input[type="email"],
-.edit-account-card .form-field input[type="password"] {
+.edit-account-form input[type="email"],
+.edit-account-form input[type="password"] {
   width: 100%;
+  max-width: 400px;
   padding: 12px var(--spacing-md);
   border: 1px solid var(--color-gray-400);
   border-radius: var(--radius-md);
@@ -54,7 +46,8 @@
   box-sizing: border-box;
 }
 
-.edit-account-card .form-field input:focus {
+.edit-account-form input[type="email"]:focus,
+.edit-account-form input[type="password"]:focus {
   outline: none;
   border-color: var(--color-primary);
 }

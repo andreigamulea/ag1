@@ -84,8 +84,8 @@ function setupMobileMenu() {
   closeBtn.addEventListener('click', handleCloseClick);
   document.addEventListener('keydown', handleKeyDown);
 
-  // Atașare pe toate link-urile și butoanele din meniu
-  const menuLinks = navWrapper.querySelectorAll('a, .link-button, button');
+  // Atașare pe toate link-urile și butoanele din meniu (exclus account-toggle și close-menu)
+  const menuLinks = navWrapper.querySelectorAll('a, .link-button, button:not(#account-toggle):not(#close-menu)');
   menuLinks.forEach(link => {
     link.addEventListener('click', handleLinkClick);
   });

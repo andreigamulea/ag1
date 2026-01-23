@@ -451,21 +451,51 @@ nav button:focus {
   .account-toggle {
     width: 100%;
     justify-content: flex-start;
-    padding: var(--spacing-xs) 0;
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: white !important;
+    font-size: var(--font-size-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .account-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white !important;
   }
 
   .account-dropdown {
     position: static;
     box-shadow: none;
     border: none;
-    border-left: 3px solid var(--color-primary);
+    border-left: 3px solid rgba(255, 255, 255, 0.3);
     margin-left: var(--spacing-md);
-    margin-top: var(--spacing-xs);
-    background: rgba(139, 0, 0, 0.05);
+    margin-top: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0;
   }
 
   .account-dropdown.show {
     display: block;
+  }
+
+  .account-dropdown a,
+  .account-dropdown button {
+    color: white !important;
+    padding: var(--spacing-sm) var(--spacing-lg);
+  }
+
+  .account-dropdown a:hover,
+  .account-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white !important;
+  }
+
+  .account-dropdown .user-info {
+    color: rgba(255, 255, 255, 0.7);
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .account-dropdown .divider {
+    background: rgba(255, 255, 255, 0.2);
   }
 
   /* Asigură clicabilitate */
