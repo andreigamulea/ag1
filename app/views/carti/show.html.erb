@@ -1,3 +1,43 @@
+<% content_for :title do %>
+  <%= @product.meta_title.presence || @product.name %> | AYUS GRUP
+<% end %>
+
+<% content_for :meta_description do %>
+  <%= @product.meta_description.presence || truncate(strip_tags(@product.description.to_s), length: 160) %>
+<% end %>
+
+<% content_for :canonical do %>
+  <%= request.base_url %><%= carti_path(@product) %>
+<% end %>
+
+<!-- Schema.org JSON-LD pentru Product -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": <%= @product.name.to_json.html_safe %>,
+  "description": <%= truncate(strip_tags(@product.description.to_s), length: 500).to_json.html_safe %>,
+  <% if @product.external_image_url.present? %>
+  "image": "<%= @product.external_image_url %>",
+  <% end %>
+  "offers": {
+    "@type": "Offer",
+    "url": "<%= request.base_url %><%= carti_path(@product) %>",
+    "priceCurrency": "RON",
+    "price": "<%= @product.price %>",
+    "availability": "<%= @product.stock.to_i > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' %>",
+    "seller": {
+      "@type": "Organization",
+      "name": "AYUS GRUP Romania"
+    }
+  },
+  "brand": {
+    "@type": "Brand",
+    "name": "AYUS GRUP"
+  }
+}
+</script>
+
 <div class="container_content product-view">
   <div class="section-title">
     <h1><%= @product.name %></h1>

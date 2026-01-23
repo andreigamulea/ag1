@@ -13,6 +13,24 @@
         <%= f.text_field :slug, class: "form-control" %>
       </div>
 
+      <hr>
+      <h4>SEO (opțional)</h4>
+
+      <div class="form-group">
+        <%= f.label :description, "Descriere categorie" %>
+        <%= f.text_area :description, class: "form-control", rows: 4, placeholder: "Descriere pentru pagina categoriei..." %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :meta_title, "Meta Title (SEO)" %>
+        <%= f.text_field :meta_title, class: "form-control", placeholder: "Titlu pentru motoarele de căutare" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :meta_description, "Meta Description (SEO)" %>
+        <%= f.text_area :meta_description, class: "form-control", rows: 2, placeholder: "Descriere pentru motoarele de căutare (max 160 caractere)" %>
+      </div>
+
       <div class="form-actions">
         <%= f.submit "💾 Salvează", class: "form-button" %>
       </div>

@@ -22,6 +22,38 @@
   margin-top: var(--spacing-lg);
 }
 
+/* Hero Section pentru homepage */
+.hero-section {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white);
+}
+
+.site-main-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-white);
+}
+
+.site-subtitle {
+  font-size: var(--font-size-lg);
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .site-main-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .site-subtitle {
+    font-size: var(--font-size-base);
+  }
+}
+
 /* Flex container - pentru articole + resurse */
 .flex-container {
   display: flex;

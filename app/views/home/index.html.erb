@@ -1,5 +1,45 @@
+<% content_for :title do %>
+  AYUS GRUP Romania - Produse Naturale Ayurveda, Cărți și Cursuri
+<% end %>
+
+<% content_for :meta_description do %>
+  AYUS GRUP Romania - Magazin online cu produse naturale Ayurveda, cărți și cursuri de specializare. Descoperă înțelepciunea milenară a Ayurvedei.
+<% end %>
+
+<!-- Schema.org JSON-LD pentru Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "AYUS GRUP Romania",
+  "url": "<%= request.base_url %>",
+  "logo": "<%= request.base_url %><%= asset_path('ayus-grup.webp') %>",
+  "description": "Magazin online cu produse naturale Ayurveda, cărți și cursuri de specializare în România.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Str. Ostașilor nr. 15",
+    "addressLocality": "București",
+    "addressRegion": "Sector 1",
+    "addressCountry": "RO"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+40749079619",
+    "contactType": "customer service",
+    "availableLanguage": "Romanian"
+  },
+  "sameAs": []
+}
+</script>
+
+<!-- Hero section cu H1 principal -->
+<div class="container_content hero-section">
+  <h1 class="site-main-title">AYUS GRUP Romania - Produse Naturale Ayurveda</h1>
+  <p class="site-subtitle">Descoperă înțelepciunea milenară a Ayurvedei pentru o viață echilibrată și sănătoasă.</p>
+</div>
+
 <div class="container_content">
-  <div class="section-title"><h1>Articole & Informatii</h1></div>
+  <div class="section-title"><h2>Articole & Informatii</h2></div>
   <div class="separator"></div>
 
   <div class="flex-container">
