@@ -46,7 +46,7 @@ class CartiController < ApplicationController
         .where.not(id: @product.id)
         .where(status: 'active')
         .distinct
-        .limit(4)
+        .limit(5)
     else
       @similar_products = []
     end

@@ -4,13 +4,22 @@
    =================================== */
 
 :root {
-  /* Culori principale */
+  /* Culori principale - diferentiate pe rol */
   --color-primary: #8b0000;
   --color-primary-dark: #6d0000;
   --color-primary-light: #a01010;
   --color-secondary: #bc2c2c;
   --color-accent: #fbc02d;
   --color-accent-hover: #e0a800;
+
+  /* Culori semantice UI */
+  --color-hero-bg: #a52a2a;
+  --color-hero-text: #ffffff;
+  --color-title: #4a4a4a;
+  --color-title-section: #6d0000;
+  --color-btn-primary: #8b0000;
+  --color-btn-secondary: transparent;
+  --color-btn-text: #8b0000;
 
   /* Culori status */
   --color-success: #28a745;
@@ -61,6 +70,11 @@
   --spacing-xl: 25px;
   --spacing-2xl: 30px;
   --spacing-3xl: 40px;
+
+  /* Spacing sistem - ritm vertical consistent */
+  --section-gap: 48px;
+  --section-title-gap: 24px;
+  --content-gap: 16px;
 
   /* Border radius */
   --radius-xs: 3px;

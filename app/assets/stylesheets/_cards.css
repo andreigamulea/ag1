@@ -12,7 +12,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-lg);
+  flex: 1;
+  padding: var(--spacing-xl);
   background: var(--color-white);
   border-left: 1px solid var(--color-primary);
   border-right: 1px solid var(--color-primary);
@@ -24,31 +25,33 @@
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
-.box h2 {
-  font-size: var(--font-size-xl);
-  margin-bottom: 8px;
-  color: var(--color-primary);
+.box h3 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-title);
 }
 
 .box p {
   font-size: var(--font-size-base);
   color: var(--color-gray-700);
+  line-height: 1.7;
 }
 
-.box a {
+.box a.btn-secondary {
   display: inline-block;
-  margin-top: var(--spacing-sm);
-  padding: 6px 12px;
+  margin-top: var(--spacing-lg);
+  padding: 10px 24px;
   border: 1px solid var(--color-primary);
-  border-radius: var(--radius-xs);
-  color: var(--color-white);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
   text-decoration: none;
-  font-size: var(--font-size-sm);
-  font-weight: bold;
-  background: var(--color-secondary);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  background: transparent;
+  transition: all var(--transition-fast);
 }
 
-.box a:hover {
+.box a.btn-secondary:hover {
   background: var(--color-primary);
   color: var(--color-white);
 }
@@ -90,11 +93,12 @@
   margin-bottom: 0px;
 }
 
-.book h3 {
-  font-size: var(--font-size-xl);
-  color: var(--color-primary);
+.book h4 {
+  font-size: var(--font-size-lg);
+  color: var(--color-title);
   margin-bottom: var(--spacing-xs);
   margin-top: var(--spacing-sm);
+  font-weight: 600;
 }
 
 .book p {
@@ -102,20 +106,21 @@
   color: var(--color-gray-700);
 }
 
-.book a {
+.book a.btn-text {
   display: inline-block;
-  margin-top: 8px;
-  padding: 5px 22px;
+  margin-top: var(--spacing-sm);
+  padding: 8px 20px;
   border: 1px solid var(--color-primary);
-  border-radius: var(--radius-xs);
-  color: var(--color-white);
-  background: var(--color-secondary);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  background: transparent;
   text-decoration: none;
   font-size: var(--font-size-sm);
-  font-weight: bold;
+  font-weight: 600;
+  transition: all var(--transition-fast);
 }
 
-.book a:hover {
+.book a.btn-text:hover {
   background: var(--color-primary);
   color: var(--color-white);
 }
@@ -237,29 +242,30 @@
 @media (max-width: 480px) {
   .books-container {
     grid-template-columns: repeat(1, 1fr);
+    gap: var(--spacing-md);
   }
 
   .box {
-    background: #fff5f5;
-    margin: var(--spacing-sm) 0;
+    background: var(--color-white);
+    margin: 0;
     border: none;
-    padding: var(--spacing-sm);
-    margin-top: -20px;
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
   }
 
   .book {
     border: none;
     padding: var(--spacing-sm);
-    margin-top: -20px;
+    margin: 0;
   }
 
-  .book h3 {
-    margin-top: 0px;
+  .book h4 {
+    margin-top: var(--spacing-xs);
   }
 
-  .book a,
-  .box a {
-    margin-bottom: var(--spacing-sm);
+  .book a.btn-text,
+  .box a.btn-secondary {
+    margin-bottom: var(--spacing-xs);
   }
 
   .product-card {

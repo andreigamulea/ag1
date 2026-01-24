@@ -95,14 +95,43 @@
 }
 
 .btn-secondary {
-  background-color: var(--color-secondary);
-  color: var(--color-white);
-  border-color: var(--color-secondary);
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
 }
 
 .btn-secondary:hover {
   background-color: var(--color-primary);
+  color: var(--color-white);
   border-color: var(--color-primary);
+}
+
+/* Text link button - minimal styling */
+.btn-text {
+  display: inline-block;
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  position: relative;
+}
+
+.btn-text::after {
+  content: " \2192";
+  transition: transform var(--transition-fast);
+}
+
+.btn-text:hover {
+  color: var(--color-primary-dark);
+}
+
+.btn-text:hover::after {
+  margin-left: 4px;
 }
 
 .btn-success {

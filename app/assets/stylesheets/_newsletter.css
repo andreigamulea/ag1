@@ -137,6 +137,7 @@
 @media (max-width: 768px) {
   .news {
     padding: var(--spacing-2xl) var(--spacing-md);
+    margin-top: 12px;
   }
 
   .newsletter-prompt p {

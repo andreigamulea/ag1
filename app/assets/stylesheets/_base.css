@@ -58,13 +58,13 @@ a:hover {
 
 /* Section titles */
 .section-title {
-  font-size: var(--font-size-2xl);
-  font-weight: bold;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
   text-align: center;
   padding: 8px;
-  margin-bottom: 1em;
-  padding-top: var(--spacing-2xl);
-  color: var(--color-primary);
+  margin-bottom: var(--section-title-gap);
+  padding-top: var(--section-gap);
+  color: var(--color-title-section);
 }
 
 .section-title h1 {
