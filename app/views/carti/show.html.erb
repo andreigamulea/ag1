@@ -1,13 +1,13 @@
-<% content_for :title do %>
-  <%= @product.meta_title.presence || @product.name %> | AYUS GRUP
-<% end %>
+<% content_for :title do %><%= @product.meta_title.presence || @product.name %> | AYUS GRUP<% end %>
 
-<% content_for :meta_description do %>
-  <%= @product.meta_description.presence || truncate(strip_tags(@product.description.to_s), length: 160) %>
-<% end %>
+<% content_for :meta_description do %><%= @product.meta_description.presence || truncate(strip_tags(@product.description.to_s), length: 160) %><% end %>
 
-<% content_for :canonical do %>
-  <%= request.base_url %><%= carti_path(@product) %>
+<% content_for :canonical do %><%= canonical_host %><%= carti_path(@product) %><% end %>
+
+<% content_for :og_type do %>product<% end %>
+
+<% if @product.external_image_url.present? %>
+<% content_for :og_image do %><%= @product.external_image_url %><% end %>
 <% end %>
 
 <!-- Schema.org JSON-LD pentru Product -->
@@ -22,7 +22,7 @@
   <% end %>
   "offers": {
     "@type": "Offer",
-    "url": "<%= request.base_url %><%= carti_path(@product) %>",
+    "url": "<%= canonical_host %><%= carti_path(@product) %>",
     "priceCurrency": "RON",
     "price": "<%= @product.price %>",
     "availability": "<%= @product.stock.to_i > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' %>",

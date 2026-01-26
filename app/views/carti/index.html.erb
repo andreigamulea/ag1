@@ -1,14 +1,10 @@
-<% content_for :title do %>
-  Cărți Ayurveda - Format Fizic și Digital | AYUS GRUP Romania
-<% end %>
+<% content_for :title do %>Cărți Ayurveda - Format Fizic și Digital | AYUS GRUP Romania<% end %>
 
-<% content_for :meta_description do %>
-  Descoperă colecția noastră de cărți Ayurveda în format fizic și digital. Învață principiile medicinei tradiționale indiene de la AYUS GRUP Romania.
-<% end %>
+<% content_for :meta_description do %>Descoperă colecția noastră de cărți Ayurveda în format fizic și digital. Învață principiile medicinei tradiționale indiene de la AYUS GRUP Romania.<% end %>
 
-<% content_for :canonical do %>
-  <%= request.base_url %><%= carti_index_path %>
-<% end %>
+<% content_for :canonical do %><%= canonical_host %><%= carti_index_path %><% end %>
+
+<% content_for :og_type do %>website<% end %>
 
 <div class="elegant-header">
   <h1 class="refined-title">

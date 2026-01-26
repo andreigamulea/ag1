@@ -1,10 +1,12 @@
-<% content_for :title do %>
-  AYUS GRUP Romania - Magazin Online | Cărți, Cursuri și Produse Naturale
-<% end %>
+<% content_for :title do %>AYUS GRUP Romania - Magazin Online | Cărți, Cursuri și Produse Naturale<% end %>
 
-<% content_for :meta_description do %>
-  AYUS GRUP Romania - Centru de perfecționare și pregătire de specialitate în Ayurveda. Cursuri, seminarii și produse naturale.
-<% end %>
+<% content_for :meta_description do %>AYUS GRUP Romania - Centru de perfecționare și pregătire de specialitate în Ayurveda. Cursuri, seminarii și produse naturale.<% end %>
+
+<% content_for :canonical do %><%= canonical_host %><% end %>
+
+<% content_for :og_type do %>website<% end %>
+
+<% content_for :og_image do %><%= canonical_host %><%= asset_path('ayus-grup.webp') %><% end %>
 
 <!-- Schema.org JSON-LD pentru Organization -->
 <script type="application/ld+json">
@@ -12,8 +14,8 @@
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "AYUS GRUP Romania",
-  "url": "<%= request.base_url %>",
-  "logo": "<%= request.base_url %><%= asset_path('ayus-grup.webp') %>",
+  "url": "<%= canonical_host %>",
+  "logo": "<%= canonical_host %><%= asset_path('ayus-grup.webp') %>",
   "description": "Centru de perfecționare și pregătire de specialitate în Ayurveda. Cursuri, seminarii și produse naturale.",
   "address": {
     "@type": "PostalAddress",
