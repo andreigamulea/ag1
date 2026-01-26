@@ -1,7 +1,12 @@
 # Set the host name for URL creation
-# Foloseste variabila de environment sau domeniul implicit
-# In productie pe Render, seteaza SITE_URL=https://ayus.ro cand treci pe domeniul final
-SitemapGenerator::Sitemap.default_host = ENV.fetch('SITE_URL', 'https://ag1-eef1.onrender.com')
+# Production: uses SITE_URL env var or defaults to ayus.ro
+# Development: defaults to ag1-eef1.onrender.com
+# Instructions: On Render deployment, set SITE_URL=https://ayus.ro
+SitemapGenerator::Sitemap.default_host = if Rails.env.production?
+  ENV.fetch('SITE_URL', 'https://ayus.ro')
+else
+  ENV.fetch('SITE_URL', 'https://ag1-eef1.onrender.com')
+end
 
 # Pick a place safe to write the files
 SitemapGenerator::Sitemap.public_path = 'public/'

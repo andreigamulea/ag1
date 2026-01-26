@@ -1,0 +1,81 @@
+<%# JSON-LD Schema.org structured data for SEO %>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "<%= canonical_host %>/#organization",
+      "name": "AYUS GRUP Romania",
+      "url": "<%= canonical_host %>",
+      "logo": "<%= canonical_host %>/assets/logo.png",
+      "description": "AYUS GRUP - Centru de perfecționare și pregătire de specialitate în Ayurveda. Cursuri, seminarii și produse naturale.",
+      "sameAs": [
+        "https://www.facebook.com/ayusgrupromania",
+        "https://www.instagram.com/ayusgrupromania"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Str. Ostașilor nr. 15",
+        "addressLocality": "București",
+        "addressRegion": "Sector 1",
+        "postalCode": "010145",
+        "addressCountry": "RO"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "telephone": "+40-749-079-619",
+        "email": "contact@ayus.ro"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "<%= canonical_host %>/#website",
+      "url": "<%= canonical_host %>",
+      "name": "AYUS GRUP Romania",
+      "description": "Magazin online - Cărți, cursuri și produse Ayurveda",
+      "inLanguage": "ro-RO",
+      "isPartOf": {
+        "@id": "<%= canonical_host %>/#organization"
+      }
+    }
+    <% if @product.present? && @product.persisted? %>
+    ,
+    {
+      "@type": "Product",
+      "@id": "<%= canonical_host %><%= carti_path(@product) %>",
+      "name": "<%= @product.name %>",
+      <% if @product.description.present? %>
+      "description": "<%= strip_tags(@product.description.to_s).gsub('"', '\"') %>",
+      <% end %>
+      <% if @product.respond_to?(:sku) && @product.sku.present? %>
+      "sku": "<%= @product.sku %>",
+      <% end %>
+      "brand": {
+        "@type": "Brand",
+        "name": "AYUS GRUP"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": "<%= canonical_host %><%= carti_path(@product) %>",
+        "priceCurrency": "RON",
+        "price": "<%= @product.price.to_f %>",
+        <% if @product.respond_to?(:discount_price) && @product.discount_price.present? %>
+        "discount": "<%= (@product.price.to_f - @product.discount_price.to_f).round(2) %>",
+        <% end %>
+        "availability": "https://schema.org/<%= @product.respond_to?(:stock) && @product.stock.to_i > 0 ? 'InStock' : 'OutOfStock' %>",
+        "seller": {
+          "@id": "<%= canonical_host %>/#organization"
+        }
+      }
+      <% if @product.respond_to?(:created_at) && @product.created_at.present? %>
+      ,
+      "datePublished": "<%= @product.created_at.iso8601 %>",
+      "dateModified": "<%= @product.updated_at.iso8601 %>"
+      <% end %>
+    }
+    <% end %>
+  ]
+}
+</script>

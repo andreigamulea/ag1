@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ro">
   <head>
+    <meta charset="UTF-8">
     <title><%= content_for?(:title) ? yield(:title) : "AYUS GRUP Romania" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <%= csrf_meta_tags %>
@@ -40,6 +41,9 @@
     <% if content_for?(:canonical) %>
       <meta property="og:url" content="<%= yield(:canonical) %>">
     <% end %>
+
+    <%# JSON-LD Structured Data for SEO %>
+    <%= render 'shared/json_ld_schema' %>
 
     <!-- Doar aici adaugi Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">

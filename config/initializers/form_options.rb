@@ -15,5 +15,17 @@ module ActionView
         original_hidden_field_tag(name, value, options.symbolize_keys)
       end
     end
+
+    # Override FormHelper hidden_field pentru form.hidden_field
+    class FormBuilder
+      alias_method :original_hidden_field, :hidden_field
+
+      def hidden_field(method, options = {})
+        options = options.stringify_keys
+        options.delete("autocomplete")
+        original_hidden_field(method, options.symbolize_keys)
+      end
+    end
   end
 end
+
