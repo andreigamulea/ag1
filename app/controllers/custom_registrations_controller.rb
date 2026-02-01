@@ -1,6 +1,11 @@
 class CustomRegistrationsController < Devise::RegistrationsController
   before_action :authenticate_user!, only: [:deactivate]
 
+  # Devise registration/edit pages use shop layout
+  def is_shop_page?
+    true
+  end
+
   def deactivate
     # Verifică dacă parola a fost trimisă
     if params[:user].present? && params[:user][:current_password].present?

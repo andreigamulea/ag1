@@ -10,9 +10,55 @@
   margin-top: 0 !important;
 }
 
-/* Content container */
+/* ===== SHOP CONTAINER ===== */
+/* For frontend store pages: index, products, cart, orders, contact */
+.shop-container {
+  max-width: var(--container-shop-max);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.shop-content {
+  flex: 1;
+  padding: 0 var(--spacing-lg);
+}
+
+/* ===== ADMIN CONTAINER ===== */
+/* For CMS, backoffice and administration pages */
+.admin-container {
+  max-width: var(--container-admin-max);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.admin-content {
+  flex: 1;
+  padding: var(--spacing-lg);
+}
+
+/* ===== DEFAULT CONTAINER ===== */
+/* Fallback for any other pages */
+.default-container {
+  max-width: var(--container-shop-max);
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Content container - adapts to parent container */
 .container_content {
-  max-width: var(--container-max);
+  max-width: 100%;
   margin: 0 auto;
   padding: var(--spacing-xl);
   padding-top: 0px;

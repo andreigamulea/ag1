@@ -3,6 +3,11 @@ class UsersController < ApplicationController
   before_action :authorize_admin!
   before_action :set_user, only: %i[show edit update destroy reactivate]
 
+  # Users management is admin only
+  def is_admin_page?
+    true
+  end
+
   def index
     @users = User.all.order(:id)
   end

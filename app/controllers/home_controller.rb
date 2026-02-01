@@ -2,6 +2,16 @@ class HomeController < ApplicationController
   before_action :authenticate_user!, only: [:admin]
   before_action :check_admin, only: [:admin, :lista_newsletter, :edit_newsletter, :update_newsletter, :delete_newsletter]
 
+  # Define which actions use shop layout (frontend)
+  def is_shop_page?
+    %w[index contact politica_confidentialitate politica_cookies termeni_conditii newsletter].include?(action_name)
+  end
+
+  # Define which actions use admin layout
+  def is_admin_page?
+    %w[admin lista_newsletter edit_newsletter update_newsletter delete_newsletter].include?(action_name)
+  end
+
   def index
   end
   

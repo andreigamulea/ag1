@@ -1,10 +1,34 @@
 class ApplicationController < ActionController::Base
   before_action :store_user_location!, if: :storable_location?
   protect_from_forgery with: :exception, prepend: true
-  
+
   helper CdnHelper
   before_action :load_cart
   before_action :set_cart_totals
+  layout :choose_layout
+
+  # Metoda pentru a alege layout-ul corespunzător
+  def choose_layout
+    if is_admin_page?
+      'admin'
+    elsif is_shop_page?
+      'shop'
+    else
+      'application'
+    end
+  end
+
+  # Identifică dacă pagina e de tip admin/CMS
+  def is_admin_page?
+    # Override în controllere specifice de admin
+    false
+  end
+
+  # Identifică dacă pagina e de tip magazin (front-end)
+  def is_shop_page?
+    # Override în controllere specifice de shop
+    false
+  end
 
   def set_cart_totals
     Rails.logger.debug "=== set_cart_totals a fost apelat ==="

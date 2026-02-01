@@ -3,6 +3,16 @@ class OrdersController < ApplicationController
   before_action :authenticate_user!, only: [:index, :show_items, :invoice]
   before_action :set_order, only: [:show_items, :invoice]
   before_action :check_order_access, only: [:show_items, :invoice]
+
+  # Orders index and new are shop pages for users, but admin layout for admin users
+  def is_shop_page?
+    %w[new thank_you].include?(action_name)
+  end
+
+  def is_admin_page?
+    action_name == 'index' && current_user&.role == 1
+  end
+
   def index
   if current_user.role == 1
     # Admin vede toate comenzile cu paginare

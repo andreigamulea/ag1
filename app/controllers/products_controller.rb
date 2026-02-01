@@ -3,6 +3,16 @@ class ProductsController < ApplicationController
   before_action :set_product, only: [:show, :edit, :update, :destroy, :purge_attached_file]
   after_action :cleanup_memory, only: [:create, :update, :show, :edit, :new], if: :production?  # Rulează doar în production
 
+  # Products show is a shop page (product details)
+  # Products index, new, edit, update, destroy are admin pages
+  def is_shop_page?
+    action_name == 'show'
+  end
+
+  def is_admin_page?
+    %w[index new edit update destroy purge_image force_gc].include?(action_name)
+  end
+
   # GET /products or /products.json
   def index
     @products = Product.all

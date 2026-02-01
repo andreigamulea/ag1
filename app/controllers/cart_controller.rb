@@ -1,5 +1,9 @@
 class CartController < ApplicationController
-  
+  # Cart is a shop page
+  def is_shop_page?
+    true
+  end
+
   def index
     prepare_cart_variables
   end

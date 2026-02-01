@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(findstr:*)",
+      "Bash(copy \"c:\\\\ag1\\\\PLAN_VARIANTE7.md\" \"c:\\\\ag1\\\\PLAN_VARIANTE8.md\")"
+    ]
+  }
+}

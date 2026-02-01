@@ -1,4 +1,9 @@
 class CartiController < ApplicationController
+  # Books/Carti is a shop page
+  def is_shop_page?
+    true
+  end
+
   def index
     # Produse care au ambele categorii 'carte' și 'fizic'
     base_product_ids = Product

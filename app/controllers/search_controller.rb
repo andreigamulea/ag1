@@ -1,4 +1,9 @@
 class SearchController < ApplicationController
+  # Search is a shop page
+  def is_shop_page?
+    true
+  end
+
   def index
     @query = params[:q]&.strip
     

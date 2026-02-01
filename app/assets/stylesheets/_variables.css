@@ -104,6 +104,8 @@
 
   /* Container widths */
   --container-max: 1280px;
+  --container-shop-max: 1280px;
+  --container-admin-max: 1920px;
   --container-sm: 600px;
   --container-md: 800px;
 }

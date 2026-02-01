@@ -1,4 +1,9 @@
 class CouponsController < ApplicationController
+  # Coupons is admin only
+  def is_admin_page?
+    true
+  end
+
   before_action :set_coupon, only: [:edit, :update, :destroy]
 
   def index
