@@ -70,7 +70,8 @@ gem 'ruby-vips', '~> 2.2', '>= 2.2.4'
 group :development, :test do
   gem 'derailed_benchmarks', '~> 2.2', '>= 2.2.1' #pentrua vedea de ce consuma ram
   gem 'memory_profiler'
-  
+  gem 'rspec-rails', '~> 7.1'
+  gem 'factory_bot_rails', '~> 6.4'
 end
 gem 'sys-proctable', '~> 1.3'
 gem 'get_process_mem', '~> 1.0'
@@ -88,3 +89,4 @@ gem 'pdfkit', '~> 0.8.7.3'
 
 # Sitemap generator pentru SEO
 gem 'sitemap_generator', '~> 6.3'
+

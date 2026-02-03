@@ -1,5 +1,13 @@
-# PLAN VARIANTE V8.0.1 - Implementation Ready + Multi-Source Feeds + Multi-Account + Hardened + Deadlock-Safe + Lock-Order-Hardened + Fail-Fast + Runtime-Verified + DRY + Nested-Tx-Safe + DB-Portable + Defensive-Guards + Multi-DB-Safe + Xact-Lock-Anchored + Serialization-Tested + De-Flaked + Observability-Ready + Bugfix-Hardened
+# PLAN VARIANTE V8.0.2 - Implementation Ready + Multi-Source Feeds + Multi-Account + Hardened + Deadlock-Safe + Lock-Order-Hardened + Fail-Fast + Runtime-Verified + DRY + Nested-Tx-Safe + DB-Portable + Defensive-Guards + Multi-DB-Safe + Xact-Lock-Anchored + Serialization-Tested + De-Flaked + Observability-Ready + Bugfix-Hardened + Idempotency-Hardened + Transaction-Guard-Hardened
 
+> **V8.0.2 Changelog:**
+> - **Fix 4**: Metric drift - folosește `VariantSyncConfig.increment_legacy_lock_counter` în loc de StatsD direct
+> - **Fix 5**: Idempotency hardening - `create_or_link_new` face lookup pe `:conflict` când variant e nil
+> - **Fix 6**: Normalizare `external_id` - `.to_s.strip.presence` (consistent cu `external_sku`)
+> - **Fix 7**: `transaction_open_on?` helper - fallback la `open_transactions` dacă `transaction_open?` nu există
+> - **Fix 8**: `handle_unique_violation` - returnează `:conflict` în loc de `:linked` când mapping există dar pentru alt variant
+> - **Fix 9**: M1 preflight - verifică tipul coloanei `variants.status` înainte de migrare
+>
 > **V8.0.1 Changelog:**
 > - **Fix 1**: `create_or_link_new` - guard `.persisted?` + return `:linked` pentru `:race_condition`
 > - **Fix 2**: `update_existing` - `with_variant_transaction_if_needed` pentru multi-DB row-lock safety
@@ -25,7 +33,24 @@
 ```ruby
 class M1AddVariantsColumns < ActiveRecord::Migration[7.0]
   def change
-    unless column_exists?(:variants, :status)
+    # FIX 9 (V8.0.2): Preflight check pentru variants.status
+    # Dacă coloana există deja, verificăm că tipul e compatibil cu enum integer.
+    # Previne erori opace mai târziu (M3 CHECK, model enum) când tipul e string/boolean/etc.
+    if column_exists?(:variants, :status)
+      col = connection.columns(:variants).find { |c| c.name == 'status' }
+      if col
+        # Tipuri acceptate pentru Rails enum (integer-backed)
+        allowed_types = [:integer, :bigint]
+        unless allowed_types.include?(col.type)
+          raise <<~MSG.squish
+            ABORT M1: variants.status exists with type #{col.type.inspect},
+            but this migration expects integer (for Rails enum 0=active, 1=archived).
+            Manual intervention required: either drop the column, rename it,
+            or migrate existing data to integer format before running this migration.
+          MSG
+        end
+      end
+    else
       add_column :variants, :status, :integer, null: false, default: 0
     end
 
@@ -74,6 +99,49 @@ end
 ```
 
 ### M2: Cleanup & Preflight
+
+```
+═══════════════════════════════════════════════════════════════════════════
+H4: ATENȚIE - M2 POATE FI HEAVY PE TABELE MARI
+═══════════════════════════════════════════════════════════════════════════
+
+Această migrare execută:
+- Multiple UPDATE-uri pe întregul tabel variants
+- DELETE-uri cu subquery-uri pe option_value_variants
+- Aggregări cu array_agg/string_agg
+
+PE TABELE CU MILIOANE DE RÂNDURI, POATE:
+- Ține lock-uri exclusive minute întregi
+- Bloca alte operații pe aceste tabele
+- Cauza timeout-uri la aplicație
+- Genera WAL masiv (replication lag)
+
+RECOMANDĂRI PENTRU PROD:
+
+1. RULEAZĂ ÎN MAINTENANCE WINDOW
+   - Anunță downtime sau "degraded performance"
+   - Preferabil când traficul e minim
+
+2. MONITORIZEAZĂ LOCK WAITS
+   SELECT * FROM pg_stat_activity WHERE wait_event_type = 'Lock';
+   SELECT * FROM pg_locks WHERE NOT granted;
+
+3. DACĂ TABELUL E MARE (>1M rows), CONSIDERĂ BATCHING:
+
+   # În loc de UPDATE global:
+   Variant.where(sku: nil).find_in_batches(batch_size: 10_000) do |batch|
+     Variant.where(id: batch.map(&:id)).update_all("sku = 'VAR-' || id")
+     sleep 0.1  # Dă timp replication-ului să țină pasul
+   end
+
+4. TESTEAZĂ PE CLONE/STAGING CU DATE REALE
+   - Măsoară timpul efectiv
+   - Verifică impact pe metrics (latency, error rate)
+
+5. BACKUP ÎNAINTE
+   pg_dump -Fc database_name > backup_before_m2.dump
+═══════════════════════════════════════════════════════════════════════════
+```
 
 ```ruby
 class M2CleanupVariantsData < ActiveRecord::Migration[7.0]
@@ -483,17 +551,36 @@ module IdSanitizer
     # FAIL-FAST semantics:
     # - nil / "" / " " → ignorate (drop)
     # - "abc" / "1.5"  → ArgumentError (Integer parse fail)
+    # - "0x10" / "1_000" → ArgumentError (H1: doar decimal strict)
     # - 0 / -1         → ArgumentError explicit
     # - "123" / 123    → OK
+    #
+    # H1 HARDENING: Integer() în Ruby acceptă forme "surpriză":
+    # - Integer("0x10") → 16 (hex)
+    # - Integer("0b101") → 5 (binary)
+    # - Integer("0o17") → 15 (octal)
+    # - Integer("1_000") → 1000 (underscore separator)
+    # Dacă ID-urile vin din feed-uri externe, acestea pot fi foot-guns.
+    # Validăm strict: doar cifre decimale (opțional cu leading/trailing whitespace).
     #
     # @param input [Array, nil] Array de ID-uri (poate fi nil)
     # @return [Array<Integer>] Array sortat de ID-uri pozitive unice
     # @raise [ArgumentError] dacă un ID nu e valid
+    STRICT_DECIMAL_REGEX = /\A[1-9]\d*\z/.freeze
+
     def sanitize_ids(input)
       Array(input).map { |x|
         s = x.to_s.strip
         next nil if s.empty?
-        id = Integer(s)  # FAIL-FAST: "abc" → ArgumentError
+
+        # H1: Validare strictă - doar cifre decimale, fără hex/octal/binary/underscore
+        # Permite doar: "1", "123", "999999" etc.
+        # Respinge: "0x10", "0b101", "0o17", "1_000", "01" (leading zero)
+        unless s.match?(STRICT_DECIMAL_REGEX)
+          raise ArgumentError, "ID must be decimal digits only (no hex/octal/underscore), got: #{s.inspect}"
+        end
+
+        id = Integer(s)  # Acum e safe - am validat formatul
         raise ArgumentError, "ID must be positive integer, got: #{id}" unless id > 0
         id
       }.compact.uniq.sort
@@ -536,6 +623,28 @@ module AdvisoryLockKey
     VariantExternalId.connection
   end
 
+  # PORTABLE GUARD: Verifică dacă conexiunea are tranzacție deschisă
+  # FALLBACK: Unele adaptere AR (mai vechi, custom, sau multi-DB) pot să nu implementeze
+  # `transaction_open?`. În acest caz, fallback la `open_transactions > 0`.
+  #
+  # NOTĂ: `open_transactions` returnează nivelul de nesting (0 = fără tranzacție),
+  # pe când `transaction_open?` e mai precis (ține cont și de savepoints).
+  # Preferăm `transaction_open?` când e disponibil, fallback altfel.
+  def transaction_open_on?(conn)
+    if conn.respond_to?(:transaction_open?)
+      conn.transaction_open?
+    elsif conn.respond_to?(:open_transactions)
+      conn.open_transactions.to_i > 0
+    else
+      # Dacă nici unul nu e disponibil, presupunem că e OK (să nu blocăm la runtime)
+      # dar logăm warning pentru debugging
+      Rails.logger.warn(
+        "[AdvisoryLockKey] Connection #{conn.class} does not respond to transaction_open? or open_transactions"
+      )
+      true
+    end
+  end
+
   # FAIL-FAST GUARD: Verifică că suntem într-o tranzacție pe conexiunea corectă
   # pg_advisory_xact_lock NECESITĂ o tranzacție deschisă pe aceeași conexiune.
   # Fără tranzacție, lock-ul se eliberează imediat (tranzacție implicită) și NU serializează nimic.
@@ -545,7 +654,7 @@ module AdvisoryLockKey
   def assert_transaction_open_on_lock_connection!
     return unless supports_pg_advisory_locks?
 
-    unless advisory_lock_connection.transaction_open?
+    unless transaction_open_on?(advisory_lock_connection)
       # SAFE-NAV: pool/db_config/name pot fi nil în test adapters sau config-uri custom
       # Evităm NoMethodError în timpul construirii mesajului de eroare
       db_name = advisory_lock_connection.pool&.db_config&.name || "unknown"
@@ -584,16 +693,18 @@ Rails.application.configure do
   # pentru a reduce collision space. Pentru rolling deploy safety, am păstrat
   # și legacy lock-ul (1 cheie bigint) - "dual-lock".
   #
-  # CRITERIU DE ELIMINARE (CORECT):
+  # CRITERIU DE ELIMINARE (RF2):
   # 1. Confirmă că 100% din fleet e pe V7.9.7+ (via deploy tooling/monitoring)
   # 2. Setează VARIANT_SYNC_DUAL_LOCK_ENABLED=false în staging
   # 3. Monitorizează 7 zile - dacă nu apar probleme de concurență, continuă
   # 4. Setează VARIANT_SYNC_DUAL_LOCK_ENABLED=false în prod
-  # 5. Monitorizează 14 zile - dacă stabil, șterge codul legacy (*_legacy methods)
+  # 5. Monitorizează 14 zile - verifică variant_sync.legacy_lock_call = 0
+  # 6. Dacă legacy_lock_call > 0, există noduri vechi care încă emit legacy lock
+  # 7. Când legacy_lock_call = 0 timp de 14+ zile, șterge codul legacy
   #
-  # NOTĂ: Metrica variant_sync.dual_lock_call contorizează TOATE apelurile dual-lock
-  # (nu poate fi 0 cât timp dual_lock_enabled=true). Valoarea ei e utilă pentru
-  # a vedea volumul de operațiuni, NU ca criteriu de eliminare.
+  # METRICI (RF2):
+  # - variant_sync.dual_lock_call  = volumul TOTAL (normal să fie >0 când flag=true)
+  # - variant_sync.legacy_lock_call = DOAR legacy lock (CRITERIUL de deprecation)
   #
   # ROLLBACK: Dacă apar probleme după dezactivare, setează dual_lock_enabled=true
   # ═══════════════════════════════════════════════════════════════════════════
@@ -610,18 +721,33 @@ module VariantSyncConfig
       Rails.configuration.x.variant_sync.dual_lock_enabled
     end
 
-    # Metric/counter pentru observabilitate
-    # NOTĂ: Această metrică contorizează apelurile dual-lock (nu poate fi 0 cât timp e activ).
-    # Utilă pentru a vedea volumul, nu ca criteriu de eliminare.
+    # ═══════════════════════════════════════════════════════════════════════════
+    # METRICI DUAL-LOCK (RF2)
+    # ═══════════════════════════════════════════════════════════════════════════
+    #
+    # Avem DOUĂ metrici separate:
+    #
+    # 1. variant_sync.dual_lock_call
+    #    - Contorizează volumul total de operații când dual_lock e activ
+    #    - Utilă pentru a vedea cât trafic procesezi
+    #    - Va fi >0 cât timp flag-ul e true (normal)
+    #
+    # 2. variant_sync.legacy_lock_call
+    #    - Contorizează DOAR apelurile legacy lock (din acquire_external_id_lock_legacy)
+    #    - CRITERIU DE DEPRECATION: Când VARIANT_SYNC_DUAL_LOCK_ENABLED=false,
+    #      această metrică ar trebui să fie 0.
+    #    - Dacă e >0 după dezactivare = există noduri vechi (V7.9.6) în fleet
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    # Metric pentru volumul dual-lock (nu e criteriu de deprecation)
     def increment_dual_lock_counter
-      # Exemplu StatsD (recomandat pentru prod):
-      # StatsD.increment('variant_sync.dual_lock_call')
-      #
-      # Exemplu Prometheus:
-      # DUAL_LOCK_COUNTER.increment(labels: { service: 'variant_sync' })
-      #
-      # Minimal fără dependințe:
       StatsD.increment('variant_sync.dual_lock_call') if defined?(StatsD)
+    end
+
+    # Metric pentru legacy lock - ACEASTA e criteriul de deprecation
+    # Emis din acquire_external_id_lock_legacy în fiecare serviciu
+    def increment_legacy_lock_counter
+      StatsD.increment('variant_sync.legacy_lock_call') if defined?(StatsD)
     end
   end
 end
@@ -854,7 +980,10 @@ class VariantExternalId < ApplicationRecord
   def normalize_values
     self.source = source.to_s.strip.downcase if source.present?
     self.source_account = source_account.to_s.strip.downcase.presence || 'default'
-    self.external_id = external_id.to_s.strip if external_id.present?
+    # NORMALIZATION FIX (V8.0.2): Aplicăm .to_s.strip.presence necondiționat pentru
+    # a transforma whitespace-only (" ") în nil. Astfel validarea presence pică corect,
+    # iar mesajele de eroare și debug sunt consistente cu DB checks (btrim).
+    self.external_id = external_id.to_s.strip.presence
     # NORMALIZATION FIX: Nu folosim `if external_sku.present?` pentru că " " (whitespace-only)
     # e considerat blank? (deci present? returnează FALSE), și guard-ul `if external_sku.present?`
     # ar fi SKIP-uit normalizarea, lăsând " " să ajungă în DB.
@@ -1348,7 +1477,7 @@ module Imports
     # tranzacția VariantExternalId (care rămâne activă pentru advisory lock).
     def with_variant_transaction_if_needed
       conn = Variant.connection
-      if conn.transaction_open?
+      if transaction_open_on?(conn)
         yield
       else
         Variant.transaction(requires_new: true) { yield }
@@ -1376,13 +1505,18 @@ module Imports
 
     # Legacy lock (V7.9.6 și anterior) - single bigint key
     # DEPRECATION: Elimină această metodă când dual_lock_enabled = false în prod 14+ zile
-    #              și legacy_lock_acquired metric = 0
+    #              și legacy_lock_call metric = 0 (nu mai există noduri vechi în fleet)
     def acquire_external_id_lock_legacy(external_id)
       # Folosim varianta bigint (1 parametru) care acceptă valori > 2^31
       # ::bigint explicit pentru a elimina ambiguitate de casting
       # MULTI-DB SAFETY: advisory_lock_connection (din concern) în loc de ActiveRecord::Base.connection
       key = Zlib.crc32("#{@source}|#{@source_account}|#{external_id}")
       advisory_lock_connection.execute("SELECT pg_advisory_xact_lock(#{key}::bigint)")
+
+      # RF2: Metrică separată pentru legacy lock - utilă pentru deprecation tracking
+      # Când VARIANT_SYNC_DUAL_LOCK_ENABLED=false, această metrică ar trebui să fie 0.
+      # Dacă e >0, înseamnă că există noduri vechi (V7.9.6) care încă emit legacy lock.
+      VariantSyncConfig.increment_legacy_lock_counter
     end
 
     # New lock (V7.9.7+) - two int32 keys, reduced collision space
@@ -1445,6 +1579,8 @@ module Imports
     end
 
     def create_or_link_new(product, external_id, option_value_ids, attributes)
+      digest = option_value_ids.empty? ? nil : option_value_ids.join('-')
+
       # IMPORTANT: NU pasăm external_sku la CreateOrReactivateService
       # pentru că ar scrie în variants.external_sku (care are unique index global).
       # external_sku se salvează DOAR în variant_external_ids.
@@ -1452,6 +1588,22 @@ module Imports
 
       service = Variants::CreateOrReactivateService.new(product)
       result = service.call(option_value_ids, variant_attrs)
+
+      # IDEMPOTENCY HARDENING (V8.0.2):
+      # Dacă create/reactivate a eșuat cu :conflict (DB constraint pe active digest/default),
+      # încercăm să găsim varianta existentă și să facem link la external_id.
+      # Asta închide gaura unde importul rămânea "neancorat" și genera retry-uri inutile.
+      if result.action == :conflict && result.variant.nil?
+        existing = find_existing_variant_for_product(product, digest)
+        if existing&.persisted?
+          create_external_id_mapping!(
+            existing,
+            external_id,
+            attributes[:external_sku] || attributes["external_sku"]
+          )
+          return Result.new(success: true, variant: existing, action: :linked, error: nil)
+        end
+      end
 
       # IDEMPOTENT: Creăm mapping-ul dacă avem o variantă PERSISTATĂ
       # GUARD: result.variant.persisted? previne crash pe RecordNotSaved când
@@ -1474,7 +1626,28 @@ module Imports
         end
       end
 
-      result
+      # RF1 FIX: Normalizăm ÎNTOTDEAUNA la Imports::VariantSyncService::Result
+      # CreateOrReactivateService returnează propriul Result type care e "duck-type compatible"
+      # dar poate cauza probleme la: case result.class, serializări, type checking (Sorbet/RBS)
+      Result.new(
+        success: result.success,
+        variant: result.variant,
+        action: result.action,
+        error: result.error
+      )
+    end
+
+    # Deterministic lookup (same semantics as CreateOrReactivateService#find_existing_variant)
+    # Folosit pentru idempotency hardening când create/reactivate returnează :conflict cu variant nil
+    def find_existing_variant_for_product(product, digest)
+      scope = Variant.where(product_id: product.id)
+      if digest.nil?
+        scope.find_by(options_digest: nil, status: :active) ||
+          scope.where(options_digest: nil).order(:id).first
+      else
+        scope.find_by(options_digest: digest, status: :active) ||
+          scope.where(options_digest: digest).order(:id).first
+      end
     end
 
     def create_external_id_mapping!(variant, external_id, external_sku)
@@ -1548,7 +1721,30 @@ module Imports
                    "nu produsului #{expected_product.id}. Verifică configurarea feed-ului."
           )
         end
-        return Result.new(success: true, variant: existing.variant, action: :linked, error: nil)
+
+        # FIX 8 (V8.0.2): Returnăm :conflict în loc de :linked
+        # RAȚIUNE: Am ajuns aici pentru că am primit RecordNotUnique DUPĂ ce find_mapping
+        # a returnat nil (altfel n-am fi încercat INSERT). Deci cineva a creat mapping-ul
+        # între timp (race condition).
+        #
+        # PROBLEMA CU :linked: Nu putem ști sigur dacă mapping-ul nou e pentru variant-ul
+        # pe care noi încercam să-l creăm sau pentru altul (tranzacția noastră a fost rollback-uită).
+        # Returnând success: true am masca un potențial conflict real.
+        #
+        # SOLUȚIE: Returnăm success: false cu action: :conflict. Apelantul poate:
+        # 1. Reîncerca operația (va găsi mapping-ul existent și va merge pe update_existing)
+        # 2. Loga și ignora dacă e idempotent job
+        # 3. Escalada dacă e operație critică
+        Rails.logger.warn(
+          "[VariantSyncService] Race condition on external_id #{external_id}: " \
+          "mapping created by concurrent worker for variant #{existing.variant_id}. Returning :conflict for safety."
+        )
+        return Result.new(
+          success: false,
+          variant: existing.variant,
+          action: :conflict,
+          error: "External ID #{external_id} a fost mapat concurent la varianta #{existing.variant_id}. Reîncearcă operația."
+        )
       end
 
       # Mapping-ul NU există, deci RecordNotUnique e de la altceva (SKU, digest, etc.)
@@ -1958,10 +2154,14 @@ module Variants
 
     # Legacy lock - ::bigint explicit pentru a elimina ambiguitate de casting
     # DEPRECATION: Elimină când dual_lock_enabled = false în prod 14+ zile
+    #              și legacy_lock_call metric = 0 (nu mai există noduri vechi în fleet)
     # MULTI-DB SAFETY: advisory_lock_connection (din concern) în loc de ActiveRecord::Base.connection
     def acquire_external_id_lock_legacy(source, source_account, external_id)
       key = Zlib.crc32("#{source}|#{source_account}|#{external_id}")
       advisory_lock_connection.execute("SELECT pg_advisory_xact_lock(#{key}::bigint)")
+
+      # RF2: Metrică separată pentru legacy lock - utilă pentru deprecation tracking
+      VariantSyncConfig.increment_legacy_lock_counter
     end
 
     # New lock - int32() din AdvisoryLockKey concern
@@ -2155,6 +2355,49 @@ Câmpul `variants.external_sku` rămâne cu **unique index global** și este con
 - Poate fi folosit pentru identificatori manuali/admin
 - Dacă nu mai e nevoie de el, poate fi deprecat în viitor (drop index + column)
 
+### Design Assumptions (Multi-DB) - H2
+
+```
+═══════════════════════════════════════════════════════════════════════════
+H2: MULTI-DB ASSUMPTION - NU EXISTĂ ATOMICITATE CROSS-DB
+═══════════════════════════════════════════════════════════════════════════
+
+CONTEXT:
+Codul suportă scenarii unde VariantExternalId și Variant sunt pe DB-uri diferite
+(ex: sharding, database-per-service, role switching).
+
+LIMITARE FUNDAMENTALĂ:
+- VariantExternalId.transaction + Variant.transaction (pe DB-uri diferite) = NU E ACID
+- "All-or-nothing" NU e garantat cross-DB
+- 2PC (two-phase commit) NU e implementat
+
+CE FACEM ÎN LOC:
+1. IDEMPOTENCY: Operațiile pot fi re-rulate safe (find_or_create patterns)
+2. ADVISORY LOCKS: Serializăm pe external_id pentru a reduce race conditions
+3. SAVEPOINTS: Izolăm erorile DB pentru a nu "otrăvi" tranzacții externe
+4. FALLBACK LOGIC: handle_unique_violation recuperează din race conditions
+
+SCENARII DE FAILURE POSIBILE:
+1. Variant creat dar mapping VEI fail → varianta există fără mapping
+   RECOVERY: Re-rulează import-ul (idempotent)
+
+2. Mapping creat dar Variant update fail → mapping pointează la date vechi
+   RECOVERY: Re-rulează import-ul (update va funcționa)
+
+3. Crash între operații → stare parțial actualizată
+   RECOVERY: Re-rulează import-ul (idempotent)
+
+RECOMANDARE PROD:
+- Dacă single-DB: totul e ACID, fără griji
+- Dacă multi-DB: monitorizează discrepanțe și rulează reconciliation jobs periodic
+- Logurile de warning (product_mismatch, options mismatch) ajută la detectare
+
+NU VĂ AȘTEPTAȚI LA:
+- Rollback automat cross-DB
+- Comportament atomic când DB-urile sunt diferite
+═══════════════════════════════════════════════════════════════════════════
+```
+
 ---
 
 ## 5c. TESTE DE REGRESIE (Lock Safety)
@@ -2297,6 +2540,42 @@ RSpec.describe IdSanitizer do
         expect { subject }.to raise_error(ArgumentError, /ID must be positive integer, got: -5/)
       end
     end
+
+    # H1 HARDENING: Ruby Integer() acceptă forme "surpriză"
+    context "with hex string (H1)" do
+      let(:input) { ["0x10"] }
+      it "raises ArgumentError (no hex allowed)" do
+        expect { subject }.to raise_error(ArgumentError, /decimal digits only/)
+      end
+    end
+
+    context "with binary string (H1)" do
+      let(:input) { ["0b101"] }
+      it "raises ArgumentError (no binary allowed)" do
+        expect { subject }.to raise_error(ArgumentError, /decimal digits only/)
+      end
+    end
+
+    context "with octal string (H1)" do
+      let(:input) { ["0o17"] }
+      it "raises ArgumentError (no octal allowed)" do
+        expect { subject }.to raise_error(ArgumentError, /decimal digits only/)
+      end
+    end
+
+    context "with underscore separator (H1)" do
+      let(:input) { ["1_000"] }
+      it "raises ArgumentError (no underscore allowed)" do
+        expect { subject }.to raise_error(ArgumentError, /decimal digits only/)
+      end
+    end
+
+    context "with leading zero (H1)" do
+      let(:input) { ["0123"] }
+      it "raises ArgumentError (no leading zero - could be octal)" do
+        expect { subject }.to raise_error(ArgumentError, /decimal digits only/)
+      end
+    end
   end
 
   describe "#sanitize_ids (instance method)" do
@@ -2425,13 +2704,18 @@ RSpec.describe VariantSyncConfig do
         puts ""
         puts "CRITERIU DE ELIMINARE:"
         puts "1. 100% fleet pe V7.9.7+"
-        puts "2. variant_sync.legacy_lock_acquired = 0 timp de 14+ zile"
+        puts "2. variant_sync.legacy_lock_call = 0 timp de 14+ zile"
         puts "3. Nicio instanță < V7.9.7 în monitoring"
+        puts ""
+        puts "METRICI DISPONIBILE:"
+        puts "- variant_sync.dual_lock_call  = volum total (normal să fie >0)"
+        puts "- variant_sync.legacy_lock_call = doar legacy (criteriu deprecation)"
         puts ""
         puts "Când criteriile sunt îndeplinite:"
         puts "1. Set VARIANT_SYNC_DUAL_LOCK_ENABLED=false"
-        puts "2. Monitorizează 14 zile"
-        puts "3. Șterge metodele *_legacy și acest flag"
+        puts "2. Monitorizează 14 zile - legacy_lock_call ar trebui să fie 0"
+        puts "3. Dacă legacy_lock_call > 0, există noduri vechi în fleet"
+        puts "4. Șterge metodele *_legacy și acest flag"
         puts "=" * 70 + "\n"
       else
         puts "\n" + "=" * 70
@@ -4203,4 +4487,4 @@ Verdict actualizat
 GO deploy pentru V8.0.1 pe Postgres (din perspectiva celor 3 bug-uri fixate + lock safety).
 Singurele lucruri pe care le-aș mai “șlefui” înainte de a-l numi 100% “ops-friendly” sunt cele 2 de mai sus (metric naming + text/version consistency).
 
-Dacă vrei, îți pot da un checklist ultra-scurt “pre-deploy / post-deploy monitoring” adaptat exact la ce ai deja (migrări M1–M5 + serviciile de import/admin/checkout) — fără să adaug observability pack complet.
+Dacă vrei, îți pot da un checklist ultra-scurt “pre-deploy / post-deploy monitoring” adaptat exact la ce ai deja (migrări M1–M5 + serviciile de import/admin/checkout) — fără să adaug observability pack complet.  

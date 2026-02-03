@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_23_162428) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_02_220013) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -146,6 +146,39 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_23_162428) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "option_types", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "presentation"
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_option_types_on_name", unique: true
+  end
+
+  create_table "option_value_variants", force: :cascade do |t|
+    t.bigint "variant_id", null: false
+    t.bigint "option_value_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["option_value_id"], name: "idx_ovv_option_value"
+    t.index ["option_value_id"], name: "index_option_value_variants_on_option_value_id"
+    t.index ["variant_id", "option_value_id"], name: "idx_unique_ovv", unique: true
+    t.index ["variant_id"], name: "idx_ovv_variant"
+    t.index ["variant_id"], name: "index_option_value_variants_on_variant_id"
+  end
+
+  create_table "option_values", force: :cascade do |t|
+    t.bigint "option_type_id", null: false
+    t.string "name", null: false
+    t.string "presentation"
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["option_type_id", "name"], name: "index_option_values_on_option_type_id_and_name", unique: true
+    t.index ["option_type_id"], name: "idx_ov_type"
+    t.index ["option_type_id"], name: "index_option_values_on_option_type_id"
+  end
+
   create_table "order_items", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "product_id"
@@ -157,8 +190,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_23_162428) do
     t.string "product_name"
     t.decimal "unit_price"
     t.decimal "total_price"
+    t.bigint "variant_id"
+    t.string "variant_sku"
+    t.text "variant_options_text"
+    t.decimal "vat_rate_snapshot", precision: 5, scale: 2
+    t.string "currency", default: "RON"
+    t.decimal "line_total_gross", precision: 10, scale: 2
+    t.decimal "tax_amount", precision: 10, scale: 2
     t.index ["order_id"], name: "index_order_items_on_order_id"
     t.index ["product_id"], name: "index_order_items_on_product_id"
+    t.index ["variant_id"], name: "index_order_items_on_variant_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -201,6 +242,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_23_162428) do
     t.string "stripe_session_id"
     t.index ["coupon_id"], name: "index_orders_on_coupon_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "product_option_types", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.bigint "option_type_id", null: false
+    t.integer "position", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["option_type_id"], name: "index_product_option_types_on_option_type_id"
+    t.index ["product_id", "option_type_id"], name: "idx_unique_product_option_type", unique: true
+    t.index ["product_id"], name: "idx_pot_product"
+    t.index ["product_id"], name: "index_product_option_types_on_product_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -266,12 +319,60 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_23_162428) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "variant_external_ids", force: :cascade do |t|
+    t.bigint "variant_id", null: false
+    t.string "source", null: false
+    t.string "source_account", default: "default", null: false
+    t.string "external_id", null: false
+    t.string "external_sku"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source", "source_account", "external_id"], name: "idx_unique_source_account_external_id", unique: true
+    t.index ["source", "source_account"], name: "idx_vei_source_account"
+    t.index ["source"], name: "idx_vei_source"
+    t.index ["variant_id"], name: "idx_vei_variant"
+    t.check_constraint "btrim(external_id::text) <> ''::text", name: "chk_vei_external_id_not_empty"
+    t.check_constraint "external_id::text = btrim(external_id::text)", name: "chk_vei_external_id_normalized"
+    t.check_constraint "source::text ~ '^[a-z][a-z0-9_]{0,49}$'::text", name: "chk_vei_source_format"
+    t.check_constraint "source_account::text ~ '^[a-z][a-z0-9_]{0,49}$'::text", name: "chk_vei_source_account_format"
+  end
+
+  create_table "variants", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.string "sku", null: false
+    t.decimal "price", precision: 10, scale: 2, default: "0.0", null: false
+    t.integer "stock", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.text "options_digest"
+    t.string "external_sku"
+    t.decimal "vat_rate", precision: 5, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_sku"], name: "idx_unique_external_sku", unique: true, where: "(external_sku IS NOT NULL)"
+    t.index ["product_id", "options_digest"], name: "idx_unique_active_options_per_product", unique: true, where: "((options_digest IS NOT NULL) AND (status = 0))"
+    t.index ["product_id", "sku"], name: "idx_unique_sku_per_product", unique: true
+    t.index ["product_id"], name: "idx_unique_active_default_variant", unique: true, where: "((options_digest IS NULL) AND (status = 0))"
+    t.index ["product_id"], name: "index_variants_on_product_id"
+    t.index ["status"], name: "index_variants_on_status"
+    t.check_constraint "price IS NOT NULL AND price >= 0::numeric", name: "chk_variants_price_positive"
+    t.check_constraint "status = ANY (ARRAY[0, 1])", name: "chk_variants_status_enum"
+    t.check_constraint "stock IS NOT NULL AND stock >= 0", name: "chk_variants_stock_positive"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "cart_snapshots", "users"
   add_foreign_key "invoices", "orders"
+  add_foreign_key "option_value_variants", "option_values", on_delete: :restrict
+  add_foreign_key "option_value_variants", "variants", on_delete: :cascade
+  add_foreign_key "option_values", "option_types"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
+  add_foreign_key "order_items", "variants", on_delete: :nullify
   add_foreign_key "orders", "coupons"
   add_foreign_key "orders", "users"
+  add_foreign_key "product_option_types", "option_types"
+  add_foreign_key "product_option_types", "products"
+  add_foreign_key "variant_external_ids", "variants", on_delete: :cascade
+  add_foreign_key "variants", "products", on_delete: :restrict
 end

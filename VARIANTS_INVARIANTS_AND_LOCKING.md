@@ -9,6 +9,7 @@ Este intenționat orientat pe **de ce** (raționamente, contracte, riscuri), nu 
 ## Cum să folosești acest document
 
 - Citește o dată cap-coadă ca onboarding, apoi folosește-l ca referință când atingi Product/Variant, Order/Checkout sau feed-uri.
+- Pentru detalii de implementare (migrații, modele, servicii, teste) vezi: `PLAN_VARIANTE9.md`.
 - Când te blochezi într-o decizie, începe de la: **ce invariantă trebuie protejată** și **ce lock-uri concurează**.
 - Dacă un writer atinge mai mult de un domeniu, tratează-l ca risc ridicat și cere review de la cineva care cunoaște sistemul.
 
@@ -55,8 +56,10 @@ Este intenționat orientat pe **de ce** (raționamente, contracte, riscuri), nu 
 - **A** = advisory lock (lock logic) pe o cheie externă (de ex. un external ID), folosit pentru coordonare între writer-e.
 - **P** = lock pe Product (ancora domeniului de catalog).
 - **V** = lock pe una sau mai multe variante.
+- **V*** = lock pe mai multe variante, într-o ordine deterministă (de obicei crescător după `id`).
 - **O** = lock pe Order/Cart (ancora domeniului de checkout).
 - **I** = lock pe liniile comenzii (order items).
+- **OVV/VEI** = resurse derivate (de exemplu join-ul opțiuni↔variante și mapping-ul external IDs), care se ating după `V`.
 
 Notă: abrevierile sunt doar o unealtă de comunicare; ideea importantă este **ordinea stabilă** în care sunt blocate resursele.
 
@@ -152,6 +155,8 @@ O invariantă este o regulă care trebuie să fie adevărată mereu (sau, mai pr
 - Protejează detecția conflictelor. Dacă aceeași combinație poate fi reprezentată în două feluri, atunci două variante pot părea diferite când de fapt nu sunt.
 - Dacă se încalcă: unicitatea „pare” respectată, dar în realitate ai duplicate semantice; bug-urile apar când interfețe diferite calculează diferit combinația.
 
+Intuiție practică: acest contract se ține mult mai ușor dacă digest-ul are un singur „source of truth” de calcul (de exemplu într-un set de servicii), nu mai multe locuri care re-implementează „aproape la fel”.
+
 ### 2.2 Invariante de selecție (default) și stare (active/inactive)
 
 **Invariantă: există cel mult o variantă default activă per produs.**
@@ -246,6 +251,8 @@ Asta nu înseamnă neapărat că varianta nu se poate schimba în catalog, ci c�
 
 - Protejează sistemul intern de reîncercări, duplicări și întârzieri.
 - Dacă se încalcă: același eveniment aplicat de două ori produce dublări, drift, sau stări imposibile; bug-urile apar doar sub load sau incidente de integrare.
+
+Notă (pragmatic): dacă există identificatori „legacy” cu unicitate globală (ex: un `external_sku` istoric), tratează-i ca manual/admin. Feed-urile ar trebui să se bazeze pe un mapping dedicat per (sursă, cont), altfel nu poți suporta multi-source + multi-account fără ambiguități.
 
 ### 2.8 Permis vs interzis (în termeni de efect)
 
@@ -345,6 +352,8 @@ Simptomele clasice când granițele se rup:
 - **Row-level locks**: blocări pe rânduri (de exemplu pe un Product, o Variantă, un Order). Sunt mecanismul standard pentru a preveni scrieri concurente care ar încălca invarianta.
 - **Advisory locks (A)**: blocări logice pe o cheie (de exemplu un external ID) pentru coordonarea writer-elor care altfel nu ar concura pe același rând, dar ar produce efecte conflictuale (dubluri, mapping-uri ambigue).
 
+Notă importantă: în Postgres, advisory lock-urile de tip „transaction-scoped” există doar cât durează tranzacția. Dacă le iei în afara unei tranzacții explicite (sau pe altă conexiune decât restul operației), efectul poate deveni „zero” din perspectiva serializării.
+
 ### 4.3 Ce este lock ordering
 
 Lock ordering este o regulă de disciplină: când o operație are nevoie să blocheze mai multe resurse, o face mereu în aceeași ordine canonică. Scopul nu este „performanță”, ci **evitarea deadlock-urilor** și menținerea predictibilității sub concurență.
@@ -367,7 +376,7 @@ Regula conceptuală pentru writer-ele care operează în catalog:
 1) Dacă operația depinde de un external ID (sau altă cheie externă care poate produce dubluri), ia mai întâi un **advisory lock (A)** pe cheia respectivă.
 2) Ia lock pe **Product (P)** (ancora care stabilește „despre ce produs vorbim”).
 3) Ia lock pe **variante (V)** implicate, întotdeauna într-o **ordine deterministă** (ex: crescător după id) dacă sunt mai multe.
-4) Abia apoi atingi **resurse derivate** (de exemplu mapping-uri, agregări, alte entități dependente), astfel încât să nu creezi cicluri inversând ordinea.
+4) Abia apoi atingi **resurse derivate** (de exemplu join-ul opțiuni↔variante, mapping-uri de external IDs, agregări), astfel încât să nu creezi cicluri inversând ordinea.
 
 Intuiție: product-ul este contextul. Dacă începi de la o variantă și abia apoi „urci” la product, concurezi cu fluxuri care pornesc de la product și coboră către variante; asta e sursă clasică de deadlock.
 
@@ -411,9 +420,24 @@ Două operații ating aceleași două variante, dar în ordine diferită. Fiecar
 
 **Tiparul 3: advisory lock luat târziu**
 
-Un flux ia lock pe product/variant și abia apoi încearcă să ia advisory lock pe o cheie externă (de exemplu un external ID). În paralel, alt flux ia mai întâi advisory lock (A), apoi încearcă să ia product/variant. Rezultatul poate fi un ciclu între A și lock-urile de catalog.
+Un flux ia lock pe catalog (de exemplu `P` sau `V`) și abia apoi încearcă să ia advisory lock (A) pe aceeași cheie externă (de exemplu un external ID). În paralel, alt flux ia mai întâi advisory lock (A), apoi încearcă să ia lock-urile de catalog. Rezultatul poate fi un ciclu între A și lock-urile de catalog.
 
 Acesta este motivul pentru care ordinea canonică din catalog spune: dacă ai nevoie de A, îl iei primul.
+
+### 4.9 Matrice (exemple) de secvențe de lock
+
+Aceasta nu e o listă exhaustivă, ci un „cheat sheet” pentru a clasifica rapid un writer și a vedea dacă secvența lui e compatibilă cu restul sistemului:
+
+| Tip de writer | Secvență (conceptual) | Observație |
+|---|---|---|
+| Catalog: create/reactivate/update opțiuni | `P → V` | Catalog-only; evită să pornești din `V` |
+| Catalog: operație pe set de variante | `P → V*` | `V*` trebuie să fie ordonat determinist |
+| Feed: create/attach pe external ID | `A → P → V` | `A` serializează pe cheie externă |
+| Feed: update pe variantă deja determinată | `A → V` | Safe doar dacă nu ajungi ulterior să ai nevoie de `P` |
+| Admin: link/unlink external ID (mapping only) | `A → VEI` | Ideal nu ia `V` dacă nu e necesar |
+| Checkout: finalize/consume stoc | `O → I → V*` | Domeniu separat; nu ia `P` |
+| Order: cancel/refund/restock | `O → I → V*` | Aceleași reguli ca finalize |
+| Bulk updates pe variante | `V*` | Compatibil cu `P → V*` și `O → I → V*` (wait-only) |
 
 ---
 
@@ -428,10 +452,13 @@ Această regulă există pentru că varianta este punctul comun cel mai frecvent
 - admin/feeds pornesc dinspre catalog;
 - checkout pornește dinspre comandă.
 
+Dacă (rar) chiar trebuie să atingi ambele domenii în același writer, tratează designul ca high-risk și stabilește o ordine explicită a ancorelor (un exemplu: `P → O → I → V*`, cu `V*` ultimul).
+
 ### 5.2 Ce este interzis (pentru că introduce cicluri)
 
 - Să blochezi o variantă și apoi să blochezi product-ul (V înainte de P).
 - Să blochezi o variantă și apoi să blochezi comanda/liniile ei (V înainte de O/I).
+- Să blochezi catalogul și apoi să iei advisory lock pe aceeași cheie externă (P înainte de A).
 - Să blochezi multiple variante fără o ordine deterministă (ordine „aleatoare” din execuție).
 
 Aceste tipare creează exact condițiile în care două fluxuri pot forma un ciclu: unul ține V și așteaptă P/O, iar altul ține P/O și așteaptă V.
@@ -466,6 +493,8 @@ De ce contează:
 - Când trebuie blocate mai multe rânduri (de exemplu mai multe variante) într-o ordine deterministă, presupunem că acea ordine este respectată consecvent la achiziția lock-urilor.
 
 Intuiție: dacă două tranzacții încearcă să blocheze același set de variante în aceeași ordine canonică, nu se poate forma un ciclu. Una va aștepta după cealaltă, dar nu vor ajunge să se aștepte reciproc.
+
+Practic: orice lock pe un set de variante trebuie să fie determinist (de obicei „după id”). Fără o ordine explicită, ordinea poate varia (plan de execuție, caching, diferențe de date) și reintroduce deadlock-uri intermitente.
 
 Ce s-ar rupe dacă se schimbă:
 

@@ -3,6 +3,11 @@ class Product < ApplicationRecord
   has_and_belongs_to_many :categories
   has_many :order_items, dependent: :restrict_with_exception
 
+  # Variant system associations
+  has_many :variants, dependent: :restrict_with_exception
+  has_many :product_option_types, -> { order(:position) }, dependent: :destroy
+  has_many :option_types, through: :product_option_types
+
   enum stock_status: { in_stock: "in_stock", out_of_stock: "out_of_stock" }
 
   validates :name, :slug, :price, :sku, presence: true
@@ -18,6 +23,21 @@ class Product < ApplicationRecord
     download: "download",
     external_link: "external_link"
   }
+
+  # Archive product: deactivate all variants, set status to 'archived'.
+  # LOCK ORDER: P -> V* (ORDER BY id)
+  def archive!
+    transaction do
+      lock!
+      locked_variant_ids = variants.order(:id).lock.pluck(:id)
+      Variant.where(id: locked_variant_ids).update_all(status: Variant.statuses[:inactive]) if locked_variant_ids.any?
+      update!(status: 'archived')
+    end
+  end
+
+  def archived?
+    status == 'archived'
+  end
 
   def price_breakdown
     vat_rate = vat.to_f
