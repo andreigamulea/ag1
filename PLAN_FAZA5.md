@@ -402,3 +402,51 @@ Cele 15 verificari critice aplicate la implementarea reala:
 **Ultima actualizare:** FAZA 5 PLAN COMPLET
 
 **Rezultat local:** 344 teste, 0 failures. Codul este ready pentru deploy.
+
+---
+
+## 9. SUGESTII PENTRU VIITOR
+
+### Prioritate ridicata (cand ai feed extern)
+
+| Sugestie | Cand | Ce faci |
+|----------|------|---------|
+| **M5 Backfill migration** | Cand importi din surse externe (eMAG, ERP) | Migreaza `variants.external_sku` → `variant_external_ids` cu `source='legacy'` |
+| **Import job/rake task** | Cand ai feed extern | Scrii un job care apeleaza `Imports::VariantSyncService.call` per produs din feed |
+
+### Prioritate medie (cand upgrade-ezi infrastructura)
+
+| Sugestie | Cand | Ce faci |
+|----------|------|---------|
+| **CI/CD pipeline** | Cand adaugi GitHub Actions sau similar | Ruleaza `bundle exec rspec` + `rake variants:audit` automat la fiecare push |
+| **Staging environment** | Cand upgrade-ezi planul Render | Testeaza migratii si cod pe staging inainte de production |
+| **StatsD/Datadog** | Cand ai nevoie de monitoring | Adaugi gem `statsd-instrument`, timing metrics in servicii critice (`VariantSyncService`, `FinalizeService`) |
+| **SimpleCov** | Cand ai CI/CD | Adaugi gem `simplecov` in group :test, confirmi coverage >95% pe servicii |
+
+### Prioritate scazuta (nice-to-have)
+
+| Sugestie | Detalii |
+|----------|---------|
+| **JSON output la `rake variants:audit`** | Adaugi parametru `[json]` pentru integrare cu monitoring extern |
+| **README cu diagrame lock order** | Mermaid diagrams pentru lock ordering — util dar deja documentat in VARIANTS_INVARIANTS_AND_LOCKING.md |
+| **Orders::ConcurrencyPolicy** | Serviciu separat pentru policy concurenta comenzi — util la volum mare, acum logica e in FinalizeService/RestockService |
+
+### Nu se recomanda
+
+| Sugestie | De ce nu |
+|----------|----------|
+| Batching (find_in_batches) in BulkLockingService | Incompatibil cu lock ordering — trebuie lock pe toate variantele intr-o tranzactie |
+| Fallback log la StatsD absent | Ar polua logurile cu mesaje la fiecare apel; `defined?(StatsD)` e suficient |
+| Test multi-thread serialization | Flaky in CI, PostgreSQL garanteaza serializarea advisory locks |
+
+---
+
+**Verificare post-deploy in Render Shell:**
+```
+bundle exec rails db:migrate:status
+bundle exec rails variants:audit
+```
+
+
+
+

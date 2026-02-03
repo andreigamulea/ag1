@@ -32,8 +32,8 @@ header {
 /* Pentru conținut centrat pe ecrane mari */
 @media (min-width: 1320px) {
   header {
-    padding-left: calc((100% - 1280px) / 2 + 20px);
-    padding-right: calc((100% - 1280px) / 2 + 20px);
+    padding-left: calc((100% - 1330px) / 2 + 20px);
+    padding-right: calc((100% - 1330px) / 2 + 20px);
   }
 }
 
