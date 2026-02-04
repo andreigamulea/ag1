@@ -403,11 +403,41 @@
   color: var(--color-gray-600);
 }
 
+/* Password toggle eye */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 2.5rem;
+}
+
+.password-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-gray-500);
+  display: flex;
+  align-items: center;
+  transition: color var(--transition-fast);
+}
+
+.password-eye:hover {
+  color: var(--color-primary);
+}
+
 /* Inputs */
 #login-page input[type="email"],
 #login-page input[type="password"],
+#login-page input[type="text"],
 #signup-page input[type="email"],
 #signup-page input[type="password"],
+#signup-page input[type="text"],
 #forgot-password-page input[type="email"] {
   -webkit-appearance: none;
   appearance: none;
@@ -425,8 +455,10 @@
 
 #login-page input[type="email"]:focus,
 #login-page input[type="password"]:focus,
+#login-page input[type="text"]:focus,
 #signup-page input[type="email"]:focus,
 #signup-page input[type="password"]:focus,
+#signup-page input[type="text"]:focus,
 #forgot-password-page input[type="email"]:focus {
   border-color: var(--color-primary-dark);
   outline: none;
