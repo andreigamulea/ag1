@@ -9,7 +9,7 @@
       <%= render "devise/shared/error_messages", resource: resource %>
 
       <div class="field">
-        <%= f.label :email %>
+        <%= f.label :email, "Email" %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
       </div>
 
@@ -21,7 +21,7 @@
       </div>
 
       <div class="field">
-        <%= f.label :password_confirmation %>
+        <%= f.label :password_confirmation, "Confirmare parolă" %>
         <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input-style" %>
       </div>
 
