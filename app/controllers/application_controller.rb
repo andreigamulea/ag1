@@ -26,6 +26,8 @@ class ApplicationController < ActionController::Base
 
   # Identifică dacă pagina e de tip magazin (front-end)
   def is_shop_page?
+    # Devise pages (login, forgot password, etc.) use shop layout
+    return true if devise_controller?
     # Override în controllere specifice de shop
     false
   end

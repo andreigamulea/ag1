@@ -1,33 +1,35 @@
 <%= render 'shared/noindex' %>
-<div id="login-page" class="container_content">
-  <h1>
-    Autentificare
-  </h1>
+<div class="auth-wrapper">
+  <%= render "devise/shared/auth_benefits" %>
 
-  <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-    <div class="field">
-      <%= f.label :email %>
-      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
-    </div>
+  <div id="login-page" class="container_content">
+    <h1>Autentificare</h1>
 
-    <div class="field">
-      <%= f.label :password %>
-      <%= f.password_field :password, autocomplete: "current-password", class: "input-style" %>
-    </div>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+      <div class="field">
+        <%= f.label :email %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
+      </div>
 
-    <% if devise_mapping.rememberable? %>
-      <div class="remember">
-        <%= f.check_box :remember_me %>
-        <%= f.label :remember_me, "Autentificare automată" %>
+      <div class="field">
+        <%= f.label :password %>
+        <%= f.password_field :password, autocomplete: "current-password", class: "input-style" %>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <div class="remember">
+          <%= f.check_box :remember_me %>
+          <%= f.label :remember_me, "Autentificare automată" %>
+        </div>
+      <% end %>
+
+      <div class="actions" style="margin-top: 20px;">
+        <%= f.submit "Intră în cont", class: "link-button" %>
       </div>
     <% end %>
 
-    <div class="actions" style="margin-top: 20px;">
-      <%= f.submit "Intră în cont", class: "link-button" %>
+    <div class="devise-links special">
+      <%= render "devise/shared/links" %>
     </div>
-  <% end %>
-
-  <div class="devise-links special">
-    <%= render "devise/shared/links" %>
   </div>
 </div>

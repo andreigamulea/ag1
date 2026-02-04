@@ -1,33 +1,37 @@
 <%= render 'shared/noindex' %>
-<div id="signup-page" class="container_content">
-  <h1>Creare cont</h1>
+<div class="auth-wrapper">
+  <%= render "devise/shared/auth_benefits" %>
 
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-    <%= render "devise/shared/error_messages", resource: resource %>
+  <div id="signup-page" class="container_content">
+    <h1>Creare cont</h1>
 
-    <div class="field">
-      <%= f.label :email %>
-      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="field">
+        <%= f.label :email %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :password do %>
+          Parolă <em>(<%= @minimum_password_length %> caractere minim)</em>
+        <% end %>
+        <%= f.password_field :password, autocomplete: "new-password", class: "input-style" %>
+      </div>
+
+      <div class="field">
+        <%= f.label :password_confirmation %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input-style" %>
+      </div>
+
+      <div class="actions" style="margin-top: 20px;">
+        <%= f.submit "Creează cont", class: "link-button" %>
+      </div>
+    <% end %>
+
+    <div class="devise-links special">
+      <%= render "devise/shared/links" %>
     </div>
-
-    <div class="field">
-      <%= f.label :password do %>
-        Parolă <em>(<%= @minimum_password_length %> caractere minim)</em>
-      <% end %>
-      <%= f.password_field :password, autocomplete: "new-password", class: "input-style" %>
-    </div>
-
-    <div class="field">
-      <%= f.label :password_confirmation %>
-      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input-style" %>
-    </div>
-
-    <div class="actions" style="margin-top: 20px;">
-      <%= f.submit "Creează cont", class: "link-button" %>
-    </div>
-  <% end %>
-
-  <div class="devise-links special">
-    <%= render "devise/shared/links" %>
   </div>
 </div>

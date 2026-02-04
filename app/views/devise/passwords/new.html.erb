@@ -1,23 +1,27 @@
 <%= render 'shared/noindex' %>
-<div id="forgot-password-page" class="container_content">
-  <h1>Resetare parolă</h1>
+<div class="auth-wrapper">
+  <%= render "devise/shared/auth_benefits" %>
 
-  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-    <%= render "devise/shared/error_messages", resource: resource %>
+  <div id="forgot-password-page" class="container_content">
+    <h1>Resetare parola</h1>
 
-    <div class="field">
-      <%= f.label :email do %>
-        Email <em>(obligatoriu)</em>
-      <% end %>
-      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="field">
+        <%= f.label :email do %>
+          Email <em>(obligatoriu)</em>
+        <% end %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
+      </div>
+
+      <div class="actions" style="margin-top: 20px;">
+        <%= f.submit "Trimite instrucțiuni", class: "link-button" %>
+      </div>
+    <% end %>
+
+    <div class="devise-links special">
+      <%= render "devise/shared/links" %>
     </div>
-
-    <div class="actions" style="margin-top: 20px;">
-      <%= f.submit "Trimite instrucțiuni", class: "link-button" %>
-    </div>
-  <% end %>
-
-  <div class="devise-links special">
-    <%= render "devise/shared/links" %>
   </div>
 </div>
