@@ -103,8 +103,8 @@
   --z-modal: 1002;
 
   /* Container widths */
-  --container-max: 1280px;
-  --container-shop-max: 1280px;
+  --container-max: 1380px;
+  --container-shop-max: 1380px;
   --container-admin-max: 1920px;
   --container-sm: 600px;
   --container-md: 800px;
