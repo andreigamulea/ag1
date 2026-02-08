@@ -57,7 +57,7 @@ module Imports
       handle_unique_violation(e)
     rescue ActiveRecord::RecordInvalid => e
       # Rails validation (uniqueness) fires before DB constraint
-      if e.message =~ /external.*taken/i
+      if e.message =~ /external.*(taken|folosit)/i
         Result.new(success: false, variant: nil, action: :conflict, error: "External ID mapping conflict: #{e.message}")
       else
         Result.new(success: false, variant: nil, action: :invalid, error: "Validation failed: #{e.message}")

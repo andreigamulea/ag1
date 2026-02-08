@@ -10,12 +10,25 @@ RSpec.describe Product, type: :model do
     it 'requires name' do
       product = build(:product, name: nil)
       expect(product).not_to be_valid
-      expect(product.errors[:name]).to include("can't be blank")
+      expect(product.errors[:name]).to include("nu poate fi gol")
     end
 
     it 'requires slug' do
-      product = build(:product, slug: nil)
+      product = build(:product, name: nil, slug: nil)
       expect(product).not_to be_valid
+      expect(product.errors[:slug]).to be_present
+    end
+
+    it 'auto-generates slug from name when blank' do
+      product = build(:product, name: 'Carte Ayurveda', slug: nil)
+      product.valid?
+      expect(product.slug).to eq('carte-ayurveda')
+    end
+
+    it 'does not overwrite manually set slug' do
+      product = build(:product, name: 'Carte Ayurveda', slug: 'custom-slug')
+      product.valid?
+      expect(product.slug).to eq('custom-slug')
     end
 
     it 'requires price' do

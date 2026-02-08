@@ -64,7 +64,7 @@ resources :users, except: [:edit, :update] do
   end
 end
   
-  resources :carti, only: [:index, :show]
+  resources :carti, only: [:index, :show], param: :slug
 
   get "/mem", to: "monitoring#mem", as: :mem
   get "/ram_logs", to: "memory_logs#index", as: :ram_logs

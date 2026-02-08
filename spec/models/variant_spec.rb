@@ -10,7 +10,7 @@ RSpec.describe Variant, type: :model do
     it 'requires sku' do
       variant = build(:variant, sku: nil)
       expect(variant).not_to be_valid
-      expect(variant.errors[:sku]).to include("can't be blank")
+      expect(variant.errors[:sku]).to include("nu poate fi gol")
     end
 
     it 'requires unique sku within product' do
@@ -19,7 +19,7 @@ RSpec.describe Variant, type: :model do
       duplicate = build(:variant, product: product, sku: 'SKU-001')
 
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:sku]).to include('has already been taken')
+      expect(duplicate.errors[:sku]).to include('este deja folosit')
     end
 
     it 'allows same sku in different products' do

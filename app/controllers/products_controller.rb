@@ -73,10 +73,10 @@ class ProductsController < ApplicationController
 
   # DELETE /products/1 or /products/1.json
   def destroy
-    @product.destroy!
+    @product.archive!
 
     respond_to do |format|
-      format.html { redirect_to products_path, status: :see_other, notice: "Product was successfully destroyed." }
+      format.html { redirect_to products_path, status: :see_other, notice: "Produsul a fost arhivat." }
       format.json { head :no_content }
     end
   end
@@ -284,7 +284,11 @@ class ProductsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_product
-      @product = Product.find(params[:id])
+      @product = if params[:id] =~ /\A\d+\z/
+        Product.find(params[:id])
+      else
+        Product.find_by!(slug: params[:id])
+      end
     end
 
     # Only allow a list of trusted parameters through.

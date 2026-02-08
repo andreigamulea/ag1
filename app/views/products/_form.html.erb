@@ -50,7 +50,7 @@
           </div>
           <div class="form-field">
             <%= form.label :status, "Status" %>
-            <%= form.select :status, ["active", "inactive"], {}, {} %>
+            <%= form.select :status, ["active", "inactive", "archived"], {}, {} %>
           </div>
           <div class="checkbox-field" style="margin-top: 24px;">
             <%= form.check_box :featured %>
@@ -336,7 +336,7 @@
     </div>
 
     <!-- Categorii -->
-    <div class="form-section" data-controller="category-select">
+    <div class="form-section">
       <div class="section-header warning">
         🏷️ Categorii
       </div>
@@ -348,15 +348,13 @@
               <% Category.all.each do |category| %>
                 <% selected = product.category_ids.include?(category.id) %>
                 <span class="category-badge <%= selected ? 'active' : 'inactive' %>"
-                      data-id="<%= category.id %>"
-                      data-category-select-target="badge"
-                      data-action="click->category-select#toggle">
+                      data-id="<%= category.id %>">
                   <%= category.name %>
                 </span>
               <% end %>
             </div>
 
-            <div id="category-hidden-inputs" data-category-select-target="hiddenInputsWrapper">
+            <div id="category-hidden-inputs">
               <input type="hidden" name="product[category_ids][]" value="">
               <% product.category_ids.each do |cat_id| %>
                 <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">

@@ -15,7 +15,7 @@ RSpec.describe ProductOptionType, type: :model do
       duplicate = build(:product_option_type, product: product, option_type: option_type)
 
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:option_type_id]).to include('has already been taken')
+      expect(duplicate.errors[:option_type_id]).to include('este deja folosit')
     end
 
     it 'allows same option_type on different products' do

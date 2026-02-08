@@ -10,14 +10,14 @@ RSpec.describe OptionType, type: :model do
     it 'requires name' do
       option_type = build(:option_type, name: nil)
       expect(option_type).not_to be_valid
-      expect(option_type.errors[:name]).to include("can't be blank")
+      expect(option_type.errors[:name]).to include("nu poate fi gol")
     end
 
     it 'requires unique name' do
       create(:option_type, name: 'Culoare')
       duplicate = build(:option_type, name: 'Culoare')
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:name]).to include('has already been taken')
+      expect(duplicate.errors[:name]).to include('este deja folosit')
     end
   end
 

@@ -15,7 +15,7 @@ RSpec.describe OptionValueVariant, type: :model do
       duplicate = build(:option_value_variant, variant: variant, option_value: option_value)
 
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:option_value_id]).to include('has already been taken')
+      expect(duplicate.errors[:option_value_id]).to include('este deja folosit')
     end
 
     it 'allows same option_value on different variants' do

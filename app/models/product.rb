@@ -10,6 +10,8 @@ class Product < ApplicationRecord
 
   enum stock_status: { in_stock: "in_stock", out_of_stock: "out_of_stock" }
 
+  before_validation :generate_slug
+
   validates :name, :slug, :price, :sku, presence: true
 
   enum product_type: {
@@ -38,6 +40,18 @@ class Product < ApplicationRecord
   def archived?
     status == 'archived'
   end
+
+  def to_param
+    slug
+  end
+
+  private
+
+  def generate_slug
+    self.slug = name.parameterize if slug.blank? && name.present?
+  end
+
+  public
 
   def price_breakdown
     vat_rate = vat.to_f

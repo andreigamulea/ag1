@@ -74,23 +74,24 @@ SitemapGenerator::Sitemap.create do
   
   # Adauga toate produsele publice (active)
   Product.where(status: 'active').find_each do |product|
-    add carti_path(product), 
-        priority: 0.8, 
+    images = []
+    images << { loc: product.external_image_url, title: product.name } if product.external_image_url.present?
+
+    add carti_path(product),
+        priority: 0.8,
         changefreq: 'weekly',
-        lastmod: product.updated_at
-        # Optional: adauga imagini pentru Google Images
-        # images: product.external_image_url.present? ? [{ loc: product.external_image_url, title: product.name }] : []
+        lastmod: product.updated_at,
+        images: images
   end
-  
+
   # ========================================
-  # CATEGORII DINAMICE (daca sunt publice)
+  # CATEGORII DINAMICE
   # ========================================
-  
-  # Decomentati daca aveti pagini publice de categorii
-  # Category.find_each do |category|
-  #   add category_path(category), 
-  #       priority: 0.7, 
-  #       changefreq: 'weekly',
-  #       lastmod: category.updated_at
-  # end
+
+  Category.find_each do |category|
+    add carti_index_path(category: category.slug),
+        priority: 0.7,
+        changefreq: 'weekly',
+        lastmod: category.updated_at
+  end
 end

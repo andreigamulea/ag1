@@ -33,22 +33,12 @@ Disallow: /autocomplete_tara
 Disallow: /autocomplete_judet
 Disallow: /autocomplete_localitate
 
-# === Continut duplicat ===
-Disallow: /*?*
+# === Cautare si parametri admin ===
 Disallow: /search
 
 # === Newsletter admin ===
 Disallow: /home/lista_newsletter
 Disallow: /home/newsletter/
 
-# Sitemap configuration:
-# ========================
-# DEVELOPMENT (ag1-eef1.onrender.com):
-Sitemap: https://ag1-eef1.onrender.com/sitemap.xml.gz
-
-# PRODUCTION (ayus.ro):
-# Uncomment below when deploying to ayus.ro
-# Sitemap: https://ayus.ro/sitemap.xml.gz
-#
-# Note: Update this after domain migration. To regenerate sitemap:
-# RAILS_ENV=production SITE_URL=https://ayus.ro bundle exec rake sitemap:refresh
+# Sitemap
+Sitemap: https://ayus.ro/sitemap.xml.gz

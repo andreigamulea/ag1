@@ -47,7 +47,7 @@
       "@id": "<%= canonical_host %><%= carti_path(@product) %>",
       "name": "<%= @product.name %>",
       <% if @product.description.present? %>
-      "description": "<%= strip_tags(@product.description.to_s).gsub('"', '\"') %>",
+      "description": <%= strip_tags(@product.description.to_s).to_json.html_safe %>,
       <% end %>
       <% if @product.respond_to?(:sku) && @product.sku.present? %>
       "sku": "<%= @product.sku %>",

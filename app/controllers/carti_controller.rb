@@ -14,8 +14,8 @@ class CartiController < ApplicationController
       .pluck(:id)
 
     @products = Product
-      .select(:id, :name, :price, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url)
-      .where(id: base_product_ids)
+      .select(:id, :name, :slug, :price, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url)
+      .where(id: base_product_ids, status: 'active')
 
     # Filtrare adițională după categorie (opțional)
     if params[:category].present?
@@ -34,9 +34,15 @@ class CartiController < ApplicationController
   end
 
   def show
-    @product = Product
-      .select(:id, :name, :price, :description, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls, :meta_title, :meta_description, :slug)
-      .find(params[:id])
+    @product = if params[:slug] =~ /\A\d+\z/
+      Product
+        .select(:id, :name, :price, :description, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls, :meta_title, :meta_description, :slug)
+        .find(params[:slug])
+    else
+      Product
+        .select(:id, :name, :price, :description, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls, :meta_title, :meta_description, :slug)
+        .find_by!(slug: params[:slug])
+    end
 
     # Verifică dacă există produse în coș
     @cart_has_items = session[:cart].present? && session[:cart].any?
@@ -45,7 +51,7 @@ class CartiController < ApplicationController
     category_ids = @product.category_ids
     if category_ids.present?
       @similar_products = Product
-        .select(:id, :name, :price, :external_image_url)
+        .select(:id, :name, :slug, :price, :external_image_url)
         .joins(:categories)
         .where(categories: { id: category_ids })
         .where.not(id: @product.id)

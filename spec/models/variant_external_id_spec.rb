@@ -10,13 +10,13 @@ RSpec.describe VariantExternalId, type: :model do
     it 'requires source' do
       vei = build(:variant_external_id, source: nil)
       expect(vei).not_to be_valid
-      expect(vei.errors[:source]).to include("can't be blank")
+      expect(vei.errors[:source]).to include("nu poate fi gol")
     end
 
     it 'requires external_id' do
       vei = build(:variant_external_id, external_id: nil)
       expect(vei).not_to be_valid
-      expect(vei.errors[:external_id]).to include("can't be blank")
+      expect(vei.errors[:external_id]).to include("nu poate fi gol")
     end
 
     it 'requires source to be lowercase' do
@@ -48,7 +48,7 @@ RSpec.describe VariantExternalId, type: :model do
                         external_id: 'ERP-001')
 
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:external_id]).to include('has already been taken')
+      expect(duplicate.errors[:external_id]).to include('este deja folosit')
     end
 
     it 'allows same external_id on different source_accounts' do

@@ -10,6 +10,34 @@
 <% content_for :og_image do %><%= @product.external_image_url %><% end %>
 <% end %>
 
+<!-- Schema.org JSON-LD BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Acasa",
+      "item": "<%= canonical_host %>"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Carti",
+      "item": "<%= canonical_host %><%= carti_index_path %>"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": <%= @product.name.to_json.html_safe %>,
+      "item": "<%= canonical_host %><%= carti_path(@product) %>"
+    }
+  ]
+}
+</script>
+
 <!-- Schema.org JSON-LD pentru Product -->
 <script type="application/ld+json">
 {
@@ -54,14 +82,14 @@
         <% if @product.external_image_url.present? %>
           <% main_thumb_url = "#{@product.external_image_url}?width=600&height=600&quality=95" %>
           <% main_full_url = "#{@product.external_image_url}?width=2000&height=2000&quality=95" %>
-          <%= image_tag main_thumb_url, class: "thumb main-thumb", data: { full: main_full_url }, alt: "Imagine principală" %>
+          <%= image_tag main_thumb_url, class: "thumb main-thumb", data: { full: main_full_url }, alt: @product.name %>
         <% end %>
         
         <!-- THUMBNAILS SECUNDARE -->
         <% @product.external_image_urls.each do |url| %>
           <% thumb_url = "#{url}?width=600&height=600&quality=95" %>
           <% full_url  = "#{url}?width=2000&height=2000&quality=95" %>
-          <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "Thumbnail" %>
+          <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "#{@product.name} - imagine #{@product.external_image_urls.index(url).to_i + 2}" %>
         <% end %>
       </div>
     <% end %>

@@ -10,7 +10,7 @@ RSpec.describe OptionValue, type: :model do
     it 'requires name' do
       option_value = build(:option_value, name: nil)
       expect(option_value).not_to be_valid
-      expect(option_value.errors[:name]).to include("can't be blank")
+      expect(option_value.errors[:name]).to include("nu poate fi gol")
     end
 
     it 'requires unique name within option_type' do
@@ -19,7 +19,7 @@ RSpec.describe OptionValue, type: :model do
       duplicate = build(:option_value, option_type: option_type, name: 'Roșu')
 
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:name]).to include('has already been taken')
+      expect(duplicate.errors[:name]).to include('este deja folosit')
     end
 
     it 'allows same name in different option_types' do
