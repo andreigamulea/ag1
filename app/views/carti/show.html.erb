@@ -123,7 +123,7 @@
 
       <div class="product-description">
         <strong>Descriere:</strong>
-        <%= simple_format(@product.description) %>
+        <%= simple_format(sanitize(@product.description)) %>
       </div>
       <div class="badges">
         <span class="badge">
