@@ -1,7 +1,9 @@
 class ProductsController < ApplicationController
-  before_action :set_product, only: %i[ show edit update destroy ]
   before_action :set_product, only: [:show, :edit, :update, :destroy, :purge_attached_file]
-  after_action :cleanup_memory, only: [:create, :update, :show, :edit, :new], if: :production?  # Rulează doar în production
+  before_action :load_option_types, only: [:new, :edit, :create, :update]
+  after_action :cleanup_memory, only: [:create, :update, :show, :edit, :new], if: :production?
+
+  helper_method :preload_variants
 
   # Products show is a shop page (product details)
   # Products index, new, edit, update, destroy are admin pages
@@ -306,7 +308,8 @@ class ProductsController < ApplicationController
         :external_image_url, :vat,
         external_file_urls: [],
         external_image_urls: [],
-        category_ids: []
+        category_ids: [],
+        variants_attributes: [:id, :sku, :price, :stock, :vat_rate, :status, :external_image_url, :_destroy, option_value_ids: [], external_image_urls: []]
       )
 
       # ✅ Parsează JSON-ul dacă este string
@@ -349,9 +352,34 @@ class ProductsController < ApplicationController
       Rails.env.production?
     end
 
-    # app/controllers/products_controller.rb
     def generate_variants_for(product)
-      puts "Imagine principală externă: #{product.external_image_url}"
-      puts "Imagini secundare externe: #{product.external_image_urls}"
+      # Stub - variant generation se face prin nested attributes acum
+    end
+
+    def load_option_types
+      @option_types = OptionType.includes(:option_values).order(:position).to_a
+    end
+
+    def preload_variants(product)
+      return [] unless product.persisted?
+
+      variants = product.variants.order(:id).to_a
+
+      if variants.any?
+        ActiveRecord::Associations::Preloader.new(
+          records: variants,
+          associations: [:option_values, :order_items]
+        ).call
+
+        if product.class.reflect_on_association(:variant_external_ids) ||
+           Variant.reflect_on_association(:external_ids)
+          ActiveRecord::Associations::Preloader.new(
+            records: variants,
+            associations: [:external_ids]
+          ).call
+        end
+      end
+
+      variants
     end
 end

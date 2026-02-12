@@ -1,0 +1,45 @@
+<div class="container_content">
+  <div class="section-title">
+    <h1>Option Types Management</h1>
+    <div class="separator"></div>
+  </div>
+
+  <%= link_to "➕ New Option Type", new_admin_option_type_path, class: "btn btn-primary", style: "margin-bottom: 20px;" %>
+
+  <% if @option_types.empty? %>
+    <p>No option types defined yet. Create your first one!</p>
+  <% else %>
+    <div class="option-types-list">
+      <% @option_types.each do |option_type| %>
+        <div class="option-type-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+          <h3><%= option_type.name %> <span style="color: #666; font-size: 14px;">(Position: <%= option_type.position %>)</span></h3>
+
+          <div style="margin: 10px 0;">
+            <strong>Values:</strong>
+            <% if option_type.option_values.any? %>
+              <%= option_type.option_values.map(&:name).join(', ') %>
+              <span style="color: #666;">(<%= option_type.option_values.count %> values)</span>
+            <% else %>
+              <span style="color: #999;">No values yet</span>
+            <% end %>
+          </div>
+
+          <div style="margin: 10px 0;">
+            <strong>Used by:</strong>
+            <span style="color: <%= option_type.products.count > 0 ? '#28a745' : '#999' %>;">
+              <%= option_type.products.count %> products
+            </span>
+          </div>
+
+          <div style="margin-top: 15px;">
+            <%= link_to "Edit", edit_admin_option_type_path(option_type), class: "btn btn-secondary" %>
+            <%= button_to "Delete", admin_option_type_path(option_type),
+                method: :delete,
+                data: { turbo_confirm: "Are you sure you want to delete '#{option_type.name}'?" },
+                class: "btn btn-danger" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

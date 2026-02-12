@@ -8,11 +8,27 @@ class Product < ApplicationRecord
   has_many :product_option_types, -> { order(:position) }, dependent: :destroy
   has_many :option_types, through: :product_option_types
 
+  accepts_nested_attributes_for :variants, allow_destroy: true,
+    reject_if: proc { |attrs|
+      id = attrs['id'] || attrs[:id]
+      destroying = ActiveModel::Type::Boolean.new.cast(attrs['_destroy'] || attrs[:_destroy])
+      if id.present? || destroying
+        false
+      else
+        option_ids = Array(attrs['option_value_ids'] || attrs[:option_value_ids]).reject(&:blank?)
+        sku   = attrs['sku']   || attrs[:sku]
+        price = attrs['price'] || attrs[:price]
+        stock = attrs['stock'] || attrs[:stock]
+        sku.blank? && price.blank? && stock.blank? && option_ids.empty?
+      end
+    }
+
   enum stock_status: { in_stock: "in_stock", out_of_stock: "out_of_stock" }
 
   before_validation :generate_slug
 
-  validates :name, :slug, :price, :sku, presence: true
+  validates :name, :slug, :sku, presence: true
+  validates :price, presence: true, unless: :has_active_variants?
 
   enum product_type: {
     physical: "physical",
@@ -46,6 +62,14 @@ class Product < ApplicationRecord
   end
 
   private
+
+  def has_active_variants?
+    if variants.loaded?
+      variants.reject(&:marked_for_destruction?).any?(&:active?)
+    else
+      variants.active.exists?
+    end
+  end
 
   def generate_slug
     self.slug = name.parameterize if slug.blank? && name.present?

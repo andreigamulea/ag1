@@ -111,25 +111,38 @@ def create
     Rails.logger.debug "✅ Billing diferit - folosim datele din formular"
   end
 
-  # Adaugă produsele comandate
+  # Adaugă produsele comandate (cu suport variante)
   items_added = false
-  @cart.each do |product_id, data|
-    product = Product.find_by(id: product_id)
+  @cart.each do |cart_key, data|
+    parsed = parse_cart_key(cart_key)
+    product = Product.find_by(id: parsed[:product_id])
     unless product
-      flash.now[:alert] = "Produs invalid în coș (ID: #{product_id})."
+      flash.now[:alert] = "Produs invalid in cos."
       render :new, status: :unprocessable_entity and return
     end
 
+    variant = parsed[:variant_id] ? Variant.find_by(id: parsed[:variant_id]) : nil
     quantity = data["quantity"].to_i
+    unit_price = variant&.price || product.price
+    vat_rate = variant&.vat_rate || product.vat || 0
 
-    @order.order_items.build(
+    item_attrs = {
       product: product,
       product_name: product.name,
       quantity: quantity,
-      price: product.price,
-      vat: product.vat || 0,
-      total_price: product.price * quantity
-    )
+      price: unit_price,
+      vat: vat_rate,
+      total_price: unit_price * quantity
+    }
+
+    if variant
+      item_attrs[:variant_id] = variant.id
+      item_attrs[:variant_sku] = variant.sku
+      item_attrs[:variant_options_text] = variant.options_text
+      item_attrs[:vat_rate_snapshot] = variant.vat_rate
+    end
+
+    @order.order_items.build(item_attrs)
     items_added = true
   end
 
@@ -462,18 +475,27 @@ end
     end
   end
 
+  def resolve_cart_price(cart_key, product)
+    parsed = parse_cart_key(cart_key)
+    if parsed[:variant_id]
+      variant = Variant.find_by(id: parsed[:variant_id])
+      variant&.price || product.price
+    else
+      product.price
+    end
+  end
+
   def calculate_total
-    @cart.sum do |product_id, data|
-      product = Product.find_by(id: product_id)
-      product ? product.price * data["quantity"].to_i : 0
+    @cart.sum do |key, data|
+      parsed = parse_cart_key(key)
+      product = Product.find_by(id: parsed[:product_id])
+      next 0 unless product
+      resolve_cart_price(key, product) * data["quantity"].to_i
     end
   end
 
   def calculate_subtotal
-    @cart.sum do |product_id, data|
-      product = Product.find_by(id: product_id)
-      product ? product.price * data["quantity"].to_i : 0
-    end
+    calculate_total
   end
 
   def calculate_total_after_discount
@@ -494,12 +516,16 @@ end
   end
 
   def calculate_vat_total
-    @cart.sum do |product_id, data|
-      product = Product.find_by(id: product_id)
+    @cart.sum do |key, data|
+      parsed = parse_cart_key(key)
+      product = Product.find_by(id: parsed[:product_id])
       next 0 unless product
+
+      variant = parsed[:variant_id] ? Variant.find_by(id: parsed[:variant_id]) : nil
       quantity = data["quantity"].to_i
-      subtotal = product.price * quantity
-      vat_rate = product.vat.to_f
+      unit_price = variant&.price || product.price
+      vat_rate = (variant&.vat_rate || product.vat).to_f
+      subtotal = unit_price * quantity
       subtotal * vat_rate / (100 + vat_rate)
     end
   end
@@ -515,18 +541,27 @@ end
 
     subtotal = calculate_subtotal
     total_quantity = @cart.sum { |_id, data| data["quantity"].to_i }
+    product_ids = @cart.keys.map { |k| parse_cart_key(k)[:product_id].to_i }
 
     target_subtotal = subtotal
     if coupon.product_id.present?
-      product = Product.find_by(id: coupon.product_id)
-      quantity = @cart[coupon.product_id.to_s] ? @cart[coupon.product_id.to_s]["quantity"].to_i : 0
-      target_subtotal = product ? product.price * quantity : 0
+      matching = @cart.select { |k, _| parse_cart_key(k)[:product_id].to_i == coupon.product_id }
+      if matching.any?
+        product = Product.find_by(id: coupon.product_id)
+        target_subtotal = matching.sum do |k, d|
+          p = product
+          next 0 unless p
+          resolve_cart_price(k, p) * d["quantity"].to_i
+        end
+      else
+        target_subtotal = 0
+      end
     end
 
     valid = true
     valid &&= target_subtotal >= coupon.minimum_cart_value.to_f if coupon.minimum_cart_value.present?
     valid &&= total_quantity >= coupon.minimum_quantity.to_i if coupon.minimum_quantity.present?
-    valid &&= @cart.keys.map(&:to_i).include?(coupon.product_id) if coupon.product_id.present?
+    valid &&= product_ids.include?(coupon.product_id) if coupon.product_id.present?
 
     if valid
       if coupon.discount_type == "percentage"
@@ -540,8 +575,9 @@ end
   end
 
   def calculate_shipping_cost
-    produse_fizice = @cart.keys.any? do |product_id|
-      product = Product.find_by(id: product_id)
+    produse_fizice = @cart.keys.any? do |key|
+      parsed = parse_cart_key(key)
+      product = Product.find_by(id: parsed[:product_id])
       product&.categories&.any? { |cat| cat.name.downcase == "fizic" }
     end
 

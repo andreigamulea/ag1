@@ -3,13 +3,45 @@
 one:
   order: one
   product: one
+  product_name: "Produs Test Unu"
   quantity: 1
-  price: 9.99
-  vat: 9.99
+  unit_price: 29.99
+  price: 29.99
+  total_price: 29.99
+  vat: 5.70
+  vat_rate_snapshot: 19.00
+  currency: "RON"
+  line_total_gross: 35.69
+  tax_amount: 5.70
 
 two:
   order: two
   product: two
+  product_name: "Produs Test Doi"
   quantity: 1
-  price: 9.99
-  vat: 9.99
+  unit_price: 49.99
+  price: 49.99
+  total_price: 49.99
+  vat: 9.50
+  vat_rate_snapshot: 19.00
+  currency: "RON"
+  line_total_gross: 59.49
+  tax_amount: 9.50
+
+# Order item cu varianta
+with_variant:
+  order: one
+  product: one
+  variant: one
+  product_name: "Produs Test Unu"
+  variant_sku: "SKU-VARIANT-001"
+  variant_options_text: "Culoare: Roșu, Mărime: M"
+  quantity: 1
+  unit_price: 29.99
+  price: 29.99
+  total_price: 29.99
+  vat: 5.70
+  vat_rate_snapshot: 19.00
+  currency: "RON"
+  line_total_gross: 35.69
+  tax_amount: 5.70

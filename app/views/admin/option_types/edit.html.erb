@@ -1,0 +1,119 @@
+<div class="container_content">
+  <div class="section-title">
+    <h1>Edit Option Type: <%= @option_type.name %></h1>
+    <div class="separator"></div>
+  </div>
+
+  <%= form_with model: @option_type, url: admin_option_type_path(@option_type), class: "form-container" do |f| %>
+    <% if @option_type.errors.any? %>
+      <div class="error-messages" style="background: #f8d7da; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h4><%= pluralize(@option_type.errors.count, "error") %> found:</h4>
+        <ul>
+          <% @option_type.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= f.label :name %>
+      <%= f.text_field :name, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :presentation %>
+      <%= f.text_field :presentation, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :position %>
+      <%= f.number_field :position, class: "form-control" %>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit "Update Option Type", class: "btn btn-primary" %>
+      <%= link_to "Back to List", admin_option_types_path, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+
+  <hr style="margin: 40px 0;">
+
+  <!-- Option Values Management -->
+  <div class="section-title">
+    <h2>Option Values</h2>
+    <div class="separator"></div>
+  </div>
+
+  <% if @option_type.option_values.any? %>
+    <table class="table" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+      <thead>
+        <tr style="background: #f8f9fa;">
+          <th style="padding: 12px; border: 1px solid #ddd;">#</th>
+          <th style="padding: 12px; border: 1px solid #ddd;">Name</th>
+          <th style="padding: 12px; border: 1px solid #ddd;">Display</th>
+          <th style="padding: 12px; border: 1px solid #ddd;">Position</th>
+          <th style="padding: 12px; border: 1px solid #ddd;">Used by Variants</th>
+          <th style="padding: 12px; border: 1px solid #ddd;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @option_type.option_values.order(:position).each_with_index do |value, index| %>
+          <tr>
+            <td style="padding: 12px; border: 1px solid #ddd;"><%= index + 1 %></td>
+            <td style="padding: 12px; border: 1px solid #ddd;"><%= value.name %></td>
+            <td style="padding: 12px; border: 1px solid #ddd;"><%= value.presentation %></td>
+            <td style="padding: 12px; border: 1px solid #ddd;"><%= value.position %></td>
+            <td style="padding: 12px; border: 1px solid #ddd;"><%= value.variants.count %></td>
+            <td style="padding: 12px; border: 1px solid #ddd;">
+              <%= button_to "Delete", admin_option_type_option_value_path(@option_type, value),
+                  method: :delete,
+                  data: { turbo_confirm: "Delete '#{value.name}'?" },
+                  class: "btn btn-danger btn-sm" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p style="color: #666;">No option values yet. Add your first one below!</p>
+  <% end %>
+
+  <!-- Add New Option Value Form -->
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+    <h3>Add New Option Value</h3>
+
+    <%= form_with model: @new_option_value, url: admin_option_type_option_values_path(@option_type) do |f| %>
+      <% if @new_option_value&.errors&.any? %>
+        <div class="error-messages" style="background: #f8d7da; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+          <ul>
+            <% @new_option_value.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+        <div>
+          <%= f.label :name, "Name" %>
+          <%= f.text_field :name, class: "form-control", placeholder: "e.g., Roșu" %>
+        </div>
+
+        <div>
+          <%= f.label :presentation, "Display Name" %>
+          <%= f.text_field :presentation, class: "form-control", placeholder: "e.g., Roșu" %>
+        </div>
+
+        <div>
+          <%= f.label :position, "Position" %>
+          <%= f.number_field :position, class: "form-control", value: (@option_type.option_values.maximum(:position) || -1) + 1 %>
+        </div>
+
+        <div>
+          <%= f.submit "➕ Add Value", class: "btn btn-primary" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

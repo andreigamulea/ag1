@@ -12,29 +12,32 @@
               <div class="cart-item-details">
                 <span class="cart-item-name">
                   <%= link_to item[:product].name, item[:product]&.persisted? ? carti_path(item[:product]) : root_path, class: "product-link", data: { turbo: false } %>
+                  <% if item[:variant] %>
+                    <small class="cart-variant-info"><%= item[:variant].options_text %></small>
+                  <% end %>
                 </span>
-                
+
                 <!-- Counter pentru cantitate -->
                 <div class="quantity-counter">
-                  <button type="button" class="qty-btn qty-minus" data-product-id="<%= item[:product].id %>">−</button>
-                  <%= number_field_tag "quantities[#{item[:product].id}]", 
-                      item[:quantity], 
-                      min: 1, 
+                  <button type="button" class="qty-btn qty-minus" data-cart-key="<%= item[:cart_key] %>">−</button>
+                  <%= number_field_tag "quantities[#{item[:cart_key]}]",
+                      item[:quantity],
+                      min: 1,
                       class: "qty-input",
-                      data: { product_id: item[:product].id } %>
-                  <button type="button" class="qty-btn qty-plus" data-product-id="<%= item[:product].id %>">+</button>
+                      data: { cart_key: item[:cart_key] } %>
+                  <button type="button" class="qty-btn qty-plus" data-cart-key="<%= item[:cart_key] %>">+</button>
                 </div>
-                
+
                 <span class="cart-item-price">
-                  x <%= number_to_currency(item[:product].price, unit: "lei", format: "%n %u") %>
+                  x <%= number_to_currency(item[:unit_price], unit: "lei", format: "%n %u") %>
                 </span>
                 <span class="cart-item-subtotal">
                   = <%= number_to_currency(item[:subtotal], unit: "lei", format: "%n %u") %>
                 </span>
               </div>
-              <button type="button" 
-                      class="btn btn-danger cart-item-delete" 
-                      data-product-id="<%= item[:product].id %>"
+              <button type="button"
+                      class="btn btn-danger cart-item-delete"
+                      data-cart-key="<%= item[:cart_key] %>"
                       data-remove-product>X</button>
             </li>
           <% end %>
@@ -129,130 +132,70 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('=== CART SCRIPT START ===');
-
-  // Funcționalitate pentru butoanele +/-
+  // +/- buttons use data-cart-key
   const qtyMinusButtons = document.querySelectorAll('.qty-minus');
   const qtyPlusButtons = document.querySelectorAll('.qty-plus');
 
-  qtyMinusButtons.forEach((btn, index) => {
+  qtyMinusButtons.forEach(function(btn) {
     const newButton = btn.cloneNode(true);
     btn.parentNode.replaceChild(newButton, btn);
-    console.log(`Minus Button ${index}:`, newButton, 'Product ID:', newButton.dataset.productId);
-
     newButton.addEventListener('click', function(e) {
       e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-
-      const productId = this.dataset.productId;
-      const input = document.querySelector(`input[data-product-id="${productId}"]`);
-      const currentValue = parseInt(input.value) || 1;
-      console.log(`Minus clicked for Product ID ${productId}, Current Value: ${currentValue}`);
-      if (currentValue > 1) {
-        input.value = currentValue - 1;
-        console.log(`New Value: ${input.value}`);
-      }
+      const cartKey = this.dataset.cartKey;
+      const input = document.querySelector('input[data-cart-key="' + cartKey + '"]');
+      const val = parseInt(input.value) || 1;
+      if (val > 1) input.value = val - 1;
     });
   });
 
-  qtyPlusButtons.forEach((btn, index) => {
+  qtyPlusButtons.forEach(function(btn) {
     const newButton = btn.cloneNode(true);
     btn.parentNode.replaceChild(newButton, btn);
-    console.log(`Plus Button ${index}:`, newButton, 'Product ID:', newButton.dataset.productId);
-
     newButton.addEventListener('click', function(e) {
       e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-
-      const productId = this.dataset.productId;
-      const input = document.querySelector(`input[data-product-id="${productId}"]`);
-      const currentValue = parseInt(input.value) || 1;
-      console.log(`Plus clicked for Product ID ${productId}, Current Value: ${currentValue}`);
-      input.value = currentValue + 1;
-      console.log(`New Value: ${input.value}`);
+      const cartKey = this.dataset.cartKey;
+      const input = document.querySelector('input[data-cart-key="' + cartKey + '"]');
+      input.value = (parseInt(input.value) || 1) + 1;
     });
   });
 
-  // Submit cu AJAX pentru actualizarea coșului
+  // AJAX form submit
   const form = document.querySelector('.cart-form');
   if (form) {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       const formData = new FormData(this);
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
       fetch(this.action, {
         method: 'POST',
-        headers: {
-          'X-CSRF-Token': csrfToken,
-          'Accept': 'application/json'
-        },
+        headers: { 'X-CSRF-Token': csrfToken, 'Accept': 'application/json' },
         body: formData,
         credentials: 'same-origin'
-      })
-      .then(response => {
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          alert('A apărut o eroare. Vă rugăm încercați din nou.');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('A apărut o eroare. Vă rugăm încercați din nou.');
+      }).then(function(response) {
+        if (response.ok) window.location.reload();
+        else alert('Eroare la actualizare.');
       });
     });
   }
 
-  // Funcționalitate pentru ștergere produs cu AJAX fără confirmare
-  console.log('Initializing remove buttons...');
+  // Remove buttons use data-cart-key
   const removeButtons = document.querySelectorAll('[data-remove-product]');
-  console.log('Found remove buttons:', removeButtons.length);
-
-  removeButtons.forEach((btn, index) => {
+  removeButtons.forEach(function(btn) {
     const newButton = btn.cloneNode(true);
     btn.parentNode.replaceChild(newButton, btn);
     newButton.removeAttribute('data-confirm');
-    console.log(`Remove Button ${index}:`, newButton, 'Product ID:', newButton.dataset.productId);
-
     newButton.addEventListener('click', function(e) {
       e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-
-      const productId = this.dataset.productId;
-      console.log('=== CLICK PE X ===');
-      console.log('Product ID:', productId);
-      console.log('Button:', this);
-
+      const cartKey = this.dataset.cartKey;
       const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-      console.log('CSRF Token:', csrfToken);
-      console.log('Trimit request pentru ștergere produs...');
-
       fetch('/cart/remove', {
         method: 'POST',
-        headers: {
-          'X-CSRF-Token': csrfToken,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ product_id: productId }),
+        headers: { 'X-CSRF-Token': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ cart_key: cartKey }),
         credentials: 'same-origin'
-      })
-      .then(response => {
-        console.log('Remove Response status:', response.status);
-        console.log('Remove Response ok:', response.ok);
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          alert('A apărut o eroare la ștergerea produsului. Vă rugăm încercați din nou.');
-        }
-      })
-      .catch(error => {
-        console.error('Remove Error:', error);
-        alert('A apărut o eroare la ștergerea produsului. Vă rugăm încercați din nou.');
+      }).then(function(response) {
+        if (response.ok) window.location.reload();
+        else alert('Eroare la stergere.');
       });
     });
   });

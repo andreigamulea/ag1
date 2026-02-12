@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# Variant pentru "Produs Test Unu"
+one:
+  product: one
+  sku: "SKU-VARIANT-001"
+  price: 29.99
+  vat_rate: 19.00
+  stock: 10
+  status: 0  # active
+  external_image_url: "https://ayus-cdn.b-cdn.net/test/variant1.jpg"
+  external_image_urls: []
+
+# Variant pentru "Produs Test Doi"
+two:
+  product: two
+  sku: "SKU-VARIANT-002"
+  price: 49.99
+  vat_rate: 19.00
+  stock: 20
+  status: 0  # active
+  external_image_url: "https://ayus-cdn.b-cdn.net/test/variant2.jpg"
+  external_image_urls: ["https://ayus-cdn.b-cdn.net/test/variant2-secondary.jpg"]

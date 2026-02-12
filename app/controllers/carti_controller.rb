@@ -44,6 +44,15 @@ class CartiController < ApplicationController
         .find_by!(slug: params[:slug])
     end
 
+    # Preload variante active cu optiunile lor
+    @active_variants = @product.variants.active.includes(:option_values).order(:id).to_a
+    @product_option_types = if @active_variants.any?
+      ot_ids = @active_variants.flat_map { |v| v.option_values.map(&:option_type_id) }.uniq
+      OptionType.includes(:option_values).where(id: ot_ids).order(:position).to_a
+    else
+      []
+    end
+
     # Verifică dacă există produse în coș
     @cart_has_items = session[:cart].present? && session[:cart].any?
 

@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   before_action :set_cart_totals
   layout :choose_layout
 
+  helper_method :parse_cart_key, :build_cart_key
+
   # Metoda pentru a alege layout-ul corespunzător
   def choose_layout
     if is_admin_page?
@@ -38,16 +40,28 @@ class ApplicationController < ActionController::Base
     @cart ||= session[:cart] || {}
     @cart_items_count = @cart.values.sum { |data| data["quantity"].to_i }
 
-    ## Caută toate produsele din coș
-    product_ids = @cart.keys.map(&:to_i)
+    ## Caută toate produsele și variantele din coș
+    parsed_keys = @cart.keys.map { |k| parse_cart_key(k) }
+    product_ids = parsed_keys.map { |pk| pk[:product_id].to_i }.uniq
+    variant_ids = parsed_keys.map { |pk| pk[:variant_id]&.to_i }.compact.uniq
+
     @cart_products = Product.includes(:categories).where(id: product_ids).index_by(&:id)
+    @cart_variants = variant_ids.any? ? Variant.where(id: variant_ids).index_by(&:id) : {}
 
     @subtotal = 0
 
-    @cart.each do |product_id_str, data|
-      product = @cart_products[product_id_str.to_i]
+    @cart.each do |key, data|
+      parsed = parse_cart_key(key)
+      product = @cart_products[parsed[:product_id].to_i]
       next unless product
-      @subtotal += product.price * data["quantity"].to_i
+      quantity = data["quantity"].to_i
+
+      if parsed[:variant_id]
+        variant = @cart_variants[parsed[:variant_id].to_i]
+        @subtotal += (variant&.price || product.price) * quantity
+      else
+        @subtotal += product.price * quantity
+      end
     end
 
     @discount = 0
@@ -59,13 +73,18 @@ class ApplicationController < ActionController::Base
 
         # Calculăm subtotal și quantity în funcție de dacă e produs specific
         if coupon.product_id.present?
-          product_key = coupon.product_id.to_s
-          found = @cart.key?(product_key)
-          if found
+          # Cauta toate cart entries pentru acest product (cu sau fara variante)
+          matching_entries = @cart.select { |k, _| parse_cart_key(k)[:product_id].to_i == coupon.product_id }
+          if matching_entries.any?
             product = @cart_products[coupon.product_id]
-            quantity = @cart[product_key]["quantity"].to_i
-            target_subtotal = product ? product.price * quantity : 0
-            target_quantity = quantity
+            target_quantity = matching_entries.sum { |_, d| d["quantity"].to_i }
+            target_subtotal = 0
+            matching_entries.each do |k, d|
+              parsed = parse_cart_key(k)
+              v = parsed[:variant_id] ? @cart_variants[parsed[:variant_id].to_i] : nil
+              price = v&.price || product&.price || 0
+              target_subtotal += price * d["quantity"].to_i
+            end
           else
             target_subtotal = 0
             target_quantity = 0
@@ -163,12 +182,45 @@ def calculate_totals_from_order
   Rails.logger.debug "Subtotal: #{@subtotal}, Transport: #{@transport}, Discount: #{@discount}, Total: #{@total}"
 end
 
+  def parse_cart_key(key)
+    key = key.to_s
+    if key.include?("_v")
+      parts = key.split("_v", 2)
+      { product_id: parts[0], variant_id: parts[1] }
+    else
+      { product_id: key, variant_id: nil }
+    end
+  end
+
+  def build_cart_key(product_id, variant_id = nil)
+    variant_id.present? ? "#{product_id}_v#{variant_id}" : product_id.to_s
+  end
+
   private
 
   def load_cart
     session[:cart] ||= {}
     # Normalizăm toate cheile ca string-uri
     @cart = session[:cart].transform_keys(&:to_s)
+
+    # Cleanup: elimina entries cu variante invalide/inactive
+    variant_keys = @cart.keys.select { |k| k.include?("_v") }
+    if variant_keys.any?
+      vids = variant_keys.map { |k| parse_cart_key(k)[:variant_id].to_i }
+      valid_variants = Variant.where(id: vids, status: :active).pluck(:id, :product_id)
+      valid_map = valid_variants.to_h  # { variant_id => product_id }
+
+      variant_keys.each do |key|
+        parsed = parse_cart_key(key)
+        vid = parsed[:variant_id].to_i
+        pid = parsed[:product_id].to_i
+        # Elimina daca varianta nu exista, e inactiva, sau nu apartine produsului
+        unless valid_map[vid] == pid
+          @cart.delete(key)
+        end
+      end
+    end
+
     # Salvăm înapoi versiunea normalizată
     session[:cart] = @cart
   end

@@ -1,7 +1,23 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  \: MyString
+  name: "Produs Test Unu"
+  slug: "produs-test-unu"
+  sku: "SKU-TEST-001"
+  price: 29.99
+  stock: 10
+  stock_status: "in_stock"
+  product_type: "physical"
+  delivery_method: "shipping"
+  status: "active"
 
 two:
-  \: MyString
+  name: "Produs Test Doi"
+  slug: "produs-test-doi"
+  sku: "SKU-TEST-002"
+  price: 49.99
+  stock: 20
+  stock_status: "in_stock"
+  product_type: "physical"
+  delivery_method: "shipping"
+  status: "active"

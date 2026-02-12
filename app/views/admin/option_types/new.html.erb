@@ -1,0 +1,42 @@
+<div class="container_content">
+  <div class="section-title">
+    <h1>New Option Type</h1>
+    <div class="separator"></div>
+  </div>
+
+  <%= form_with model: @option_type, url: admin_option_types_path, class: "form-container" do |f| %>
+    <% if @option_type.errors.any? %>
+      <div class="error-messages" style="background: #f8d7da; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h4><%= pluralize(@option_type.errors.count, "error") %> prohibited this option type from being saved:</h4>
+        <ul>
+          <% @option_type.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= f.label :name, "Name (internal, e.g., 'Culoare')" %>
+      <%= f.text_field :name, class: "form-control", placeholder: "e.g., Culoare, Marime, Material" %>
+      <small class="form-text">Unique identifier, used in code.</small>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :presentation, "Display Name (shown to users)" %>
+      <%= f.text_field :presentation, class: "form-control", placeholder: "e.g., Culoare, Mărime, Material" %>
+      <small class="form-text">User-friendly label displayed in forms.</small>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :position, "Position (order)" %>
+      <%= f.number_field :position, class: "form-control", value: OptionType.maximum(:position).to_i + 1 %>
+      <small class="form-text">Lower numbers appear first (0, 1, 2...).</small>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit "Create Option Type", class: "btn btn-primary" %>
+      <%= link_to "Cancel", admin_option_types_path, class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>

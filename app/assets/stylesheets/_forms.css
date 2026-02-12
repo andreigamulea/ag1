@@ -86,7 +86,7 @@ select.form-control {
    =================================== */
 
 .form-container {
-  max-width: 800px;
+  max-width: 1380px;
   margin: 0 auto;
   padding: var(--spacing-2xl);
   background: var(--color-white);
@@ -744,6 +744,272 @@ select.form-control {
 }
 
 /* ===================================
+   VARIANTS TABLE (Admin product form)
+   =================================== */
+
+.variants-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+  font-size: var(--font-size-base);
+}
+
+.variants-table thead th {
+  background: #f5f5f5;
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-gray-700);
+  border-bottom: 2px solid var(--color-gray-300);
+  white-space: nowrap;
+}
+
+.variants-table tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-gray-200);
+  vertical-align: middle;
+}
+
+.variant-row:hover {
+  background: #fafafa;
+}
+
+.variant-row.variant-new {
+  background: #f6ffed;
+}
+
+.variant-row.variant-inactive {
+  opacity: 0.6;
+}
+
+.variant-input {
+  padding: 6px 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.variant-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+.variant-sku { min-width: 100px; }
+.variant-price { min-width: 80px; }
+.variant-stock { min-width: 60px; }
+.variant-vat { min-width: 60px; }
+.variant-status { min-width: 90px; }
+
+/* Variant option selects */
+.variant-options-cell {
+  min-width: 140px;
+}
+
+.variant-option-select {
+  margin-bottom: 4px;
+}
+
+.variant-option-select:last-child {
+  margin-bottom: 0;
+}
+
+.variant-option-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  margin-bottom: 2px;
+}
+
+.variant-options-text {
+  font-size: 13px;
+  color: var(--color-gray-700);
+}
+
+/* Variant badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-new {
+  background: #e6f7ff;
+  color: #0070cc;
+  border: 1px solid #91d5ff;
+}
+
+.badge-feed {
+  background: #fff7e6;
+  color: #d46b08;
+  border: 1px solid #ffd591;
+}
+
+.badge-manual {
+  background: #f6ffed;
+  color: #389e0d;
+  border: 1px solid #b7eb8f;
+}
+
+/* Variant lock icon */
+.variant-lock {
+  font-size: 18px;
+  cursor: help;
+  opacity: 0.7;
+}
+
+/* Variant warning */
+.variant-warning {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: var(--radius-sm);
+  color: #d46b08;
+  font-size: 13px;
+}
+
+/* Variant image cell */
+.variant-image-cell {
+  width: 220px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 6px !important;
+}
+.variant-image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.variant-gallery-item {
+  position: relative;
+  display: inline-block;
+}
+.variant-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+.variant-image-cell .remove-btn {
+  display: none;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+}
+.variant-gallery-item:hover .remove-btn {
+  display: block;
+}
+.variant-img-label {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  background: #2196F3;
+  color: #fff;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1.2;
+}
+.variant-image-cell .variant-image-input {
+  display: none;
+}
+.variant-add-img-btn {
+  display: inline-block;
+  width: 80px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  background: #f0f0f0;
+  border: 1px dashed #aaa;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+}
+.variant-add-img-btn:hover {
+  background: #e0e0e0;
+  border-color: #888;
+}
+
+/* Remove variant button */
+.btn-remove-variant {
+  padding: 4px 10px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Add variant button */
+#btn-add-variant {
+  margin-top: 10px;
+}
+
+/* ===================================
+   VARIANT SELECTOR (Product show page)
+   =================================== */
+
+.variant-selector {
+  margin-bottom: 15px;
+}
+
+.variant-option-group {
+  margin-bottom: 10px;
+}
+
+.variant-option-group-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  margin-bottom: 4px;
+}
+
+.variant-option-dropdown {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+}
+
+.variant-option-dropdown:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+/* Cart variant info text */
+.cart-variant-info {
+  display: block;
+  font-size: 12px;
+  color: var(--color-gray-600);
+  margin-top: 2px;
+}
+
+/* ===================================
    RESPONSIVE
    =================================== */
 
@@ -772,5 +1038,11 @@ select.form-control {
     width: 100%;
     padding: var(--spacing-sm);
     margin-top:10px;
+  }
+
+  .variants-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

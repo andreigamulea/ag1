@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_02_220013) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_11_231340) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -348,6 +348,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_02_220013) do
     t.decimal "vat_rate", precision: 5, scale: 2
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "external_image_url"
+    t.text "external_image_urls", default: [], array: true
     t.index ["external_sku"], name: "idx_unique_external_sku", unique: true, where: "(external_sku IS NOT NULL)"
     t.index ["product_id", "options_digest"], name: "idx_unique_active_options_per_product", unique: true, where: "((options_digest IS NOT NULL) AND (status = 0))"
     t.index ["product_id", "sku"], name: "idx_unique_sku_per_product", unique: true

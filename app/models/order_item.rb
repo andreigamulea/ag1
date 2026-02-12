@@ -1,6 +1,7 @@
 class OrderItem < ApplicationRecord
   belongs_to :order
   belongs_to :product, optional: true  # Permite nil temporar, dar validăm condiționat mai jos
+  belongs_to :variant, optional: true
 
   validates :product, presence: true, unless: -> { product_name.in?(['Discount', 'Transport']) }  # Obligatoriu doar dacă nu e Discount sau Transport
 

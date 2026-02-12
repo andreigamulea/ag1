@@ -61,7 +61,7 @@
     </div>
 
     <!-- Prețuri și Taxe -->
-    <div class="form-section">
+    <div class="form-section" id="section-prices">
       <div class="section-header success">
         💰 Prețuri și Taxe
       </div>
@@ -111,7 +111,7 @@
     </div>
 
     <!-- Inventar și Stoc -->
-    <div class="form-section">
+    <div class="form-section" id="section-inventory">
       <div class="section-header info">
         📦 Inventar și Stoc
       </div>
@@ -365,6 +365,63 @@
       </div>
     </div>
 
+    <!-- Variante Produs -->
+    <div class="form-section" id="section-variants-toggle">
+      <div class="section-header dark">
+        Variante Produs
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-1">
+          <div class="checkbox-field">
+            <% has_variants = form.object.persisted? && form.object.variants.active.any? %>
+            <%= hidden_field_tag :has_variants, '0', id: nil %>
+            <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants', data: { action: 'change' } %>
+            <label for="toggle-has-variants">Are variante? (culoare, marime, etc.)</label>
+          </div>
+        </div>
+        <% if has_variants %>
+          <p class="variant-warning">Pretul si stocul se gestioneaza la nivel de varianta.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>">
+      <div class="section-header dark">
+        Lista Variante
+      </div>
+      <div class="section-body">
+        <table class="variants-table" id="variants-table">
+          <thead>
+            <tr>
+              <th>Imagine</th>
+              <th>SKU</th>
+              <th>Pret (RON)</th>
+              <th>Stoc</th>
+              <th>TVA %</th>
+              <th>Status</th>
+              <th>Optiuni</th>
+              <th>Sursa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="variants-tbody">
+            <% variants_list = form.object.persisted? ? (respond_to?(:preload_variants) ? preload_variants(form.object) : form.object.variants.order(:id).to_a) : [] %>
+            <% variants_list.each do |variant| %>
+              <%= form.fields_for :variants, variant do |vf| %>
+                <%= render 'variant_fields', f: vf, variant: variant, option_types: (@option_types || []) %>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+
+        <button type="button" class="btn btn-info" id="btn-add-variant"
+                data-option-types="<%= (@option_types || []).map { |ot| { id: ot.id, name: ot.name, values: ot.option_values.map { |ov| { id: ov.id, name: ov.display_name } } } }.to_json %>"
+                data-variant-index="<%= variants_list.size %>">
+          + Adauga varianta
+        </button>
+      </div>
+    </div>
+
     <!-- Atribute Personalizate -->
     <div class="form-section">
       <div class="section-header secondary">
@@ -571,6 +628,203 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(data => console.log("Presign OK:", data))
       .catch(error => console.error("Eroare:", error));
   }
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // ===== VARIANTE: Toggle + Add + Remove =====
+  const toggleCheckbox = document.getElementById('toggle-has-variants');
+  const sectionVariants = document.getElementById('section-variants');
+  const sectionPrices = document.getElementById('section-prices');
+  const sectionInventory = document.getElementById('section-inventory');
+  const variantWarning = document.querySelector('.variant-warning');
+  const addBtn = document.getElementById('btn-add-variant');
+  const tbody = document.getElementById('variants-tbody');
+
+  function updateVariantSections() {
+    const on = toggleCheckbox && toggleCheckbox.checked;
+    if (sectionVariants) sectionVariants.style.display = on ? '' : 'none';
+    if (sectionPrices) sectionPrices.style.display = on ? 'none' : '';
+    if (sectionInventory) sectionInventory.style.display = on ? 'none' : '';
+    if (variantWarning) variantWarning.style.display = on ? '' : 'none';
+  }
+
+  if (toggleCheckbox) {
+    toggleCheckbox.addEventListener('change', updateVariantSections);
+    updateVariantSections();
+  }
+
+  // Add new variant row
+  if (addBtn && tbody) {
+    addBtn.addEventListener('click', function() {
+      const idx = Date.now();
+      const prefix = `product[variants_attributes][${idx}]`;
+      const optionTypes = JSON.parse(addBtn.dataset.optionTypes || '[]');
+      const statuses = ['active', 'inactive'];
+
+      let optionsHtml = '';
+      optionTypes.forEach(function(ot) {
+        let opts = '<option value="">-- alege --</option>';
+        (ot.values || []).forEach(function(ov) {
+          opts += `<option value="${ov.id}">${ov.name}</option>`;
+        });
+        optionsHtml += `<div class="variant-option-select">
+          <label class="variant-option-label">${ot.name}</label>
+          <select name="${prefix}[option_value_ids][]" class="variant-input">${opts}</select>
+        </div>`;
+      });
+
+      let statusOpts = '';
+      statuses.forEach(function(s) {
+        statusOpts += `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`;
+      });
+
+      const tr = document.createElement('tr');
+      tr.className = 'variant-row variant-new';
+      tr.innerHTML = `
+        <input type="hidden" name="${prefix}[_destroy]" value="0" class="destroy-flag">
+        <td class="variant-image-cell">
+          <input type="hidden" name="${prefix}[external_image_url]" value="" class="variant-image-hidden">
+          <div class="variant-images-hidden"></div>
+          <div class="variant-image-gallery"></div>
+          <input type="file" accept="image/*" multiple class="variant-image-input" />
+          <label class="variant-add-img-btn" title="Adauga imagini">+</label>
+        </td>
+        <td><input type="text" name="${prefix}[sku]" placeholder="SKU-001" class="variant-input variant-sku"></td>
+        <td><input type="number" name="${prefix}[price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-price"></td>
+        <td><input type="number" name="${prefix}[stock]" min="0" placeholder="0" class="variant-input variant-stock"></td>
+        <td><input type="number" name="${prefix}[vat_rate]" min="0" step="0.01" placeholder="19" class="variant-input variant-vat"></td>
+        <td><select name="${prefix}[status]" class="variant-input variant-status">${statusOpts}</select></td>
+        <td class="variant-options-cell">${optionsHtml}</td>
+        <td><span class="badge badge-new">Nou</span></td>
+        <td><button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Remove variant (delegate)
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('btn-remove-variant')) return;
+    const row = e.target.closest('tr.variant-row');
+    if (!row) return;
+
+    const idField = row.querySelector('input[name$="[id]"]');
+    const destroyFlag = row.querySelector('.destroy-flag');
+    if (idField && idField.value) {
+      // Existing persisted variant — mark for destruction, hide row
+      destroyFlag.value = '1';
+      row.classList.add('variant-destroyed');
+      row.style.display = 'none';
+    } else {
+      // New unsaved variant — just remove from DOM
+      row.remove();
+    }
+  });
+
+  // ===== VARIANTE: Buton "+" deschide file input ascuns =====
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('variant-add-img-btn')) return;
+    const td = e.target.closest('.variant-image-cell');
+    const fileInput = td.querySelector('.variant-image-input');
+    if (fileInput) fileInput.click();
+  });
+
+  // ===== VARIANTE: Upload imagini pe Bunny CDN (multiplu) =====
+  document.addEventListener('change', async function(e) {
+    if (!e.target.classList.contains('variant-image-input')) return;
+    const files = e.target.files;
+    if (!files.length) return;
+    const td = e.target.closest('.variant-image-cell');
+    const mainHidden = td.querySelector('.variant-image-hidden');
+    const gallery = td.querySelector('.variant-image-gallery');
+    const hiddenContainer = td.querySelector('.variant-images-hidden');
+    // Determina prefix-ul name-ului din hidden field-ul principal
+    const mainName = mainHidden.name; // ex: product[variants_attributes][123][external_image_url]
+    const baseName = mainName.replace('[external_image_url]', '[external_image_urls][]');
+
+    for (const file of files) {
+      const uniqueName = Date.now() + '_' + encodeURIComponent(file.name);
+      const res = await fetch('/uploads/presign?filename=' + uniqueName);
+      const { upload_url, headers } = await res.json();
+
+      const upload = await fetch(upload_url, {
+        method: 'PUT',
+        headers: { 'Content-Type': headers['Content-Type'], 'AccessKey': headers['AccessKey'] },
+        body: file
+      });
+
+      if (upload.ok) {
+        const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
+        const cdnUrl = 'https://ayus-cdn.b-cdn.net/' + path;
+
+        // Prima imagine devine principala daca nu exista inca
+        if (!mainHidden.value) {
+          mainHidden.value = cdnUrl;
+          const item = document.createElement('div');
+          item.className = 'variant-gallery-item';
+          item.dataset.role = 'main';
+          item.innerHTML = '<img src="' + cdnUrl + '" class="variant-thumb">'
+            + '<button type="button" class="remove-btn remove-variant-img" data-role="main">\u00d7</button>'
+            + '<span class="variant-img-label">P</span>';
+          gallery.appendChild(item);
+        } else {
+          // Imagine secundara
+          const hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = baseName;
+          hidden.value = cdnUrl;
+          hiddenContainer.appendChild(hidden);
+
+          const item = document.createElement('div');
+          item.className = 'variant-gallery-item';
+          item.dataset.role = 'secondary';
+          item.dataset.url = cdnUrl;
+          item.innerHTML = '<img src="' + cdnUrl + '" class="variant-thumb">'
+            + '<button type="button" class="remove-btn remove-variant-img" data-role="secondary">\u00d7</button>';
+          gallery.appendChild(item);
+        }
+      }
+    }
+    e.target.value = '';
+  });
+
+  // Remove variant image (principala sau secundara)
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('remove-variant-img')) return;
+    const item = e.target.closest('.variant-gallery-item');
+    const td = e.target.closest('.variant-image-cell');
+    const role = e.target.dataset.role;
+
+    if (role === 'main') {
+      // Sterge imaginea principala
+      td.querySelector('.variant-image-hidden').value = '';
+      item.remove();
+      // Promoveaza prima secundara ca principala (daca exista)
+      const firstSecondary = td.querySelector('.variant-gallery-item[data-role="secondary"]');
+      if (firstSecondary) {
+        const url = firstSecondary.dataset.url;
+        td.querySelector('.variant-image-hidden').value = url;
+        firstSecondary.dataset.role = 'main';
+        firstSecondary.querySelector('.remove-variant-img').dataset.role = 'main';
+        firstSecondary.innerHTML = '<img src="' + url + '" class="variant-thumb">'
+          + '<button type="button" class="remove-btn remove-variant-img" data-role="main">\u00d7</button>'
+          + '<span class="variant-img-label">P</span>';
+        // Sterge hidden input-ul secundar pentru URL-ul promovat
+        const hiddenContainer = td.querySelector('.variant-images-hidden');
+        const hiddens = hiddenContainer.querySelectorAll('input[type="hidden"]');
+        hiddens.forEach(function(h) { if (h.value === url) h.remove(); });
+      }
+    } else {
+      // Sterge imaginea secundara
+      const url = item.dataset.url;
+      const hiddenContainer = td.querySelector('.variant-images-hidden');
+      const hiddens = hiddenContainer.querySelectorAll('input[type="hidden"]');
+      hiddens.forEach(function(h) { if (h.value === url) h.remove(); });
+      item.remove();
+    }
+  });
+});
 </script>
 
 <script>

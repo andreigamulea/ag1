@@ -19,6 +19,12 @@ Rails.application.routes.draw do
   post "/remove-coupon", to: "cart#remove_coupon", as: :remove_coupon
   resources :coupons
 
+  namespace :admin do
+    resources :option_types do
+      resources :option_values, only: [:create, :update, :destroy]
+    end
+  end
+
   resources :cart, only: [:index] do
     post :add, on: :collection
     post :update, on: :collection

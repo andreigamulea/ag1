@@ -10,35 +10,55 @@ class CartController < ApplicationController
 
   def add
     product_id = params[:product_id].to_s
+    variant_id = params[:variant_id].presence
     quantity   = params[:quantity].to_i
     product    = Product.find(product_id)
 
-    if product.track_inventory
-      # ✅ Permitem oricât, chiar dacă stock <= 0
-      current_quantity = @cart[product_id] ? @cart[product_id]["quantity"] : 0
-      new_quantity     = current_quantity + quantity
-      # aici nu limităm nimic
-    else
-      # ✅ Dacă nu se urmărește inventarul, respectăm strict stocul
-      if product.stock <= 0
-        redirect_to carti_path, alert: "Produsul nu mai este disponibil."
+    # Daca produsul are variante active, variant_id e obligatoriu
+    if product.variants.active.exists?
+      if variant_id.blank?
+        redirect_back fallback_location: carti_path(product), alert: "Selecteaza o varianta."
         return
       end
 
-      current_quantity = @cart[product_id] ? @cart[product_id]["quantity"] : 0
+      variant = product.variants.active.find_by(id: variant_id)
+      unless variant
+        redirect_back fallback_location: carti_path(product), alert: "Varianta selectata nu este disponibila."
+        return
+      end
+
+      # Stoc verificat pe varianta
+      available_stock = variant.stock
+      cart_key = build_cart_key(product_id, variant_id)
+    else
+      variant = nil
+      available_stock = product.stock
+      cart_key = build_cart_key(product_id)
+    end
+
+    if product.track_inventory
+      current_quantity = @cart[cart_key] ? @cart[cart_key]["quantity"] : 0
+      new_quantity     = current_quantity + quantity
+    else
+      if available_stock <= 0
+        redirect_back fallback_location: carti_path(product), alert: "Produsul nu mai este disponibil."
+        return
+      end
+
+      current_quantity = @cart[cart_key] ? @cart[cart_key]["quantity"] : 0
       new_quantity     = current_quantity + quantity
 
-      if new_quantity > product.stock
-        new_quantity = product.stock
+      if new_quantity > available_stock
+        new_quantity = available_stock
       end
     end
 
-    @cart[product_id] ||= { "quantity" => 0 }
-    @cart[product_id]["quantity"] = new_quantity
+    @cart[cart_key] ||= { "quantity" => 0 }
+    @cart[cart_key]["quantity"] = new_quantity
     save_cart
     save_snapshot
 
-    redirect_to cart_index_path, notice: "Produs adăugat în coș."
+    redirect_to cart_index_path, notice: "Produs adaugat in cos."
   end
 
   def update
@@ -55,66 +75,57 @@ class CartController < ApplicationController
   # Nouă metodă pentru actualizare multiplă
   def update_all
     quantities = params[:quantities] || {}
-    
-    quantities.each do |product_id, quantity|
-      product_id = product_id.to_s
+
+    quantities.each do |cart_key, quantity|
+      cart_key = cart_key.to_s
       quantity = quantity.to_i
-      
-      if @cart[product_id] && quantity > 0
-        product = Product.find_by(id: product_id)
-        
+
+      if @cart[cart_key] && quantity > 0
+        parsed = parse_cart_key(cart_key)
+        product = Product.find_by(id: parsed[:product_id])
+
         if product
-          # Verificăm limitele de stoc dacă e cazul
-          if product.track_inventory
-            # Permitem orice cantitate
-            @cart[product_id]["quantity"] = quantity
+          if parsed[:variant_id]
+            variant = Variant.find_by(id: parsed[:variant_id])
+            available_stock = variant&.stock || 0
           else
-            # Respectăm stocul disponibil
-            if quantity > product.stock
-              @cart[product_id]["quantity"] = product.stock
-            else
-              @cart[product_id]["quantity"] = quantity
-            end
+            available_stock = product.stock
+          end
+
+          if product.track_inventory
+            @cart[cart_key]["quantity"] = quantity
+          else
+            @cart[cart_key]["quantity"] = [quantity, available_stock].min
           end
         end
       elsif quantity <= 0
-        # Dacă cantitatea e 0, eliminăm produsul
-        @cart.delete(product_id)
+        @cart.delete(cart_key)
       end
     end
-    
+
     save_cart
     save_snapshot
-    
+
     respond_to do |format|
-      format.html { redirect_to cart_index_path, notice: "Coșul a fost actualizat." }
-      format.json { render json: { success: true, message: "Coșul a fost actualizat." } }
+      format.html { redirect_to cart_index_path, notice: "Cosul a fost actualizat." }
+      format.json { render json: { success: true, message: "Cosul a fost actualizat." } }
     end
   end
 
   def remove
-    product_id = params[:product_id].to_s
-    Rails.logger.debug "=== REMOVE DEBUG ==="
-    Rails.logger.debug "Product ID primit: #{product_id}"
-    Rails.logger.debug "Product ID class: #{product_id.class}"
-    Rails.logger.debug "Cart keys: #{@cart.keys.inspect}"
-    Rails.logger.debug "Cart keys classes: #{@cart.keys.map(&:class).inspect}"
-    Rails.logger.debug "Cart înainte: #{@cart.inspect}"
-    
-    # Încearcă să ștergi atât varianta string cât și integer
-    deleted_string = @cart.delete(product_id)
-    deleted_int = @cart.delete(product_id.to_i)
-    
-    Rails.logger.debug "Deleted as string (#{product_id}): #{deleted_string.inspect}"
-    Rails.logger.debug "Deleted as int (#{product_id.to_i}): #{deleted_int.inspect}"
-    Rails.logger.debug "Cart după: #{@cart.inspect}"
-    
+    # Accepts either cart_key (composite "42_v7") or product_id (legacy)
+    cart_key = (params[:cart_key] || params[:product_id]).to_s
+
+    @cart.delete(cart_key)
+    # Legacy fallback: try integer key too
+    @cart.delete(cart_key.to_i) if cart_key.match?(/\A\d+\z/)
+
     save_cart
     save_snapshot
-    
+
     respond_to do |format|
-      format.html { redirect_to cart_index_path, notice: "Produs eliminat din coș." }
-      format.json { render json: { success: true, message: "Produs eliminat din coș." } }
+      format.html { redirect_to cart_index_path, notice: "Produs eliminat din cos." }
+      format.json { render json: { success: true, message: "Produs eliminat din cos." } }
     end
   end
 
@@ -155,24 +166,23 @@ class CartController < ApplicationController
     end
 
     if coupon
-      # Calcul subtotal și quantity în funcție de product_id
+      # Calcul subtotal si quantity in functie de product_id
       if coupon.product_id.present?
-        product_key = coupon.product_id.to_s
-        found = @cart.key?(product_key)
+        matching = @cart.select { |k, _| parse_cart_key(k)[:product_id].to_i == coupon.product_id }
+        found = matching.any?
         if found
           product = Product.find_by(id: coupon.product_id)
-          quantity = @cart[product_key]["quantity"].to_i
-          subtotal = product ? product.price * quantity : 0
-          total_quantity = quantity
+          total_quantity = matching.sum { |_, d| d["quantity"].to_i }
+          subtotal = product ? product.price * total_quantity : 0
         else
-          found = false
           subtotal = 0
           total_quantity = 0
         end
       else
         found = true
-        subtotal = @cart.sum do |product_id, data|
-          product = Product.find_by(id: product_id)
+        subtotal = @cart.sum do |key, data|
+          parsed = parse_cart_key(key)
+          product = Product.find_by(id: parsed[:product_id])
           product ? product.price * data["quantity"].to_i : 0
         end
         total_quantity = @cart.sum { |_id, data| data["quantity"].to_i }
@@ -219,27 +229,43 @@ class CartController < ApplicationController
 
   def prepare_cart_variables
     set_cart_totals
-    # Filtrează ID-urile valide
-    @valid_product_ids = Product.where(id: @cart.keys).pluck(:id).map(&:to_s)
-    @cart_items = Product.where(id: @valid_product_ids).map do |product|
-      quantity = @cart[product.id.to_s]["quantity"]
+    @coupon_errors ||= []
+
+    # Preload variants for cart entries
+    variant_ids = @cart.keys.filter_map { |k| parse_cart_key(k)[:variant_id]&.to_i }
+    variants_map = variant_ids.any? ? Variant.includes(:option_values).where(id: variant_ids).index_by(&:id) : {}
+
+    # Build cart items with variant info
+    parsed_keys = @cart.keys.map { |k| parse_cart_key(k) }
+    product_ids = parsed_keys.map { |pk| pk[:product_id].to_i }.uniq
+    products_map = Product.includes(:categories).where(id: product_ids).index_by(&:id)
+
+    @cart_items = @cart.filter_map do |key, data|
+      parsed = parse_cart_key(key)
+      product = products_map[parsed[:product_id].to_i]
+      next unless product
+
+      variant = parsed[:variant_id] ? variants_map[parsed[:variant_id].to_i] : nil
+      quantity = data["quantity"].to_i
+      unit_price = variant&.price || product.price
+
       {
+        cart_key: key,
         product: product,
+        variant: variant,
         quantity: quantity,
-        subtotal: product.price * quantity
+        unit_price: unit_price,
+        subtotal: unit_price * quantity
       }
     end
 
     @subtotal = @cart_items.sum { |item| item[:subtotal] }
     @discount = 0
-    @coupon_errors ||= []  # Asigură-te că există
 
-    # Verificăm dacă există produse fizice în coș
     @has_physical = @cart_items.any? do |item|
       item[:product].categories.any? { |cat| cat.name.downcase == "fizic" }
     end
 
-    # Cost transport: 20 lei dacă sunt produse fizice și total < 200
     @shipping_cost = (@has_physical && @subtotal < 200) ? 20 : 0
 
     if session[:applied_coupon]
@@ -251,24 +277,15 @@ class CartController < ApplicationController
          (coupon.starts_at.nil? || coupon.starts_at <= Time.current) &&
          (coupon.expires_at.nil? || coupon.expires_at >= Time.current)
 
-        # Calculăm subtotal și quantity în funcție de dacă e produs specific
         if coupon.product_id.present?
-          product_key = coupon.product_id.to_s
-          if @cart[product_key]
-            product = Product.find_by(id: coupon.product_id)
-            quantity = @cart[product_key]["quantity"].to_i
-            target_subtotal = product ? product.price * quantity : 0
-            target_quantity = quantity
-          else
-            target_subtotal = 0
-            target_quantity = 0
-          end
+          target_items = @cart_items.select { |i| i[:product].id == coupon.product_id }
+          target_subtotal = target_items.sum { |i| i[:subtotal] }
+          target_quantity = target_items.sum { |i| i[:quantity] }
         else
           target_subtotal = @subtotal
-          target_quantity = @cart.sum { |_id, data| data["quantity"].to_i }
+          target_quantity = @cart_items.sum { |i| i[:quantity] }
         end
 
-        # Verificări de validitate cu motive specifice
         valid = true
 
         if coupon.usage_limit.present? && coupon.usage_count.to_i >= coupon.usage_limit
@@ -277,29 +294,26 @@ class CartController < ApplicationController
         end
 
         if coupon.minimum_cart_value.present? && target_subtotal < coupon.minimum_cart_value.to_f
-          @coupon_errors << "Valoarea minimă a coșului (sau a produsului) nu este atinsă."
+          @coupon_errors << "Valoarea minima a cosului nu este atinsa."
           valid = false
         end
 
         if coupon.minimum_quantity.present? && target_quantity < coupon.minimum_quantity.to_i
-          @coupon_errors << "Numărul minim de produse (sau cantitatea produsului) nu este atins."
+          @coupon_errors << "Numarul minim de produse nu este atins."
           valid = false
         end
 
         if coupon.product_id.present? && target_quantity == 0
-          @coupon_errors << "Produsul specificat nu este în coș."
+          @coupon_errors << "Produsul specificat nu este in cos."
           valid = false
         end
 
         if valid
-          # Calcul discount doar pe target_subtotal (produs specific sau total)
           if coupon.discount_type == "percentage"
             @discount = target_subtotal * (coupon.discount_value.to_f / 100.0)
           elsif coupon.discount_type == "fixed"
-            @discount = [coupon.discount_value.to_f, target_subtotal].min  # Nu depășim subtotalul țintei
+            @discount = [coupon.discount_value.to_f, target_subtotal].min
           end
-
-          # Dacă free_shipping, anulează shipping_cost
           @shipping_cost = 0 if coupon.free_shipping
         else
           session.delete(:applied_coupon)

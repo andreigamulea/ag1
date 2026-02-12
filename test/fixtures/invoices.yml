@@ -11,7 +11,7 @@ one:
 
 two:
   order: two
-  invoice_number: 1
+  invoice_number: 2
   emitted_at: 2025-10-12 21:43:18
   status: MyString
   total: 9.99

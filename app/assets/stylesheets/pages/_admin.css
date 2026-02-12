@@ -191,7 +191,7 @@
    =================================== */
 
 .admin-form-container {
-  max-width: var(--container-md);
+  max-width: var(--container-max);
   margin: 0 auto;
   padding: var(--spacing-2xl);
   background: var(--color-white);

@@ -1,0 +1,110 @@
+<%# Partial pentru un rând de variantă în tabelul admin %>
+<%# Locals: f (fields_for builder), variant (Variant record), option_types (Array<OptionType>) %>
+<% variant = f.object %>
+<% is_new = variant.new_record? %>
+<% is_feed = !is_new && variant.respond_to?(:external_ids) && variant.external_ids.any? %>
+<% has_orders = !is_new && variant.respond_to?(:order_items) && variant.order_items.any? %>
+
+<tr class="variant-row <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
+    data-variant-id="<%= variant.id %>">
+
+  <%# Hidden fields %>
+  <% if variant.persisted? %>
+    <%= f.hidden_field :id %>
+  <% end %>
+  <%= f.hidden_field :_destroy, value: '0', class: 'destroy-flag' %>
+
+  <%# Imagini %>
+  <td class="variant-image-cell">
+    <%= f.hidden_field :external_image_url, class: 'variant-image-hidden' %>
+    <div class="variant-images-hidden">
+      <% (variant.external_image_urls || []).each do |url| %>
+        <input type="hidden" name="<%= f.object_name %>[external_image_urls][]" value="<%= url %>">
+      <% end %>
+    </div>
+    <div class="variant-image-gallery">
+      <% if variant.external_image_url.present? %>
+        <div class="variant-gallery-item" data-role="main">
+          <img src="<%= variant.external_image_url %>" class="variant-thumb">
+          <button type="button" class="remove-btn remove-variant-img" data-role="main">&times;</button>
+          <span class="variant-img-label">P</span>
+        </div>
+      <% end %>
+      <% (variant.external_image_urls || []).each do |url| %>
+        <div class="variant-gallery-item" data-role="secondary" data-url="<%= url %>">
+          <img src="<%= url %>" class="variant-thumb">
+          <button type="button" class="remove-btn remove-variant-img" data-role="secondary">&times;</button>
+        </div>
+      <% end %>
+    </div>
+    <input type="file" accept="image/*" multiple class="variant-image-input" />
+    <label class="variant-add-img-btn" title="Adauga imagini">+</label>
+  </td>
+
+  <%# SKU %>
+  <td>
+    <%= f.text_field :sku, placeholder: 'SKU-001', class: 'variant-input variant-sku' %>
+  </td>
+
+  <%# Pret %>
+  <td>
+    <%= f.number_field :price, step: 0.01, min: 0, placeholder: '0.00', class: 'variant-input variant-price' %>
+  </td>
+
+  <%# Stoc %>
+  <td>
+    <%= f.number_field :stock, min: 0, placeholder: '0', class: 'variant-input variant-stock' %>
+  </td>
+
+  <%# TVA %>
+  <td>
+    <%= f.number_field :vat_rate, min: 0, step: 0.01, placeholder: '19', class: 'variant-input variant-vat' %>
+  </td>
+
+  <%# Status %>
+  <td>
+    <%= f.select :status, Variant.statuses.keys.map { |s| [s.humanize, s] }, {}, class: 'variant-input variant-status' %>
+  </td>
+
+  <%# Optiuni %>
+  <td class="variant-options-cell">
+    <% if is_feed %>
+      <%# Feed variants: readonly text %>
+      <span class="variant-options-text"><%= variant.options_text %></span>
+    <% else %>
+      <%# Manual / new variants: editable selects %>
+      <% current_ov_ids = variant.respond_to?(:option_value_ids) ? variant.option_value_ids.map(&:to_s) : [] %>
+      <% (option_types || []).each do |ot| %>
+        <div class="variant-option-select">
+          <label class="variant-option-label"><%= ot.name %></label>
+          <select name="<%= f.object_name %>[option_value_ids][]" class="variant-input">
+            <option value="">-- alege --</option>
+            <% ot.option_values.each do |ov| %>
+              <option value="<%= ov.id %>" <%= 'selected' if current_ov_ids.include?(ov.id.to_s) %>><%= ov.display_name %></option>
+            <% end %>
+          </select>
+        </div>
+      <% end %>
+    <% end %>
+  </td>
+
+  <%# Sursa %>
+  <td>
+    <% if is_new %>
+      <span class="badge badge-new">Nou</span>
+    <% elsif is_feed %>
+      <span class="badge badge-feed">Feed</span>
+    <% else %>
+      <span class="badge badge-manual">Manual</span>
+    <% end %>
+  </td>
+
+  <%# Actiuni %>
+  <td>
+    <% if has_orders %>
+      <span class="variant-lock" title="Varianta are comenzi asociate">&#128274;</span>
+    <% else %>
+      <button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button>
+    <% end %>
+  </td>
+</tr>
