@@ -77,7 +77,7 @@ config.action_mailer.smtp_settings = {
   # === DEFAULT URL OPTIONS ===
   Rails.application.routes.default_url_options[:host] = "localhost:3000"
 
-  ## === OPTIONALS ===
+  # === OPTIONALS ===
   # config.i18n.raise_on_missing_translations = true
   # config.action_view.annotate_rendered_view_with_filenames = true
   # config.action_cable.disable_request_forgery_protection = true
