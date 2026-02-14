@@ -29,6 +29,7 @@ class Product < ApplicationRecord
 
   validates :name, :slug, :sku, presence: true
   validates :price, presence: true, unless: :has_active_variants?
+  validate :must_have_one_primary_option_type, if: :has_active_variants?
 
   enum product_type: {
     physical: "physical",
@@ -61,10 +62,18 @@ class Product < ApplicationRecord
     slug
   end
 
+  def primary_option_type
+    product_option_types.find_by(primary: true)&.option_type
+  end
+
+  def primary_product_option_type
+    product_option_types.find_by(primary: true)
+  end
+
   private
 
   def has_active_variants?
-    if variants.loaded?
+    if new_record? || variants.loaded?
       variants.reject(&:marked_for_destruction?).any?(&:active?)
     else
       variants.active.exists?
@@ -75,7 +84,28 @@ class Product < ApplicationRecord
     self.slug = name.parameterize if slug.blank? && name.present?
   end
 
+  def must_have_one_primary_option_type
+    return if product_option_types.empty?
+
+    primary_count = product_option_types.select(&:primary?).count
+    if primary_count == 0
+      errors.add(:base, "Selectează o opțiune principală pentru variante")
+    elsif primary_count > 1
+      errors.add(:base, "Doar o singură opțiune poate fi principală")
+    end
+  end
+
   public
+
+  # Returns the active price for the customer:
+  # discount_price if promo is active, otherwise regular price
+  def effective_price
+    if promo_active? && discount_price.present? && discount_price > 0
+      discount_price
+    else
+      price
+    end
+  end
 
   def price_breakdown
     vat_rate = vat.to_f

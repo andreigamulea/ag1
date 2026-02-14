@@ -58,9 +58,9 @@ class ApplicationController < ActionController::Base
 
       if parsed[:variant_id]
         variant = @cart_variants[parsed[:variant_id].to_i]
-        @subtotal += (variant&.price || product.price) * quantity
+        @subtotal += (variant&.effective_price || product.effective_price) * quantity
       else
-        @subtotal += product.price * quantity
+        @subtotal += product.effective_price * quantity
       end
     end
 
@@ -82,7 +82,7 @@ class ApplicationController < ActionController::Base
             matching_entries.each do |k, d|
               parsed = parse_cart_key(k)
               v = parsed[:variant_id] ? @cart_variants[parsed[:variant_id].to_i] : nil
-              price = v&.price || product&.price || 0
+              price = v&.effective_price || product&.effective_price || 0
               target_subtotal += price * d["quantity"].to_i
             end
           else

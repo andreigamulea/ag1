@@ -117,13 +117,8 @@ class SuiteTestCase < ApplicationSystemTestCase
   end
 
   def create_test_coupon(overrides = {})
-    # Dacă se specifică un cod, adăugăm sufix unic pentru a evita coliziuni
-    if overrides[:code]
-      overrides[:code] = "#{overrides[:code]}-#{Time.now.to_i}-#{SecureRandom.hex(2).upcase}"
-    end
-
     defaults = {
-      code: overrides[:code] || "TEST#{Time.now.to_i}#{SecureRandom.hex(2).upcase}",
+      code: "TEST#{Time.now.to_i}#{SecureRandom.hex(4).upcase}",
       discount_type: "percentage",
       discount_value: 10,
       active: true,
@@ -136,7 +131,10 @@ class SuiteTestCase < ApplicationSystemTestCase
       product_id: nil,
       free_shipping: false
     }
-    Coupon.create!(defaults.merge(overrides))
+    merged = defaults.merge(overrides)
+    # Clean up stale coupons with the same code from previous failed test runs
+    Coupon.where("UPPER(code) = ?", merged[:code].to_s.upcase).destroy_all
+    Coupon.create!(merged)
   end
 
   def create_location_data
@@ -161,9 +159,16 @@ class SuiteTestCase < ApplicationSystemTestCase
 
   def sign_in(email:, password:)
     visit new_user_session_path
+    assert_selector "input[name='user[password]']", wait: 5
     fill_in "Email", with: email
     fill_in "user[password]", with: password
     click_button "Intră în cont"
+    # Wait for login redirect to complete; retry once if still on login page
+    if page.has_selector?("input[name='user[password]']", wait: 3)
+      fill_in "Email", with: email
+      fill_in "user[password]", with: password
+      click_button "Intră în cont"
+    end
   end
 
   def sign_out
@@ -180,12 +185,15 @@ class SuiteTestCase < ApplicationSystemTestCase
   def add_variant_to_cart(product, variant)
     visit carti_path(product.slug || product.id)
 
-    # Selectăm variantele pe baza option_values
+    # Selectăm variantele pe baza option_values (swatches + butoane)
     variant.option_values.each do |option_value|
-      option_type_id = option_value.option_type_id
-      select_selector = ".variant-option-dropdown[data-option-type-id='#{option_type_id}']"
-      if page.has_css?(select_selector)
-        find(select_selector).find("option[value='#{option_value.id}']").select_option
+      swatch_selector = ".variant-swatch[data-option-value-id='#{option_value.id}']"
+      btn_selector = ".variant-btn[data-option-value-id='#{option_value.id}']"
+
+      if page.has_css?(swatch_selector)
+        find(swatch_selector).click
+      elsif page.has_css?(btn_selector)
+        find(btn_selector).click
       end
     end
 

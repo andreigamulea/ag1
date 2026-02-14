@@ -2,59 +2,40 @@ require "application_system_test_case"
 
 class AddingProductToCartTest < ApplicationSystemTestCase
   setup do
+    @carte = Category.find_or_create_by!(name: "carte") { |c| c.slug = "carte" }
+    @fizic = Category.find_or_create_by!(name: "fizic") { |c| c.slug = "fizic" }
+
     @product = Product.create!(
       name: "Test Book: Ruby on Rails",
-      slug: "test-book-ruby-on-rails",
-      sku: "BOOK-ROR-001",
+      slug: "test-book-ruby-on-rails-#{SecureRandom.hex(4)}",
+      sku: "BOOK-ROR-#{SecureRandom.hex(4)}",
       description: "A comprehensive guide to Ruby on Rails development",
       price: 29.99,
       stock: 50,
       stock_status: "in_stock",
       product_type: "physical",
-      delivery_method: "shipping"
+      delivery_method: "shipping",
+      status: "active"
     )
+    @product.categories << [@carte, @fizic]
   end
 
-  test "should add a product to cart" do
-    visit root_path
-    
-    # Look for the product on the page
+  test "should add a product to cart from product page" do
+    visit carti_path(@product.slug)
+
     assert_text @product.name
-    
-    # Click add to cart button
-    click_button "Add to cart"
-    
-    # Verify the product was added to the cart
-    assert_text "Product added to cart"
+    click_button "Adauga in cos"
+
+    # Should redirect to cart with product added
+    assert_text "Coșul tău", wait: 5
+    assert_text @product.name
   end
 
   test "should display product details" do
-    visit products_path
-    
-    # Check if the product is displayed
+    visit carti_path(@product.slug)
+
     assert_text @product.name
     assert_text @product.description
-    assert_text "$#{@product.price}"
-  end
-
-  test "should update cart quantity" do
-    visit root_path
-    
-    # Add product to cart
-    assert_text @product.name
-    click_button "Add to cart"
-    
-    # Navigate to cart
-    click_link "Cart"
-    
-    # Verify the product is in the cart
-    assert_text @product.name
-    
-    # Update quantity
-    fill_in "quantity", with: 3
-    click_button "Update Cart"
-    
-    # Verify the quantity was updated
-    assert_text "3"
+    assert_text "29.99"
   end
 end

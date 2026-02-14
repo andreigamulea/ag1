@@ -3,11 +3,11 @@
 
   <p>
     <strong>Preț:</strong>
-    <%= number_to_currency(product.price) %>
-    <% if product.discount_price.present? %>
-      <span style="color: red;">
-        (Promo: <%= number_to_currency(product.discount_price) %>)
-      </span>
+    <% if product.promo_active? && product.discount_price.present? && product.discount_price > 0 %>
+      <span style="text-decoration: line-through; color: #999;"><%= number_to_currency(product.price) %></span>
+      <span style="color: #dc3545; font-weight: bold;"><%= number_to_currency(product.discount_price) %></span>
+    <% else %>
+      <%= number_to_currency(product.price) %>
     <% end %>
   </p>
 

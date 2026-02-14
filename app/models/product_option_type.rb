@@ -6,5 +6,7 @@ class ProductOptionType < ApplicationRecord
 
   validates :option_type_id, uniqueness: { scope: :product_id }
 
+  scope :primary_option, -> { where(primary: true) }
+
   default_scope { order(:position) }
 end

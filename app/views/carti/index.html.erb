@@ -30,75 +30,151 @@
 
 <div class="product-grid">
   <% @products.each do |product| %>
-    <div class="product-card">
-      <div class="image-wrapper">
-        <% if product.external_image_url.present? %>
-          <%= link_to carti_path(product.id), class: "image-link" do %>
-            <%= image_tag product.external_image_url, alt: product.name, class: "popup-trigger" %>
+    <% variants = @product_variants[product.id] %>
+    <% if variants.present? %>
+      <%# Product has variants: show each variant as its own card %>
+      <% variants.each do |variant| %>
+        <% card_image = variant.external_image_url.presence || product.external_image_url %>
+        <% product_link = carti_path(product.slug.presence || product.id, variant: variant.id) %>
+        <div class="product-card">
+          <div class="image-wrapper">
+            <% if card_image.present? %>
+              <%= link_to product_link, class: "image-link" do %>
+                <%= image_tag card_image, alt: "#{product.name} - #{variant.options_text}", class: "popup-trigger" %>
+              <% end %>
+            <% else %>
+              <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
+            <% end %>
+          </div>
+
+          <div class="content-section">
+            <p class="product-title"><%= product.name %></p>
+            <p class="product-variant-info"><%= variant.options_text %></p>
+
+            <% if product.custom_attributes["autor"].present? %>
+              <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
+            <% end %>
+
+            <p class="product-price">Preț:
+              <% if variant.promo_active? && variant.discount_price.present? && variant.discount_price > 0 %>
+                <span style="text-decoration: line-through; color: #999;"><%= number_to_currency(variant.price, unit: "", delimiter: ".", separator: ",") %> lei</span>
+                <span style="color: #dc3545; font-weight: bold;"><%= number_to_currency(variant.discount_price, unit: "", delimiter: ".", separator: ",") %> lei</span>
+              <% elsif variant.price.present? %>
+                <%= number_to_currency(variant.price, unit: "", delimiter: ".", separator: ",") %> lei
+              <% end %>
+            </p>
+
+            <% if current_user && current_user.role == 1 %>
+              <% if variant.stock > 5 %>
+                <p class="stock green">Stoc: <%= variant.stock %> Pe stoc</p>
+              <% elsif variant.stock > 0 %>
+                <p class="stock yellow">Stoc: <%= variant.stock %> Cantitate limitată</p>
+              <% else %>
+                <p class="stock red">Stoc: 0 (Se poate comanda)</p>
+              <% end %>
+            <% else %>
+              <% if variant.stock > 0 %>
+                <p class="stock green">Disponibil</p>
+              <% else %>
+                <p class="stock red">Indisponibil temporar</p>
+              <% end %>
+            <% end %>
+          </div>
+
+          <div class="add-to-cart-form">
+            <%= form_tag add_cart_index_path, method: :post do %>
+              <input type="hidden" name="product_id" value="<%= product.id %>">
+              <input type="hidden" name="variant_id" value="<%= variant.id %>">
+              <%= number_field_tag :quantity, 1,
+                id: "quantity_v#{variant.id}",
+                class: "qty-input",
+                min: 1 %>
+
+              <%= submit_tag "Adaugă în coș",
+                class: "add-to-cart-btn",
+                disabled: (variant.stock <= 0) %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <%# Product without variants: show as before %>
+      <div class="product-card">
+        <div class="image-wrapper">
+          <% if product.external_image_url.present? %>
+            <%= link_to carti_path(product.slug.presence || product.id), class: "image-link" do %>
+              <%= image_tag product.external_image_url, alt: product.name, class: "popup-trigger" %>
+            <% end %>
+          <% else %>
+            <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
           <% end %>
-        <% else %>
-          <%= image_tag "placeholder.png", class: "product-image", loading: "lazy" %>
-        <% end %>
+        </div>
+
+        <div class="content-section">
+          <p class="product-title"><%= product.name %></p>
+
+          <% if product.custom_attributes["autor"].present? %>
+            <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
+          <% end %>
+
+          <p class="product-price">Preț:
+            <% if product.promo_active? && product.discount_price.present? && product.discount_price > 0 %>
+              <span style="text-decoration: line-through; color: #999;"><%= number_to_currency(product.price, unit: "", delimiter: ".", separator: ",") %> lei</span>
+              <span style="color: #dc3545; font-weight: bold;"><%= number_to_currency(product.discount_price, unit: "", delimiter: ".", separator: ",") %> lei</span>
+            <% elsif product.price.present? %>
+              <%= number_to_currency(product.price, unit: "", delimiter: ".", separator: ",") %> lei
+            <% end %>
+          </p>
+
+          <% if product.track_inventory %>
+            <% if current_user && current_user.role == 1 %>
+              <% if product.stock > 5 %>
+                <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
+              <% elsif product.stock > 0 %>
+                <p class="stock yellow">Stoc: <%= product.stock %> Cantitate limitată</p>
+              <% else %>
+                <p class="stock red">Stoc: 0 (Se poate comanda, livrarea va fi făcută când revine în stoc)</p>
+              <% end %>
+            <% else %>
+              <% if product.stock > 0 %>
+                <p class="stock green">Disponibil</p>
+              <% else %>
+                <p class="stock red">Indisponibil temporar</p>
+              <% end %>
+            <% end %>
+          <% else %>
+            <% if current_user && current_user.role == 1 %>
+              <% if product.stock > 0 %>
+                <p class="stock green">Stoc disponibil: <%= product.stock %></p>
+              <% else %>
+                <p class="stock red">Stoc: 0 (indisponibil)</p>
+              <% end %>
+            <% else %>
+              <% if product.stock > 0 %>
+                <p class="stock green">Disponibil</p>
+              <% else %>
+                <p class="stock red">Indisponibil temporar</p>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+
+        <div class="add-to-cart-form">
+          <%= form_tag add_cart_index_path, method: :post do %>
+            <input type="hidden" name="product_id" id="product_id_<%= product.id %>" value="<%= product.id %>">
+            <%= number_field_tag :quantity, 1,
+              id: "quantity_#{product.id}",
+              class: "qty-input",
+              min: 1,
+              max: (product.track_inventory ? nil : product.stock) %>
+
+            <%= submit_tag "Adaugă în coș",
+              class: "add-to-cart-btn",
+              disabled: (!product.track_inventory && product.stock <= 0) %>
+          <% end %>
+        </div>
       </div>
-
-      <div class="content-section">
-        <p class="product-title"><%= product.name %></p>
-
-        <% if product.custom_attributes["autor"].present? %>
-          <p class="product-author">autor: <%= product.custom_attributes["autor"] %></p>
-        <% end %>
-
-        <p class="product-price">Preț: <%= number_to_currency(product.price, unit: "", delimiter: ".", separator: ",") %> lei</p>
-            
-        <% if product.track_inventory %>
-  <% if current_user && current_user.role == 1 %>
-    <% if product.stock > 5 %>
-      <p class="stock green">Stoc: <%= product.stock %> Pe stoc</p>
-    <% elsif product.stock > 0 %>
-      <p class="stock yellow">Stoc: <%= product.stock %> Cantitate limitată</p>
-    <% else %>
-      <p class="stock red">Stoc: 0 (Se poate comanda, livrarea va fi făcută când revine în stoc)</p>
     <% end %>
-  <% else %>
-    <% if product.stock > 0 %>
-      <p class="stock green">Disponibil</p>
-    <% else %>
-      <p class="stock red">Indisponibil temporar</p>
-    <% end %>
-  <% end %>
-<% else %>
-  <% if current_user && current_user.role == 1 %>
-    <% if product.stock > 0 %>
-      <p class="stock green">Stoc disponibil: <%= product.stock %></p>
-    <% else %>
-      <p class="stock red">Stoc: 0 (indisponibil)</p>
-    <% end %>
-  <% else %>
-    <% if product.stock > 0 %>
-      <p class="stock green">Disponibil</p>
-    <% else %>
-      <p class="stock red">Indisponibil temporar</p>
-    <% end %>
-  <% end %>
-<% end %>
-
-      </div>
-
-      <div class="add-to-cart-form">
-        <%= form_tag add_cart_index_path, method: :post do %>
-          <input type="hidden" name="product_id" id="product_id_<%= product.id %>" value="<%= product.id %>">
-          <%= number_field_tag :quantity, 1,
-            id: "quantity_#{product.id}",
-            class: "qty-input",
-            min: 1,
-            max: (product.track_inventory ? nil : product.stock) %>
-
-          <%= submit_tag "Adaugă în coș",
-            class: "add-to-cart-btn",
-            disabled: (!product.track_inventory && product.stock <= 0) %>
-        <% end %>
-      </div>
-    </div>
   <% end %>
 </div>
 

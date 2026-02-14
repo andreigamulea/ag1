@@ -14,24 +14,16 @@ class Admin::OptionTypesControllerTest < ActionDispatch::IntegrationTest
     )
     sign_in @admin
 
-    # Create option types
-    @culoare = OptionType.create!(name: "Culoare", presentation: "Culoare", position: 0)
-    @marime = OptionType.create!(name: "Marime", presentation: "Mărime", position: 1)
+    # Create option types with unique names to avoid collisions
+    @culoare = OptionType.create!(name: "Culoare-#{SecureRandom.hex(4)}", presentation: "Culoare", position: 0)
+    @marime = OptionType.create!(name: "Marime-#{SecureRandom.hex(4)}", presentation: "Mărime", position: 1)
 
     # Add option values to Culoare
-    @rosu = @culoare.option_values.create!(name: "Roșu", presentation: "Roșu", position: 0)
-    @albastru = @culoare.option_values.create!(name: "Albastru", presentation: "Albastru", position: 1)
+    @rosu = @culoare.option_values.create!(name: "Roșu-#{SecureRandom.hex(4)}", presentation: "Roșu", position: 0)
+    @albastru = @culoare.option_values.create!(name: "Albastru-#{SecureRandom.hex(4)}", presentation: "Albastru", position: 1)
   end
 
-  teardown do
-    # Use delete_all to bypass associations and avoid cascade errors
-    Variant.delete_all
-    Product.delete_all
-    User.delete_all
-    OptionValue.delete_all
-    OptionType.delete_all
-    Order.delete_all
-  end
+  # Transactional tests handle cleanup automatically
 
   # INDEX tests
   test "should get index" do
@@ -56,10 +48,11 @@ class Admin::OptionTypesControllerTest < ActionDispatch::IntegrationTest
 
   # CREATE tests
   test "should create option_type" do
+    unique_name = "Material-#{SecureRandom.hex(4)}"
     assert_difference("OptionType.count") do
       post admin_option_types_path, params: {
         option_type: {
-          name: "Material",
+          name: unique_name,
           presentation: "Material",
           position: 2
         }
@@ -68,7 +61,7 @@ class Admin::OptionTypesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to edit_admin_option_type_path(OptionType.last)
     follow_redirect!
-    assert_match "Material", response.body
+    assert_match unique_name, response.body
   end
 
   test "should not create option_type with invalid params" do
@@ -85,7 +78,7 @@ class Admin::OptionTypesControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference("OptionType.count") do
       post admin_option_types_path, params: {
         option_type: {
-          name: "Culoare",
+          name: @culoare.name,
           presentation: "Culoare",
           position: 3
         }
@@ -121,13 +114,15 @@ class Admin::OptionTypesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not update option_type with invalid params" do
+    original_name = @culoare.name
+
     patch admin_option_type_path(@culoare), params: {
       option_type: { name: "" }
     }
 
     assert_response :unprocessable_entity
     @culoare.reload
-    assert_equal "Culoare", @culoare.name
+    assert_equal original_name, @culoare.name
   end
 
   # DELETE tests

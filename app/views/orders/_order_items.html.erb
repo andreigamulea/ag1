@@ -14,7 +14,12 @@
     <tbody>
       <% order_items.each do |item| %>
         <tr>
-          <td><%= item.product_name %></td>
+          <td>
+            <%= item.product_name %>
+            <% if item.variant_options_text.present? %>
+              <br><small style="color: #666;"><%= item.variant_options_text %></small>
+            <% end %>
+          </td>
           <td><%= item.quantity %></td>
           <td><%= number_to_currency(item.price, unit: "RON ", separator: ",", delimiter: ".") %></td>
           <td><%= number_to_currency(item.total_price, unit: "RON ", separator: ",", delimiter: ".") %></td>

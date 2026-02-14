@@ -14,23 +14,17 @@ class ProductVariantsUITest < SuiteTestCase
   test "checkbox 'Are variante?' este prezent și funcțional" do
     visit new_product_path
 
-    # Verificăm că checkbox-ul există
     assert_field "has_variants", type: "checkbox"
-
-    # Inițial este debifat
     assert_unchecked_field "has_variants"
   end
 
   test "bifând 'Are variante?' secțiunea de variante devine vizibilă" do
     visit new_product_path
 
-    # Inițial secțiunea e ascunsă
     assert_selector "#section-variants", visible: :hidden
 
-    # Bifăm checkbox-ul
     check "has_variants"
 
-    # Secțiunea devine vizibilă
     assert_selector "#section-variants", visible: :visible, wait: 2
     assert_selector "#btn-add-variant", visible: :visible
     assert_selector ".variants-table", visible: :visible
@@ -39,14 +33,11 @@ class ProductVariantsUITest < SuiteTestCase
   test "debifând 'Are variante?' secțiunea de variante dispare" do
     visit new_product_path
 
-    # Bifăm pentru a face secțiunea vizibilă
     check "has_variants"
     assert_selector "#section-variants", visible: :visible, wait: 2
 
-    # Debifăm
     uncheck "has_variants"
 
-    # Secțiunea devine ascunsă
     assert_selector "#section-variants", visible: :hidden, wait: 2
   end
 
@@ -54,7 +45,6 @@ class ProductVariantsUITest < SuiteTestCase
     visit new_product_path
     check "has_variants"
 
-    # Verificăm că tabelul are toate coloanele necesare
     within ".variants-table" do
       assert_text "Imagine"
       assert_text "SKU"
@@ -71,26 +61,27 @@ class ProductVariantsUITest < SuiteTestCase
     visit new_product_path
     check "has_variants"
 
-    # Verificăm că butonul există
     assert_button "Adauga varianta"
 
-    # Număr inițial de rânduri
-    initial_rows = all(".variant-row").count
+    initial_rows = all(".variant-row-top").count
 
-    # Click pe buton
     find("#btn-add-variant").click
 
-    # Verificăm că s-a adăugat un rând nou
-    assert_equal initial_rows + 1, all(".variant-row").count, wait: 2
+    assert_equal initial_rows + 1, all(".variant-row-top", wait: 2).count
   end
 
   test "câmpurile variantei au clasele CSS corecte pentru JavaScript" do
     visit new_product_path
     check "has_variants"
+    find("#btn-add-variant").click
 
-    within first(".variant-row") do
-      # Verificăm că toate câmpurile au clasele corecte
+    # SKU is in the top row
+    within first(".variant-row-top") do
       assert_selector ".variant-sku"
+    end
+
+    # Price, stock, vat, status are in the bottom row
+    within first(".variant-row-bottom") do
       assert_selector ".variant-price"
       assert_selector ".variant-stock"
       assert_selector ".variant-vat"
@@ -100,16 +91,16 @@ class ProductVariantsUITest < SuiteTestCase
 
   test "varianta nouă are buton de ștergere" do
     visit new_product_path
+    assert_selector "#toggle-has-variants", wait: 5
     check "has_variants"
+    find("#btn-add-variant").click
 
-    within first(".variant-row") do
-      # Verificăm că butonul de ștergere există
+    within first(".variant-row-bottom") do
       assert_selector ".btn-remove-variant"
     end
   end
 
   test "în pagina de edit checkbox 'Are variante?' reflectă starea corectă" do
-    # Produs fără variante
     product_without_variants = create_test_product(
       name: "Produs Fără Variante #{SecureRandom.hex(4)}"
     )
@@ -117,7 +108,6 @@ class ProductVariantsUITest < SuiteTestCase
     visit edit_product_path(product_without_variants)
     assert_unchecked_field "has_variants"
 
-    # Produs cu variante
     product_with_variants = create_test_product(
       name: "Produs Cu Variante #{SecureRandom.hex(4)}"
     )
@@ -144,31 +134,29 @@ class ProductVariantsUITest < SuiteTestCase
         sku: "VAR-2-#{SecureRandom.hex(2)}",
         price: 49.99,
         vat_rate: 9.0,
-        status: 1 # inactive
+        status: 1
       }
     )
 
     visit edit_product_path(product)
 
-    # Verificăm că ambele variante apar în tabel
-    assert_text v1.sku
-    assert_text v2.sku
-    assert_equal 2, all(".variant-row").count
+    # SKUs are in input fields, not as plain text
+    assert_selector "input.variant-sku[value='#{v1.sku}']"
+    assert_selector "input.variant-sku[value='#{v2.sku}']"
+    assert_equal 2, all(".variant-row-top").count
   end
 
   test "zona de upload imagini este prezentă pentru fiecare variantă" do
     visit new_product_path
+    assert_selector "#toggle-has-variants", wait: 5
     check "has_variants"
+    find("#btn-add-variant").click
 
-    within first(".variant-row") do
-      # Verificăm că există input file pentru imagini
+    within first(".variant-row-bottom") do
       assert_selector "input.variant-image-input[type='file']", visible: :all
-
-      # Verificăm butonul de adăugare imagini
       assert_selector ".variant-add-img-btn"
-
-      # Verificăm container-ul pentru galerie
-      assert_selector ".variant-image-gallery"
+      # Gallery div is empty (0 height) for new variants, so check with visible: :all
+      assert_selector ".variant-image-gallery", visible: :all
     end
   end
 end

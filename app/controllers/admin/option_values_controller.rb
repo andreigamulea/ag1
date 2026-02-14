@@ -52,7 +52,7 @@ class Admin::OptionValuesController < ApplicationController
   end
 
   def option_value_params
-    params.require(:option_value).permit(:name, :presentation, :position)
+    params.require(:option_value).permit(:name, :presentation, :position, :color_hex)
   end
 
   def require_admin

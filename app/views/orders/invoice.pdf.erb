@@ -254,7 +254,12 @@
       <tbody>
         <% order.order_items.where.not(product_name: ["Discount", "Transport"]).each do |item| %>
           <tr>
-            <td style="text-align: left;"><%= item.product_name %></td>
+            <td style="text-align: left;">
+              <%= item.product_name %>
+              <% if item.variant_options_text.present? %>
+                <br><span style="font-size: 0.8em; color: #666;"><%= item.variant_options_text %></span>
+              <% end %>
+            </td>
             <td><%= item.quantity %></td>
             <td><%= sprintf("%.2f lei", item.price) %></td>
             <td><%= sprintf("%.2f lei", item.total_price) %></td>

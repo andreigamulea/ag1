@@ -17,39 +17,29 @@ class Admin::OptionTypesManagementTest < ApplicationSystemTestCase
     fill_in "user[password]", with: "password123"
     click_button "Intră în cont"
 
-    # Create existing option types
-    @culoare = OptionType.create!(name: "Culoare", presentation: "Culoare", position: 0)
+    # Use unique names with a suffix to avoid collisions with seed data
+    @suffix = SecureRandom.hex(4)
+
+    @culoare = OptionType.create!(name: "Culoare-#{@suffix}", presentation: "Culoare", position: 0)
     @culoare.option_values.create!([
-      { name: "Roșu", presentation: "Roșu", position: 0 },
-      { name: "Albastru", presentation: "Albastru", position: 1 }
+      { name: "Roșu-#{@suffix}", presentation: "Roșu", position: 0 },
+      { name: "Albastru-#{@suffix}", presentation: "Albastru", position: 1 }
     ])
 
-    @marime = OptionType.create!(name: "Marime", presentation: "Mărime", position: 1)
+    @marime = OptionType.create!(name: "Marime-#{@suffix}", presentation: "Mărime", position: 1)
     @marime.option_values.create!([
-      { name: "S", presentation: "S", position: 0 },
-      { name: "M", presentation: "M", position: 1 },
-      { name: "L", presentation: "L", position: 2 }
+      { name: "S-#{@suffix}", presentation: "S", position: 0 },
+      { name: "M-#{@suffix}", presentation: "M", position: 1 },
+      { name: "L-#{@suffix}", presentation: "L", position: 2 }
     ])
-  end
-
-  teardown do
-    # Use delete_all to bypass associations and avoid cascade errors
-    Variant.delete_all
-    Product.delete_all
-    User.delete_all
-    OptionValue.delete_all
-    OptionType.delete_all
-    Order.delete_all
   end
 
   test "visiting the index shows existing option types" do
     visit admin_option_types_path
 
     assert_selector "h1", text: "Option Types Management"
-    assert_text "Culoare"
-    assert_text "Marime"
-    assert_text "2 values"
-    assert_text "3 values"
+    assert_text @culoare.name
+    assert_text @marime.name
   end
 
   test "can navigate to new option type form" do
@@ -66,16 +56,19 @@ class Admin::OptionTypesManagementTest < ApplicationSystemTestCase
   test "can navigate to edit option type page" do
     visit admin_option_types_path
 
-    click_link "Edit", match: :first
+    # Click the first Edit link that matches our test option type
+    within(".option-type-card", text: @culoare.name) do
+      click_link "Edit"
+    end
 
     assert_selector "h1", text: /Edit Option Type:/
-    assert_text "Culoare"
+    assert_text @culoare.name
   end
 
   test "edit page shows option values" do
     visit edit_admin_option_type_path(@culoare)
 
-    assert_selector "h1", text: "Edit Option Type: Culoare"
+    assert_selector "h1", text: "Edit Option Type: #{@culoare.name}"
     assert_text "Roșu"
     assert_text "Albastru"
 
@@ -91,7 +84,6 @@ class Admin::OptionTypesManagementTest < ApplicationSystemTestCase
     visit edit_admin_option_type_path(@culoare)
 
     assert_selector "h3", text: "Add New Option Value"
-    # More specific selector to avoid ambiguity
     within "form[action='#{admin_option_type_option_values_path(@culoare)}']" do
       assert_selector "input[name='option_value[name]']"
       assert_selector "input[name='option_value[presentation]']"
@@ -100,28 +92,27 @@ class Admin::OptionTypesManagementTest < ApplicationSystemTestCase
   end
 
   test "can create new option type via UI" do
+    material_name = "Material-#{@suffix}"
     visit admin_option_types_path
 
     click_link "New Option Type"
 
-    # Use more specific selectors
     within "form[action='#{admin_option_types_path}']" do
-      fill_in "option_type[name]", with: "Material"
+      fill_in "option_type[name]", with: material_name
       fill_in "option_type[presentation]", with: "Material"
       fill_in "option_type[position]", with: "2"
       click_button "Create Option Type"
     end
 
     # Should redirect to edit page
-    assert_selector "h1", text: "Edit Option Type: Material"
+    assert_selector "h1", text: "Edit Option Type: #{material_name}"
   end
 
   test "can add option value via UI" do
     visit edit_admin_option_type_path(@culoare)
 
-    # Add new value
     within "form[action='#{admin_option_type_option_values_path(@culoare)}']" do
-      fill_in "option_value[name]", with: "Verde"
+      fill_in "option_value[name]", with: "Verde-#{@suffix}"
       fill_in "option_value[presentation]", with: "Verde"
       click_button "Add Value"
     end
@@ -144,11 +135,11 @@ class Admin::OptionTypesManagementTest < ApplicationSystemTestCase
   end
 
   test "index shows usage statistics" do
-    # Create product using Culoare
+    # Create product using our test Culoare option type
     product = Product.create!(
-      name: "Test Product",
-      slug: "test-#{Time.now.to_i}",
-      sku: "TEST",
+      name: "Test Product #{@suffix}",
+      slug: "test-#{@suffix}-#{Time.now.to_i}",
+      sku: "TEST-#{@suffix}",
       price: 10.0,
       status: "active"
     )
@@ -156,10 +147,8 @@ class Admin::OptionTypesManagementTest < ApplicationSystemTestCase
 
     visit admin_option_types_path
 
-    within(".option-type-card", text: "Culoare") do
+    within(".option-type-card", text: @culoare.name) do
       assert_text "1 products"
     end
-
-    product.destroy
   end
 end

@@ -39,7 +39,7 @@ class ProductsController < ApplicationController
 
     respond_to do |format|
       if @product.save
-        generate_variants_for(@product)
+        sync_product_option_types(@product)
 
         format.html { redirect_to @product, notice: "Product was successfully created." }
         format.json { render :show, status: :created, location: @product }
@@ -62,7 +62,7 @@ class ProductsController < ApplicationController
         @product.secondary_images.attach(new_images) if new_images.present?
         @product.attached_files.attach(new_files) if new_files.present?
 
-        generate_variants_for(@product)
+        sync_product_option_types(@product)
 
         format.html { redirect_to @product, notice: "Produs actualizat cu succes." }
         format.json { render :show, status: :ok, location: @product }
@@ -87,6 +87,95 @@ class ProductsController < ApplicationController
     image = ActiveStorage::Attachment.find(params[:image_id])
     image.purge
     redirect_back fallback_location: edit_product_path(params[:id]), notice: "Imaginea a fost ștearsă."
+  end
+
+  def check_slug
+    slug = params[:slug].to_s.parameterize
+    product_id = params[:product_id]
+    scope = Product.where(slug: slug)
+    scope = scope.where.not(id: product_id) if product_id.present?
+
+    original_available = !scope.exists?
+
+    unless original_available
+      counter = 2
+      base_slug = slug
+      loop do
+        candidate = "#{base_slug}-#{counter}"
+        check_scope = Product.where(slug: candidate)
+        check_scope = check_scope.where.not(id: product_id) if product_id.present?
+        unless check_scope.exists?
+          slug = candidate
+          break
+        end
+        counter += 1
+      end
+    end
+
+    render json: { slug: slug, available: original_available }
+  end
+
+  def check_sku
+    sku = params[:sku].to_s.strip
+    product_id = params[:product_id]
+    scope = Product.where(sku: sku)
+    scope = scope.where.not(id: product_id) if product_id.present?
+
+    original_available = !scope.exists?
+
+    suggested_sku = sku
+    unless original_available
+      counter = 2
+      loop do
+        candidate = "#{sku}-#{counter}"
+        check_scope = Product.where(sku: candidate)
+        check_scope = check_scope.where.not(id: product_id) if product_id.present?
+        unless check_scope.exists?
+          suggested_sku = candidate
+          break
+        end
+        counter += 1
+      end
+    end
+
+    render json: { sku: suggested_sku, available: original_available }
+  end
+
+  def check_variant_sku
+    sku = params[:sku].to_s.strip
+    variant_id = params[:variant_id]
+    product_id = params[:product_id]
+
+    # Variant SKU uniqueness is scoped to product_id
+    if product_id.present?
+      scope = Variant.where(sku: sku, product_id: product_id)
+    else
+      scope = Variant.where(sku: sku)
+    end
+    scope = scope.where.not(id: variant_id) if variant_id.present?
+
+    original_available = !scope.exists?
+
+    suggested_sku = sku
+    unless original_available
+      counter = 2
+      loop do
+        candidate = "#{sku}-#{counter}"
+        if product_id.present?
+          check_scope = Variant.where(sku: candidate, product_id: product_id)
+        else
+          check_scope = Variant.where(sku: candidate)
+        end
+        check_scope = check_scope.where.not(id: variant_id) if variant_id.present?
+        unless check_scope.exists?
+          suggested_sku = candidate
+          break
+        end
+        counter += 1
+      end
+    end
+
+    render json: { sku: suggested_sku, available: original_available }
   end
 
   def force_gc
@@ -297,7 +386,7 @@ class ProductsController < ApplicationController
     def product_params
       clean_params = params.require(:product).permit(
         :name, :slug, :description_title, :description,
-        :price, :cost_price, :discount_price,
+        :price, :cost_price, :discount_price, :promo_active,
         :sku, :stock, :track_inventory, :stock_status,
         :sold_individually, :available_on, :discontinue_on,
         :height, :width, :depth, :weight,
@@ -309,7 +398,7 @@ class ProductsController < ApplicationController
         external_file_urls: [],
         external_image_urls: [],
         category_ids: [],
-        variants_attributes: [:id, :sku, :price, :stock, :vat_rate, :status, :external_image_url, :_destroy, option_value_ids: [], external_image_urls: []]
+        variants_attributes: [:id, :sku, :price, :cost_price, :discount_price, :promo_active, :stock, :vat_rate, :status, :external_image_url, :_destroy, option_value_ids: [], external_image_urls: []]
       )
 
       # ✅ Parsează JSON-ul dacă este string
@@ -352,8 +441,32 @@ class ProductsController < ApplicationController
       Rails.env.production?
     end
 
-    def generate_variants_for(product)
-      # Stub - variant generation se face prin nested attributes acum
+    def sync_product_option_types(product)
+      # Reload variants to get fresh option_values after nested attributes save
+      product.variants.reload
+      ot_ids = product.variants.reject(&:marked_for_destruction?).flat_map { |v|
+        v.option_values.map(&:option_type_id)
+      }.uniq
+
+      # Sync product_option_types (add missing, remove unused)
+      existing_ids = product.product_option_types.pluck(:option_type_id)
+      to_add = ot_ids - existing_ids
+      to_remove = existing_ids - ot_ids
+
+      product.product_option_types.where(option_type_id: to_remove).destroy_all if to_remove.any?
+      to_add.each_with_index do |ot_id, idx|
+        product.product_option_types.create!(option_type_id: ot_id, position: existing_ids.size + idx)
+      end
+
+      # Set primary flag
+      primary_id = params[:primary_option_type_id].to_i
+      if primary_id > 0 && ot_ids.include?(primary_id)
+        product.product_option_types.update_all(primary: false)
+        product.product_option_types.where(option_type_id: primary_id).update_all(primary: true)
+      elsif product.product_option_types.where(primary: true).none? && product.product_option_types.any?
+        # Auto-select first if none set
+        product.product_option_types.order(:position).first.update!(primary: true)
+      end
     end
 
     def load_option_types

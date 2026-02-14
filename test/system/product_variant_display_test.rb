@@ -28,8 +28,10 @@ class ProductVariantDisplayTest < ApplicationSystemTestCase
     )
 
     @product.categories << [@carte, @fizic]
-    @product.product_option_types.create!(option_type: @culoare)
-    @product.product_option_types.create!(option_type: @marime)
+
+    # Culoare = primary, Marime = secondary
+    @product.product_option_types.create!(option_type: @culoare, primary: true, position: 0)
+    @product.product_option_types.create!(option_type: @marime, primary: false, position: 1)
 
     # Varianta 1: Roșu + M
     @variant1 = @product.variants.create!(
@@ -63,83 +65,100 @@ class ProductVariantDisplayTest < ApplicationSystemTestCase
     @variant2.save!
   end
 
-  test "afiseaza selectoarele de variante pe pagina produsului" do
+  test "afiseaza swatches pentru optiunea principala si butoane pentru secundara" do
     visit carti_path(@product)
 
     assert_selector ".variant-selector"
-    assert_selector "select.variant-option-dropdown", count: 2
 
-    # Verifica ca exista dropdown-urile pentru Culoare si Marime
+    # Swatches pentru Culoare (primary)
+    assert_selector ".variant-swatches"
+    assert_selector ".variant-swatch", count: 2
     assert_text "Culoare:"
-    assert_text "Marime:"
+
+    # Butoane pentru Marime (secondary)
+    assert_selector ".variant-buttons"
+    assert_selector ".variant-btn", count: 2
+    assert_text "Mărime:"
   end
 
-  test "selectarea variantei actualizeaza pretul" do
+  test "swatches au buline colorate pentru optiunea Culoare" do
     visit carti_path(@product)
 
-    # Selecteaza Culoare: Roșu (gaseste dropdown-ul pentru Culoare)
-    culoare_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @culoare.id.to_s }
-    culoare_dropdown.select "Roșu"
+    # Fiecare swatch ar trebui sa aiba o bulina colorata
+    within ".variant-swatches" do
+      circles = all(".swatch-color")
+      assert_equal 2, circles.length
+    end
+  end
 
-    # Selecteaza Marime: M
-    marime_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @marime.id.to_s }
-    marime_dropdown.select "M"
+  test "click pe swatch schimba varianta si actualizeaza pretul" do
+    visit carti_path(@product)
 
-    # Verifica ca pretul s-a actualizat la 39.99
+    # Initial: prima varianta selectata (Roșu + M, 39.99)
     within "#product-price" do
       assert_text "39.99 lei"
     end
+
+    # Click pe swatch Albastru
+    find(".variant-swatch[data-option-value-id='#{@albastru.id}']").click
+
+    # Auto-selecteaza L (singurul secondary disponibil pentru Albastru)
+    # Pretul se actualizeaza la 44.99
+    within "#product-price" do
+      assert_text "44.99 lei"
+    end
   end
 
-  test "selectarea variantei actualizeaza stocul" do
+  test "click pe swatch actualizeaza stocul" do
     visit carti_path(@product)
 
-    # Initial ar trebui sa spuna "Selectează opțiunile"
-    within "#variant-stock-info" do
-      assert_text "Selectează opțiunile"
-    end
-
-    # Selecteaza Culoare: Roșu
-    culoare_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @culoare.id.to_s }
-    culoare_dropdown.select "Roșu"
-
-    # Selecteaza Marime: M
-    marime_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @marime.id.to_s }
-    marime_dropdown.select "M"
-
-    # Verifica ca stocul s-a actualizat
+    # Initial: prima varianta (Roșu + M, stock = 10)
     within "#variant-stock-info" do
       assert_text "10 bucăți disponibile"
     end
+
+    # Click pe swatch Albastru → varianta Albastru + L (stock = 5)
+    find(".variant-swatch[data-option-value-id='#{@albastru.id}']").click
+
+    within "#variant-stock-info" do
+      assert_text "5 bucăți disponibile"
+    end
   end
 
-  test "nu permite adaugarea in cos fara selectare varianta completa" do
+  test "click pe buton secondary selecteaza varianta corecta" do
     visit carti_path(@product)
 
-    # Butonul ar trebui sa fie disabled initial
-    submit_btn = find("#add-to-cart-submit")
-    assert submit_btn.disabled?
+    # Adaugam o varianta Roșu + L pentru a avea optiuni secondary multiple
+    variant3 = @product.variants.create!(
+      sku: "VAR3-#{SecureRandom.hex(4)}",
+      price: 42.00,
+      stock: 7,
+      vat_rate: 19.0,
+      status: 0,
+      external_image_url: "https://ayus-cdn.b-cdn.net/variant3-main.jpg"
+    )
+    variant3.option_values << [@rosu, @l]
+    variant3.save!
 
-    # Selecteaza doar Culoare (nu si Marime)
-    culoare_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @culoare.id.to_s }
-    culoare_dropdown.select "Roșu"
+    visit carti_path(@product)
 
-    # Butonul ar trebui sa fie inca disabled
-    assert submit_btn.disabled?
+    # Prima: swatch Roșu activ, buton M auto-selectat (prima varianta)
+    # Click pe buton L
+    find(".variant-btn[data-option-value-id='#{@l.id}']").click
+
+    # Acum ar trebui sa fie varianta Roșu + L (42.00)
+    within "#product-price" do
+      assert_text "42.00 lei"
+    end
+
+    hidden_input = find("#selected-variant-id", visible: false)
+    assert_equal variant3.id.to_s, hidden_input.value
   end
 
-  test "permite adaugarea in cos dupa selectarea completa a variantei" do
+  test "permite adaugarea in cos dupa selectarea variantei" do
     visit carti_path(@product)
 
-    # Selecteaza Culoare: Albastru
-    culoare_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @culoare.id.to_s }
-    culoare_dropdown.select "Albastru"
-
-    # Selecteaza Marime: L
-    marime_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @marime.id.to_s }
-    marime_dropdown.select "L"
-
-    # Butonul ar trebui sa fie enabled
+    # Initial: prima varianta auto-selectata (Roșu + M)
     submit_btn = find("#add-to-cart-submit")
     refute submit_btn.disabled?
 
@@ -151,50 +170,29 @@ class ProductVariantDisplayTest < ApplicationSystemTestCase
 
     # Verifica ca produsul este in cos cu varianta corecta
     assert_text @product.name
-    assert_text "Culoare: Albastru, Marime: L"
-    assert_text "44.99 lei"
+    assert_text "Culoare: Roșu, Marime: M"
+    assert_text "39.99 lei"
   end
 
   test "hidden input pentru variant_id este completat corect" do
     visit carti_path(@product)
 
-    # Selecteaza Culoare: Roșu
-    culoare_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @culoare.id.to_s }
-    culoare_dropdown.select "Roșu"
-
-    # Selecteaza Marime: M
-    marime_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @marime.id.to_s }
-    marime_dropdown.select "M"
-
-    # Verifica ca hidden field-ul are ID-ul variantei corecte
-    hidden_input = find("#selected-variant-id", visible: false)
-    assert_equal @variant1.id.to_s, hidden_input.value
-  end
-
-  test "schimbarea variantei actualizeaza variant_id-ul" do
-    visit carti_path(@product)
-
-    # Selecteaza prima varianta
-    culoare_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @culoare.id.to_s }
-    culoare_dropdown.select "Roșu"
-
-    marime_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @marime.id.to_s }
-    marime_dropdown.select "M"
-
+    # Initial: prima varianta auto-selectata
     hidden_input = find("#selected-variant-id", visible: false)
     assert_equal @variant1.id.to_s, hidden_input.value
 
-    # Schimba la a doua varianta
-    culoare_dropdown.select "Albastru"
-    marime_dropdown.select "L"
+    # Click pe swatch Albastru → se schimba la variant2
+    find(".variant-swatch[data-option-value-id='#{@albastru.id}']").click
 
-    # Verifica ca s-a actualizat
     hidden_input = find("#selected-variant-id", visible: false)
     assert_equal @variant2.id.to_s, hidden_input.value
   end
 
   test "varianta fara stoc dezactiveaza butonul de adaugare in cos" do
     # Creeaza o varianta fara stoc
+    verde = @culoare.option_values.find_or_create_by!(name: "Verde", presentation: "Verde", position: 3)
+    xs = @marime.option_values.find_or_create_by!(name: "XS", presentation: "XS", position: 0)
+
     varianta_epuizata = @product.variants.create!(
       sku: "VAR-EPUIZAT-#{SecureRandom.hex(4)}",
       price: 49.99,
@@ -202,22 +200,13 @@ class ProductVariantDisplayTest < ApplicationSystemTestCase
       vat_rate: 19.0,
       status: 0
     )
-
-    # Creeaza option values noi pentru aceasta varianta
-    verde = @culoare.option_values.find_or_create_by!(name: "Verde", presentation: "Verde", position: 3)
-    xs = @marime.option_values.find_or_create_by!(name: "XS", presentation: "XS", position: 0)
-
     varianta_epuizata.option_values << [verde, xs]
     varianta_epuizata.save!
 
     visit carti_path(@product)
 
-    # Selecteaza varianta epuizata
-    culoare_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @culoare.id.to_s }
-    culoare_dropdown.select "Verde"
-
-    marime_dropdown = all("select.variant-option-dropdown").find { |dd| dd["data-option-type-id"] == @marime.id.to_s }
-    marime_dropdown.select "XS"
+    # Click pe swatch Verde
+    find(".variant-swatch[data-option-value-id='#{verde.id}']").click
 
     # Verifica ca stocul spune "Stoc epuizat"
     within "#variant-stock-info" do
@@ -241,5 +230,48 @@ class ProductVariantDisplayTest < ApplicationSystemTestCase
     assert_equal "https://ayus-cdn.b-cdn.net/variant1-main.jpg", variant1_data["external_image_url"]
     assert_equal 2, variant1_data["external_image_urls"].length
     assert_includes variant1_data["external_image_urls"], "https://ayus-cdn.b-cdn.net/variant1-gal1.jpg"
+  end
+
+  test "swatch-ul activ are clasa variant-swatch--active" do
+    visit carti_path(@product)
+
+    # Initial: primul swatch activ
+    active_swatches = all(".variant-swatch--active")
+    assert_equal 1, active_swatches.length
+
+    # Click pe al doilea swatch
+    find(".variant-swatch[data-option-value-id='#{@albastru.id}']").click
+
+    # Doar un swatch activ
+    active_swatches = all(".variant-swatch--active")
+    assert_equal 1, active_swatches.length
+
+    # Al doilea swatch e cel activ
+    assert_selector ".variant-swatch--active[data-option-value-id='#{@albastru.id}']"
+  end
+
+  test "butonul secondary activ are clasa variant-btn--active" do
+    # Adaugam varianta Roșu + L pentru a avea optiuni secondary
+    variant3 = @product.variants.create!(
+      sku: "VAR3B-#{SecureRandom.hex(4)}",
+      price: 41.00,
+      stock: 3,
+      vat_rate: 19.0,
+      status: 0
+    )
+    variant3.option_values << [@rosu, @l]
+    variant3.save!
+
+    visit carti_path(@product)
+
+    # Initial: M auto-selectat
+    assert_selector ".variant-btn--active[data-option-value-id='#{@m.id}']"
+
+    # Click pe L
+    find(".variant-btn[data-option-value-id='#{@l.id}']").click
+
+    # L activ, M nu mai e activ
+    assert_selector ".variant-btn--active[data-option-value-id='#{@l.id}']"
+    assert_no_selector ".variant-btn--active[data-option-value-id='#{@m.id}']"
   end
 end

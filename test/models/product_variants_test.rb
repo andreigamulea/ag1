@@ -63,13 +63,13 @@ class ProductVariantsTest < ActiveSupport::TestCase
     assert_not variant.valid?
     assert variant.errors[:sku].present?
 
-    # Fără preț - invalidă
-    variant = product.variants.build(sku: "VAR-001", stock: 10, vat_rate: 19.0)
+    # Fără preț - invalidă (price defaults to 0 in DB, but model validates >= 0)
+    variant = product.variants.build(sku: "VAR-001", price: nil, stock: 10, vat_rate: 19.0)
     assert_not variant.valid?
     assert variant.errors[:price].present?
 
-    # Fără stoc - invalidă
-    variant = product.variants.build(sku: "VAR-001", price: 39.99, vat_rate: 19.0)
+    # Fără stoc - invalidă (stock defaults to 0 in DB, but model validates >= 0)
+    variant = product.variants.build(sku: "VAR-001", price: 39.99, stock: nil, vat_rate: 19.0)
     assert_not variant.valid?
     assert variant.errors[:stock].present?
   end
@@ -159,7 +159,7 @@ class ProductVariantsTest < ActiveSupport::TestCase
     assert_equal 9.0, variant.vat_rate.to_f
   end
 
-  test "product.has_variants returnează true dacă are variante active" do
+  test "product.has_active_variants? returnează true dacă are variante active" do
     product = Product.create!(
       name: "Carte Has Variants #{SecureRandom.hex(4)}",
       slug: "carte-has-variants-#{SecureRandom.hex(4)}",
@@ -168,7 +168,7 @@ class ProductVariantsTest < ActiveSupport::TestCase
     )
 
     # Fără variante
-    assert_not product.has_variants
+    assert_not product.send(:has_active_variants?)
 
     # Creăm variantă activă
     product.variants.create!(
@@ -176,11 +176,11 @@ class ProductVariantsTest < ActiveSupport::TestCase
       price: 39.99,
       stock: 10,
       vat_rate: 19.0,
-      status: 0 # active
+      status: :active
     )
 
     product.reload
-    assert product.has_variants
+    assert product.send(:has_active_variants?)
   end
 
   test "nested attributes - accept blank pentru reject_if" do
@@ -254,7 +254,7 @@ class ProductVariantsTest < ActiveSupport::TestCase
     assert_includes variant.external_image_urls, "https://ayus-cdn.b-cdn.net/products/gallery1.jpg"
   end
 
-  test "ștergerea produsului șterge și variantele asociate" do
+  test "ștergerea produsului cu variante este restricționată" do
     product = Product.create!(
       name: "Carte Pentru Ștergere #{SecureRandom.hex(4)}",
       slug: "carte-pentru-stergere-#{SecureRandom.hex(4)}",
@@ -269,15 +269,18 @@ class ProductVariantsTest < ActiveSupport::TestCase
       vat_rate: 19.0
     ).id
 
+    product.reload
+
     # Verificăm că varianta există
     assert Variant.exists?(variant_id)
 
-    # Ștergem produsul
-    product.destroy
+    # dependent: :restrict_with_exception previne ștergerea
+    assert_raises(ActiveRecord::DeleteRestrictionError) do
+      product.destroy
+    end
 
-    # Verificăm că varianta a fost ștearsă (sau nu, depinde de constraint ON DELETE)
-    # Dacă e RESTRICT, produsul nu se șterge
-    # Dacă e CASCADE, varianta e ștearsă
-    # Pe baza migrației, pare să fie RESTRICT, deci testăm că produsul nu se șterge
+    # Produsul și varianta rămân intacte
+    assert Product.exists?(product.id)
+    assert Variant.exists?(variant_id)
   end
 end

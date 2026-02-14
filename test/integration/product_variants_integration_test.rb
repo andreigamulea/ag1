@@ -39,7 +39,7 @@ class ProductVariantsIntegrationTest < ActionDispatch::IntegrationTest
             price: 49.99,
             stock: 15,
             vat_rate: 9.0,
-            status: 1, # inactive
+            status: "inactive",
             external_image_url: "https://ayus-cdn.b-cdn.net/test/api2.jpg"
           }
         ]
@@ -85,7 +85,7 @@ class ProductVariantsIntegrationTest < ActionDispatch::IntegrationTest
             price: 54.99,
             stock: 12,
             vat_rate: 19.0,
-            status: 1
+            status: "inactive"
           }
         ]
       }
@@ -204,15 +204,12 @@ class ProductVariantsIntegrationTest < ActionDispatch::IntegrationTest
       }
     }
 
-    # Produsul se creează dar varianta este respinsă (reject_if)
-    # sau validarea eșuează
-    assert_difference "Product.count", 1 do
+    # Varianta invalidă (fără SKU) face ca tot produsul să nu se salveze
+    assert_no_difference "Product.count" do
       post products_path, params: product_params
     end
 
-    product = Product.last
-    # Varianta ar trebui să fie respinsă automat
-    assert_equal 0, product.variants.count
+    assert_response :unprocessable_entity
   end
 
   test "crearea produsului cu variante cu prețuri și VAT diferite" do
@@ -234,7 +231,7 @@ class ProductVariantsIntegrationTest < ActionDispatch::IntegrationTest
             price: 99.99,
             stock: 5,
             vat_rate: 9.0,
-            status: 1
+            status: "inactive"
           }
         ]
       }
@@ -274,7 +271,7 @@ class ProductVariantsIntegrationTest < ActionDispatch::IntegrationTest
 
     product = Product.last
     assert_equal 0, product.variants.count
-    assert_not product.has_variants
+    assert_not product.send(:has_active_variants?)
     assert_equal 49.99, product.price.to_f
   end
 

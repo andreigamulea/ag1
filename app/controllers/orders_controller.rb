@@ -123,7 +123,7 @@ def create
 
     variant = parsed[:variant_id] ? Variant.find_by(id: parsed[:variant_id]) : nil
     quantity = data["quantity"].to_i
-    unit_price = variant&.price || product.price
+    unit_price = variant&.effective_price || product.effective_price
     vat_rate = variant&.vat_rate || product.vat || 0
 
     item_attrs = {
@@ -259,7 +259,7 @@ def create
       {
         price_data: {
           currency: 'ron',
-          product_data: { name: item.product_name || 'Produs' },
+          product_data: { name: [item.product_name, item.variant_options_text.presence].compact.join(' - ').presence || 'Produs' },
           unit_amount: (item.price.to_f * 100).to_i
         },
         quantity: item.quantity
@@ -479,9 +479,9 @@ end
     parsed = parse_cart_key(cart_key)
     if parsed[:variant_id]
       variant = Variant.find_by(id: parsed[:variant_id])
-      variant&.price || product.price
+      variant&.effective_price || product.effective_price
     else
-      product.price
+      product.effective_price
     end
   end
 
@@ -523,7 +523,7 @@ end
 
       variant = parsed[:variant_id] ? Variant.find_by(id: parsed[:variant_id]) : nil
       quantity = data["quantity"].to_i
-      unit_price = variant&.price || product.price
+      unit_price = variant&.effective_price || product.effective_price
       vat_rate = (variant&.vat_rate || product.vat).to_f
       subtotal = unit_price * quantity
       subtotal * vat_rate / (100 + vat_rate)

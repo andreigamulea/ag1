@@ -34,6 +34,7 @@ RSpec.describe Product, 'nested variants', type: :model do
       it 'allows destroying existing variants' do
         product = create(:product)
         variant = create(:variant, product: product)
+        product.reload
         product.update(variants_attributes: [
           { id: variant.id, _destroy: '1' }
         ])
@@ -65,6 +66,7 @@ RSpec.describe Product, 'nested variants', type: :model do
     it 'does not require price when product has active variants' do
       product = create(:product, price: 10)
       create(:variant, product: product, status: :active)
+      product.reload
       product.price = nil
       expect(product).to be_valid
     end
@@ -78,7 +80,8 @@ RSpec.describe Product, 'nested variants', type: :model do
 
     it 'handles variants marked_for_destruction correctly' do
       product = create(:product, price: 10)
-      variant = create(:variant, product: product, status: :active)
+      create(:variant, product: product, status: :active)
+      product.reload
 
       # Force load the association so has_active_variants? uses the in-memory path
       product.variants.load_target

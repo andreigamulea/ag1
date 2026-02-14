@@ -82,7 +82,7 @@
       <strong>Produse Comandate:</strong>
       <div class="product-list">
         <% @order.order_items.each do |item| %>
-          • <%= item.quantity %> x <%= item.product_name %> - <%= number_to_currency(item.price, unit: "RON ", separator: ",", delimiter: ".") %> = <%= number_to_currency(item.total_price, unit: "RON ", separator: ",", delimiter: ".") %><br>
+          • <%= item.quantity %> x <%= item.product_name %><% if item.variant_options_text.present? %> (<%= item.variant_options_text %>)<% end %> - <%= number_to_currency(item.price, unit: "RON ", separator: ",", delimiter: ".") %> = <%= number_to_currency(item.total_price, unit: "RON ", separator: ",", delimiter: ".") %><br>
         <% end %>
       </div>
       <strong>Total Plătit:</strong> <%= number_to_currency(@order.total, unit: "RON ", separator: ",", delimiter: ".") %>

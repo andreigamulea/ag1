@@ -11,8 +11,8 @@ class EdgeCasesTest < SuiteTestCase
   end
 
   test "un user normal nu poate accesa panoul admin" do
-    create_test_user(password: "parola123", role: 0)
-    sign_in(email: "normal@example.com", password: "parola123")
+    user = create_test_user(password: "parola123", role: 0)
+    sign_in(email: user.email, password: "parola123")
 
     visit admin_path
 

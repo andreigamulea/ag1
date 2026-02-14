@@ -283,6 +283,149 @@
 }
 
 /* ===================================
+   VARIANT SWATCHES IN PRODUCT ACTIONS
+   =================================== */
+
+.product-view .variant-swatches {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.product-view .variant-swatch {
+  width: 44px;
+  max-width: 44px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Color circles */
+.product-view .swatch-color {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  margin: 0 auto;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.product-view .variant-swatch:hover .swatch-color {
+  border-color: #999;
+}
+
+.product-view .variant-swatch--active .swatch-color {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-primary);
+}
+
+/* Image thumbnails (non-color primary) */
+.product-view .variant-swatch img {
+  width: 40px;
+  height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  object-fit: cover;
+  border: 2px solid #d9d9d9;
+  border-radius: 4px;
+  display: block;
+}
+
+.product-view .variant-swatch:hover img {
+  border-color: var(--color-primary);
+}
+
+.product-view .variant-swatch--active img {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+/* Swatch name label */
+.product-view .swatch-name {
+  display: block;
+  font-size: 9px;
+  color: #666;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 44px;
+  line-height: 1.2;
+}
+
+/* Text fallback (no color match, no image) */
+.product-view .swatch-label {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #d9d9d9;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 600;
+  background: #f5f5f5;
+  margin: 0 auto;
+}
+
+.product-view .variant-swatch--active .swatch-label {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-primary);
+}
+
+.product-view .variant-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.product-view .variant-btn {
+  padding: 6px 12px;
+  border: 2px solid #d9d9d9;
+  border-radius: 4px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 40px;
+  text-align: center;
+}
+
+.product-view .variant-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.product-view .variant-btn--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.product-view .variant-btn--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.product-view .variant-btn--out-of-stock {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.product-view .variant-option-group-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ===================================
    LIGHTBOX
    =================================== */
 

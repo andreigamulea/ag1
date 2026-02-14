@@ -29,6 +29,15 @@ class Variant < ApplicationRecord
     end.join(', ')
   end
 
+  # Returns the active price: discount_price if promo is active, otherwise regular price
+  def effective_price
+    if promo_active? && discount_price.present? && discount_price > 0
+      discount_price
+    else
+      price
+    end
+  end
+
   # Calculează breakdown-ul de preț cu TVA
   def price_breakdown
     rate = vat_rate.to_f

@@ -5,7 +5,8 @@ require "rails/test_help"
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers
-    parallelize(workers: :number_of_processors, with: :threads)
+    # Windows doesn't support fork, and thread-based parallelism breaks Devise sign_in sessions
+    parallelize(workers: 1)
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     self.fixture_paths = [Rails.root.join("test", "fixtures")]

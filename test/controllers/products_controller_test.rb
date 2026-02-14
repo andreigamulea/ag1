@@ -1,8 +1,25 @@
 require "test_helper"
 
 class ProductsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
   setup do
-    @product = products(:one)
+    @admin = User.create!(
+      email: "admin-pct-#{SecureRandom.hex(4)}@test.com",
+      password: "password123",
+      password_confirmation: "password123",
+      role: 1,
+      active: true
+    )
+    sign_in @admin
+
+    @product = Product.create!(
+      name: "Test Product #{SecureRandom.hex(4)}",
+      slug: "test-product-#{SecureRandom.hex(4)}",
+      sku: "TP-#{SecureRandom.hex(4)}",
+      price: 49.99,
+      stock: 10
+    )
   end
 
   test "should get index" do
@@ -18,7 +35,7 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
   test "should create product" do
     assert_difference("Product.count") do
       post products_url, params: { product: {
-        name: "New Product",
+        name: "New Product #{SecureRandom.hex(4)}",
         sku: "SKU-NEW-#{SecureRandom.hex(4)}",
         slug: "new-product-#{SecureRandom.hex(4)}",
         price: 99.99,
@@ -44,11 +61,11 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to product_url(@product)
   end
 
-  test "should destroy product" do
-    assert_difference("Product.count", -1) do
-      delete product_url(@product)
-    end
-
+  test "should archive product on destroy" do
+    delete product_url(@product)
     assert_redirected_to products_url
+
+    @product.reload
+    assert_equal "archived", @product.status
   end
 end

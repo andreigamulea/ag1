@@ -173,7 +173,7 @@ class CartController < ApplicationController
         if found
           product = Product.find_by(id: coupon.product_id)
           total_quantity = matching.sum { |_, d| d["quantity"].to_i }
-          subtotal = product ? product.price * total_quantity : 0
+          subtotal = product ? product.effective_price * total_quantity : 0
         else
           subtotal = 0
           total_quantity = 0
@@ -183,7 +183,7 @@ class CartController < ApplicationController
         subtotal = @cart.sum do |key, data|
           parsed = parse_cart_key(key)
           product = Product.find_by(id: parsed[:product_id])
-          product ? product.price * data["quantity"].to_i : 0
+          product ? product.effective_price * data["quantity"].to_i : 0
         end
         total_quantity = @cart.sum { |_id, data| data["quantity"].to_i }
       end
@@ -247,7 +247,7 @@ class CartController < ApplicationController
 
       variant = parsed[:variant_id] ? variants_map[parsed[:variant_id].to_i] : nil
       quantity = data["quantity"].to_i
-      unit_price = variant&.price || product.price
+      unit_price = variant&.effective_price || product.effective_price
 
       {
         cart_key: key,

@@ -7,7 +7,15 @@
       "Bash(grep:*)",
       "Bash(bundle exec rails runner:*)",
       "Bash(rails test:*)",
-      "Bash(bundle exec rails routes:*)"
+      "Bash(bundle exec rails routes:*)",
+      "Bash(bundle exec rails db:migrate:*)",
+      "Bash(dir:*)",
+      "Bash(find:*)",
+      "Bash(PARALLEL_WORKERS=1 bundle exec rails test:*)",
+      "Bash(bundle exec rails test:system:*)",
+      "Bash(where:*)",
+      "Bash(chromedriver --version:*)",
+      "Bash(bundle list:*)"
     ]
   }
 }

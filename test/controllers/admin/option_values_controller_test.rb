@@ -14,21 +14,13 @@ class Admin::OptionValuesControllerTest < ActionDispatch::IntegrationTest
     )
     sign_in @admin
 
-    # Create option type
-    @culoare = OptionType.create!(name: "Culoare", presentation: "Culoare", position: 0)
-    @rosu = @culoare.option_values.create!(name: "Roșu", presentation: "Roșu", position: 0)
-    @albastru = @culoare.option_values.create!(name: "Albastru", presentation: "Albastru", position: 1)
+    # Create option type with unique name to avoid collisions
+    @culoare = OptionType.create!(name: "Culoare-#{SecureRandom.hex(4)}", presentation: "Culoare", position: 0)
+    @rosu = @culoare.option_values.create!(name: "Roșu-#{SecureRandom.hex(4)}", presentation: "Roșu", position: 0)
+    @albastru = @culoare.option_values.create!(name: "Albastru-#{SecureRandom.hex(4)}", presentation: "Albastru", position: 1)
   end
 
-  teardown do
-    # Use delete_all to bypass associations and avoid cascade errors
-    Variant.delete_all
-    Product.delete_all
-    User.delete_all
-    OptionValue.delete_all
-    OptionType.delete_all
-    Order.delete_all
-  end
+  # Transactional tests handle cleanup automatically
 
   # CREATE tests
   test "should create option_value" do
@@ -75,7 +67,7 @@ class Admin::OptionValuesControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference("@culoare.option_values.count") do
       post admin_option_type_option_values_path(@culoare), params: {
         option_value: {
-          name: "Roșu",
+          name: @rosu.name,
           presentation: "Roșu Duplicate",
           position: 10
         }
@@ -132,7 +124,7 @@ class Admin::OptionValuesControllerTest < ActionDispatch::IntegrationTest
       price: 10.0,
       stock: 5,
       vat_rate: 19.0,
-      status: 0
+      status: :active
     )
     variant.option_values << @rosu
 

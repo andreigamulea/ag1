@@ -5,7 +5,8 @@
 <% is_feed = !is_new && variant.respond_to?(:external_ids) && variant.external_ids.any? %>
 <% has_orders = !is_new && variant.respond_to?(:order_items) && variant.order_items.any? %>
 
-<tr class="variant-row <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
+<%# === RAND 1: Optiuni + SKU === %>
+<tr class="variant-row variant-row-top <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
     data-variant-id="<%= variant.id %>">
 
   <%# Hidden fields %>
@@ -14,8 +15,44 @@
   <% end %>
   <%= f.hidden_field :_destroy, value: '0', class: 'destroy-flag' %>
 
+  <%# Optiuni %>
+  <td class="variant-options-cell">
+    <% if is_feed %>
+      <span class="variant-options-text"><%= variant.options_text %></span>
+    <% else %>
+      <% current_ov_ids = variant.respond_to?(:option_value_ids) ? variant.option_value_ids.map(&:to_s) : [] %>
+      <% (option_types || []).each do |ot| %>
+        <div class="variant-option-select" style="display:inline-block; margin-right:8px;">
+          <label class="variant-option-label"><%= ot.name %></label>
+          <select name="<%= f.object_name %>[option_value_ids][]" class="variant-input">
+            <option value="">-- alege --</option>
+            <% ot.option_values.each do |ov| %>
+              <option value="<%= ov.id %>" <%= 'selected' if current_ov_ids.include?(ov.id.to_s) %>><%= ov.display_name %></option>
+            <% end %>
+          </select>
+        </div>
+      <% end %>
+    <% end %>
+  </td>
+
+  <%# SKU %>
+  <td colspan="5">
+    <label class="variant-field-label">SKU</label>
+    <div style="display:flex; gap:4px; align-items:center;">
+      <%= f.text_field :sku, placeholder: 'SKU-001', class: 'variant-input variant-sku', style: 'flex:1;', data: { variant_id: variant.persisted? ? variant.id : '' } %>
+      <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare">&#8635;</button>
+    </div>
+    <small class="variant-sku-status" style="display:none; margin-top:2px; font-size:11px;"></small>
+  </td>
+</tr>
+
+<%# === RAND 2: Imagine + Pret + Stoc + TVA + Status + Sursa + Actiuni === %>
+<tr class="variant-row variant-row-bottom <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
+    data-variant-id="<%= variant.id %>">
+
   <%# Imagini %>
   <td class="variant-image-cell">
+    <label class="variant-field-label">Imagine</label>
     <%= f.hidden_field :external_image_url, class: 'variant-image-hidden' %>
     <div class="variant-images-hidden">
       <% (variant.external_image_urls || []).each do |url| %>
@@ -41,55 +78,49 @@
     <label class="variant-add-img-btn" title="Adauga imagini">+</label>
   </td>
 
-  <%# SKU %>
+  <%# Pret vanzare %>
   <td>
-    <%= f.text_field :sku, placeholder: 'SKU-001', class: 'variant-input variant-sku' %>
+    <label class="variant-field-label">Pret vanzare</label>
+    <%= f.number_field :price, step: 0.01, min: 0, placeholder: '0.00', class: 'variant-input variant-price' %>
   </td>
 
-  <%# Pret %>
+  <%# Pret achizitie %>
   <td>
-    <%= f.number_field :price, step: 0.01, min: 0, placeholder: '0.00', class: 'variant-input variant-price' %>
+    <label class="variant-field-label">Pret achizitie</label>
+    <%= f.number_field :cost_price, step: 0.01, min: 0, placeholder: '0.00', class: 'variant-input variant-cost-price', style: 'width:70px;' %>
+  </td>
+
+  <%# Pret Promo %>
+  <td>
+    <label class="variant-field-label">Promo (RON)</label>
+    <%= f.number_field :discount_price, step: 0.01, min: 0, placeholder: '0.00', class: 'variant-input variant-discount-price', style: 'width:70px;' %>
+    <label style="display:flex; align-items:center; gap:3px; margin-top:3px; cursor:pointer;">
+      <%= f.check_box :promo_active, style: 'width:auto; margin:0;' %>
+      <span style="font-size:10px;">Activ</span>
+    </label>
   </td>
 
   <%# Stoc %>
   <td>
+    <label class="variant-field-label">Stoc</label>
     <%= f.number_field :stock, min: 0, placeholder: '0', class: 'variant-input variant-stock' %>
   </td>
 
   <%# TVA %>
   <td>
-    <%= f.number_field :vat_rate, min: 0, step: 0.01, placeholder: '19', class: 'variant-input variant-vat' %>
+    <label class="variant-field-label">TVA %</label>
+    <%= f.number_field :vat_rate, min: 0, step: 0.01, placeholder: '0', class: 'variant-input variant-vat' %>
   </td>
 
   <%# Status %>
   <td>
+    <label class="variant-field-label">Status</label>
     <%= f.select :status, Variant.statuses.keys.map { |s| [s.humanize, s] }, {}, class: 'variant-input variant-status' %>
-  </td>
-
-  <%# Optiuni %>
-  <td class="variant-options-cell">
-    <% if is_feed %>
-      <%# Feed variants: readonly text %>
-      <span class="variant-options-text"><%= variant.options_text %></span>
-    <% else %>
-      <%# Manual / new variants: editable selects %>
-      <% current_ov_ids = variant.respond_to?(:option_value_ids) ? variant.option_value_ids.map(&:to_s) : [] %>
-      <% (option_types || []).each do |ot| %>
-        <div class="variant-option-select">
-          <label class="variant-option-label"><%= ot.name %></label>
-          <select name="<%= f.object_name %>[option_value_ids][]" class="variant-input">
-            <option value="">-- alege --</option>
-            <% ot.option_values.each do |ov| %>
-              <option value="<%= ov.id %>" <%= 'selected' if current_ov_ids.include?(ov.id.to_s) %>><%= ov.display_name %></option>
-            <% end %>
-          </select>
-        </div>
-      <% end %>
-    <% end %>
   </td>
 
   <%# Sursa %>
   <td>
+    <label class="variant-field-label">Sursa</label><br>
     <% if is_new %>
       <span class="badge badge-new">Nou</span>
     <% elsif is_feed %>

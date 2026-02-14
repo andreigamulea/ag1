@@ -21,11 +21,15 @@
         <div class="form-row cols-2">
           <div class="form-field">
             <%= form.label :name, "Nume produs" %>
-            <%= form.text_field :name, placeholder: "Nume produs" %>
+            <%= form.text_field :name, placeholder: "Nume produs", id: "product_name" %>
           </div>
           <div class="form-field">
             <%= form.label :slug, "URL Slug" %>
-            <%= form.text_field :slug, placeholder: "url-friendly-name" %>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <%= form.text_field :slug, placeholder: "url-friendly-name", id: "product_slug", style: "flex:1;" %>
+              <button type="button" id="slug-auto-btn" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume">&#8635; Auto</button>
+            </div>
+            <small id="slug-status" style="display:none; margin-top:4px;"></small>
           </div>
         </div>
 
@@ -46,7 +50,11 @@
         <div class="form-row cols-3">
           <div class="form-field">
             <%= form.label :sku, "SKU" %>
-            <%= form.text_field :sku, placeholder: "SKU-12345" %>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <%= form.text_field :sku, placeholder: "SKU-12345", id: "product_sku", style: "flex:1;" %>
+              <button type="button" id="sku-auto-btn" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume">&#8635; Auto</button>
+            </div>
+            <small id="sku-status" style="display:none; margin-top:4px;"></small>
           </div>
           <div class="form-field">
             <%= form.label :status, "Status" %>
@@ -68,25 +76,32 @@
       <div class="section-body">
         <div class="form-row cols-4">
           <div class="form-field">
-            <%= form.label :price, "Preț" %>
+            <%= form.label :price, "Preț vânzare" %>
             <div class="input-group">
               <%= form.number_field :price, step: 0.01, placeholder: "0.00" %>
               <span class="input-group-text">RON</span>
             </div>
+            <small class="form-hint">Prețul afișat clientului (obligatoriu)</small>
           </div>
           <div class="form-field">
-            <%= form.label :cost_price, "Preț cost" %>
+            <%= form.label :cost_price, "Preț achiziție" %>
             <div class="input-group">
               <%= form.number_field :cost_price, step: 0.01, placeholder: "0.00" %>
               <span class="input-group-text">RON</span>
             </div>
+            <small class="form-hint">Cât ai plătit pe produs (vizibil doar admin, pentru calcul profit)</small>
           </div>
           <div class="form-field">
-            <%= form.label :discount_price, "Preț redus" %>
+            <%= form.label :discount_price, "Preț promoțional" %>
             <div class="input-group">
               <%= form.number_field :discount_price, step: 0.01, placeholder: "0.00" %>
               <span class="input-group-text">RON</span>
             </div>
+            <label style="display:flex; align-items:center; gap:6px; margin-top:6px; cursor:pointer;">
+              <%= form.check_box :promo_active, style: "width:auto; margin:0;" %>
+              <span style="font-size:13px; font-weight:600;">Afișează prețul promoțional în site</span>
+            </label>
+            <small class="form-hint">Bifează pentru a arăta clientului prețul tăiat + prețul redus</small>
           </div>
           <div class="form-field">
             <%= form.label :vat, "TVA" %>
@@ -94,6 +109,7 @@
               <%= form.number_field :vat, min: 0, placeholder: "19" %>
               <span class="input-group-text">%</span>
             </div>
+            <small class="form-hint">Cota TVA inclusă în preț (standard: 19%)</small>
           </div>
         </div>
 
@@ -373,7 +389,7 @@
       <div class="section-body">
         <div class="form-row cols-1">
           <div class="checkbox-field">
-            <% has_variants = form.object.persisted? && form.object.variants.active.any? %>
+            <% has_variants = form.object.variants.any? { |v| !v.marked_for_destruction? } %>
             <%= hidden_field_tag :has_variants, '0', id: nil %>
             <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants', data: { action: 'change' } %>
             <label for="toggle-has-variants">Are variante? (culoare, marime, etc.)</label>
@@ -385,6 +401,26 @@
       </div>
     </div>
 
+    <div class="form-section" id="section-primary-option" style="<%= has_variants ? '' : 'display:none;' %>">
+      <div class="section-header dark">
+        Opțiune Principală (swatches pe site)
+      </div>
+      <div class="section-body">
+        <p class="variant-warning">Selectează opțiunea care va fi afișată ca imagini thumbnail pe pagina produsului. Obligatorie.</p>
+        <div class="form-row cols-1" id="primary-option-radios">
+          <% current_primary_id = form.object.primary_product_option_type&.option_type_id %>
+          <% (@option_types || []).each do |ot| %>
+            <div class="radio-field">
+              <%= radio_button_tag :primary_option_type_id, ot.id,
+                  current_primary_id == ot.id,
+                  id: "primary_option_type_#{ot.id}" %>
+              <label for="primary_option_type_<%= ot.id %>"><%= ot.presentation || ot.name %></label>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
     <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>">
       <div class="section-header dark">
         Lista Variante
@@ -393,19 +429,27 @@
         <table class="variants-table" id="variants-table">
           <thead>
             <tr>
+              <th>Optiuni</th>
+              <th colspan="5">SKU</th>
+            </tr>
+            <tr>
               <th>Imagine</th>
-              <th>SKU</th>
-              <th>Pret (RON)</th>
+              <th>Pret vanzare</th>
+              <th>Achizitie</th>
+              <th>Promo</th>
               <th>Stoc</th>
               <th>TVA %</th>
               <th>Status</th>
-              <th>Optiuni</th>
               <th>Sursa</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="variants-tbody">
-            <% variants_list = form.object.persisted? ? (respond_to?(:preload_variants) ? preload_variants(form.object) : form.object.variants.order(:id).to_a) : [] %>
+            <% variants_list = if form.object.errors.any? || !form.object.persisted?
+                 form.object.variants.reject(&:marked_for_destruction?).to_a
+               else
+                 respond_to?(:preload_variants) ? preload_variants(form.object) : form.object.variants.order(:id).to_a
+               end %>
             <% variants_list.each do |variant| %>
               <%= form.fields_for :variants, variant do |vf| %>
                 <%= render 'variant_fields', f: vf, variant: variant, option_types: (@option_types || []) %>
@@ -641,9 +685,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const addBtn = document.getElementById('btn-add-variant');
   const tbody = document.getElementById('variants-tbody');
 
+  const sectionPrimaryOption = document.getElementById('section-primary-option');
+
   function updateVariantSections() {
     const on = toggleCheckbox && toggleCheckbox.checked;
     if (sectionVariants) sectionVariants.style.display = on ? '' : 'none';
+    if (sectionPrimaryOption) sectionPrimaryOption.style.display = on ? '' : 'none';
     if (sectionPrices) sectionPrices.style.display = on ? 'none' : '';
     if (sectionInventory) sectionInventory.style.display = on ? 'none' : '';
     if (variantWarning) variantWarning.style.display = on ? '' : 'none';
@@ -679,46 +726,81 @@ document.addEventListener("DOMContentLoaded", () => {
         statusOpts += `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`;
       });
 
-      const tr = document.createElement('tr');
-      tr.className = 'variant-row variant-new';
-      tr.innerHTML = `
+      // Rand 1: Optiuni + SKU
+      const tr1 = document.createElement('tr');
+      tr1.className = 'variant-row variant-row-top variant-new';
+      tr1.innerHTML = `
         <input type="hidden" name="${prefix}[_destroy]" value="0" class="destroy-flag">
+        <td class="variant-options-cell">${optionsHtml}</td>
+        <td colspan="5">
+          <label class="variant-field-label">SKU</label>
+          <div style="display:flex; gap:4px; align-items:center;">
+            <input type="text" name="${prefix}[sku]" placeholder="SKU-001" class="variant-input variant-sku" style="flex:1;" data-variant-id="">
+            <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare">&#8635;</button>
+          </div>
+          <small class="variant-sku-status" style="display:none; margin-top:2px; font-size:11px;"></small>
+        </td>
+      `;
+
+      // Rand 2: Imagine + Pret + Stoc + TVA + Status + Sursa + X
+      const tr2 = document.createElement('tr');
+      tr2.className = 'variant-row variant-row-bottom variant-new';
+      tr2.innerHTML = `
         <td class="variant-image-cell">
+          <label class="variant-field-label">Imagine</label>
           <input type="hidden" name="${prefix}[external_image_url]" value="" class="variant-image-hidden">
           <div class="variant-images-hidden"></div>
           <div class="variant-image-gallery"></div>
           <input type="file" accept="image/*" multiple class="variant-image-input" />
           <label class="variant-add-img-btn" title="Adauga imagini">+</label>
         </td>
-        <td><input type="text" name="${prefix}[sku]" placeholder="SKU-001" class="variant-input variant-sku"></td>
-        <td><input type="number" name="${prefix}[price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-price"></td>
-        <td><input type="number" name="${prefix}[stock]" min="0" placeholder="0" class="variant-input variant-stock"></td>
-        <td><input type="number" name="${prefix}[vat_rate]" min="0" step="0.01" placeholder="19" class="variant-input variant-vat"></td>
-        <td><select name="${prefix}[status]" class="variant-input variant-status">${statusOpts}</select></td>
-        <td class="variant-options-cell">${optionsHtml}</td>
-        <td><span class="badge badge-new">Nou</span></td>
+        <td><label class="variant-field-label">Pret vanzare</label><input type="number" name="${prefix}[price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-price"></td>
+        <td><label class="variant-field-label">Pret achizitie</label><input type="number" name="${prefix}[cost_price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-cost-price" style="width:70px;"></td>
+        <td><label class="variant-field-label">Promo (RON)</label><input type="number" name="${prefix}[discount_price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-discount-price" style="width:70px;"><label style="display:flex;align-items:center;gap:3px;margin-top:3px;cursor:pointer;"><input type="hidden" name="${prefix}[promo_active]" value="0"><input type="checkbox" name="${prefix}[promo_active]" value="1" style="width:auto;margin:0;"><span style="font-size:10px;">Activ</span></label></td>
+        <td><label class="variant-field-label">Stoc</label><input type="number" name="${prefix}[stock]" min="0" placeholder="0" class="variant-input variant-stock"></td>
+        <td><label class="variant-field-label">TVA %</label><input type="number" name="${prefix}[vat_rate]" min="0" step="0.01" placeholder="0" value="0" class="variant-input variant-vat"></td>
+        <td><label class="variant-field-label">Status</label><select name="${prefix}[status]" class="variant-input variant-status">${statusOpts}</select></td>
+        <td><label class="variant-field-label">Sursa</label><br><span class="badge badge-new">Nou</span></td>
         <td><button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button></td>
       `;
-      tbody.appendChild(tr);
+
+      tbody.appendChild(tr1);
+      tbody.appendChild(tr2);
     });
   }
 
-  // Remove variant (delegate)
+  // Remove variant (delegate) - handles both rows (top + bottom)
+  // Button X is in bottom row, so find top row via previousElementSibling
   document.addEventListener('click', function(e) {
     if (!e.target.classList.contains('btn-remove-variant')) return;
-    const row = e.target.closest('tr.variant-row');
-    if (!row) return;
-
-    const idField = row.querySelector('input[name$="[id]"]');
-    const destroyFlag = row.querySelector('.destroy-flag');
-    if (idField && idField.value) {
-      // Existing persisted variant — mark for destruction, hide row
-      destroyFlag.value = '1';
-      row.classList.add('variant-destroyed');
-      row.style.display = 'none';
+    const bottomRow = e.target.closest('tr.variant-row-bottom');
+    var topRow;
+    if (bottomRow) {
+      topRow = bottomRow.previousElementSibling;
     } else {
-      // New unsaved variant — just remove from DOM
-      row.remove();
+      // fallback: button might be in top row
+      topRow = e.target.closest('tr.variant-row-top');
+    }
+    if (!topRow) return;
+    const realBottom = bottomRow || topRow.nextElementSibling;
+
+    const idField = topRow.querySelector('input[name$="[id]"]');
+    const destroyFlag = topRow.querySelector('.destroy-flag');
+    if (idField && idField.value) {
+      // Existing persisted variant — mark for destruction, hide both rows
+      destroyFlag.value = '1';
+      topRow.classList.add('variant-destroyed');
+      topRow.style.display = 'none';
+      if (realBottom && realBottom.classList.contains('variant-row-bottom')) {
+        realBottom.classList.add('variant-destroyed');
+        realBottom.style.display = 'none';
+      }
+    } else {
+      // New unsaved variant — remove both rows from DOM
+      if (realBottom && realBottom.classList.contains('variant-row-bottom')) {
+        realBottom.remove();
+      }
+      topRow.remove();
     }
   });
 
@@ -901,5 +983,332 @@ document.addEventListener("DOMContentLoaded", () => {
       if (card) card.remove();
     }
   });
+});
+</script>
+
+<script>
+// ===== AUTO-GENERARE LIVE: Slug + SKU Produs + SKU Variante =====
+document.addEventListener("DOMContentLoaded", function() {
+  var nameField = document.getElementById('product_name');
+  var slugField = document.getElementById('product_slug');
+  var skuField = document.getElementById('product_sku');
+  var slugStatus = document.getElementById('slug-status');
+  var skuStatus = document.getElementById('sku-status');
+  var slugAutoBtn = document.getElementById('slug-auto-btn');
+  var skuAutoBtn = document.getElementById('sku-auto-btn');
+
+  if (!nameField || !slugField || !skuField) return;
+
+  var isNewProduct = !slugField.value.trim();
+  var slugManuallyEdited = false;
+  var skuManuallyEdited = false;
+  var slugCheckTimer = null;
+  var skuCheckTimer = null;
+  var productId = '<%= product.persisted? ? product.id : "" %>';
+
+  function parameterize(str) {
+    return str.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  // === Auto-generare Slug + SKU din Nume ===
+  nameField.addEventListener('input', function() {
+    var val = this.value.trim();
+    if (!val) return;
+
+    if (isNewProduct && !slugManuallyEdited) {
+      slugField.value = parameterize(val);
+      clearTimeout(slugCheckTimer);
+      slugCheckTimer = setTimeout(function() { checkSlugUniqueness(); }, 600);
+    }
+
+    if (isNewProduct && !skuManuallyEdited) {
+      skuField.value = parameterize(val).toUpperCase();
+      clearTimeout(skuCheckTimer);
+      skuCheckTimer = setTimeout(function() { checkSkuUniqueness(); }, 600);
+    }
+  });
+
+  // === Tracking editare manuala ===
+  slugField.addEventListener('input', function() {
+    slugManuallyEdited = true;
+    if (slugAutoBtn) slugAutoBtn.style.display = 'inline-block';
+    clearTimeout(slugCheckTimer);
+    slugCheckTimer = setTimeout(function() { checkSlugUniqueness(); }, 600);
+  });
+
+  skuField.addEventListener('input', function() {
+    skuManuallyEdited = true;
+    if (skuAutoBtn) skuAutoBtn.style.display = 'inline-block';
+    clearTimeout(skuCheckTimer);
+    skuCheckTimer = setTimeout(function() { checkSkuUniqueness(); }, 600);
+  });
+
+  // === Butoane reset Auto ===
+  if (slugAutoBtn) {
+    slugAutoBtn.addEventListener('click', function() {
+      slugManuallyEdited = false;
+      this.style.display = 'none';
+      var val = nameField.value.trim();
+      if (val) {
+        slugField.value = parameterize(val);
+        checkSlugUniqueness();
+      }
+    });
+  }
+
+  if (skuAutoBtn) {
+    skuAutoBtn.addEventListener('click', function() {
+      skuManuallyEdited = false;
+      this.style.display = 'none';
+      var val = nameField.value.trim();
+      if (val) {
+        skuField.value = parameterize(val).toUpperCase();
+        checkSkuUniqueness();
+      }
+    });
+  }
+
+  slugField.addEventListener('blur', function() {
+    if (this.value.trim()) checkSlugUniqueness();
+  });
+
+  skuField.addEventListener('blur', function() {
+    if (this.value.trim()) checkSkuUniqueness();
+  });
+
+  // === Verificare unicitate slug via AJAX ===
+  function checkSlugUniqueness() {
+    var slug = slugField.value.trim();
+    if (!slug) { slugStatus.style.display = 'none'; return; }
+
+    var url = '/products/check_slug?slug=' + encodeURIComponent(slug);
+    if (productId) url += '&product_id=' + productId;
+
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        slugStatus.style.display = 'block';
+        if (data.available) {
+          slugStatus.style.color = '#28a745';
+          slugStatus.textContent = '\u2713 URL disponibil';
+        } else {
+          slugField.value = data.slug;
+          slugStatus.style.color = '#dc8a00';
+          slugStatus.textContent = '\u26A0 URL ocupat, sugerat: ' + data.slug;
+        }
+      })
+      .catch(function() { slugStatus.style.display = 'none'; });
+  }
+
+  // === Verificare unicitate SKU via AJAX ===
+  function checkSkuUniqueness() {
+    var sku = skuField.value.trim();
+    if (!sku) { skuStatus.style.display = 'none'; return; }
+
+    var url = '/products/check_sku?sku=' + encodeURIComponent(sku);
+    if (productId) url += '&product_id=' + productId;
+
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        skuStatus.style.display = 'block';
+        if (data.available) {
+          skuStatus.style.color = '#28a745';
+          skuStatus.textContent = '\u2713 SKU disponibil';
+        } else {
+          skuField.value = data.sku;
+          skuStatus.style.color = '#dc8a00';
+          skuStatus.textContent = '\u26A0 SKU ocupat, sugerat: ' + data.sku;
+        }
+      })
+      .catch(function() { skuStatus.style.display = 'none'; });
+  }
+
+  // ===== AUTO-GENERARE SKU VARIANTE =====
+  var variantSkuManualEdits = {};
+
+  // Gaseste perechea top/bottom pentru o varianta
+  function getVariantPair(anyRow) {
+    var topRow, bottomRow;
+    if (anyRow.classList.contains('variant-row-top')) {
+      topRow = anyRow;
+      bottomRow = anyRow.nextElementSibling;
+    } else if (anyRow.classList.contains('variant-row-bottom')) {
+      bottomRow = anyRow;
+      topRow = anyRow.previousElementSibling;
+    }
+    return { top: topRow, bottom: bottomRow };
+  }
+
+  function autoGenerateVariantSku(topRow) {
+    var pair = getVariantPair(topRow);
+    if (!pair.top) return;
+
+    // SKU input is now in topRow (same row as options)
+    var skuInput = pair.top.querySelector('input[name*="[sku]"]');
+    if (!skuInput) return;
+
+    var rowId = skuInput.name;
+    if (variantSkuManualEdits[rowId]) return;
+
+    // Use product name (parameterized) as base for variant SKU
+    var productName = nameField.value.trim();
+    var baseSku = productName ? parameterize(productName).toUpperCase() : (skuField.value.trim() || 'VAR');
+    var selects = pair.top.querySelectorAll('select[name*="option_value_ids"]');
+    var parts = [baseSku];
+
+    selects.forEach(function(sel) {
+      var selectedOption = sel.options[sel.selectedIndex];
+      var text = selectedOption ? selectedOption.text.trim() : '';
+      if (text && text !== '-- alege --') {
+        var abbr = parameterize(text).substring(0, 3).toUpperCase();
+        if (abbr) parts.push(abbr);
+      }
+    });
+
+    if (parts.length === 1) {
+      var allTopRows = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)');
+      var idx = Array.from(allTopRows).indexOf(pair.top) + 1;
+      parts.push('V' + idx);
+    }
+
+    skuInput.value = parts.join('-');
+    // Check uniqueness after auto-generation
+    checkVariantSkuUniqueness(skuInput);
+  }
+
+  // Cand se schimba optiunile variantei -> regenereaza SKU
+  document.addEventListener('change', function(e) {
+    if (!e.target.matches('select[name*="option_value_ids"]')) return;
+    var topRow = e.target.closest('tr.variant-row-top');
+    if (topRow) autoGenerateVariantSku(topRow);
+  });
+
+  // Tracking editare manuala SKU varianta + arata butonul Auto
+  var variantSkuCheckTimers = {};
+
+  document.addEventListener('input', function(e) {
+    if (!e.target.matches('input.variant-sku')) return;
+    variantSkuManualEdits[e.target.name] = true;
+    var btn = e.target.closest('td').querySelector('.variant-sku-auto-btn');
+    if (btn) btn.style.display = 'inline-block';
+
+    // Debounced uniqueness check
+    clearTimeout(variantSkuCheckTimers[e.target.name]);
+    var input = e.target;
+    variantSkuCheckTimers[input.name] = setTimeout(function() { checkVariantSkuUniqueness(input); }, 600);
+  });
+
+  // Blur pe SKU varianta -> check unicitate
+  document.addEventListener('blur', function(e) {
+    if (!e.target.matches('input.variant-sku')) return;
+    if (e.target.value.trim()) checkVariantSkuUniqueness(e.target);
+  }, true);
+
+  // Verificare unicitate SKU varianta via AJAX + duplicat local in formular
+  function checkVariantSkuUniqueness(input) {
+    var sku = input.value.trim();
+    var statusEl = input.closest('td').querySelector('.variant-sku-status');
+    if (!sku || !statusEl) { if (statusEl) statusEl.style.display = 'none'; return; }
+
+    // Check local duplicates first (other variant SKUs in the same form)
+    var allSkuInputs = document.querySelectorAll('input.variant-sku');
+    var localDuplicate = false;
+    allSkuInputs.forEach(function(other) {
+      if (other !== input && other.value.trim().toUpperCase() === sku.toUpperCase()) {
+        // Check that the other variant is not destroyed
+        var otherRow = other.closest('tr');
+        if (otherRow && !otherRow.classList.contains('variant-destroyed')) {
+          localDuplicate = true;
+        }
+      }
+    });
+
+    if (localDuplicate) {
+      // Find next available suffix (-2, -3, etc.) that's unique both locally and not destroyed
+      var baseSku = sku.replace(/-\d+$/, '');
+      var counter = 2;
+      var candidate;
+      while (true) {
+        candidate = baseSku + '-' + counter;
+        var candidateTaken = false;
+        allSkuInputs.forEach(function(other) {
+          if (other !== input && other.value.trim().toUpperCase() === candidate.toUpperCase()) {
+            var otherRow = other.closest('tr');
+            if (otherRow && !otherRow.classList.contains('variant-destroyed')) {
+              candidateTaken = true;
+            }
+          }
+        });
+        if (!candidateTaken) break;
+        counter++;
+      }
+      input.value = candidate;
+      statusEl.style.display = 'block';
+      statusEl.style.color = '#dc8a00';
+      statusEl.textContent = '\u26A0 SKU duplicat, sugerat: ' + candidate;
+      // Also check the suggested SKU against the DB
+      checkVariantSkuUniqueness(input);
+      return;
+    }
+
+    var variantId = input.dataset.variantId || '';
+    var productId = document.querySelector('input[name="product[id]"], form[action*="products/"] input[name="_method"]');
+    // Extract product_id from form action URL
+    var formEl = document.querySelector('form.product-form, form[action*="products"]');
+    var pId = '';
+    if (formEl) {
+      var match = formEl.action.match(/products\/(\d+)/);
+      if (match) pId = match[1];
+    }
+
+    var url = '/products/check_variant_sku?sku=' + encodeURIComponent(sku);
+    if (variantId) url += '&variant_id=' + variantId;
+    if (pId) url += '&product_id=' + pId;
+
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        statusEl.style.display = 'block';
+        if (data.available) {
+          statusEl.style.color = '#28a745';
+          statusEl.textContent = '\u2713 SKU disponibil';
+        } else {
+          input.value = data.sku;
+          statusEl.style.color = '#dc8a00';
+          statusEl.textContent = '\u26A0 SKU ocupat, sugerat: ' + data.sku;
+        }
+      })
+      .catch(function() { statusEl.style.display = 'none'; });
+  }
+
+  // Click pe butonul Auto la varianta -> reset si regenereaza
+  document.addEventListener('click', function(e) {
+    if (!e.target.matches('.variant-sku-auto-btn')) return;
+    var topRow = e.target.closest('tr.variant-row-top');
+    if (!topRow) return;
+    var skuInput = topRow.querySelector('input.variant-sku');
+    if (skuInput) {
+      delete variantSkuManualEdits[skuInput.name];
+      e.target.style.display = 'none';
+      var statusEl = topRow.querySelector('.variant-sku-status');
+      if (statusEl) statusEl.style.display = 'none';
+      autoGenerateVariantSku(topRow);
+    }
+  });
+
+  // Cand se schimba numele produsului -> regenereaza SKU-uri variante (bazat pe nume)
+  function regenerateAllVariantSkus() {
+    var topRows = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)');
+    topRows.forEach(function(topRow) { autoGenerateVariantSku(topRow); });
+  }
+
+  nameField.addEventListener('input', function() { regenerateAllVariantSkus(); });
+  skuField.addEventListener('input', function() { regenerateAllVariantSkus(); });
 });
 </script>

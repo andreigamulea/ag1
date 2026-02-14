@@ -48,17 +48,33 @@
   <% if @product.external_image_url.present? %>
   "image": "<%= @product.external_image_url %>",
   <% end %>
+  <% if @active_variants.present? && @active_variants.any? %>
+  "offers": {
+    "@type": "AggregateOffer",
+    "url": "<%= canonical_host %><%= carti_path(@product) %>",
+    "priceCurrency": "RON",
+    "lowPrice": "<%= @active_variants.map(&:effective_price).compact.min %>",
+    "highPrice": "<%= @active_variants.map(&:effective_price).compact.max %>",
+    "offerCount": "<%= @active_variants.size %>",
+    "availability": "<%= @active_variants.sum(&:stock).to_i > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' %>",
+    "seller": {
+      "@type": "Organization",
+      "name": "AYUS GRUP Romania"
+    }
+  },
+  <% else %>
   "offers": {
     "@type": "Offer",
     "url": "<%= canonical_host %><%= carti_path(@product) %>",
     "priceCurrency": "RON",
-    "price": "<%= @product.price %>",
+    "price": "<%= @product.effective_price %>",
     "availability": "<%= @product.stock.to_i > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' %>",
     "seller": {
       "@type": "Organization",
       "name": "AYUS GRUP Romania"
     }
   },
+  <% end %>
   "brand": {
     "@type": "Brand",
     "name": "AYUS GRUP"
@@ -74,31 +90,47 @@
 
 
 
-  <div class="product-grid <%= 'no-thumbnails' unless @product.external_image_urls.present? && @product.external_image_urls.any? %>">
+  <%# Determine initial variant for image display %>
+  <% initial_variant = nil %>
+  <% if @active_variants.present? && @active_variants.any? %>
+    <% if params[:variant].present? %>
+      <% initial_variant = @active_variants.find { |v| v.id == params[:variant].to_i } %>
+    <% end %>
+    <% initial_variant ||= @active_variants.first %>
+  <% end %>
+
+  <%# Resolve images: use variant images if available, fallback to product images %>
+  <% if initial_variant %>
+    <% display_main_url = initial_variant.external_image_url.presence || @product.external_image_url %>
+    <% display_gallery_urls = (initial_variant.external_image_urls.presence if initial_variant.respond_to?(:external_image_urls)) || @product.external_image_urls || [] %>
+  <% else %>
+    <% display_main_url = @product.external_image_url %>
+    <% display_gallery_urls = @product.external_image_urls || [] %>
+  <% end %>
+
+  <div class="product-grid <%= 'no-thumbnails' unless display_gallery_urls.present? && display_gallery_urls.any? %>">
     <!-- Column 1: Thumbnails (includem și imaginea principală) -->
-    <% if @product.external_image_urls.present? && @product.external_image_urls.any? %>
+    <% if display_gallery_urls.present? && display_gallery_urls.any? %>
       <div class="product-thumbnails">
-        <!-- ADĂUGĂM IMAGINEA PRINCIPALĂ ÎN THUMBNAILS -->
-        <% if @product.external_image_url.present? %>
-          <% main_thumb_url = "#{@product.external_image_url}?width=600&height=600&quality=95" %>
-          <% main_full_url = "#{@product.external_image_url}?width=2000&height=2000&quality=95" %>
+        <% if display_main_url.present? %>
+          <% main_thumb_url = "#{display_main_url}?width=600&height=600&quality=95" %>
+          <% main_full_url = "#{display_main_url}?width=2000&height=2000&quality=95" %>
           <%= image_tag main_thumb_url, class: "thumb main-thumb", data: { full: main_full_url }, alt: @product.name %>
         <% end %>
-        
-        <!-- THUMBNAILS SECUNDARE -->
-        <% @product.external_image_urls.each do |url| %>
+
+        <% display_gallery_urls.each_with_index do |url, idx| %>
           <% thumb_url = "#{url}?width=600&height=600&quality=95" %>
           <% full_url  = "#{url}?width=2000&height=2000&quality=95" %>
-          <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "#{@product.name} - imagine #{@product.external_image_urls.index(url).to_i + 2}" %>
+          <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "#{@product.name} - imagine #{idx + 2}" %>
         <% end %>
       </div>
     <% end %>
 
     <!-- Column 2: Main Image -->
     <div class="product-image">
-      <% if @product.external_image_url.present? %>
-        <% display_url = "#{@product.external_image_url}?width=600&height=600&quality=85" %>
-        <% main_full_url = "#{@product.external_image_url}?width=2000&height=2000&quality=95" %>
+      <% if display_main_url.present? %>
+        <% display_url = "#{display_main_url}?width=600&height=600&quality=85" %>
+        <% main_full_url = "#{display_main_url}?width=2000&height=2000&quality=95" %>
         <div class="image-container">
           <%= image_tag display_url, alt: @product.name, class: "main-image popup-trigger", data: { full: main_full_url } %>
         </div>
@@ -147,7 +179,18 @@
       <p class="product-price" id="product-price">
         <strong>Pret:</strong>
         <% if has_variants %>
-          <span id="variant-price"><%= number_to_currency(@active_variants.first.price, unit: "lei", format: "%n %u") %></span>
+          <% display_v = initial_variant || @active_variants.first %>
+          <% if display_v.promo_active? && display_v.discount_price.present? && display_v.discount_price > 0 %>
+            <span id="variant-price">
+              <span style="text-decoration: line-through; color: #999;"><%= number_to_currency(display_v.price, unit: "lei", format: "%n %u") %></span>
+              <span style="color: #dc3545; font-weight: bold;"><%= number_to_currency(display_v.discount_price, unit: "lei", format: "%n %u") %></span>
+            </span>
+          <% else %>
+            <span id="variant-price"><%= number_to_currency(display_v.price, unit: "lei", format: "%n %u") %></span>
+          <% end %>
+        <% elsif @product.promo_active? && @product.discount_price.present? && @product.discount_price > 0 %>
+          <span style="text-decoration: line-through; color: #999;"><%= number_to_currency(@product.price, unit: "lei", format: "%n %u") %></span>
+          <span style="color: #dc3545; font-weight: bold;"><%= number_to_currency(@product.discount_price, unit: "lei", format: "%n %u") %></span>
         <% else %>
           <%= number_to_currency(@product.price, unit: "lei", format: "%n %u") %>
         <% end %>
@@ -155,34 +198,100 @@
 
       <% if has_variants %>
         <p class="product-stock-info" id="variant-stock-info" style="margin-top: 8px; font-size: 14px; color: #666;">
-          <strong>Stoc:</strong> <span id="variant-stock-text">Selectează opțiunile</span>
+          <strong>Stoc:</strong>
+          <% if initial_variant %>
+            <% if initial_variant.stock > 0 %>
+              <span id="variant-stock-text" style="color: #28a745;"><%= initial_variant.stock %> bucăți disponibile</span>
+            <% else %>
+              <span id="variant-stock-text" style="color: #dc3545;">Stoc epuizat</span>
+            <% end %>
+          <% else %>
+            <span id="variant-stock-text">Selectează opțiunile</span>
+          <% end %>
         </p>
       <% end %>
 
+      <%
+        # Color map: Romanian color names → hex codes
+        color_hex_map = {
+          'rosu' => '#DC3545', 'roșu' => '#DC3545', 'red' => '#DC3545',
+          'albastru' => '#007BFF', 'blue' => '#007BFF',
+          'verde' => '#28A745', 'green' => '#28A745',
+          'negru' => '#222222', 'black' => '#222222',
+          'alb' => '#FFFFFF', 'white' => '#FFFFFF',
+          'gri' => '#6C757D', 'grey' => '#6C757D', 'gray' => '#6C757D',
+          'galben' => '#FFC107', 'yellow' => '#FFC107',
+          'portocaliu' => '#FD7E14', 'orange' => '#FD7E14',
+          'roz' => '#E83E8C', 'pink' => '#E83E8C',
+          'mov' => '#6F42C1', 'purple' => '#6F42C1', 'violet' => '#6F42C1',
+          'maro' => '#795548', 'brown' => '#795548',
+          'turcoaz' => '#17A2B8', 'cyan' => '#17A2B8',
+          'bej' => '#D4C5A9', 'beige' => '#D4C5A9',
+          'crem' => '#FFFDD0', 'cream' => '#FFFDD0',
+          'auriu' => '#D4AF37', 'gold' => '#D4AF37',
+          'argintiu' => '#C0C0C0', 'silver' => '#C0C0C0',
+          'bleumarin' => '#1B3A5C', 'navy' => '#1B3A5C',
+          'bordo' => '#800020', 'burgundy' => '#800020',
+          'corai' => '#FF7F50', 'coral' => '#FF7F50',
+          'kaki' => '#8B8000', 'khaki' => '#8B8000'
+        }
+        is_color_type = @primary_option_type && %w[culoare color couleur].include?(@primary_option_type.name.downcase.gsub(/[^a-z]/, ''))
+      %>
       <% if has_variants %>
         <div class="variant-selector" id="variant-selector">
-          <% @product_option_types.each do |ot| %>
-            <div class="variant-option-group">
-              <label class="variant-option-group-label"><%= ot.name %>:</label>
-              <select class="variant-option-dropdown" data-option-type-id="<%= ot.id %>">
-                <option value="">-- Alege <%= ot.name.downcase %> --</option>
-                <% ot.option_values.select { |ov| @active_variants.any? { |v| v.option_value_ids.include?(ov.id) } }.each do |ov| %>
-                  <option value="<%= ov.id %>"><%= ov.display_name %></option>
+          <%# === OPȚIUNE PRINCIPALĂ === %>
+          <% if @primary_option_type %>
+            <div class="variant-option-group variant-option-primary">
+              <label class="variant-option-group-label"><%= @primary_option_type.presentation || @primary_option_type.name %>:</label>
+              <div class="variant-swatches" id="primary-swatches" data-option-type-id="<%= @primary_option_type.id %>" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:10px;align-items:flex-start;">
+                <% primary_values = @primary_option_type.option_values.select { |ov|
+                     @active_variants.any? { |v| v.option_value_ids.include?(ov.id) }
+                   }
+                %>
+                <% primary_values.each_with_index do |ov, idx| %>
+                  <% hex = ov.color_hex.presence || (is_color_type ? color_hex_map[ov.name.downcase.strip] : nil) %>
+                  <div class="variant-swatch <%= 'variant-swatch--active' if idx == 0 %>"
+                       data-option-value-id="<%= ov.id %>"
+                       title="<%= ov.display_name %>"
+                       style="display:inline-flex;flex-direction:column;align-items:center;width:48px;cursor:pointer;">
+                    <% if hex %>
+                      <span class="swatch-color" style="display:block;width:28px;height:28px;border-radius:50%;background-color:<%= hex %>;border:2px solid <%= hex.upcase == '#FFFFFF' ? '#ccc' : hex %>;"></span>
+                    <% else %>
+                      <span class="swatch-label" style="display:flex;width:28px;height:28px;border-radius:50%;align-items:center;justify-content:center;border:2px solid #d9d9d9;font-size:10px;font-weight:600;background:#f5f5f5;"><%= ov.display_name[0..1] %></span>
+                    <% end %>
+                    <span class="swatch-name" style="display:block;font-size:9px;color:#666;margin-top:2px;max-width:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= ov.display_name %></span>
+                  </div>
                 <% end %>
-              </select>
+              </div>
+            </div>
+          <% end %>
+
+          <%# === OPȚIUNI SECUNDARE: BUTOANE === %>
+          <% (@secondary_option_types || []).each do |ot| %>
+            <div class="variant-option-group variant-option-secondary">
+              <label class="variant-option-group-label"><%= ot.presentation || ot.name %>:</label>
+              <div class="variant-buttons" data-option-type-id="<%= ot.id %>">
+                <% ot.option_values.select { |ov|
+                     @active_variants.any? { |v| v.option_value_ids.include?(ov.id) }
+                   }.each do |ov| %>
+                  <button type="button" class="variant-btn" data-option-value-id="<%= ov.id %>">
+                    <%= ov.display_name %>
+                  </button>
+                <% end %>
+              </div>
             </div>
           <% end %>
         </div>
 
         <script type="application/json" id="variants-data">
-          <%= @active_variants.map { |v| { id: v.id, price: v.price.to_f, stock: v.stock, option_value_ids: v.option_value_ids, options_text: v.options_text, external_image_url: v.external_image_url, external_image_urls: v.external_image_urls || [] } }.to_json.html_safe %>
+          <%= @active_variants.map { |v| { id: v.id, price: v.price.to_f, effective_price: v.effective_price.to_f, discount_price: v.discount_price.to_f, promo_active: v.promo_active?, stock: v.stock, option_value_ids: v.option_value_ids, options_text: v.options_text, external_image_url: v.external_image_url, external_image_urls: v.external_image_urls || [] } }.to_json.html_safe %>
         </script>
       <% end %>
 
       <%= form_with url: "/cart/add", method: :post, local: true, class: "add-to-cart-form" do |f| %>
         <%= f.hidden_field :product_id, value: @product.id %>
         <% if has_variants %>
-          <%= f.hidden_field :variant_id, value: '', id: 'selected-variant-id' %>
+          <%= f.hidden_field :variant_id, value: (initial_variant&.id || ''), id: 'selected-variant-id' %>
         <% end %>
         <div class="quantity-wrapper">
           <label for="quantity_input" class="quantity-label">Cantitate:</label>
@@ -227,7 +336,17 @@
           </div>
           <div class="similar-product-info">
             <p class="similar-product-name"><%= truncate(product.name, length: 50) %></p>
-            <p class="similar-product-price"><%= number_to_currency(product.price, unit: "lei", format: "%n %u") %></p>
+            <p class="similar-product-price">
+              <% similar_variant_price = @similar_variant_prices&.dig(product.id) %>
+              <% if similar_variant_price %>
+                de la <%= number_to_currency(similar_variant_price, unit: "lei", format: "%n %u") %>
+              <% elsif product.promo_active? && product.discount_price.present? && product.discount_price > 0 %>
+                <span style="text-decoration: line-through; color: #999; font-size: 0.85em;"><%= number_to_currency(product.price, unit: "lei", format: "%n %u") %></span>
+                <span style="color: #dc3545; font-weight: bold;"><%= number_to_currency(product.discount_price, unit: "lei", format: "%n %u") %></span>
+              <% elsif product.price.present? %>
+                <%= number_to_currency(product.price, unit: "lei", format: "%n %u") %>
+              <% end %>
+            </p>
           </div>
         <% end %>
       </div>
@@ -375,52 +494,101 @@ function bindQuantityControls() {
   increaseBtn.addEventListener('click', () => adjustQty(1));
 }
 
-// Variant selector logic
+// Variant selector logic (swatches primary + buttons secondary)
 function bindVariantSelector() {
-  const dataEl = document.getElementById('variants-data');
-  if (!dataEl) return; // No variants
+  var dataEl = document.getElementById('variants-data');
+  if (!dataEl) return;
 
-  const variants = JSON.parse(dataEl.textContent);
-  const dropdowns = document.querySelectorAll('.variant-option-dropdown');
-  const priceEl = document.getElementById('variant-price');
-  const hiddenInput = document.getElementById('selected-variant-id');
-  const submitBtn = document.getElementById('add-to-cart-submit');
+  var variants = JSON.parse(dataEl.textContent);
+  var swatches = document.querySelectorAll('.variant-swatch');
+  var priceEl = document.getElementById('variant-price');
+  var hiddenInput = document.getElementById('selected-variant-id');
+  var submitBtn = document.getElementById('add-to-cart-submit');
+  var stockTextEl = document.getElementById('variant-stock-text');
+  var primarySwatchesEl = document.getElementById('primary-swatches');
 
-  if (!dropdowns.length) return;
+  // Fallback: if no swatches (backward compat for products without primary set)
+  if (!swatches.length) return;
 
-  function findMatchingVariant() {
-    const selected = {};
-    dropdowns.forEach(function(dd) {
-      const val = dd.value;
-      if (val) selected[dd.dataset.optionTypeId] = parseInt(val);
+  var selectedPrimaryValueId = null;
+  var selectedSecondaryValues = {};
+
+  function getVariantsForPrimary(primaryValueId) {
+    return variants.filter(function(v) {
+      return v.option_value_ids.includes(primaryValueId);
     });
+  }
 
-    const selectedIds = Object.values(selected);
-    if (selectedIds.length === 0) return null;
-
+  function findExactVariant() {
+    if (!selectedPrimaryValueId) return null;
+    var allSelected = [selectedPrimaryValueId];
+    var secValues = Object.values(selectedSecondaryValues).filter(Boolean);
+    allSelected = allSelected.concat(secValues);
     return variants.find(function(v) {
-      return selectedIds.every(function(id) { return v.option_value_ids.includes(id); }) &&
-             v.option_value_ids.length === selectedIds.length;
+      return allSelected.every(function(id) { return v.option_value_ids.includes(id); }) &&
+             v.option_value_ids.length === allSelected.length;
+    });
+  }
+
+  function updateSecondaryButtons() {
+    if (!selectedPrimaryValueId) return;
+    var availableVariants = getVariantsForPrimary(selectedPrimaryValueId);
+
+    document.querySelectorAll('.variant-buttons').forEach(function(container) {
+      container.querySelectorAll('.variant-btn').forEach(function(btn) {
+        var valueId = parseInt(btn.dataset.optionValueId);
+        var exists = availableVariants.some(function(v) {
+          return v.option_value_ids.includes(valueId);
+        });
+        var hasStock = availableVariants.some(function(v) {
+          return v.option_value_ids.includes(valueId) && v.stock > 0;
+        });
+
+        btn.classList.toggle('variant-btn--disabled', !exists);
+        btn.classList.toggle('variant-btn--out-of-stock', exists && !hasStock);
+        btn.disabled = !exists;
+      });
+    });
+  }
+
+  function autoSelectSecondary() {
+    if (!selectedPrimaryValueId) return;
+    var availableVariants = getVariantsForPrimary(selectedPrimaryValueId);
+
+    document.querySelectorAll('.variant-buttons').forEach(function(container) {
+      var typeId = container.dataset.optionTypeId;
+      var currentSelection = selectedSecondaryValues[typeId];
+
+      if (currentSelection) {
+        var stillAvailable = availableVariants.some(function(v) {
+          return v.option_value_ids.includes(currentSelection);
+        });
+        if (stillAvailable) return;
+      }
+
+      var firstAvailable = container.querySelector('.variant-btn:not(.variant-btn--disabled)');
+      if (firstAvailable) {
+        selectedSecondaryValues[typeId] = parseInt(firstAvailable.dataset.optionValueId);
+        container.querySelectorAll('.variant-btn').forEach(function(b) { applyBtnActive(b, false); });
+        applyBtnActive(firstAvailable, true);
+      }
     });
   }
 
   function updateVariantImages(variant) {
-    const mainImage = document.querySelector('.main-image');
-    const thumbnailsContainer = document.querySelector('.product-thumbnails');
-
+    var mainImage = document.querySelector('.main-image');
+    var thumbnailsContainer = document.querySelector('.product-thumbnails');
     if (!mainImage) return;
 
-    // Determine images to display (variant images or fallback to product images)
-    const mainImgUrl = variant.external_image_url;
-    const galleryUrls = variant.external_image_urls || [];
+    var mainImgUrl = variant.external_image_url;
+    var galleryUrls = variant.external_image_urls || [];
 
     if (mainImgUrl) {
-      // Update main image
-      const displayUrl = mainImgUrl + '?width=600&height=600&quality=85';
-      const fullUrl = mainImgUrl + '?width=2000&height=2000&quality=95';
+      var displayUrl = mainImgUrl + '?width=600&height=600&quality=85';
+      var fullUrl = mainImgUrl + '?width=2000&height=2000&quality=95';
 
       mainImage.style.opacity = '0.5';
-      const newImage = new Image();
+      var newImage = new Image();
       newImage.onload = function() {
         mainImage.src = displayUrl;
         mainImage.dataset.full = fullUrl;
@@ -428,45 +596,40 @@ function bindVariantSelector() {
       };
       newImage.src = displayUrl;
 
-      // Update thumbnails if container exists
       if (thumbnailsContainer) {
         thumbnailsContainer.innerHTML = '';
-
-        // Add main image thumbnail
-        const mainThumb = document.createElement('img');
+        var mainThumb = document.createElement('img');
         mainThumb.className = 'thumb main-thumb active';
         mainThumb.src = mainImgUrl + '?width=600&height=600&quality=95';
         mainThumb.dataset.full = fullUrl;
         mainThumb.alt = 'Imagine principală';
         thumbnailsContainer.appendChild(mainThumb);
 
-        // Add gallery thumbnails
         galleryUrls.forEach(function(url, index) {
-          const thumb = document.createElement('img');
+          var thumb = document.createElement('img');
           thumb.className = 'thumb';
           thumb.src = url + '?width=600&height=600&quality=95';
           thumb.dataset.full = url + '?width=2000&height=2000&quality=95';
           thumb.alt = 'Imagine ' + (index + 2);
           thumbnailsContainer.appendChild(thumb);
         });
-
-        // Re-bind thumbnail clicks
         bindThumbnailClick();
       }
     }
   }
 
-  function updateSelection() {
-    const match = findMatchingVariant();
-    const stockTextEl = document.getElementById('variant-stock-text');
+  function updateDisplay() {
+    var match = findExactVariant();
 
     if (match) {
       hiddenInput.value = match.id;
-      priceEl.textContent = match.price.toFixed(2) + ' lei';
-      submitBtn.disabled = false;
-      submitBtn.title = '';
-
-      // Update stock info
+      if (match.promo_active && match.discount_price > 0) {
+        priceEl.innerHTML = '<span style="text-decoration:line-through;color:#999;">' +
+          match.price.toFixed(2) + ' lei</span> <span style="color:#dc3545;font-weight:bold;">' +
+          match.effective_price.toFixed(2) + ' lei</span>';
+      } else {
+        priceEl.textContent = match.price.toFixed(2) + ' lei';
+      }
       if (stockTextEl) {
         if (match.stock > 0) {
           stockTextEl.textContent = match.stock + ' bucăți disponibile';
@@ -474,21 +637,17 @@ function bindVariantSelector() {
         } else {
           stockTextEl.textContent = 'Stoc epuizat';
           stockTextEl.style.color = '#dc3545';
-          submitBtn.disabled = true;
-          submitBtn.title = 'Produsul nu este în stoc';
         }
       }
-
-      // Update images if variant has images
+      submitBtn.disabled = match.stock <= 0;
+      submitBtn.title = match.stock <= 0 ? 'Produsul nu este în stoc' : '';
       if (match.external_image_url || (match.external_image_urls && match.external_image_urls.length > 0)) {
         updateVariantImages(match);
       }
     } else {
       hiddenInput.value = '';
-      if (submitBtn) {
-        submitBtn.disabled = dropdowns.length > 0;
-        submitBtn.title = dropdowns.length > 0 ? 'Selecteaza toate optiunile' : '';
-      }
+      submitBtn.disabled = true;
+      submitBtn.title = 'Selectează toate opțiunile';
       if (stockTextEl) {
         stockTextEl.textContent = 'Selectează opțiunile';
         stockTextEl.style.color = '#666';
@@ -496,12 +655,90 @@ function bindVariantSelector() {
     }
   }
 
-  dropdowns.forEach(function(dd) {
-    dd.addEventListener('change', updateSelection);
+  // === VISUAL STATE HELPERS ===
+
+  function applySwatchActive(swatch, active) {
+    swatch.classList.toggle('variant-swatch--active', active);
+    var colorEl = swatch.querySelector('.swatch-color');
+    var labelEl = swatch.querySelector('.swatch-label');
+    if (colorEl) {
+      colorEl.style.boxShadow = active ? '0 0 0 2px #fff, 0 0 0 4px #8b0000' : 'none';
+    }
+    if (labelEl) {
+      labelEl.style.boxShadow = active ? '0 0 0 2px #fff, 0 0 0 4px #8b0000' : 'none';
+    }
+  }
+
+  function applyBtnActive(btn, active) {
+    btn.classList.toggle('variant-btn--active', active);
+    if (active) {
+      btn.style.backgroundColor = '#8b0000';
+      btn.style.borderColor = '#8b0000';
+      btn.style.color = '#fff';
+      btn.style.fontWeight = '600';
+    } else {
+      btn.style.backgroundColor = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      btn.style.fontWeight = '';
+    }
+  }
+
+  // === EVENT LISTENERS ===
+
+  swatches.forEach(function(swatch) {
+    swatch.addEventListener('click', function() {
+      selectedPrimaryValueId = parseInt(this.dataset.optionValueId);
+      swatches.forEach(function(s) { applySwatchActive(s, false); });
+      applySwatchActive(this, true);
+      updateSecondaryButtons();
+      autoSelectSecondary();
+      updateDisplay();
+    });
   });
 
-  // Initial state: disable submit if variants exist but none selected
-  updateSelection();
+  document.querySelectorAll('.variant-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (this.disabled) return;
+      var typeId = this.closest('.variant-buttons').dataset.optionTypeId;
+      selectedSecondaryValues[typeId] = parseInt(this.dataset.optionValueId);
+      this.closest('.variant-buttons').querySelectorAll('.variant-btn').forEach(function(b) {
+        applyBtnActive(b, false);
+      });
+      applyBtnActive(this, true);
+      updateDisplay();
+    });
+  });
+
+  // === INITIALIZATION ===
+  var initialVariantId = hiddenInput ? parseInt(hiddenInput.value) : null;
+  var initialVariant = initialVariantId ? variants.find(function(v) { return v.id === initialVariantId; }) : variants[0];
+
+  if (initialVariant) {
+    swatches.forEach(function(swatch) {
+      var valueId = parseInt(swatch.dataset.optionValueId);
+      if (initialVariant.option_value_ids.includes(valueId)) {
+        selectedPrimaryValueId = valueId;
+        applySwatchActive(swatch, true);
+      } else {
+        applySwatchActive(swatch, false);
+      }
+    });
+
+    document.querySelectorAll('.variant-buttons').forEach(function(container) {
+      var typeId = container.dataset.optionTypeId;
+      container.querySelectorAll('.variant-btn').forEach(function(btn) {
+        var valueId = parseInt(btn.dataset.optionValueId);
+        if (initialVariant.option_value_ids.includes(valueId)) {
+          selectedSecondaryValues[typeId] = valueId;
+          applyBtnActive(btn, true);
+        }
+      });
+    });
+
+    updateSecondaryButtons();
+    updateDisplay();
+  }
 }
 
 document.addEventListener('DOMContentLoaded', bindVariantSelector);

@@ -7,15 +7,23 @@
     <th>Preț</th>
     <th>Total</th>
   </tr>
-  <% @cart.each do |product_id, data| %>
-    <% product = Product.find_by(id: product_id) %>
-    <% quantity = data["quantity"].to_i %>
+  <% @cart.each do |cart_key, data| %>
+    <% parsed = parse_cart_key(cart_key) %>
+    <% product = Product.find_by(id: parsed[:product_id]) %>
     <% next unless product %>
+    <% variant = parsed[:variant_id] ? Variant.find_by(id: parsed[:variant_id]) : nil %>
+    <% quantity = data["quantity"].to_i %>
+    <% unit_price = variant&.effective_price || product.effective_price || 0 %>
     <tr>
-      <td><%= product.name %></td>
+      <td>
+        <%= product.name %>
+        <% if variant %>
+          <br><small style="color: #666;"><%= variant.options_text %></small>
+        <% end %>
+      </td>
       <td><%= quantity %></td>
-      <td><%= number_to_currency(product.price, unit: "") %> lei</td>
-      <td><%= number_to_currency(product.price * quantity, unit: "") %> lei</td>
+      <td><%= number_to_currency(unit_price, unit: "") %> lei</td>
+      <td><%= number_to_currency(unit_price * quantity, unit: "") %> lei</td>
     </tr>
   <% end %>
 </table>

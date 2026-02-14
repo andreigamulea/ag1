@@ -52,6 +52,7 @@
           <th style="padding: 12px; border: 1px solid #ddd;">#</th>
           <th style="padding: 12px; border: 1px solid #ddd;">Name</th>
           <th style="padding: 12px; border: 1px solid #ddd;">Display</th>
+          <th style="padding: 12px; border: 1px solid #ddd;">Color</th>
           <th style="padding: 12px; border: 1px solid #ddd;">Position</th>
           <th style="padding: 12px; border: 1px solid #ddd;">Used by Variants</th>
           <th style="padding: 12px; border: 1px solid #ddd;">Actions</th>
@@ -63,13 +64,26 @@
             <td style="padding: 12px; border: 1px solid #ddd;"><%= index + 1 %></td>
             <td style="padding: 12px; border: 1px solid #ddd;"><%= value.name %></td>
             <td style="padding: 12px; border: 1px solid #ddd;"><%= value.presentation %></td>
+            <td style="padding: 12px; border: 1px solid #ddd;">
+              <% if value.color_hex.present? %>
+                <span style="display:inline-block;width:24px;height:24px;border-radius:50%;background-color:<%= value.color_hex %>;border:1px solid #ccc;vertical-align:middle;"></span>
+                <code style="font-size:12px;"><%= value.color_hex %></code>
+              <% else %>
+                <span style="color:#999;">—</span>
+              <% end %>
+            </td>
             <td style="padding: 12px; border: 1px solid #ddd;"><%= value.position %></td>
             <td style="padding: 12px; border: 1px solid #ddd;"><%= value.variants.count %></td>
             <td style="padding: 12px; border: 1px solid #ddd;">
+              <%= form_with model: value, url: admin_option_type_option_value_path(@option_type, value), method: :patch, style: "display:inline-flex;align-items:center;gap:6px;" do |vf| %>
+                <%= vf.color_field :color_hex, value: value.color_hex.presence || "#000000", style: "width:32px;height:28px;padding:0;border:1px solid #ccc;cursor:pointer;" %>
+                <%= vf.submit "Set", class: "btn btn-primary btn-sm" %>
+              <% end %>
               <%= button_to "Delete", admin_option_type_option_value_path(@option_type, value),
                   method: :delete,
                   data: { turbo_confirm: "Delete '#{value.name}'?" },
-                  class: "btn btn-danger btn-sm" %>
+                  class: "btn btn-danger btn-sm",
+                  style: "margin-left:4px;" %>
             </td>
           </tr>
         <% end %>
@@ -94,7 +108,7 @@
         </div>
       <% end %>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr auto 1fr auto; gap: 15px; align-items: end;">
         <div>
           <%= f.label :name, "Name" %>
           <%= f.text_field :name, class: "form-control", placeholder: "e.g., Roșu" %>
@@ -103,6 +117,11 @@
         <div>
           <%= f.label :presentation, "Display Name" %>
           <%= f.text_field :presentation, class: "form-control", placeholder: "e.g., Roșu" %>
+        </div>
+
+        <div>
+          <%= f.label :color_hex, "Color" %>
+          <%= f.color_field :color_hex, style: "width:48px;height:36px;padding:2px;border:1px solid #ccc;cursor:pointer;" %>
         </div>
 
         <div>

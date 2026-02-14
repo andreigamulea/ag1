@@ -60,10 +60,7 @@
         "@type": "Offer",
         "url": "<%= canonical_host %><%= carti_path(@product) %>",
         "priceCurrency": "RON",
-        "price": "<%= @product.price.to_f %>",
-        <% if @product.respond_to?(:discount_price) && @product.discount_price.present? %>
-        "discount": "<%= (@product.price.to_f - @product.discount_price.to_f).round(2) %>",
-        <% end %>
+        "price": "<%= @product.effective_price.to_f %>",
         "availability": "https://schema.org/<%= @product.respond_to?(:stock) && @product.stock.to_i > 0 ? 'InStock' : 'OutOfStock' %>",
         "seller": {
           "@id": "<%= canonical_host %>/#organization"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_11_231340) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_13_000836) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -174,6 +174,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_11_231340) do
     t.integer "position", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "color_hex"
     t.index ["option_type_id", "name"], name: "index_option_values_on_option_type_id_and_name", unique: true
     t.index ["option_type_id"], name: "idx_ov_type"
     t.index ["option_type_id"], name: "index_option_values_on_option_type_id"
@@ -250,6 +251,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_11_231340) do
     t.integer "position", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "primary", default: false, null: false
     t.index ["option_type_id"], name: "index_product_option_types_on_option_type_id"
     t.index ["product_id", "option_type_id"], name: "idx_unique_product_option_type", unique: true
     t.index ["product_id"], name: "idx_pot_product"
@@ -261,7 +263,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_11_231340) do
     t.string "slug", null: false
     t.string "description_title"
     t.text "description"
-    t.decimal "price", precision: 10, scale: 2, null: false
+    t.decimal "price", precision: 10, scale: 2
     t.decimal "cost_price", precision: 10, scale: 2
     t.decimal "discount_price", precision: 10, scale: 2
     t.string "sku", null: false
@@ -295,6 +297,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_11_231340) do
     t.text "external_image_urls", default: [], array: true
     t.text "external_file_urls", default: [], array: true
     t.decimal "vat", precision: 4, scale: 2, default: "0.0"
+    t.boolean "promo_active", default: false, null: false
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
 
@@ -350,6 +353,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_11_231340) do
     t.datetime "updated_at", null: false
     t.string "external_image_url"
     t.text "external_image_urls", default: [], array: true
+    t.decimal "discount_price", precision: 10, scale: 2
+    t.boolean "promo_active", default: false, null: false
+    t.decimal "cost_price", precision: 10, scale: 2
     t.index ["external_sku"], name: "idx_unique_external_sku", unique: true, where: "(external_sku IS NOT NULL)"
     t.index ["product_id", "options_digest"], name: "idx_unique_active_options_per_product", unique: true, where: "((options_digest IS NOT NULL) AND (status = 0))"
     t.index ["product_id", "sku"], name: "idx_unique_sku_per_product", unique: true

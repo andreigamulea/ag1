@@ -93,6 +93,9 @@ end
     end
 
     collection do
+      get :check_slug
+      get :check_sku
+      get :check_variant_sku
       post :force_gc
       get :categories_index
       get :new_standalone_category

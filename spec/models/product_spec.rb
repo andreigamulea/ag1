@@ -158,7 +158,7 @@ RSpec.describe Product, type: :model do
       variant1 = create(:variant, product: product, status: :active)
       variant2 = create(:variant, product: product, status: :inactive)
 
-      expect(product.variants).to include(variant1, variant2)
+      expect(product.reload.variants).to include(variant1, variant2)
     end
 
     it 'has many option_types through product_option_types' do
@@ -175,6 +175,7 @@ RSpec.describe Product, type: :model do
     it 'restricts deletion when variants exist' do
       product = create(:product)
       create(:variant, product: product)
+      product.reload
 
       expect { product.destroy }.to raise_error(ActiveRecord::DeleteRestrictionError)
     end
