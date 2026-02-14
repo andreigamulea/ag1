@@ -68,7 +68,7 @@ config.action_mailer.smtp_settings = {
   config.active_record.verbose_query_logs = true
   config.active_job.verbose_enqueue_logs = true
 
-  # === ASSETS ===
+  ## === ASSETS ===
   config.assets.quiet = true
 
   # === ACTION CONTROLLER ===
