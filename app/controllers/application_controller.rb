@@ -20,7 +20,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Identifică dacă pagina e de tip admin/CMS
+  ## Identifică dacă pagina e de tip admin/CMS
   def is_admin_page?
     # Override în controllere specifice de admin
     false
