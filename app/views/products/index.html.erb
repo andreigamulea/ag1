@@ -31,7 +31,11 @@ Codul maxim existent: <%= @products.pluck(:sku).max_by { |sku| sku.sub('cod', ''
         <td class="table-actions">
           <%= link_to "Detalii", product_path(product), class: "table-button neutral" %>
           <%= link_to "Editează", edit_product_path(product), class: "table-button primary" %>
-          <%= button_to "Șterge", product_path(product), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi acest produs?" }, class: "table-button danger", form: { class: "d-inline-block m-0" } %>
+          <% if product.archived? %>
+            <%= button_to "Reactivează", unarchive_product_path(product), method: :patch, data: { confirm: "Reactivezi produsul și variantele lui?" }, class: "table-button primary", form: { class: "d-inline-block m-0" } %>
+          <% else %>
+            <%= button_to "Șterge", product_path(product), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi acest produs?" }, class: "table-button danger", form: { class: "d-inline-block m-0" } %>
+          <% end %>
         </td>
       </tr>
     <% end %>

@@ -28,7 +28,7 @@ class Product < ApplicationRecord
   before_validation :generate_slug
 
   validates :name, :slug, :sku, presence: true
-  validates :price, presence: true, unless: :has_active_variants?
+  validates :price, presence: true, unless: :has_any_variants?
   validate :must_have_one_primary_option_type, if: :has_active_variants?
   validate :no_duplicate_variant_options
 
@@ -51,12 +51,23 @@ class Product < ApplicationRecord
       lock!
       locked_variant_ids = variants.order(:id).lock.pluck(:id)
       Variant.where(id: locked_variant_ids).update_all(status: Variant.statuses[:inactive]) if locked_variant_ids.any?
-      update!(status: 'archived')
+      update_column(:status, 'archived')
     end
   end
 
   def archived?
     status == 'archived'
+  end
+
+  # Unarchive product: reactivate all variants, set status to 'active'.
+  # LOCK ORDER: P -> V* (ORDER BY id)
+  def unarchive!
+    transaction do
+      lock!
+      locked_variant_ids = variants.order(:id).lock.pluck(:id)
+      Variant.where(id: locked_variant_ids).update_all(status: Variant.statuses[:active]) if locked_variant_ids.any?
+      update!(status: 'active')
+    end
   end
 
   def to_param
@@ -78,6 +89,14 @@ class Product < ApplicationRecord
       variants.reject(&:marked_for_destruction?).any?(&:active?)
     else
       variants.active.exists?
+    end
+  end
+
+  def has_any_variants?
+    if new_record? || variants.loaded?
+      variants.reject(&:marked_for_destruction?).any?
+    else
+      variants.exists?
     end
   end
 

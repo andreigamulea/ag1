@@ -3,6 +3,13 @@
   <h3>Editare produs</h3>
 </div>
 
+<% if @product.archived? %>
+  <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+    <span>Acest produs este <strong>arhivat</strong>. Variantele sunt inactive.</span>
+    <%= button_to "Reactivează produsul + variantele", unarchive_product_path(@product), method: :patch, data: { confirm: "Reactivezi produsul și toate variantele lui?" }, class: "form-button", style: "margin: 0;" %>
+  </div>
+<% end %>
+
 <%= render "form", product: @product %>
 
 <br>

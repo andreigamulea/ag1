@@ -83,6 +83,7 @@ end
     member do
       delete 'purge_image/:image_id', to: 'products#purge_image', as: :purge_image
       delete 'purge_main_image', to: 'products#purge_main_image', as: :purge_main_image
+      patch :unarchive
       delete :purge_attached_file
       delete :purge_external_file
       

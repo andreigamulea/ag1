@@ -99,6 +99,12 @@ class ProductsController < ApplicationController
     end
   end
 
+  def unarchive
+    @product = params[:id] =~ /\A\d+\z/ ? Product.find(params[:id]) : Product.find_by!(slug: params[:id])
+    @product.unarchive!
+    redirect_to products_path, notice: "Produsul a fost reactivat."
+  end
+
   def purge_image
     image = ActiveStorage::Attachment.find(params[:image_id])
     image.purge
