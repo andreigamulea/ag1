@@ -286,6 +286,9 @@
         <script type="application/json" id="variants-data">
           <%= @active_variants.map { |v| { id: v.id, price: v.price.to_f, effective_price: v.effective_price.to_f, discount_price: v.discount_price.to_f, promo_active: v.promo_active?, stock: v.stock, option_value_ids: v.option_value_ids, options_text: v.options_text, external_image_url: v.external_image_url, external_image_urls: v.external_image_urls || [] } }.to_json.html_safe %>
         </script>
+        <script type="application/json" id="product-images-data">
+          <%= { external_image_url: @product.external_image_url, external_image_urls: @product.external_image_urls || [] }.to_json.html_safe %>
+        </script>
       <% end %>
 
       <%= form_with url: "/cart/add", method: :post, local: true, class: "add-to-cart-form" do |f| %>
@@ -500,6 +503,8 @@ function bindVariantSelector() {
   if (!dataEl) return;
 
   var variants = JSON.parse(dataEl.textContent);
+  var productImagesEl = document.getElementById('product-images-data');
+  var productImages = productImagesEl ? JSON.parse(productImagesEl.textContent) : {};
   var swatches = document.querySelectorAll('.variant-swatch');
   var priceEl = document.getElementById('variant-price');
   var hiddenInput = document.getElementById('selected-variant-id');
@@ -593,8 +598,11 @@ function bindVariantSelector() {
     var thumbnailsContainer = document.querySelector('.product-thumbnails');
     if (!mainImage) return;
 
-    var mainImgUrl = variant.external_image_url;
-    var galleryUrls = variant.external_image_urls || [];
+    // Fallback: variant images → product images
+    var mainImgUrl = variant.external_image_url || productImages.external_image_url;
+    var galleryUrls = (variant.external_image_urls && variant.external_image_urls.length > 0)
+      ? variant.external_image_urls
+      : (productImages.external_image_urls || []);
 
     if (mainImgUrl) {
       var displayUrl = mainImgUrl + '?width=600&height=600&quality=85';
@@ -654,9 +662,7 @@ function bindVariantSelector() {
       }
       submitBtn.disabled = match.stock <= 0;
       submitBtn.title = match.stock <= 0 ? 'Produsul nu este în stoc' : '';
-      if (match.external_image_url || (match.external_image_urls && match.external_image_urls.length > 0)) {
-        updateVariantImages(match);
-      }
+      updateVariantImages(match);
     } else {
       hiddenInput.value = '';
       submitBtn.disabled = true;
@@ -665,6 +671,11 @@ function bindVariantSelector() {
         stockTextEl.textContent = 'Selectează opțiunile';
         stockTextEl.style.color = '#666';
       }
+      // Show images for the best matching variant (by primary) or product fallback
+      var imageVariant = selectedPrimaryValueId
+        ? variants.find(function(v) { return v.option_value_ids.includes(selectedPrimaryValueId); })
+        : null;
+      updateVariantImages(imageVariant || productImages);
     }
   }
 
