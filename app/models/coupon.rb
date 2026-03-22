@@ -6,6 +6,7 @@ class Coupon < ApplicationRecord
   validates :code, presence: true, uniqueness: true
   validates :discount_type, inclusion: { in: discount_types.keys }
   validates :discount_value, numericality: { greater_than: 0 }
+  validate :discount_percentage_cap
   validates :starts_at, :expires_at, presence: true
 
   def expired?
@@ -53,9 +54,15 @@ class Coupon < ApplicationRecord
     product_id.nil? || item[:product_id] == product_id
   end
 
-  # app/models/coupon.rb
-def active?
-  self.expires_at.nil? || self.expires_at > Time.current
-end
+  def active?
+    self.expires_at.nil? || self.expires_at > Time.current
+  end
 
+  private
+
+  def discount_percentage_cap
+    if percentage? && discount_value.present? && discount_value > 100
+      errors.add(:discount_value, "nu poate depăși 100% pentru reducere procentuală")
+    end
+  end
 end

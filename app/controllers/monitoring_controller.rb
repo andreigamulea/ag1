@@ -1,9 +1,13 @@
 require 'sys/proctable'
 include Sys
 
-class MonitoringController < ActionController::Base
+class MonitoringController < ApplicationController
+  before_action :authenticate_user!
+  before_action :require_admin
 
-
+  def is_admin_page?
+    true
+  end
 
   def mem
     process = ProcTable.ps.find { |p| p.pid == Process.pid }

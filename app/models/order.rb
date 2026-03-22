@@ -13,7 +13,8 @@ class Order < ApplicationRecord
     shipped: "shipped",
     delivered: "delivered",
     cancelled: "cancelled",
-    refunded: "refunded"
+    refunded: "refunded",
+    expired: "expired"
   }
 
   # === VALIDĂRI FACTURARE ===
@@ -25,10 +26,20 @@ class Order < ApplicationRecord
 
   validate :validate_country_and_location
   validate :validate_shipping_address, if: -> { shipping_address_different? }
+  validate :validate_status_transition, if: :status_changed?
 
   before_validation :ensure_cnp_fallback
 
-  #after_create :decrement_stock_on_order
+  VALID_TRANSITIONS = {
+    "pending"    => %w[paid cancelled expired],
+    "paid"       => %w[processing cancelled refunded],
+    "processing" => %w[shipped cancelled refunded],
+    "shipped"    => %w[delivered cancelled refunded],
+    "delivered"  => %w[refunded],
+    "cancelled"  => %w[],
+    "refunded"   => %w[],
+    "expired"    => %w[]
+  }.freeze
 
 
   def finalize_order!
@@ -55,6 +66,18 @@ class Order < ApplicationRecord
 
   def ensure_cnp_fallback
     self.cnp = "0000000000000" if cnp.blank?
+  end
+
+  def validate_status_transition
+    return if status_was.nil? # Allow initial status setting
+
+    old_status = status_was.to_s
+    new_status = status.to_s
+    allowed = VALID_TRANSITIONS[old_status] || []
+
+    unless allowed.include?(new_status)
+      errors.add(:status, "nu poate trece din '#{old_status}' în '#{new_status}'")
+    end
   end
 
   def validate_country_and_location
@@ -111,14 +134,24 @@ class Order < ApplicationRecord
     end
   end
 
-  # ⚡ metoda unică pentru scăderea stocului
+  # ⚡ metoda unică pentru scăderea stocului — atomic cu pessimistic locking
   def decrement_stock_on_order
-    order_items.each do |item|
+    order_items.includes(:product, :variant).each do |item|
+      if item.variant_id.present?
+        variant = item.variant
+        next unless variant.present?
+        variant.with_lock do
+          variant.stock = [variant.stock.to_i - item.quantity.to_i, 0].max
+          variant.save!(validate: false)
+        end
+      end
+
       product = item.product
       next unless product.present?
-
-      product.stock = product.stock.to_i - item.quantity.to_i
-      product.save(validate: false)
+      product.with_lock do
+        product.stock = [product.stock.to_i - item.quantity.to_i, 0].max
+        product.save!(validate: false)
+      end
     end
   end
 end

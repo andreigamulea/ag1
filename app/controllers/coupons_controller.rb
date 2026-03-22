@@ -1,4 +1,7 @@
 class CouponsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :require_admin
+
   # Coupons is admin only
   def is_admin_page?
     true

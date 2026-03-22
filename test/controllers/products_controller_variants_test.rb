@@ -214,7 +214,7 @@ class ProductsControllerVariantsTest < ActionDispatch::IntegrationTest
     assert_equal 0, product.variants.count
   end
 
-  test "POST /products acceptă creare de la orice user autentificat" do
+  test "POST /products refuză creare de la user non-admin" do
     sign_out @admin
 
     regular_user = User.create!(
@@ -226,8 +226,8 @@ class ProductsControllerVariantsTest < ActionDispatch::IntegrationTest
     )
     sign_in regular_user
 
-    # Controller-ul nu restricționează crearea la admin
-    assert_difference "Product.count", 1 do
+    # Controller-ul restricționează crearea la admin
+    assert_no_difference "Product.count" do
       post products_path, params: {
         product: {
           name: "Carte User #{SecureRandom.hex(4)}",
@@ -238,7 +238,7 @@ class ProductsControllerVariantsTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_response :redirect
+    assert_redirected_to root_path
   end
 
   test "PATCH /products/:id actualizează imagini variante" do

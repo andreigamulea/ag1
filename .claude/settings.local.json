@@ -15,7 +15,22 @@
       "Bash(bundle exec rails test:system:*)",
       "Bash(where:*)",
       "Bash(chromedriver --version:*)",
-      "Bash(bundle list:*)"
+      "Bash(bundle list:*)",
+      "Bash(xargs:*)",
+      "Bash(cat:*)",
+      "Bash(bundle install:*)",
+      "Bash(/c/Ruby33-x64/bin/bundle install)",
+      "Bash(/c/Ruby33-x64/bin/ruby:*)",
+      "Bash(RAILS_ENV=test /c/Ruby33-x64/bin/ruby bin/rails db:schema:load:*)",
+      "Bash(/c/Ruby33-x64/bin/bundle exec rspec spec/models/variant_spec.rb spec/models/product_spec.rb spec/models/variant_db_constraints_spec.rb spec/models/variant_unique_indexes_spec.rb)",
+      "Bash(/c/Ruby33-x64/bin/bundle exec rspec spec/)",
+      "WebFetch(domain:www.karpaten.ro)",
+      "WebFetch(domain:pagespeed.web.dev)",
+      "WebFetch(domain:builtwith.com)",
+      "WebFetch(domain:www.wappalyzer.com)",
+      "WebFetch(domain:www.quick-sell.ro)",
+      "WebFetch(domain:www.web-design-site.oficial.ro)",
+      "WebFetch(domain:www.euphorictravel.ro)"
     ]
   }
 }

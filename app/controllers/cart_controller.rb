@@ -11,8 +11,13 @@ class CartController < ApplicationController
   def add
     product_id = params[:product_id].to_s
     variant_id = params[:variant_id].presence
-    quantity   = params[:quantity].to_i
-    product    = Product.find(product_id)
+    quantity   = [params[:quantity].to_i, 1].max
+    product    = Product.find_by(id: product_id)
+
+    unless product
+      redirect_to cart_index_path, alert: "Produsul nu a fost găsit."
+      return
+    end
 
     # Daca produsul are variante active, variant_id e obligatoriu
     if product.variants.active.exists?
@@ -39,6 +44,10 @@ class CartController < ApplicationController
     if product.track_inventory
       current_quantity = @cart[cart_key] ? @cart[cart_key]["quantity"] : 0
       new_quantity     = current_quantity + quantity
+
+      if available_stock > 0 && new_quantity > available_stock
+        new_quantity = available_stock
+      end
     else
       if available_stock <= 0
         redirect_back fallback_location: carti_path(product), alert: "Produsul nu mai este disponibil."

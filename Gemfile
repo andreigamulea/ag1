@@ -90,3 +90,6 @@ gem 'pdfkit', '~> 0.8.7.3'
 # Sitemap generator pentru SEO
 gem 'sitemap_generator', '~> 6.3'
 
+# Rate limiting
+gem 'rack-attack', '~> 6.7'
+

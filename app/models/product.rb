@@ -30,6 +30,7 @@ class Product < ApplicationRecord
   validates :name, :slug, :sku, presence: true
   validates :price, presence: true, unless: :has_active_variants?
   validate :must_have_one_primary_option_type, if: :has_active_variants?
+  validate :no_duplicate_variant_options
 
   enum product_type: {
     physical: "physical",
@@ -82,6 +83,20 @@ class Product < ApplicationRecord
 
   def generate_slug
     self.slug = name.parameterize if slug.blank? && name.present?
+  end
+
+  def no_duplicate_variant_options
+    active_variants = variants.reject(&:marked_for_destruction?).select(&:active?)
+    return if active_variants.size < 2
+
+    digests = active_variants.map do |v|
+      ids = v.option_value_variants.map(&:option_value_id).sort
+      ids.any? ? Digest::SHA256.hexdigest(ids.join('-')) : nil
+    end.compact
+
+    if digests.size != digests.uniq.size
+      errors.add(:base, "Nu pot exista două variante active cu aceeași combinație de opțiuni")
+    end
   end
 
   def must_have_one_primary_option_type

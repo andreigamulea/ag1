@@ -1,4 +1,7 @@
 class MemoryLogsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :require_admin
+
   # Memory logs is admin only
   def is_admin_page?
     true

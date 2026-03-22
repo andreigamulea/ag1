@@ -198,6 +198,13 @@ end
 
   private
 
+  def require_admin
+    unless current_user&.admin?
+      redirect_to root_path, alert: "Acces interzis."
+      nil
+    end
+  end
+
   def load_cart
     session[:cart] ||= {}
     # Normalizăm toate cheile ca string-uri

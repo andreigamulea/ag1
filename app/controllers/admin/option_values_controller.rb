@@ -55,7 +55,4 @@ class Admin::OptionValuesController < ApplicationController
     params.require(:option_value).permit(:name, :presentation, :position, :color_hex)
   end
 
-  def require_admin
-    redirect_to root_path, alert: "Access denied." unless current_user&.admin?
-  end
 end

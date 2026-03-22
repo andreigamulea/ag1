@@ -1,4 +1,6 @@
 class ProductsController < ApplicationController
+  before_action :authenticate_user!, except: [:show]
+  before_action :require_admin, except: [:show]
   before_action :set_product, only: [:show, :edit, :update, :destroy, :purge_attached_file]
   before_action :load_option_types, only: [:new, :edit, :create, :update]
   after_action :cleanup_memory, only: [:create, :update, :show, :edit, :new], if: :production?
@@ -48,6 +50,13 @@ class ProductsController < ApplicationController
         format.json { render json: @product.errors, status: :unprocessable_entity }
       end
     end
+  rescue ActiveRecord::RecordNotUnique => e
+    if e.message.include?('idx_unique_active_options_per_product')
+      @product.errors.add(:base, "Nu pot exista două variante active cu aceeași combinație de opțiuni")
+      render :new, status: :unprocessable_entity
+    else
+      raise
+    end
   end
 
   def update
@@ -70,6 +79,13 @@ class ProductsController < ApplicationController
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @product.errors, status: :unprocessable_entity }
       end
+    end
+  rescue ActiveRecord::RecordNotUnique => e
+    if e.message.include?('idx_unique_active_options_per_product')
+      @product.errors.add(:base, "Nu pot exista două variante active cu aceeași combinație de opțiuni")
+      render :edit, status: :unprocessable_entity
+    else
+      raise
     end
   end
 
