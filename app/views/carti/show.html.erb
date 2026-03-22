@@ -532,15 +532,28 @@ function bindVariantSelector() {
 
   function updateSecondaryButtons() {
     if (!selectedPrimaryValueId) return;
-    var availableVariants = getVariantsForPrimary(selectedPrimaryValueId);
 
     document.querySelectorAll('.variant-buttons').forEach(function(container) {
+      var currentTypeId = container.dataset.optionTypeId;
+
       container.querySelectorAll('.variant-btn').forEach(function(btn) {
         var valueId = parseInt(btn.dataset.optionValueId);
-        var exists = availableVariants.some(function(v) {
+
+        // Filter variants: must match primary + all OTHER selected secondaries
+        var filteredVariants = variants.filter(function(v) {
+          if (!v.option_value_ids.includes(selectedPrimaryValueId)) return false;
+          // Check all other secondary selections (not the current option type)
+          return Object.keys(selectedSecondaryValues).every(function(typeId) {
+            if (typeId === currentTypeId) return true; // skip current group
+            var selVal = selectedSecondaryValues[typeId];
+            return !selVal || v.option_value_ids.includes(selVal);
+          });
+        });
+
+        var exists = filteredVariants.some(function(v) {
           return v.option_value_ids.includes(valueId);
         });
-        var hasStock = availableVariants.some(function(v) {
+        var hasStock = filteredVariants.some(function(v) {
           return v.option_value_ids.includes(valueId) && v.stock > 0;
         });
 
@@ -706,6 +719,7 @@ function bindVariantSelector() {
         applyBtnActive(b, false);
       });
       applyBtnActive(this, true);
+      updateSecondaryButtons();
       updateDisplay();
     });
   });
