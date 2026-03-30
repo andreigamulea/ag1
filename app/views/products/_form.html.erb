@@ -765,13 +765,17 @@ document.addEventListener("DOMContentLoaded", () => {
       tr1.innerHTML = `
         <input type="hidden" name="${prefix}[_destroy]" value="0" class="destroy-flag">
         <td class="variant-options-cell">${optionsHtml}</td>
-        <td colspan="5">
+        <td colspan="3">
           <label class="variant-field-label">SKU</label>
           <div style="display:flex; gap:4px; align-items:center;">
             <input type="text" name="${prefix}[sku]" placeholder="SKU-001" class="variant-input variant-sku" style="flex:1;" data-variant-id="">
             <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare">&#8635;</button>
           </div>
           <small class="variant-sku-status" style="display:none; margin-top:2px; font-size:11px;"></small>
+        </td>
+        <td colspan="2">
+          <label class="variant-field-label">EAN / GTIN</label>
+          <input type="text" name="${prefix}[ean]" placeholder="1234567890123" class="variant-input variant-ean" style="width:100%;">
         </td>
       `;
 
