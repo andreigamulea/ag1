@@ -477,12 +477,16 @@
         <div class="form-row cols-1">
           <div class="form-field">
             <%= form.label :category_ids, "Selecteaza categoriile" %>
-            <div class="category-badges">
-              <% Category.all.each do |category| %>
+            <div class="category-badges category-tree">
+              <% Category.ordered_tree.each do |category, depth| %>
                 <% selected = product.category_ids.include?(category.id) %>
                 <span class="category-badge <%= selected ? 'active' : 'inactive' %>"
+                      style="margin-left: <%= depth * 24 %>px;"
                       data-id="<%= category.id %>"
+                      data-parent-id="<%= category.parent_id %>"
+                      data-ancestor-ids="<%= category.ancestor_ids.join(',') %>"
                       data-action="click->product-form#toggleCategory">
+                  <% if depth > 0 %><span class="tree-indent">└</span><% end %>
                   <%= category.name %>
                 </span>
               <% end %>

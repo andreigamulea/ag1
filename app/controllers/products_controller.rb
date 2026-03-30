@@ -439,7 +439,7 @@ class ProductsController < ApplicationController
     end
 
     def category_params
-      params.require(:category).permit(:name, :slug, :description, :meta_title, :meta_description)
+      params.require(:category).permit(:name, :slug, :description, :meta_title, :meta_description, :parent_id)
     end
 
     def cleanup_memory

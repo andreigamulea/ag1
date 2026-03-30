@@ -29,14 +29,32 @@ export default class extends Controller {
       badge.classList.remove("active")
       badge.classList.add("inactive")
     } else {
-      const input = document.createElement("input")
-      input.type = "hidden"
-      input.name = "product[category_ids][]"
-      input.value = id
-      wrapper.appendChild(input)
-      badge.classList.remove("inactive")
-      badge.classList.add("active")
+      this._selectCategory(id, badge, wrapper)
+
+      // Auto-select ancestors
+      const ancestorIds = badge.dataset.ancestorIds
+      if (ancestorIds) {
+        ancestorIds.split(",").filter(Boolean).forEach(ancestorId => {
+          const existingAncestor = wrapper.querySelector(`input[value="${ancestorId}"]`)
+          if (!existingAncestor) {
+            const ancestorBadge = this.element.querySelector(`.category-badge[data-id="${ancestorId}"]`)
+            if (ancestorBadge) {
+              this._selectCategory(ancestorId, ancestorBadge, wrapper)
+            }
+          }
+        })
+      }
     }
+  }
+
+  _selectCategory(id, badge, wrapper) {
+    const input = document.createElement("input")
+    input.type = "hidden"
+    input.name = "product[category_ids][]"
+    input.value = id
+    wrapper.appendChild(input)
+    badge.classList.remove("inactive")
+    badge.classList.add("active")
   }
 
   // ===== VARIANT SECTIONS TOGGLE =====

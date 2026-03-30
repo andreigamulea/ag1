@@ -276,6 +276,17 @@
   margin: 0;
 }
 
+.category-tree {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.tree-indent {
+  color: #9ca3af;
+  margin-right: 4px;
+  font-family: monospace;
+}
+
 /* ===================================
    IMAGE PREVIEW
    =================================== */

@@ -1374,7 +1374,17 @@ Un video bun, făcut o singură dată, aduce clienți luni de zile fără efort 
 
 **AG1 depaseste Solidus cu 13 puncte** si e cu 5 puncte peste eMAG.
 
-**Fata de Solidus**: AG1 castiga pe aproape toate fronturile practice: localizare RO, admin UX, feed import, EAN, dimensiuni per varianta, brand, advisory locks, cost hosting (3.4x mai ieftin). Solidus ramane superior doar pe: categorii ierarhice, multi-depozit, multi-moneda, API complet, scalabilitate enterprise.
+**Fata de Solidus**: AG1 castiga pe aproape toate fronturile practice: localizare RO, admin UX, feed import, EAN, dimensiuni per varianta, brand, advisory locks, cost hosting (3.4x mai ieftin). Solidus ramane superior doar pe: categorii ierarhice, multi-depozit, multi-moneda, API complet. Insa niciuna din aceste diferente nu e blocanta - toate se pot implementa in AG1:
+
+| Feature "lipsa" | Efort in AG1 | Detalii |
+|-----------------|-------------|---------|
+| Categorii ierarhice | 1 zi | `parent_id` pe Category, self-join, nested display |
+| API REST complet | 2-3 zile | Controllers API cu token auth, JSON responses |
+| Multi-depozit | 2 zile | Model StockLocation + StockItem, stoc per locatie |
+| Multi-moneda | 1-2 zile | Model Price separat, currency per pret |
+| Scalabilitate enterprise | Nu e o feature | PostgreSQL scaleaza la sute de mii de produse fara probleme. AG1 nu are nimic care sa-l impiedice. |
+
+**Total: ~7 zile ar elimina complet orice avantaj Solidus, pastrand toate avantajele AG1 (cost 3.4x mai mic, codebase 4x mai mic, performanta 2x mai buna).**
 
 **Fata de eMAG**: AG1 castiga pe flexibilitate (cost price, external IDs, multi-limba, multi-country tax, advisory locks). eMAG castiga pe features de marketplace (atribute per categorie, filtre automate, reviews, multi-seller) - dar astea sunt relevante doar daca esti marketplace cu mii de selleri.
 

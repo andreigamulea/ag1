@@ -13,6 +13,14 @@
         <%= f.text_field :slug, class: "form-control" %>
       </div>
 
+      <div class="form-group">
+        <%= f.label :parent_id, "Categorie parinte (optional)" %>
+        <%= f.select :parent_id,
+            Category.ordered_tree.map { |cat, depth| ["#{'— ' * depth}#{cat.name}", cat.id] },
+            { include_blank: "— Niciuna (categorie root) —" },
+            class: "form-control" %>
+      </div>
+
       <hr>
       <h4>SEO (opțional)</h4>
 
