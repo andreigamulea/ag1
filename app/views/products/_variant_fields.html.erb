@@ -139,3 +139,33 @@
     <% end %>
   </td>
 </tr>
+
+<%# === RAND 3: Dimensiuni și Greutate === %>
+<tr class="variant-row variant-row-dimensions <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
+    data-variant-id="<%= variant.id %>">
+  <td colspan="10" style="padding: 6px 12px; background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+      <span style="font-size:12px; font-weight:600; color:#666;">📏 Dimensiuni:</span>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <label class="variant-field-label" style="margin:0; font-size:11px;">H</label>
+        <%= f.number_field :height, step: 1, min: 0, placeholder: '0', class: 'variant-input', style: 'width:60px;' %>
+        <span style="font-size:11px; color:#999;">mm</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <label class="variant-field-label" style="margin:0; font-size:11px;">W</label>
+        <%= f.number_field :width, step: 1, min: 0, placeholder: '0', class: 'variant-input', style: 'width:60px;' %>
+        <span style="font-size:11px; color:#999;">mm</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <label class="variant-field-label" style="margin:0; font-size:11px;">D</label>
+        <%= f.number_field :depth, step: 1, min: 0, placeholder: '0', class: 'variant-input', style: 'width:60px;' %>
+        <span style="font-size:11px; color:#999;">mm</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <label class="variant-field-label" style="margin:0; font-size:11px;">Greutate</label>
+        <%= f.number_field :weight, step: 1, min: 0, placeholder: '0', class: 'variant-input', style: 'width:70px;' %>
+        <span style="font-size:11px; color:#999;">g</span>
+      </div>
+    </div>
+  </td>
+</tr>

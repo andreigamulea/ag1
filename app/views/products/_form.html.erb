@@ -98,7 +98,7 @@
           <%= link_to "Gestionează opțiuni", admin_option_types_path, target: "_blank", class: "btn btn-secondary btn-sm", style: "white-space:nowrap;" %>
         </div>
         <div class="form-row cols-1" id="primary-option-radios">
-          <% current_primary_id = form.object.primary_product_option_type&.option_type_id %>
+          <% current_primary_id = form.object.primary_product_option_type&.option_type_id || params[:primary_option_type_id]&.to_i %>
           <% (@option_types || []).each do |ot| %>
             <div class="radio-field">
               <%= radio_button_tag :primary_option_type_id, ot.id,
@@ -157,7 +157,7 @@
     </div>
 
     <!-- Prețuri și Taxe -->
-    <div class="form-section" id="section-prices">
+    <div class="form-section" id="section-prices" style="<%= has_variants ? 'display:none;' : '' %>">
       <div class="section-header success">
         💰 Prețuri și Taxe
       </div>
@@ -215,7 +215,7 @@
     </div>
 
     <!-- Inventar și Stoc -->
-    <div class="form-section" id="section-inventory">
+    <div class="form-section" id="section-inventory" style="<%= has_variants ? 'display:none;' : '' %>">
       <div class="section-header info">
         📦 Inventar și Stoc
       </div>
@@ -244,8 +244,8 @@
       </div>
     </div>
 
-    <!-- Dimensiuni și Greutate -->
-    <div class="form-section">
+    <!-- Dimensiuni și Greutate (doar pentru produse fără variante) -->
+    <div class="form-section" id="section-dimensions" style="<%= has_variants ? 'display:none;' : '' %>">
       <div class="section-header warning">
         📏 Dimensiuni și Greutate
       </div>
@@ -668,6 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tbody = document.getElementById('variants-tbody');
 
   const sectionPrimaryOption = document.getElementById('section-primary-option');
+  const sectionDimensions = document.getElementById('section-dimensions');
 
   function hasPrimaryOptionSelected() {
     const radios = document.querySelectorAll('#primary-option-radios input[type="radio"]');
@@ -682,6 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (sectionVariants) sectionVariants.style.display = (on && primarySelected) ? '' : 'none';
     if (sectionPrices) sectionPrices.style.display = on ? 'none' : '';
     if (sectionInventory) sectionInventory.style.display = on ? 'none' : '';
+    if (sectionDimensions) sectionDimensions.style.display = on ? 'none' : '';
     if (variantWarning) variantWarning.style.display = on ? '' : 'none';
   }
 
@@ -795,8 +797,40 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button></td>
       `;
 
+      // Rand 3: Dimensiuni si Greutate
+      const tr3 = document.createElement('tr');
+      tr3.className = 'variant-row variant-row-dimensions variant-new';
+      tr3.innerHTML = `
+        <td colspan="10" style="padding: 6px 12px; background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+          <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+            <span style="font-size:12px; font-weight:600; color:#666;">📏 Dimensiuni:</span>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <label class="variant-field-label" style="margin:0; font-size:11px;">H</label>
+              <input type="number" name="${prefix}[height]" step="1" min="0" placeholder="0" class="variant-input" style="width:60px;">
+              <span style="font-size:11px; color:#999;">mm</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <label class="variant-field-label" style="margin:0; font-size:11px;">W</label>
+              <input type="number" name="${prefix}[width]" step="1" min="0" placeholder="0" class="variant-input" style="width:60px;">
+              <span style="font-size:11px; color:#999;">mm</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <label class="variant-field-label" style="margin:0; font-size:11px;">D</label>
+              <input type="number" name="${prefix}[depth]" step="1" min="0" placeholder="0" class="variant-input" style="width:60px;">
+              <span style="font-size:11px; color:#999;">mm</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <label class="variant-field-label" style="margin:0; font-size:11px;">Greutate</label>
+              <input type="number" name="${prefix}[weight]" step="1" min="0" placeholder="0" class="variant-input" style="width:70px;">
+              <span style="font-size:11px; color:#999;">g</span>
+            </div>
+          </div>
+        </td>
+      `;
+
       tbody.appendChild(tr1);
       tbody.appendChild(tr2);
+      tbody.appendChild(tr3);
     });
   }
 
@@ -817,8 +851,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const idField = topRow.querySelector('input[name$="[id]"]');
     const destroyFlag = topRow.querySelector('.destroy-flag');
+    // Find dimensions row (row 3) - it's after bottom row
+    const dimRow = realBottom ? realBottom.nextElementSibling : null;
+    const hasDimRow = dimRow && dimRow.classList.contains('variant-row-dimensions');
+
     if (idField && idField.value) {
-      // Existing persisted variant — mark for destruction, hide both rows
+      // Existing persisted variant — mark for destruction, hide all rows
       destroyFlag.value = '1';
       topRow.classList.add('variant-destroyed');
       topRow.style.display = 'none';
@@ -826,8 +864,13 @@ document.addEventListener("DOMContentLoaded", () => {
         realBottom.classList.add('variant-destroyed');
         realBottom.style.display = 'none';
       }
+      if (hasDimRow) {
+        dimRow.classList.add('variant-destroyed');
+        dimRow.style.display = 'none';
+      }
     } else {
-      // New unsaved variant — remove both rows from DOM
+      // New unsaved variant — remove all rows from DOM
+      if (hasDimRow) dimRow.remove();
       if (realBottom && realBottom.classList.contains('variant-row-bottom')) {
         realBottom.remove();
       }

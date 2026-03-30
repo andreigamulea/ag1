@@ -420,7 +420,7 @@ class ProductsController < ApplicationController
         external_file_urls: [],
         external_image_urls: [],
         category_ids: [],
-        variants_attributes: [:id, :sku, :price, :cost_price, :discount_price, :promo_active, :stock, :vat_rate, :status, :external_image_url, :_destroy, option_value_ids: [], external_image_urls: []]
+        variants_attributes: [:id, :sku, :price, :cost_price, :discount_price, :promo_active, :stock, :vat_rate, :status, :height, :width, :depth, :weight, :external_image_url, :_destroy, option_value_ids: [], external_image_urls: []]
       )
 
       # ✅ Parsează JSON-ul dacă este string
