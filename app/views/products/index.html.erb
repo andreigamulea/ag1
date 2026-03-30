@@ -1,25 +1,31 @@
 <%= render 'shared/noindex' %>
 <div class="container_content product-list">
-  <h1 class="admin-title">🛒 Listă produse</h1>
+  <h1 class="admin-title">Seznam produse</h1>
 
-  <div class="product-actions">
-    <%= link_to "➕ Adaugă produs", new_product_path, class: "form-button" %>
+  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <%= link_to "+ Adauga produs", new_product_path, class: "form-button" %>
+      <span style="margin-left:12px; font-size:13px; color:#888;">Codul maxim: <%= @products.pluck(:sku).max_by { |sku| sku.sub('cod', '').to_i } %></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <input type="text" id="product-search" placeholder="Cauta produs..." style="padding:6px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:14px; width:250px;">
+    </div>
   </div>
-Codul maxim existent: <%= @products.pluck(:sku).max_by { |sku| sku.sub('cod', '').to_i } %>
+
   <div class="table-wrapper">
-<table class="styled-table">
+<table class="styled-table" id="products-table">
   <thead>
     <tr>
-      <th>ID</th>
-      <th>Cod</th>
-      <th>Nume</th>
-      <th>Preț</th>
-      <th>Stoc</th>
-      <th>Status</th>
-      <th>Acțiuni</th>
+      <th data-sort="number" style="cursor:pointer;">ID <span class="sort-arrow">&#8597;</span></th>
+      <th data-sort="string" style="cursor:pointer;">Cod <span class="sort-arrow">&#8597;</span></th>
+      <th data-sort="string" style="cursor:pointer;">Nume <span class="sort-arrow">&#8597;</span></th>
+      <th data-sort="number" style="cursor:pointer;">Pret <span class="sort-arrow">&#8597;</span></th>
+      <th data-sort="number" style="cursor:pointer;">Stoc <span class="sort-arrow">&#8597;</span></th>
+      <th data-sort="string" style="cursor:pointer;">Status <span class="sort-arrow">&#8597;</span></th>
+      <th>Actiuni</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="products-tbody">
     <% @products.each do |product| %>
       <tr>
         <td><%= product.id %></td>
@@ -30,11 +36,11 @@ Codul maxim existent: <%= @products.pluck(:sku).max_by { |sku| sku.sub('cod', ''
         <td><%= product.status.capitalize %></td>
         <td class="table-actions">
           <%= link_to "Detalii", product_path(product), class: "table-button neutral" %>
-          <%= link_to "Editează", edit_product_path(product), class: "table-button primary" %>
+          <%= link_to "Editeza", edit_product_path(product), class: "table-button primary" %>
           <% if product.archived? %>
-            <%= button_to "Reactivează", unarchive_product_path(product), method: :patch, data: { confirm: "Reactivezi produsul și variantele lui?" }, class: "table-button primary", form: { class: "d-inline-block m-0" } %>
+            <%= button_to "Reactiveaza", unarchive_product_path(product), method: :patch, data: { confirm: "Reactivezi produsul si variantele lui?" }, class: "table-button primary", form: { class: "d-inline-block m-0" } %>
           <% else %>
-            <%= button_to "Șterge", product_path(product), method: :delete, data: { confirm: "Ești sigur că vrei să ștergi acest produs?" }, class: "table-button danger", form: { class: "d-inline-block m-0" } %>
+            <%= button_to "Sterge", product_path(product), method: :delete, data: { confirm: "Esti sigur ca vrei sa stergi acest produs?" }, class: "table-button danger", form: { class: "d-inline-block m-0" } %>
           <% end %>
         </td>
       </tr>
@@ -44,9 +50,67 @@ Codul maxim existent: <%= @products.pluck(:sku).max_by { |sku| sku.sub('cod', ''
 
 
 
-
-
-
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // ===== CAUTARE LIVE =====
+  var searchInput = document.getElementById('product-search');
+  var tbody = document.getElementById('products-tbody');
+  if (!searchInput || !tbody) return;
+
+  searchInput.addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var rows = tbody.querySelectorAll('tr');
+
+    rows.forEach(function(row) {
+      if (!query || query.length < 2) {
+        row.style.display = '';
+        return;
+      }
+      var text = row.textContent.toLowerCase();
+      row.style.display = text.indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+
+  // ===== SORTARE PE COLOANE =====
+  var table = document.getElementById('products-table');
+  var headers = table.querySelectorAll('th[data-sort]');
+  var currentSort = { col: -1, asc: true };
+
+  headers.forEach(function(th, index) {
+    th.addEventListener('click', function() {
+      var sortType = th.dataset.sort;
+      var colIndex = index;
+      var asc = (currentSort.col === colIndex) ? !currentSort.asc : true;
+      currentSort = { col: colIndex, asc: asc };
+
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aText = a.children[colIndex].textContent.trim();
+        var bText = b.children[colIndex].textContent.trim();
+
+        if (sortType === 'number') {
+          var aNum = parseFloat(aText.replace(/[^0-9.\-]/g, '')) || 0;
+          var bNum = parseFloat(bText.replace(/[^0-9.\-]/g, '')) || 0;
+          return asc ? aNum - bNum : bNum - aNum;
+        } else {
+          return asc ? aText.localeCompare(bText, 'ro') : bText.localeCompare(aText, 'ro');
+        }
+      });
+
+      rows.forEach(function(row) { tbody.appendChild(row); });
+
+      // Actualizeaza sagetile
+      headers.forEach(function(h) {
+        var arrow = h.querySelector('.sort-arrow');
+        if (arrow) arrow.innerHTML = '&#8597;';
+      });
+      var activeArrow = th.querySelector('.sort-arrow');
+      if (activeArrow) activeArrow.innerHTML = asc ? '&#9650;' : '&#9660;';
+    });
+  });
+});
+</script>
 
