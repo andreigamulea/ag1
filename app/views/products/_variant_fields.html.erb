@@ -107,13 +107,13 @@
   <%# Stoc %>
   <td>
     <label class="variant-field-label">Stoc</label>
-    <%= f.number_field :stock, min: 0, placeholder: '0', class: 'variant-input variant-stock' %>
+    <%= f.number_field :stock, min: 0, placeholder: '0', value: f.object.stock || 0, class: 'variant-input variant-stock' %>
   </td>
 
   <%# TVA %>
   <td>
     <label class="variant-field-label">TVA %</label>
-    <%= f.number_field :vat_rate, min: 0, step: 0.01, placeholder: '0', class: 'variant-input variant-vat' %>
+    <%= f.number_field :vat_rate, min: 0, step: 0.01, placeholder: '0', value: f.object.vat_rate || 0, class: 'variant-input variant-vat' %>
   </td>
 
   <%# Status %>
