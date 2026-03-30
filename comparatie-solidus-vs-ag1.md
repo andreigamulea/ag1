@@ -393,6 +393,55 @@ Ziua 6-7: Testing + polish + edge cases          (4-6h)
 
 **Scor: Solidus 3 — AG1 6 — Egal 6**
 
+### Scenariu E: AG1 starea actuala (actualizat 31 martie 2026)
+
+Features implementate recent:
+- Formular admin produs restructurat (variante toggle la inceput, optiune principala obligatorie)
+- Dimensiuni si greutate per varianta (migrare DB + formular)
+- EAN/GTIN per varianta cu index unic (pregatit pentru feeds/marketplace)
+- Buton "Duplica varianta" (copiaza preturi, stoc, dimensiuni)
+- Buton "Salveaza" sticky
+- Progress indicator la upload imagini
+- Erori de validare arata CARE varianta are problema (highlight rosu + mesaj cu SKU)
+- JS refactored: 800 linii inline → 3 Stimulus controllers (~620 linii organizate)
+- Lista produse admin cu cautare live + sortare pe coloane
+- Reload option types fara refresh (AJAX pe tab visibility)
+- Imagini variante combinate cu imagini produs pe pagina shop
+- Fix CSP headers (script-src :self + CDN)
+- 35 teste automate (full flow: browse → variante → cos → checkout → admin CRUD → cupoane → validari)
+- External IDs multi-platform (VariantSyncService cu advisory locks)
+- Solid Queue pentru background jobs
+- Multi-limba pregatit (Mobility)
+- Tax rates multi-country
+- Brand pe produs
+- Color hex pe option values (swatches reale)
+- Views count tracking
+
+| Criteriu | Solidus (MVC expus) | AG1 (actual) | Castigator |
+|----------|---------------------|--------------|-----------|
+| **Complexitate setup** | Deja facut | Scazuta | Egal |
+| **Flexibilitate** | Ecosistem extensii | Cod direct, Stimulus controllers | Solidus |
+| **Produse & Variante** | Complet | Complet + external IDs + dimensiuni/varianta + EAN + options digest + advisory locks | **AG1** |
+| **Admin formular** | Matur, editabil | Restructurat, Stimulus, cautare/sortare, duplicare, erori per varianta | Egal |
+| **Checkout** | Multi-step, editabil | Single-step (functional pt RO) | Solidus |
+| **Plati** | Multi-gateway | Stripe (card + Apple/Google Pay) | Solidus |
+| **Promotii** | Engine complex | Cupoane (procent/fix/free shipping) | Solidus |
+| **API/Headless** | Complet (REST + GraphQL) | Partial (JSON endpoints) | Solidus |
+| **Piata RO** | Localizat custom | Nativ (facturi, judete, localitati, TVA) | **AG1** |
+| **Facturare** | Extensie custom | Nativ, conform, PDF, email | **AG1** |
+| **Performanta** | ~512MB+ | ~250MB | **AG1** |
+| **Mentenanta** | Codebase mare (~100+ modele) | Codebase mic (~25 modele), JS organizat in Stimulus | **AG1** |
+| **Teste** | RSpec masiv | 35 teste full flow (produse, variante, cos, checkout, cupoane, admin) | Egal |
+| **Feed import** | Extensii | Nativ (VariantSyncService + EAN + external IDs + advisory locks) | **AG1** |
+| **Scalabilitate** | Enterprise-ready | SMB-ready (dar pregatit pt feeds/furnizori) | Solidus |
+| **Cost hosting** | $44/luna ($528/an) | $13/luna ($156/an) | **AG1** (3.4x mai ieftin) |
+| **Multi-limba** | Nativ | Mobility (structura gata) | Egal |
+| **Brand** | Extensie | Nativ (camp pe produs) | **AG1** |
+
+**Scor: Solidus 4 — AG1 7 — Egal 5**
+
+AG1 a trecut de la Scenariul D (proiectat) la Scenariul E (implementat, 31 martie 2026). Diferenta fata de Solidus s-a marit: AG1 castiga 7-4 (fata de 6-3 proiectat). Features care au contribuit cel mai mult: EAN/GTIN, dimensiuni per varianta, formular admin restructurat cu Stimulus, teste automate complete, si feed import infrastructure.
+
 ---
 
 ## Concluzie
