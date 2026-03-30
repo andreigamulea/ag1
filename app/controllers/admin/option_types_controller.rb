@@ -5,6 +5,16 @@ class Admin::OptionTypesController < ApplicationController
 
   def index
     @option_types = OptionType.includes(:option_values, :products).order(:position)
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: @option_types.map { |ot|
+          { id: ot.id, name: ot.name, presentation: ot.presentation,
+            values: ot.option_values.map { |ov| { id: ov.id, name: ov.display_name } } }
+        }
+      end
+    end
   end
 
   def new

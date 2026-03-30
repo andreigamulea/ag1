@@ -571,26 +571,48 @@ function bindVariantSelector() {
 
   function autoSelectSecondary() {
     if (!selectedPrimaryValueId) return;
-    var availableVariants = getVariantsForPrimary(selectedPrimaryValueId);
 
-    document.querySelectorAll('.variant-buttons').forEach(function(container) {
-      var typeId = container.dataset.optionTypeId;
-      var currentSelection = selectedSecondaryValues[typeId];
+    // Multiple passes: each pass may change selections that affect other groups
+    for (var pass = 0; pass < 3; pass++) {
+      var changed = false;
+      document.querySelectorAll('.variant-buttons').forEach(function(container) {
+        var currentTypeId = container.dataset.optionTypeId;
+        var currentSelection = selectedSecondaryValues[currentTypeId];
 
-      if (currentSelection) {
-        var stillAvailable = availableVariants.some(function(v) {
-          return v.option_value_ids.includes(currentSelection);
-        });
-        if (stillAvailable) return;
-      }
+        // Check if current selection is still valid using cross-filtering (same logic as updateSecondaryButtons)
+        if (currentSelection) {
+          var filteredVariants = variants.filter(function(v) {
+            if (!v.option_value_ids.includes(selectedPrimaryValueId)) return false;
+            return Object.keys(selectedSecondaryValues).every(function(typeId) {
+              if (typeId === currentTypeId) return true;
+              var selVal = selectedSecondaryValues[typeId];
+              return !selVal || v.option_value_ids.includes(selVal);
+            });
+          });
+          var stillAvailable = filteredVariants.some(function(v) {
+            return v.option_value_ids.includes(currentSelection);
+          });
+          if (stillAvailable) return;
+        }
 
-      var firstAvailable = container.querySelector('.variant-btn:not(.variant-btn--disabled)');
-      if (firstAvailable) {
-        selectedSecondaryValues[typeId] = parseInt(firstAvailable.dataset.optionValueId);
-        container.querySelectorAll('.variant-btn').forEach(function(b) { applyBtnActive(b, false); });
-        applyBtnActive(firstAvailable, true);
-      }
-    });
+        // Current selection invalid or missing - pick first available (non-disabled) button
+        var firstAvailable = container.querySelector('.variant-btn:not(.variant-btn--disabled)');
+        if (firstAvailable) {
+          var newVal = parseInt(firstAvailable.dataset.optionValueId);
+          if (selectedSecondaryValues[currentTypeId] !== newVal) changed = true;
+          selectedSecondaryValues[currentTypeId] = newVal;
+          container.querySelectorAll('.variant-btn').forEach(function(b) { applyBtnActive(b, false); });
+          applyBtnActive(firstAvailable, true);
+        } else {
+          if (selectedSecondaryValues[currentTypeId]) changed = true;
+          delete selectedSecondaryValues[currentTypeId];
+          container.querySelectorAll('.variant-btn').forEach(function(b) { applyBtnActive(b, false); });
+        }
+      });
+      if (!changed) break;
+      // Re-run updateSecondaryButtons with new selections
+      updateSecondaryButtons();
+    }
   }
 
   function updateVariantImages(variant) {
@@ -715,6 +737,9 @@ function bindVariantSelector() {
       selectedPrimaryValueId = parseInt(this.dataset.optionValueId);
       swatches.forEach(function(s) { applySwatchActive(s, false); });
       applySwatchActive(this, true);
+      // Reset secondary selections so they get re-picked for the new color
+      selectedSecondaryValues = {};
+      document.querySelectorAll('.variant-btn').forEach(function(b) { applyBtnActive(b, false); });
       updateSecondaryButtons();
       autoSelectSecondary();
       updateDisplay();

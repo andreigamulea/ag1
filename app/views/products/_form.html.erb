@@ -68,6 +68,94 @@
       </div>
     </div>
 
+    <!-- Variante Produs (intrebare initiala) -->
+    <div class="form-section" id="section-variants-toggle">
+      <div class="section-header dark">
+        Variante Produs
+      </div>
+      <div class="section-body">
+        <div class="form-row cols-1">
+          <div class="checkbox-field">
+            <% has_variants = form.object.variants.any? { |v| !v.marked_for_destruction? } %>
+            <%= hidden_field_tag :has_variants, '0', id: nil %>
+            <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants', data: { action: 'change' } %>
+            <label for="toggle-has-variants">Are variante? (culoare, marime, etc.)</label>
+          </div>
+        </div>
+        <% if has_variants %>
+          <p class="variant-warning">Pretul si stocul se gestioneaza la nivel de varianta.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="form-section" id="section-primary-option" style="<%= has_variants ? '' : 'display:none;' %>">
+      <div class="section-header dark">
+        Opțiune Principală (swatches pe site)
+      </div>
+      <div class="section-body">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <p class="variant-warning" style="margin:0;">Selectează opțiunea care va fi afișată ca imagini thumbnail pe pagina produsului. Obligatorie.</p>
+          <%= link_to "Gestionează opțiuni", admin_option_types_path, target: "_blank", class: "btn btn-secondary btn-sm", style: "white-space:nowrap;" %>
+        </div>
+        <div class="form-row cols-1" id="primary-option-radios">
+          <% current_primary_id = form.object.primary_product_option_type&.option_type_id %>
+          <% (@option_types || []).each do |ot| %>
+            <div class="radio-field">
+              <%= radio_button_tag :primary_option_type_id, ot.id,
+                  current_primary_id == ot.id,
+                  id: "primary_option_type_#{ot.id}" %>
+              <label for="primary_option_type_<%= ot.id %>"><%= ot.presentation || ot.name %></label>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>">
+      <div class="section-header dark">
+        Lista Variante
+      </div>
+      <div class="section-body">
+        <table class="variants-table" id="variants-table">
+          <thead>
+            <tr>
+              <th>Optiuni</th>
+              <th colspan="5">SKU</th>
+            </tr>
+            <tr>
+              <th>Imagine</th>
+              <th>Pret vanzare</th>
+              <th>Achizitie</th>
+              <th>Promo</th>
+              <th>Stoc</th>
+              <th>TVA %</th>
+              <th>Status</th>
+              <th>Sursa</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="variants-tbody">
+            <% variants_list = if form.object.errors.any? || !form.object.persisted?
+                 form.object.variants.reject(&:marked_for_destruction?).to_a
+               else
+                 respond_to?(:preload_variants) ? preload_variants(form.object) : form.object.variants.order(:id).to_a
+               end %>
+            <% variants_list.each do |variant| %>
+              <%= form.fields_for :variants, variant do |vf| %>
+                <%= render 'variant_fields', f: vf, variant: variant, option_types: (@option_types || []) %>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+
+        <button type="button" class="btn btn-info" id="btn-add-variant"
+                data-option-types="<%= (@option_types || []).map { |ot| { id: ot.id, name: ot.name, values: ot.option_values.map { |ov| { id: ov.id, name: ov.display_name } } } }.to_json %>"
+                data-variant-index="<%= variants_list.size %>">
+          + Adauga varianta
+        </button>
+      </div>
+    </div>
+
     <!-- Prețuri și Taxe -->
     <div class="form-section" id="section-prices">
       <div class="section-header success">
@@ -381,91 +469,6 @@
       </div>
     </div>
 
-    <!-- Variante Produs -->
-    <div class="form-section" id="section-variants-toggle">
-      <div class="section-header dark">
-        Variante Produs
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-1">
-          <div class="checkbox-field">
-            <% has_variants = form.object.variants.any? { |v| !v.marked_for_destruction? } %>
-            <%= hidden_field_tag :has_variants, '0', id: nil %>
-            <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants', data: { action: 'change' } %>
-            <label for="toggle-has-variants">Are variante? (culoare, marime, etc.)</label>
-          </div>
-        </div>
-        <% if has_variants %>
-          <p class="variant-warning">Pretul si stocul se gestioneaza la nivel de varianta.</p>
-        <% end %>
-      </div>
-    </div>
-
-    <div class="form-section" id="section-primary-option" style="<%= has_variants ? '' : 'display:none;' %>">
-      <div class="section-header dark">
-        Opțiune Principală (swatches pe site)
-      </div>
-      <div class="section-body">
-        <p class="variant-warning">Selectează opțiunea care va fi afișată ca imagini thumbnail pe pagina produsului. Obligatorie.</p>
-        <div class="form-row cols-1" id="primary-option-radios">
-          <% current_primary_id = form.object.primary_product_option_type&.option_type_id %>
-          <% (@option_types || []).each do |ot| %>
-            <div class="radio-field">
-              <%= radio_button_tag :primary_option_type_id, ot.id,
-                  current_primary_id == ot.id,
-                  id: "primary_option_type_#{ot.id}" %>
-              <label for="primary_option_type_<%= ot.id %>"><%= ot.presentation || ot.name %></label>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>">
-      <div class="section-header dark">
-        Lista Variante
-      </div>
-      <div class="section-body">
-        <table class="variants-table" id="variants-table">
-          <thead>
-            <tr>
-              <th>Optiuni</th>
-              <th colspan="5">SKU</th>
-            </tr>
-            <tr>
-              <th>Imagine</th>
-              <th>Pret vanzare</th>
-              <th>Achizitie</th>
-              <th>Promo</th>
-              <th>Stoc</th>
-              <th>TVA %</th>
-              <th>Status</th>
-              <th>Sursa</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="variants-tbody">
-            <% variants_list = if form.object.errors.any? || !form.object.persisted?
-                 form.object.variants.reject(&:marked_for_destruction?).to_a
-               else
-                 respond_to?(:preload_variants) ? preload_variants(form.object) : form.object.variants.order(:id).to_a
-               end %>
-            <% variants_list.each do |variant| %>
-              <%= form.fields_for :variants, variant do |vf| %>
-                <%= render 'variant_fields', f: vf, variant: variant, option_types: (@option_types || []) %>
-              <% end %>
-            <% end %>
-          </tbody>
-        </table>
-
-        <button type="button" class="btn btn-info" id="btn-add-variant"
-                data-option-types="<%= (@option_types || []).map { |ot| { id: ot.id, name: ot.name, values: ot.option_values.map { |ov| { id: ov.id, name: ov.display_name } } } }.to_json %>"
-                data-variant-index="<%= variants_list.size %>">
-          + Adauga varianta
-        </button>
-      </div>
-    </div>
-
     <!-- Atribute Personalizate -->
     <div class="form-section">
       <div class="section-header secondary">
@@ -478,18 +481,6 @@
             <%= form.text_area :custom_attributes, placeholder: '{"key": "value"}', style: "font-family: monospace;" %>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Debug / Test -->
-    <div class="form-section">
-      <div class="section-header danger">
-        🔧 Debug / Test
-      </div>
-      <div class="section-body">
-        <button type="button" class="btn btn-danger" onclick="testPresign()">
-          Testează presign
-        </button>
       </div>
     </div>
 
@@ -666,15 +657,6 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <script>
-  function testPresign() {
-    fetch("/uploads/presign?filename=test_bunny.png")
-      .then(response => response.json())
-      .then(data => console.log("Presign OK:", data))
-      .catch(error => console.error("Eroare:", error));
-  }
-</script>
-
-<script>
 document.addEventListener("DOMContentLoaded", () => {
   // ===== VARIANTE: Toggle + Add + Remove =====
   const toggleCheckbox = document.getElementById('toggle-has-variants');
@@ -687,10 +669,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sectionPrimaryOption = document.getElementById('section-primary-option');
 
+  function hasPrimaryOptionSelected() {
+    const radios = document.querySelectorAll('#primary-option-radios input[type="radio"]');
+    return Array.from(radios).some(r => r.checked);
+  }
+
   function updateVariantSections() {
     const on = toggleCheckbox && toggleCheckbox.checked;
-    if (sectionVariants) sectionVariants.style.display = on ? '' : 'none';
+    const primarySelected = hasPrimaryOptionSelected();
+
     if (sectionPrimaryOption) sectionPrimaryOption.style.display = on ? '' : 'none';
+    if (sectionVariants) sectionVariants.style.display = (on && primarySelected) ? '' : 'none';
     if (sectionPrices) sectionPrices.style.display = on ? 'none' : '';
     if (sectionInventory) sectionInventory.style.display = on ? 'none' : '';
     if (variantWarning) variantWarning.style.display = on ? '' : 'none';
@@ -700,6 +689,48 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleCheckbox.addEventListener('change', updateVariantSections);
     updateVariantSections();
   }
+
+  // Cand se selecteaza optiunea principala -> deblocheaza sectiunea de variante
+  const primaryOptionRadios = document.getElementById('primary-option-radios');
+  if (primaryOptionRadios) {
+    primaryOptionRadios.addEventListener('change', updateVariantSections);
+  }
+
+  // Reincarca option types cand revii pe tab (dupa ce ai adaugat optiuni noi)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState !== 'visible') return;
+    if (!toggleCheckbox || !toggleCheckbox.checked) return;
+
+    fetch('/admin/option_types.json')
+      .then(function(r) { return r.json(); })
+      .then(function(optionTypes) {
+        var radiosContainer = document.getElementById('primary-option-radios');
+        if (!radiosContainer) return;
+
+        // Retine selectia curenta
+        var currentSelected = radiosContainer.querySelector('input[type="radio"]:checked');
+        var currentSelectedId = currentSelected ? currentSelected.value : null;
+
+        // Reconstruieste radio buttons
+        radiosContainer.innerHTML = '';
+        optionTypes.forEach(function(ot) {
+          var div = document.createElement('div');
+          div.className = 'radio-field';
+          var checked = (currentSelectedId && String(ot.id) === String(currentSelectedId)) ? 'checked' : '';
+          div.innerHTML = '<input type="radio" name="primary_option_type_id" value="' + ot.id + '" id="primary_option_type_' + ot.id + '" ' + checked + '>' +
+            '<label for="primary_option_type_' + ot.id + '">' + (ot.presentation || ot.name) + '</label>';
+          radiosContainer.appendChild(div);
+        });
+
+        // Actualizeaza si data-option-types pe butonul Adauga varianta
+        if (addBtn) {
+          addBtn.dataset.optionTypes = JSON.stringify(optionTypes);
+        }
+
+        updateVariantSections();
+      })
+      .catch(function() {});
+  });
 
   // Add new variant row
   if (addBtn && tbody) {
