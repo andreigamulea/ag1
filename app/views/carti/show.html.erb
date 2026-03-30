@@ -108,23 +108,21 @@
     <% display_gallery_urls = @product.external_image_urls || [] %>
   <% end %>
 
-  <div class="product-grid <%= 'no-thumbnails' unless display_gallery_urls.present? && display_gallery_urls.any? %>">
+  <div class="product-grid <%= 'no-thumbnails' unless display_gallery_urls.present? && display_gallery_urls.any? %>" id="product-grid">
     <!-- Column 1: Thumbnails (includem și imaginea principală) -->
-    <% if display_gallery_urls.present? && display_gallery_urls.any? %>
-      <div class="product-thumbnails">
-        <% if display_main_url.present? %>
-          <% main_thumb_url = "#{display_main_url}?width=600&height=600&quality=95" %>
-          <% main_full_url = "#{display_main_url}?width=2000&height=2000&quality=95" %>
-          <%= image_tag main_thumb_url, class: "thumb main-thumb", data: { full: main_full_url }, alt: @product.name %>
-        <% end %>
+    <div class="product-thumbnails" <%= 'style="display:none;"'.html_safe unless display_gallery_urls.present? && display_gallery_urls.any? %>>
+      <% if display_main_url.present? %>
+        <% main_thumb_url = "#{display_main_url}?width=600&height=600&quality=95" %>
+        <% main_full_url = "#{display_main_url}?width=2000&height=2000&quality=95" %>
+        <%= image_tag main_thumb_url, class: "thumb main-thumb", data: { full: main_full_url }, alt: @product.name %>
+      <% end %>
 
-        <% display_gallery_urls.each_with_index do |url, idx| %>
-          <% thumb_url = "#{url}?width=600&height=600&quality=95" %>
-          <% full_url  = "#{url}?width=2000&height=2000&quality=95" %>
-          <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "#{@product.name} - imagine #{idx + 2}" %>
-        <% end %>
-      </div>
-    <% end %>
+      <% (display_gallery_urls || []).each_with_index do |url, idx| %>
+        <% thumb_url = "#{url}?width=600&height=600&quality=95" %>
+        <% full_url  = "#{url}?width=2000&height=2000&quality=95" %>
+        <%= image_tag thumb_url, class: "thumb", data: { full: full_url }, alt: "#{@product.name} - imagine #{idx + 2}" %>
+      <% end %>
+    </div>
 
     <!-- Column 2: Main Image -->
     <div class="product-image">
@@ -651,24 +649,37 @@ function bindVariantSelector() {
       };
       newImage.src = displayUrl;
 
+      var productGrid = document.getElementById('product-grid');
       if (thumbnailsContainer) {
+        var hasThumbs = galleryUrls.length > 0;
         thumbnailsContainer.innerHTML = '';
-        var mainThumb = document.createElement('img');
-        mainThumb.className = 'thumb main-thumb active';
-        mainThumb.src = mainImgUrl + '?width=600&height=600&quality=95';
-        mainThumb.dataset.full = fullUrl;
-        mainThumb.alt = 'Imagine principală';
-        thumbnailsContainer.appendChild(mainThumb);
 
-        galleryUrls.forEach(function(url, index) {
-          var thumb = document.createElement('img');
-          thumb.className = 'thumb';
-          thumb.src = url + '?width=600&height=600&quality=95';
-          thumb.dataset.full = url + '?width=2000&height=2000&quality=95';
-          thumb.alt = 'Imagine ' + (index + 2);
-          thumbnailsContainer.appendChild(thumb);
-        });
-        bindThumbnailClick();
+        if (hasThumbs) {
+          // Show thumbnails column
+          thumbnailsContainer.style.display = '';
+          if (productGrid) productGrid.classList.remove('no-thumbnails');
+
+          var mainThumb = document.createElement('img');
+          mainThumb.className = 'thumb main-thumb active';
+          mainThumb.src = mainImgUrl + '?width=600&height=600&quality=95';
+          mainThumb.dataset.full = fullUrl;
+          mainThumb.alt = 'Imagine principală';
+          thumbnailsContainer.appendChild(mainThumb);
+
+          galleryUrls.forEach(function(url, index) {
+            var thumb = document.createElement('img');
+            thumb.className = 'thumb';
+            thumb.src = url + '?width=600&height=600&quality=95';
+            thumb.dataset.full = url + '?width=2000&height=2000&quality=95';
+            thumb.alt = 'Imagine ' + (index + 2);
+            thumbnailsContainer.appendChild(thumb);
+          });
+          bindThumbnailClick();
+        } else {
+          // Hide thumbnails column
+          thumbnailsContainer.style.display = 'none';
+          if (productGrid) productGrid.classList.add('no-thumbnails');
+        }
       }
     }
   }
