@@ -11,3 +11,9 @@ application.register("category-select", CategorySelectController)
 
 import TestController from "./test_controller"
 application.register("test", TestController)
+import ProductFormController from "./product_form_controller"
+application.register("product-form", ProductFormController)
+import ProductVariantsController from "./product_variants_controller"
+application.register("product-variants", ProductVariantsController)
+import ProductAutogenController from "./product_autogen_controller"
+application.register("product-autogen", ProductAutogenController)

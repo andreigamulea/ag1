@@ -1,9 +1,11 @@
-<div class="form-container">
+<div class="form-container" data-controller="product-form product-variants product-autogen"
+     data-product-autogen-product-id-value="<%= product.persisted? ? product.id : '' %>"
+     data-action="visibilitychange@document->product-form#reloadOptionTypes">
   <%= form_with(model: product, local: true, html: { multipart: true }) do |form| %>
 
     <% if product.errors.any? %>
       <div class="alert-danger">
-        <h4>⚠️ <%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h4>
+        <h4><%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h4>
         <ul>
           <% product.errors.full_messages.each do |message| %>
             <li><%= message %></li>
@@ -12,38 +14,41 @@
       </div>
     <% end %>
 
-    <!-- Informații de bază -->
+    <!-- Informatii de baza -->
     <div class="form-section">
       <div class="section-header primary">
-        📋 Informații de bază
+        Informatii de baza
       </div>
       <div class="section-body">
         <div class="form-row cols-2">
           <div class="form-field">
             <%= form.label :name, "Nume produs" %>
-            <%= form.text_field :name, placeholder: "Nume produs", id: "product_name" %>
+            <%= form.text_field :name, placeholder: "Nume produs", id: "product_name",
+                data: { product_autogen_target: "name", action: "input->product-autogen#nameChanged" } %>
           </div>
           <div class="form-field">
             <%= form.label :slug, "URL Slug" %>
             <div style="display:flex; gap:6px; align-items:center;">
-              <%= form.text_field :slug, placeholder: "url-friendly-name", id: "product_slug", style: "flex:1;" %>
-              <button type="button" id="slug-auto-btn" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume">&#8635; Auto</button>
+              <%= form.text_field :slug, placeholder: "url-friendly-name", id: "product_slug", style: "flex:1;",
+                  data: { product_autogen_target: "slug", action: "input->product-autogen#slugChanged blur->product-autogen#slugBlur" } %>
+              <button type="button" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume"
+                      data-product-autogen-target="slugAutoBtn" data-action="click->product-autogen#resetSlug">&#8635; Auto</button>
             </div>
-            <small id="slug-status" style="display:none; margin-top:4px;"></small>
+            <small style="display:none; margin-top:4px;" data-product-autogen-target="slugStatus"></small>
           </div>
         </div>
 
         <div class="form-row cols-1">
           <div class="form-field">
             <%= form.label :description_title, "Titlu descriere" %>
-            <%= form.text_field :description_title, placeholder: "Titlu pentru secțiunea de descriere" %>
+            <%= form.text_field :description_title, placeholder: "Titlu pentru sectiunea de descriere" %>
           </div>
         </div>
 
         <div class="form-row cols-1">
           <div class="form-field">
             <%= form.label :description, "Descriere" %>
-            <%= form.text_area :description, placeholder: "Descriere detaliată a produsului..." %>
+            <%= form.text_area :description, placeholder: "Descriere detaliata a produsului..." %>
           </div>
         </div>
 
@@ -51,10 +56,12 @@
           <div class="form-field">
             <%= form.label :sku, "SKU" %>
             <div style="display:flex; gap:6px; align-items:center;">
-              <%= form.text_field :sku, placeholder: "SKU-12345", id: "product_sku", style: "flex:1;" %>
-              <button type="button" id="sku-auto-btn" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume">&#8635; Auto</button>
+              <%= form.text_field :sku, placeholder: "SKU-12345", id: "product_sku", style: "flex:1;",
+                  data: { product_autogen_target: "sku", action: "input->product-autogen#skuChanged blur->product-autogen#skuBlur" } %>
+              <button type="button" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume"
+                      data-product-autogen-target="skuAutoBtn" data-action="click->product-autogen#resetSku">&#8635; Auto</button>
             </div>
-            <small id="sku-status" style="display:none; margin-top:4px;"></small>
+            <small style="display:none; margin-top:4px;" data-product-autogen-target="skuStatus"></small>
           </div>
           <div class="form-field">
             <%= form.label :status, "Status" %>
@@ -78,32 +85,37 @@
           <div class="checkbox-field">
             <% has_variants = form.object.variants.any? { |v| !v.marked_for_destruction? } %>
             <%= hidden_field_tag :has_variants, '0', id: nil %>
-            <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants', data: { action: 'change' } %>
+            <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants',
+                data: { product_form_target: "toggleVariants", action: "change->product-form#updateVariantSections" } %>
             <label for="toggle-has-variants">Are variante? (culoare, marime, etc.)</label>
           </div>
         </div>
         <% if has_variants %>
-          <p class="variant-warning">Pretul si stocul se gestioneaza la nivel de varianta.</p>
+          <p data-product-form-target="variantWarning" class="variant-warning">Pretul si stocul se gestioneaza la nivel de varianta.</p>
+        <% else %>
+          <p data-product-form-target="variantWarning" class="variant-warning" style="display:none;">Pretul si stocul se gestioneaza la nivel de varianta.</p>
         <% end %>
       </div>
     </div>
 
-    <div class="form-section" id="section-primary-option" style="<%= has_variants ? '' : 'display:none;' %>">
+    <div class="form-section" id="section-primary-option" style="<%= has_variants ? '' : 'display:none;' %>"
+         data-product-form-target="sectionPrimaryOption">
       <div class="section-header dark">
-        Opțiune Principală (swatches pe site)
+        Optiune Principala (swatches pe site)
       </div>
       <div class="section-body">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <p class="variant-warning" style="margin:0;">Selectează opțiunea care va fi afișată ca imagini thumbnail pe pagina produsului. Obligatorie.</p>
-          <%= link_to "Gestionează opțiuni", admin_option_types_path, target: "_blank", class: "btn btn-secondary btn-sm", style: "white-space:nowrap;" %>
+          <p class="variant-warning" style="margin:0;">Selecteaza optiunea care va fi afisata ca imagini thumbnail pe pagina produsului. Obligatorie.</p>
+          <%= link_to "Gestioneaza optiuni", admin_option_types_path, target: "_blank", class: "btn btn-secondary btn-sm", style: "white-space:nowrap;" %>
         </div>
-        <div class="form-row cols-1" id="primary-option-radios">
+        <div class="form-row cols-1" id="primary-option-radios" data-product-form-target="primaryOptionRadios">
           <% current_primary_id = form.object.primary_product_option_type&.option_type_id || params[:primary_option_type_id]&.to_i %>
           <% (@option_types || []).each do |ot| %>
             <div class="radio-field">
               <%= radio_button_tag :primary_option_type_id, ot.id,
                   current_primary_id == ot.id,
-                  id: "primary_option_type_#{ot.id}" %>
+                  id: "primary_option_type_#{ot.id}",
+                  data: { action: "change->product-form#updateVariantSections" } %>
               <label for="primary_option_type_<%= ot.id %>"><%= ot.presentation || ot.name %></label>
             </div>
           <% end %>
@@ -111,7 +123,8 @@
       </div>
     </div>
 
-    <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>">
+    <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>"
+         data-product-form-target="sectionVariants">
       <div class="section-header dark">
         Lista Variante
       </div>
@@ -134,7 +147,7 @@
               <th></th>
             </tr>
           </thead>
-          <tbody id="variants-tbody">
+          <tbody id="variants-tbody" data-product-variants-target="tbody">
             <% variants_list = if form.object.errors.any? || !form.object.persisted?
                  form.object.variants.reject(&:marked_for_destruction?).to_a
                else
@@ -149,6 +162,9 @@
         </table>
 
         <button type="button" class="btn btn-info" id="btn-add-variant"
+                data-product-variants-target="addBtn"
+                data-product-form-target="addVariantBtn"
+                data-action="click->product-variants#addVariant"
                 data-option-types="<%= (@option_types || []).map { |ot| { id: ot.id, name: ot.name, values: ot.option_values.map { |ov| { id: ov.id, name: ov.display_name } } } }.to_json %>"
                 data-variant-index="<%= variants_list.size %>">
           + Adauga varianta
@@ -156,40 +172,41 @@
       </div>
     </div>
 
-    <!-- Prețuri și Taxe -->
-    <div class="form-section" id="section-prices" style="<%= has_variants ? 'display:none;' : '' %>">
+    <!-- Preturi si Taxe -->
+    <div class="form-section" id="section-prices" style="<%= has_variants ? 'display:none;' : '' %>"
+         data-product-form-target="sectionPrices">
       <div class="section-header success">
-        💰 Prețuri și Taxe
+        Preturi si Taxe
       </div>
       <div class="section-body">
         <div class="form-row cols-4">
           <div class="form-field">
-            <%= form.label :price, "Preț vânzare" %>
+            <%= form.label :price, "Pret vanzare" %>
             <div class="input-group">
               <%= form.number_field :price, step: 0.01, placeholder: "0.00" %>
               <span class="input-group-text">RON</span>
             </div>
-            <small class="form-hint">Prețul afișat clientului (obligatoriu)</small>
+            <small class="form-hint">Pretul afisat clientului (obligatoriu)</small>
           </div>
           <div class="form-field">
-            <%= form.label :cost_price, "Preț achiziție" %>
+            <%= form.label :cost_price, "Pret achizitie" %>
             <div class="input-group">
               <%= form.number_field :cost_price, step: 0.01, placeholder: "0.00" %>
               <span class="input-group-text">RON</span>
             </div>
-            <small class="form-hint">Cât ai plătit pe produs (vizibil doar admin, pentru calcul profit)</small>
+            <small class="form-hint">Cat ai platit pe produs (vizibil doar admin, pentru calcul profit)</small>
           </div>
           <div class="form-field">
-            <%= form.label :discount_price, "Preț promoțional" %>
+            <%= form.label :discount_price, "Pret promotional" %>
             <div class="input-group">
               <%= form.number_field :discount_price, step: 0.01, placeholder: "0.00" %>
               <span class="input-group-text">RON</span>
             </div>
             <label style="display:flex; align-items:center; gap:6px; margin-top:6px; cursor:pointer;">
               <%= form.check_box :promo_active, style: "width:auto; margin:0;" %>
-              <span style="font-size:13px; font-weight:600;">Afișează prețul promoțional în site</span>
+              <span style="font-size:13px; font-weight:600;">Afiseaza pretul promotional in site</span>
             </label>
-            <small class="form-hint">Bifează pentru a arăta clientului prețul tăiat + prețul redus</small>
+            <small class="form-hint">Bifeaza pentru a arata clientului pretul taiat + pretul redus</small>
           </div>
           <div class="form-field">
             <%= form.label :vat, "TVA" %>
@@ -197,27 +214,28 @@
               <%= form.number_field :vat, min: 0, placeholder: "19" %>
               <span class="input-group-text">%</span>
             </div>
-            <small class="form-hint">Cota TVA inclusă în preț (standard: 19%)</small>
+            <small class="form-hint">Cota TVA inclusa in pret (standard: 19%)</small>
           </div>
         </div>
 
         <div class="form-row cols-2">
           <div class="checkbox-field">
             <%= form.check_box :taxable %>
-            <%= form.label :taxable, "Se aplică TVA" %>
+            <%= form.label :taxable, "Se aplica TVA" %>
           </div>
           <div class="checkbox-field">
             <%= form.check_box :coupon_applicable %>
-            <%= form.label :coupon_applicable, "Se aplică cupon de reducere" %>
+            <%= form.label :coupon_applicable, "Se aplica cupon de reducere" %>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Inventar și Stoc -->
-    <div class="form-section" id="section-inventory" style="<%= has_variants ? 'display:none;' : '' %>">
+    <!-- Inventar si Stoc -->
+    <div class="form-section" id="section-inventory" style="<%= has_variants ? 'display:none;' : '' %>"
+         data-product-form-target="sectionInventory">
       <div class="section-header info">
-        📦 Inventar și Stoc
+        Inventar si Stoc
       </div>
       <div class="section-body">
         <div class="form-row cols-3">
@@ -231,7 +249,7 @@
           </div>
           <div class="checkbox-field" style="margin-top: 24px;">
             <%= form.check_box :track_inventory %>
-            <%= form.label :track_inventory, "Urmărește inventarul" %>
+            <%= form.label :track_inventory, "Urmareste inventarul" %>
           </div>
         </div>
 
@@ -244,29 +262,30 @@
       </div>
     </div>
 
-    <!-- Dimensiuni și Greutate (doar pentru produse fără variante) -->
-    <div class="form-section" id="section-dimensions" style="<%= has_variants ? 'display:none;' : '' %>">
+    <!-- Dimensiuni si Greutate (doar pentru produse fara variante) -->
+    <div class="form-section" id="section-dimensions" style="<%= has_variants ? 'display:none;' : '' %>"
+         data-product-form-target="sectionDimensions">
       <div class="section-header warning">
-        📏 Dimensiuni și Greutate
+        Dimensiuni si Greutate
       </div>
       <div class="section-body">
         <div class="form-row cols-4">
           <div class="form-field">
-            <%= form.label :height, "Înălțime" %>
+            <%= form.label :height, "Inaltime" %>
             <div class="input-group">
               <%= form.number_field :height, step: 1, min: 0, placeholder: "0" %>
               <span class="input-group-text">mm</span>
             </div>
           </div>
           <div class="form-field">
-            <%= form.label :width, "Lățime" %>
+            <%= form.label :width, "Latime" %>
             <div class="input-group">
               <%= form.number_field :width, step: 1, min: 0, placeholder: "0" %>
               <span class="input-group-text">mm</span>
             </div>
           </div>
           <div class="form-field">
-            <%= form.label :depth, "Adâncime" %>
+            <%= form.label :depth, "Adancime" %>
             <div class="input-group">
               <%= form.number_field :depth, step: 1, min: 0, placeholder: "0" %>
               <span class="input-group-text">mm</span>
@@ -286,7 +305,7 @@
     <!-- Disponibilitate -->
     <div class="form-section">
       <div class="section-header secondary">
-        📅 Disponibilitate
+        Disponibilitate
       </div>
       <div class="section-body">
         <div class="form-row cols-2">
@@ -295,17 +314,17 @@
             <%= form.date_field :available_on %>
           </div>
           <div class="form-field">
-            <%= form.label :discontinue_on, "Se întrerupe la" %>
+            <%= form.label :discontinue_on, "Se intrerupe la" %>
             <%= form.date_field :discontinue_on %>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Configurări Produs -->
+    <!-- Configurari Produs -->
     <div class="form-section">
       <div class="section-header dark">
-        ⚙️ Configurări Produs
+        Configurari Produs
       </div>
       <div class="section-body">
         <div class="form-row cols-2">
@@ -322,40 +341,38 @@
         <div class="form-row cols-2">
           <div class="checkbox-field">
             <%= form.check_box :requires_login %>
-            <%= form.label :requires_login, "Doar utilizatori logați pot cumpăra" %>
+            <%= form.label :requires_login, "Doar utilizatori logati pot cumpara" %>
           </div>
           <div class="checkbox-field">
             <%= form.check_box :visible_to_guests %>
-            <%= form.label :visible_to_guests, "Vizibil pentru utilizatori neautentificați" %>
+            <%= form.label :visible_to_guests, "Vizibil pentru utilizatori neautentificati" %>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- SEO și Metadata -->
+    <!-- SEO si Metadata -->
     <div class="form-section">
       <div class="section-header primary">
-        🔍 SEO și Metadata
+        SEO si Metadata
       </div>
       <div class="section-body">
         <div class="form-row cols-1">
           <div class="form-field">
             <%= form.label :meta_title, "Titlu SEO" %>
-            <%= form.text_field :meta_title, placeholder: "Titlu pentru motoarele de căutare" %>
+            <%= form.text_field :meta_title, placeholder: "Titlu pentru motoarele de cautare" %>
           </div>
         </div>
-
         <div class="form-row cols-1">
           <div class="form-field">
             <%= form.label :meta_description, "Descriere SEO" %>
-            <%= form.text_field :meta_description, placeholder: "Descriere pentru motoarele de căutare" %>
+            <%= form.text_field :meta_description, placeholder: "Descriere pentru motoarele de cautare" %>
           </div>
         </div>
-
         <div class="form-row cols-1">
           <div class="form-field">
             <%= form.label :meta_keywords, "Cuvinte cheie" %>
-            <%= form.text_field :meta_keywords, placeholder: "cuvânt1, cuvânt2, cuvânt3" %>
+            <%= form.text_field :meta_keywords, placeholder: "cuvant1, cuvant2, cuvant3" %>
           </div>
         </div>
       </div>
@@ -364,19 +381,21 @@
     <!-- Imagini Produs -->
     <div class="form-section">
       <div class="section-header success">
-        🖼️ Imagini Produs
+        Imagini Produs
       </div>
       <div class="section-body">
         <div class="form-row cols-1">
           <div class="form-field">
-            <label for="bunny-direct-upload">⭐ Imagine principală</label>
-            <input type="file" id="bunny-direct-upload" accept="image/*" style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;" />
-            <input type="hidden" name="product[external_image_url]" id="external_image-url" value="<%= @product.external_image_url %>" />
-            <div id="main-preview" class="image-preview-container">
+            <label>Imagine principala</label>
+            <input type="file" accept="image/*" style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
+                   data-action="change->product-form#uploadMainImage" />
+            <input type="hidden" name="product[external_image_url]" value="<%= @product.external_image_url %>"
+                   data-product-form-target="mainImageHidden" />
+            <div class="image-preview-container" data-product-form-target="mainImagePreview">
               <% if @product.external_image_url.present? %>
                 <div class="image-preview-item bunny-preview" data-type="main">
                   <img src="<%= @product.external_image_url %>" style="max-height: 120px;">
-                  <button type="button" class="remove-btn remove-bunny-image" data-target="main">×</button>
+                  <button type="button" class="remove-btn" data-target="main" data-action="click->product-form#removeImage">&times;</button>
                 </div>
               <% end %>
             </div>
@@ -385,14 +404,15 @@
 
         <div class="form-row cols-1">
           <div class="form-field">
-            <label for="bunny-secondary-upload">🖼️ Imagini secundare (galerie)</label>
-            <input type="file" id="bunny-secondary-upload" accept="image/*" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;" />
-            <div id="bunny-secondary-preview" class="image-preview-container">
+            <label>Imagini secundare (galerie)</label>
+            <input type="file" accept="image/*" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
+                   data-action="change->product-form#uploadSecondaryImages" />
+            <div class="image-preview-container" data-product-form-target="secondaryImagePreview">
               <% if @product.external_image_urls.present? %>
                 <% @product.external_image_urls.each_with_index do |url, idx| %>
                   <div class="image-preview-item bunny-preview" data-type="secondary" data-index="<%= idx %>">
                     <img src="<%= url %>" style="width: 100px;">
-                    <button type="button" class="remove-btn remove-bunny-image" data-target="secondary" data-index="<%= idx %>">×</button>
+                    <button type="button" class="remove-btn" data-target="secondary" data-index="<%= idx %>" data-action="click->product-form#removeImage">&times;</button>
                   </div>
                 <% end %>
               <% end %>
@@ -400,7 +420,7 @@
           </div>
         </div>
 
-        <div id="external-hidden-inputs">
+        <div data-product-form-target="externalHiddenInputs">
           <% (@product.external_image_urls || []).each do |url| %>
             <%= hidden_field_tag 'product[external_image_urls][]', url %>
           <% end %>
@@ -408,22 +428,23 @@
       </div>
     </div>
 
-    <!-- Fișiere Atașate -->
+    <!-- Fisiere Atasate -->
     <div class="form-section">
       <div class="section-header info">
-        📎 Fișiere Atașate
+        Fisiere Atasate
       </div>
       <div class="section-body">
         <div class="form-row cols-1">
           <div class="form-field">
-            <label for="bunny-files-upload">Fișiere atașate (Bunny)</label>
-            <input type="file" id="bunny-files-upload" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;" />
-            <div id="bunny-files-preview" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+            <label>Fisiere atasate (Bunny)</label>
+            <input type="file" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
+                   data-action="change->product-form#uploadFiles" />
+            <div data-product-form-target="filePreview" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
               <% if @product.external_file_urls.present? %>
                 <% @product.external_file_urls.each do |url| %>
                   <div class="file-preview-item">
                     <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener" %>
-                    <button type="button" class="remove-btn remove-bunny-file" data-url="<%= url %>">×</button>
+                    <button type="button" class="remove-btn" data-url="<%= url %>" data-action="click->product-form#removeFile">&times;</button>
                   </div>
                 <% end %>
               <% end %>
@@ -433,7 +454,7 @@
       </div>
     </div>
 
-    <div id="external-file-hidden-inputs">
+    <div data-product-form-target="fileHiddenInputs">
       <% (@product.external_file_urls || []).each do |url| %>
         <%= hidden_field_tag 'product[external_file_urls][]', url %>
       <% end %>
@@ -442,23 +463,24 @@
     <!-- Categorii -->
     <div class="form-section">
       <div class="section-header warning">
-        🏷️ Categorii
+        Categorii
       </div>
       <div class="section-body">
         <div class="form-row cols-1">
           <div class="form-field">
-            <%= form.label :category_ids, "Selectează categoriile" %>
-            <div id="category-options" class="category-badges">
+            <%= form.label :category_ids, "Selecteaza categoriile" %>
+            <div class="category-badges">
               <% Category.all.each do |category| %>
                 <% selected = product.category_ids.include?(category.id) %>
                 <span class="category-badge <%= selected ? 'active' : 'inactive' %>"
-                      data-id="<%= category.id %>">
+                      data-id="<%= category.id %>"
+                      data-action="click->product-form#toggleCategory">
                   <%= category.name %>
                 </span>
               <% end %>
             </div>
 
-            <div id="category-hidden-inputs">
+            <div data-product-form-target="categoryHiddenInputs">
               <input type="hidden" name="product[category_ids][]" value="">
               <% product.category_ids.each do |cat_id| %>
                 <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">
@@ -472,7 +494,7 @@
     <!-- Atribute Personalizate -->
     <div class="form-section">
       <div class="section-header secondary">
-        💻 Atribute Personalizate
+        Atribute Personalizate
       </div>
       <div class="section-body">
         <div class="form-row cols-1">
@@ -485,1016 +507,9 @@
     </div>
 
     <div class="form-actions form-actions-sticky">
-      <%= link_to "Anulează", products_path, class: "btn btn-secondary" %>
-      <%= form.submit "Salvează produsul", class: "btn btn-primary" %>
+      <%= link_to "Anuleaza", products_path, class: "btn btn-secondary" %>
+      <%= form.submit "Salveaza produsul", class: "btn btn-primary" %>
     </div>
 
   <% end %>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const badges = document.querySelectorAll(".category-badge");
-  const hiddenInputsWrapper = document.getElementById("category-hidden-inputs");
-
-  function toggleBadge(e) {
-    const badge = e.target;
-    const id = badge.dataset.id;
-    const existingInputs = [...hiddenInputsWrapper.querySelectorAll(`input[value="${id}"]`)];
-
-    if (existingInputs.length > 0) {
-      existingInputs.forEach(input => input.remove());
-      badge.classList.remove("active");
-      badge.classList.add("inactive");
-    } else {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = "product[category_ids][]";
-      input.value = id;
-      hiddenInputsWrapper.appendChild(input);
-      badge.classList.remove("inactive");
-      badge.classList.add("active");
-    }
-  }
-
-  badges.forEach(badge => {
-    badge.removeEventListener("click", toggleBadge);
-    badge.addEventListener("click", toggleBadge);
-  });
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form");
-  const mainInput = document.getElementById("bunny-direct-upload");
-  const mainPreview = document.getElementById("main-preview");
-  const mainHidden = document.getElementById("external_image-url");
-
-  const secondaryInput = document.getElementById("bunny-secondary-upload");
-  const secondaryPreview = document.getElementById("bunny-secondary-preview");
-
-  const createImageElement = (url, type, index = null) => {
-    const div = document.createElement("div");
-    div.className = "image-preview-item bunny-preview";
-    div.dataset.type = type;
-    if (index !== null) div.dataset.index = index;
-
-    const img = document.createElement("img");
-    img.src = url;
-    if (type === "main") {
-      img.style.maxHeight = "120px";
-    } else {
-      img.style.width = "100px";
-    }
-
-    const btn = document.createElement("button");
-    btn.className = "remove-btn remove-bunny-image";
-    btn.textContent = "×";
-    btn.type = "button";
-    btn.dataset.target = type;
-    if (type === "secondary") btn.dataset.index = index;
-
-    div.appendChild(img);
-    div.appendChild(btn);
-    return div;
-  };
-
-  // Upload status helper
-  const showUploadStatus = (container, message, isError) => {
-    let status = container.querySelector('.upload-status');
-    if (!status) {
-      status = document.createElement('div');
-      status.className = 'upload-status';
-      status.style.cssText = 'padding:6px 12px;margin-top:6px;border-radius:4px;font-size:13px;font-weight:500;';
-      container.appendChild(status);
-    }
-    status.textContent = message;
-    status.style.background = isError ? '#f8d7da' : '#d1ecf1';
-    status.style.color = isError ? '#721c24' : '#0c5460';
-    if (!isError && !message) status.remove();
-  };
-
-  const clearUploadStatus = (container) => {
-    const status = container.querySelector('.upload-status');
-    if (status) status.remove();
-  };
-
-  if (mainInput) {
-    mainInput.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const parentField = mainInput.closest('.form-field');
-
-      showUploadStatus(parentField, 'Se incarca imaginea...', false);
-      try {
-        const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
-        const { upload_url, headers } = await res.json();
-
-        const upload = await fetch(upload_url, {
-          method: "PUT",
-          headers: {
-            "Content-Type": headers["Content-Type"],
-            "AccessKey": headers["AccessKey"]
-          },
-          body: file
-        });
-
-        if (upload.ok) {
-          const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
-          const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
-
-          mainHidden.value = cdnUrl;
-          mainPreview.innerHTML = "";
-          mainPreview.appendChild(createImageElement(cdnUrl, "main"));
-          clearUploadStatus(parentField);
-        } else {
-          showUploadStatus(parentField, 'Eroare la upload. Incearca din nou.', true);
-        }
-      } catch(err) {
-        showUploadStatus(parentField, 'Eroare la upload: ' + err.message, true);
-      }
-    });
-  }
-
-  if (secondaryInput) {
-    secondaryInput.addEventListener("change", async () => {
-      const parentField = secondaryInput.closest('.form-field');
-      const existingInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
-      let currentIndex = existingInputs.length;
-      const totalFiles = secondaryInput.files.length;
-      let uploaded = 0;
-
-      showUploadStatus(parentField, `Se incarca 0/${totalFiles} imagini...`, false);
-
-      for (const file of secondaryInput.files) {
-        try {
-          const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
-          const { upload_url, headers } = await res.json();
-
-          const upload = await fetch(upload_url, {
-            method: "PUT",
-            headers: {
-              "Content-Type": headers["Content-Type"],
-              "AccessKey": headers["AccessKey"]
-            },
-            body: file
-          });
-
-          if (upload.ok) {
-            const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
-            const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
-
-            const existingImgs = secondaryPreview.querySelectorAll("img");
-            const alreadyExists = Array.from(existingImgs).some(img => img.src === cdnUrl);
-            if (alreadyExists) { uploaded++; continue; }
-
-            const hidden = document.createElement("input");
-            hidden.type = "hidden";
-            hidden.name = "product[external_image_urls][]";
-            hidden.value = cdnUrl;
-            const externalContainer = document.getElementById("external-hidden-inputs");
-            externalContainer.appendChild(hidden);
-
-            secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
-            currentIndex++;
-          }
-        } catch(err) {}
-        uploaded++;
-        showUploadStatus(parentField, `Se incarca ${uploaded}/${totalFiles} imagini...`, false);
-      }
-
-      clearUploadStatus(parentField);
-      secondaryInput.value = "";
-    });
-  }
-
-  document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("remove-bunny-image")) {
-      const target = e.target.dataset.target;
-
-      if (target === "main") {
-        mainHidden.value = "";
-        mainPreview.innerHTML = "";
-      }
-
-      if (target === "secondary") {
-        const container = e.target.closest(".bunny-preview");
-        const img = container.querySelector("img");
-        const url = img.src;
-
-        const hiddenInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
-        hiddenInputs.forEach(input => {
-          if (input.value === url) input.remove();
-        });
-
-        container.remove();
-      }
-    }
-  });
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // ===== VARIANTE: Toggle + Add + Remove =====
-  const toggleCheckbox = document.getElementById('toggle-has-variants');
-  const sectionVariants = document.getElementById('section-variants');
-  const sectionPrices = document.getElementById('section-prices');
-  const sectionInventory = document.getElementById('section-inventory');
-  const variantWarning = document.querySelector('.variant-warning');
-  const addBtn = document.getElementById('btn-add-variant');
-  const tbody = document.getElementById('variants-tbody');
-
-  const sectionPrimaryOption = document.getElementById('section-primary-option');
-  const sectionDimensions = document.getElementById('section-dimensions');
-
-  function hasPrimaryOptionSelected() {
-    const radios = document.querySelectorAll('#primary-option-radios input[type="radio"]');
-    return Array.from(radios).some(r => r.checked);
-  }
-
-  function updateVariantSections() {
-    const on = toggleCheckbox && toggleCheckbox.checked;
-    const primarySelected = hasPrimaryOptionSelected();
-
-    if (sectionPrimaryOption) sectionPrimaryOption.style.display = on ? '' : 'none';
-    if (sectionVariants) sectionVariants.style.display = (on && primarySelected) ? '' : 'none';
-    if (sectionPrices) sectionPrices.style.display = on ? 'none' : '';
-    if (sectionInventory) sectionInventory.style.display = on ? 'none' : '';
-    if (sectionDimensions) sectionDimensions.style.display = on ? 'none' : '';
-    if (variantWarning) variantWarning.style.display = on ? '' : 'none';
-  }
-
-  if (toggleCheckbox) {
-    toggleCheckbox.addEventListener('change', updateVariantSections);
-    updateVariantSections();
-  }
-
-  // Cand se selecteaza optiunea principala -> deblocheaza sectiunea de variante
-  const primaryOptionRadios = document.getElementById('primary-option-radios');
-  if (primaryOptionRadios) {
-    primaryOptionRadios.addEventListener('change', updateVariantSections);
-  }
-
-  // Reincarca option types cand revii pe tab (dupa ce ai adaugat optiuni noi)
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState !== 'visible') return;
-    if (!toggleCheckbox || !toggleCheckbox.checked) return;
-
-    fetch('/admin/option_types.json')
-      .then(function(r) { return r.json(); })
-      .then(function(optionTypes) {
-        var radiosContainer = document.getElementById('primary-option-radios');
-        if (!radiosContainer) return;
-
-        // Retine selectia curenta
-        var currentSelected = radiosContainer.querySelector('input[type="radio"]:checked');
-        var currentSelectedId = currentSelected ? currentSelected.value : null;
-
-        // Reconstruieste radio buttons
-        radiosContainer.innerHTML = '';
-        optionTypes.forEach(function(ot) {
-          var div = document.createElement('div');
-          div.className = 'radio-field';
-          var checked = (currentSelectedId && String(ot.id) === String(currentSelectedId)) ? 'checked' : '';
-          div.innerHTML = '<input type="radio" name="primary_option_type_id" value="' + ot.id + '" id="primary_option_type_' + ot.id + '" ' + checked + '>' +
-            '<label for="primary_option_type_' + ot.id + '">' + (ot.presentation || ot.name) + '</label>';
-          radiosContainer.appendChild(div);
-        });
-
-        // Actualizeaza si data-option-types pe butonul Adauga varianta
-        if (addBtn) {
-          addBtn.dataset.optionTypes = JSON.stringify(optionTypes);
-        }
-
-        updateVariantSections();
-      })
-      .catch(function() {});
-  });
-
-  // Add new variant row
-  if (addBtn && tbody) {
-    addBtn.addEventListener('click', function() {
-      const idx = Date.now();
-      const prefix = `product[variants_attributes][${idx}]`;
-      const optionTypes = JSON.parse(addBtn.dataset.optionTypes || '[]');
-      const statuses = ['active', 'inactive'];
-
-      let optionsHtml = '';
-      optionTypes.forEach(function(ot) {
-        let opts = '<option value="">-- alege --</option>';
-        (ot.values || []).forEach(function(ov) {
-          opts += `<option value="${ov.id}">${ov.name}</option>`;
-        });
-        optionsHtml += `<div class="variant-option-select">
-          <label class="variant-option-label">${ot.name}</label>
-          <select name="${prefix}[option_value_ids][]" class="variant-input">${opts}</select>
-        </div>`;
-      });
-
-      let statusOpts = '';
-      statuses.forEach(function(s) {
-        statusOpts += `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`;
-      });
-
-      // Rand 1: Optiuni + SKU
-      const tr1 = document.createElement('tr');
-      tr1.className = 'variant-row variant-row-top variant-new';
-      tr1.innerHTML = `
-        <input type="hidden" name="${prefix}[_destroy]" value="0" class="destroy-flag">
-        <td class="variant-options-cell">${optionsHtml}</td>
-        <td colspan="3">
-          <label class="variant-field-label">SKU</label>
-          <div style="display:flex; gap:4px; align-items:center;">
-            <input type="text" name="${prefix}[sku]" placeholder="SKU-001" class="variant-input variant-sku" style="flex:1;" data-variant-id="">
-            <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare">&#8635;</button>
-          </div>
-          <small class="variant-sku-status" style="display:none; margin-top:2px; font-size:11px;"></small>
-        </td>
-        <td colspan="2">
-          <label class="variant-field-label">EAN / GTIN</label>
-          <input type="text" name="${prefix}[ean]" placeholder="1234567890123" class="variant-input variant-ean" style="width:100%;">
-        </td>
-      `;
-
-      // Rand 2: Imagine + Pret + Stoc + TVA + Status + Sursa + X
-      const tr2 = document.createElement('tr');
-      tr2.className = 'variant-row variant-row-bottom variant-new';
-      tr2.innerHTML = `
-        <td class="variant-image-cell">
-          <label class="variant-field-label">Imagine</label>
-          <input type="hidden" name="${prefix}[external_image_url]" value="" class="variant-image-hidden">
-          <div class="variant-images-hidden"></div>
-          <div class="variant-image-gallery"></div>
-          <input type="file" accept="image/*" multiple class="variant-image-input" />
-          <label class="variant-add-img-btn" title="Adauga imagini">+</label>
-        </td>
-        <td><label class="variant-field-label">Pret vanzare</label><input type="number" name="${prefix}[price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-price"></td>
-        <td><label class="variant-field-label">Pret achizitie</label><input type="number" name="${prefix}[cost_price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-cost-price" style="width:70px;"></td>
-        <td><label class="variant-field-label">Promo (RON)</label><input type="number" name="${prefix}[discount_price]" step="0.01" min="0" placeholder="0.00" class="variant-input variant-discount-price" style="width:70px;"><label style="display:flex;align-items:center;gap:3px;margin-top:3px;cursor:pointer;"><input type="hidden" name="${prefix}[promo_active]" value="0"><input type="checkbox" name="${prefix}[promo_active]" value="1" style="width:auto;margin:0;"><span style="font-size:10px;">Activ</span></label></td>
-        <td><label class="variant-field-label">Stoc</label><input type="number" name="${prefix}[stock]" min="0" placeholder="0" value="0" class="variant-input variant-stock"></td>
-        <td><label class="variant-field-label">TVA %</label><input type="number" name="${prefix}[vat_rate]" min="0" step="0.01" placeholder="0" value="0" class="variant-input variant-vat"></td>
-        <td><label class="variant-field-label">Status</label><select name="${prefix}[status]" class="variant-input variant-status">${statusOpts}</select></td>
-        <td><label class="variant-field-label">Sursa</label><br><span class="badge badge-new">Nou</span></td>
-        <td style="white-space:nowrap;"><button type="button" class="btn btn-secondary btn-sm btn-duplicate-variant" title="Duplica varianta" style="margin-right:4px;">&#x2398;</button><button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button></td>
-      `;
-
-      // Rand 3: Dimensiuni si Greutate
-      const tr3 = document.createElement('tr');
-      tr3.className = 'variant-row variant-row-dimensions variant-new';
-      tr3.innerHTML = `
-        <td colspan="10" style="padding: 6px 12px; background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-          <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
-            <span style="font-size:12px; font-weight:600; color:#666;">📏 Dimensiuni:</span>
-            <div style="display:flex; align-items:center; gap:4px;">
-              <label class="variant-field-label" style="margin:0; font-size:11px;">H</label>
-              <input type="number" name="${prefix}[height]" step="1" min="0" placeholder="0" class="variant-input" style="width:60px;">
-              <span style="font-size:11px; color:#999;">mm</span>
-            </div>
-            <div style="display:flex; align-items:center; gap:4px;">
-              <label class="variant-field-label" style="margin:0; font-size:11px;">W</label>
-              <input type="number" name="${prefix}[width]" step="1" min="0" placeholder="0" class="variant-input" style="width:60px;">
-              <span style="font-size:11px; color:#999;">mm</span>
-            </div>
-            <div style="display:flex; align-items:center; gap:4px;">
-              <label class="variant-field-label" style="margin:0; font-size:11px;">D</label>
-              <input type="number" name="${prefix}[depth]" step="1" min="0" placeholder="0" class="variant-input" style="width:60px;">
-              <span style="font-size:11px; color:#999;">mm</span>
-            </div>
-            <div style="display:flex; align-items:center; gap:4px;">
-              <label class="variant-field-label" style="margin:0; font-size:11px;">Greutate</label>
-              <input type="number" name="${prefix}[weight]" step="1" min="0" placeholder="0" class="variant-input" style="width:70px;">
-              <span style="font-size:11px; color:#999;">g</span>
-            </div>
-          </div>
-        </td>
-      `;
-
-      tbody.appendChild(tr1);
-      tbody.appendChild(tr2);
-      tbody.appendChild(tr3);
-    });
-  }
-
-  // Remove variant (delegate) - handles both rows (top + bottom)
-  // Button X is in bottom row, so find top row via previousElementSibling
-  document.addEventListener('click', function(e) {
-    if (!e.target.classList.contains('btn-remove-variant')) return;
-    const bottomRow = e.target.closest('tr.variant-row-bottom');
-    var topRow;
-    if (bottomRow) {
-      topRow = bottomRow.previousElementSibling;
-    } else {
-      // fallback: button might be in top row
-      topRow = e.target.closest('tr.variant-row-top');
-    }
-    if (!topRow) return;
-    const realBottom = bottomRow || topRow.nextElementSibling;
-
-    const idField = topRow.querySelector('input[name$="[id]"]');
-    const destroyFlag = topRow.querySelector('.destroy-flag');
-    // Find dimensions row (row 3) - it's after bottom row
-    const dimRow = realBottom ? realBottom.nextElementSibling : null;
-    const hasDimRow = dimRow && dimRow.classList.contains('variant-row-dimensions');
-
-    if (idField && idField.value) {
-      // Existing persisted variant — mark for destruction, hide all rows
-      destroyFlag.value = '1';
-      topRow.classList.add('variant-destroyed');
-      topRow.style.display = 'none';
-      if (realBottom && realBottom.classList.contains('variant-row-bottom')) {
-        realBottom.classList.add('variant-destroyed');
-        realBottom.style.display = 'none';
-      }
-      if (hasDimRow) {
-        dimRow.classList.add('variant-destroyed');
-        dimRow.style.display = 'none';
-      }
-    } else {
-      // New unsaved variant — remove all rows from DOM
-      if (hasDimRow) dimRow.remove();
-      if (realBottom && realBottom.classList.contains('variant-row-bottom')) {
-        realBottom.remove();
-      }
-      topRow.remove();
-    }
-  });
-
-  // ===== VARIANTE: Duplica varianta =====
-  document.addEventListener('click', function(e) {
-    if (!e.target.classList.contains('btn-duplicate-variant')) return;
-    var bottomRow = e.target.closest('tr.variant-row-bottom');
-    if (!bottomRow) return;
-    var topRow = bottomRow.previousElementSibling;
-    var dimRow = bottomRow.nextElementSibling;
-    if (!topRow || !topRow.classList.contains('variant-row-top')) return;
-
-    // Click "Add variant" to create empty rows
-    if (addBtn) addBtn.click();
-
-    // Find the newly added rows (last 3 in tbody)
-    var allRows = tbody.querySelectorAll('tr.variant-row');
-    var newRows = [];
-    for (var i = allRows.length - 1; i >= 0 && newRows.length < 3; i--) {
-      newRows.unshift(allRows[i]);
-    }
-    var newTop = newRows[0], newBottom = newRows[1], newDim = newRows[2];
-    if (!newTop || !newBottom) return;
-
-    // Copy option selections
-    var srcSelects = topRow.querySelectorAll('select[name*="option_value_ids"]');
-    var dstSelects = newTop.querySelectorAll('select[name*="option_value_ids"]');
-    srcSelects.forEach(function(src, i) {
-      if (dstSelects[i]) dstSelects[i].value = src.value;
-    });
-
-    // Copy price fields from bottom row
-    var fieldsToCopy = ['price', 'cost_price', 'discount_price', 'stock', 'vat_rate'];
-    fieldsToCopy.forEach(function(field) {
-      var src = bottomRow.querySelector('input[name*="[' + field + ']"]');
-      var dst = newBottom.querySelector('input[name*="[' + field + ']"]');
-      if (src && dst) dst.value = src.value;
-    });
-
-    // Copy promo_active checkbox
-    var srcPromo = bottomRow.querySelector('input[type="checkbox"][name*="[promo_active]"]');
-    var dstPromo = newBottom.querySelector('input[type="checkbox"][name*="[promo_active]"]');
-    if (srcPromo && dstPromo) dstPromo.checked = srcPromo.checked;
-
-    // Copy status select
-    var srcStatus = bottomRow.querySelector('select[name*="[status]"]');
-    var dstStatus = newBottom.querySelector('select[name*="[status]"]');
-    if (srcStatus && dstStatus) dstStatus.value = srcStatus.value;
-
-    // Copy dimensions from dim row
-    if (dimRow && dimRow.classList.contains('variant-row-dimensions') && newDim) {
-      var dimFields = ['height', 'width', 'depth', 'weight'];
-      dimFields.forEach(function(field) {
-        var src = dimRow.querySelector('input[name*="[' + field + ']"]');
-        var dst = newDim.querySelector('input[name*="[' + field + ']"]');
-        if (src && dst) dst.value = src.value;
-      });
-    }
-
-    // Clear SKU (must be unique) and trigger auto-generation
-    var newSkuInput = newTop.querySelector('input.variant-sku');
-    if (newSkuInput) {
-      newSkuInput.value = '';
-      var autoBtn = newTop.querySelector('.variant-sku-auto-btn');
-      if (autoBtn) autoBtn.style.display = 'none';
-    }
-
-    // Clear EAN (must be unique)
-    var newEanInput = newTop.querySelector('input[name*="[ean]"]');
-    if (newEanInput) newEanInput.value = '';
-  });
-
-  // ===== VARIANTE: Buton "+" deschide file input ascuns =====
-  document.addEventListener('click', function(e) {
-    if (!e.target.classList.contains('variant-add-img-btn')) return;
-    const td = e.target.closest('.variant-image-cell');
-    const fileInput = td.querySelector('.variant-image-input');
-    if (fileInput) fileInput.click();
-  });
-
-  // ===== VARIANTE: Upload imagini pe Bunny CDN (multiplu) =====
-  document.addEventListener('change', async function(e) {
-    if (!e.target.classList.contains('variant-image-input')) return;
-    const files = e.target.files;
-    if (!files.length) return;
-    const td = e.target.closest('.variant-image-cell');
-    const mainHidden = td.querySelector('.variant-image-hidden');
-    const gallery = td.querySelector('.variant-image-gallery');
-    const hiddenContainer = td.querySelector('.variant-images-hidden');
-    // Determina prefix-ul name-ului din hidden field-ul principal
-    const mainName = mainHidden.name; // ex: product[variants_attributes][123][external_image_url]
-    const baseName = mainName.replace('[external_image_url]', '[external_image_urls][]');
-
-    for (const file of files) {
-      const uniqueName = Date.now() + '_' + encodeURIComponent(file.name);
-      const res = await fetch('/uploads/presign?filename=' + uniqueName);
-      const { upload_url, headers } = await res.json();
-
-      const upload = await fetch(upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': headers['Content-Type'], 'AccessKey': headers['AccessKey'] },
-        body: file
-      });
-
-      if (upload.ok) {
-        const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
-        const cdnUrl = 'https://ayus-cdn.b-cdn.net/' + path;
-
-        // Prima imagine devine principala daca nu exista inca
-        if (!mainHidden.value) {
-          mainHidden.value = cdnUrl;
-          const item = document.createElement('div');
-          item.className = 'variant-gallery-item';
-          item.dataset.role = 'main';
-          item.innerHTML = '<img src="' + cdnUrl + '" class="variant-thumb">'
-            + '<button type="button" class="remove-btn remove-variant-img" data-role="main">\u00d7</button>'
-            + '<span class="variant-img-label">P</span>';
-          gallery.appendChild(item);
-        } else {
-          // Imagine secundara
-          const hidden = document.createElement('input');
-          hidden.type = 'hidden';
-          hidden.name = baseName;
-          hidden.value = cdnUrl;
-          hiddenContainer.appendChild(hidden);
-
-          const item = document.createElement('div');
-          item.className = 'variant-gallery-item';
-          item.dataset.role = 'secondary';
-          item.dataset.url = cdnUrl;
-          item.innerHTML = '<img src="' + cdnUrl + '" class="variant-thumb">'
-            + '<button type="button" class="remove-btn remove-variant-img" data-role="secondary">\u00d7</button>';
-          gallery.appendChild(item);
-        }
-      }
-    }
-    e.target.value = '';
-  });
-
-  // Remove variant image (principala sau secundara)
-  document.addEventListener('click', function(e) {
-    if (!e.target.classList.contains('remove-variant-img')) return;
-    const item = e.target.closest('.variant-gallery-item');
-    const td = e.target.closest('.variant-image-cell');
-    const role = e.target.dataset.role;
-
-    if (role === 'main') {
-      // Sterge imaginea principala
-      td.querySelector('.variant-image-hidden').value = '';
-      item.remove();
-      // Promoveaza prima secundara ca principala (daca exista)
-      const firstSecondary = td.querySelector('.variant-gallery-item[data-role="secondary"]');
-      if (firstSecondary) {
-        const url = firstSecondary.dataset.url;
-        td.querySelector('.variant-image-hidden').value = url;
-        firstSecondary.dataset.role = 'main';
-        firstSecondary.querySelector('.remove-variant-img').dataset.role = 'main';
-        firstSecondary.innerHTML = '<img src="' + url + '" class="variant-thumb">'
-          + '<button type="button" class="remove-btn remove-variant-img" data-role="main">\u00d7</button>'
-          + '<span class="variant-img-label">P</span>';
-        // Sterge hidden input-ul secundar pentru URL-ul promovat
-        const hiddenContainer = td.querySelector('.variant-images-hidden');
-        const hiddens = hiddenContainer.querySelectorAll('input[type="hidden"]');
-        hiddens.forEach(function(h) { if (h.value === url) h.remove(); });
-      }
-    } else {
-      // Sterge imaginea secundara
-      const url = item.dataset.url;
-      const hiddenContainer = td.querySelector('.variant-images-hidden');
-      const hiddens = hiddenContainer.querySelectorAll('input[type="hidden"]');
-      hiddens.forEach(function(h) { if (h.value === url) h.remove(); });
-      item.remove();
-    }
-  });
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const fileInput = document.getElementById("bunny-files-upload");
-  const filePreview = document.getElementById("bunny-files-preview");
-  const fileHiddenInputs = document.getElementById("external-file-hidden-inputs");
-
-  if (fileInput) {
-    fileInput.addEventListener("change", async () => {
-      for (const file of fileInput.files) {
-        const uniqueFilename = `${Date.now()}_${encodeURIComponent(file.name)}`;
-
-        const res = await fetch(`/uploads/presign?filename=${uniqueFilename}`);
-        const { upload_url, headers } = await res.json();
-
-        const upload = await fetch(upload_url, {
-          method: "PUT",
-          headers: {
-            "Content-Type": headers["Content-Type"],
-            "AccessKey": headers["AccessKey"]
-          },
-          body: file
-        });
-
-        if (upload.ok) {
-          const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
-          const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
-
-          const exists = [...fileHiddenInputs.querySelectorAll("input")].some(input => input.value === cdnUrl);
-          if (exists) continue;
-
-          const hidden = document.createElement("input");
-          hidden.type = "hidden";
-          hidden.name = "product[external_file_urls][]";
-          hidden.value = cdnUrl;
-          fileHiddenInputs.appendChild(hidden);
-
-          const wrapper = document.createElement("div");
-          wrapper.className = "file-preview-item";
-
-          const link = document.createElement("a");
-          link.href = cdnUrl;
-          link.target = "_blank";
-          link.rel = "noopener";
-          link.textContent = file.name;
-
-          const removeBtn = document.createElement("button");
-          removeBtn.className = "remove-btn remove-bunny-file";
-          removeBtn.textContent = "×";
-          removeBtn.type = "button";
-          removeBtn.dataset.url = cdnUrl;
-
-          wrapper.appendChild(link);
-          wrapper.appendChild(removeBtn);
-          filePreview.appendChild(wrapper);
-        }
-      }
-
-      fileInput.value = "";
-    });
-  }
-
-  document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("remove-bunny-file")) {
-      const url = e.target.dataset.url;
-
-      const hiddenInputs = document.querySelectorAll("input[name='product[external_file_urls][]']");
-      hiddenInputs.forEach(input => {
-        if (input.value === url) input.remove();
-      });
-
-      const card = e.target.closest(".file-preview-item");
-      if (card) card.remove();
-    }
-  });
-});
-</script>
-
-<script>
-// ===== AUTO-GENERARE LIVE: Slug + SKU Produs + SKU Variante =====
-document.addEventListener("DOMContentLoaded", function() {
-  var nameField = document.getElementById('product_name');
-  var slugField = document.getElementById('product_slug');
-  var skuField = document.getElementById('product_sku');
-  var slugStatus = document.getElementById('slug-status');
-  var skuStatus = document.getElementById('sku-status');
-  var slugAutoBtn = document.getElementById('slug-auto-btn');
-  var skuAutoBtn = document.getElementById('sku-auto-btn');
-
-  if (!nameField || !slugField || !skuField) return;
-
-  var isNewProduct = !slugField.value.trim();
-  var slugManuallyEdited = false;
-  var skuManuallyEdited = false;
-  var slugCheckTimer = null;
-  var skuCheckTimer = null;
-  var productId = '<%= product.persisted? ? product.id : "" %>';
-
-  function parameterize(str) {
-    return str.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-  }
-
-  // === Auto-generare Slug + SKU din Nume ===
-  nameField.addEventListener('input', function() {
-    var val = this.value.trim();
-    if (!val) return;
-
-    if (isNewProduct && !slugManuallyEdited) {
-      slugField.value = parameterize(val);
-      clearTimeout(slugCheckTimer);
-      slugCheckTimer = setTimeout(function() { checkSlugUniqueness(); }, 600);
-    }
-
-    if (isNewProduct && !skuManuallyEdited) {
-      skuField.value = parameterize(val).toUpperCase();
-      clearTimeout(skuCheckTimer);
-      skuCheckTimer = setTimeout(function() { checkSkuUniqueness(); }, 600);
-    }
-  });
-
-  // === Tracking editare manuala ===
-  slugField.addEventListener('input', function() {
-    slugManuallyEdited = true;
-    if (slugAutoBtn) slugAutoBtn.style.display = 'inline-block';
-    clearTimeout(slugCheckTimer);
-    slugCheckTimer = setTimeout(function() { checkSlugUniqueness(); }, 600);
-  });
-
-  skuField.addEventListener('input', function() {
-    skuManuallyEdited = true;
-    if (skuAutoBtn) skuAutoBtn.style.display = 'inline-block';
-    clearTimeout(skuCheckTimer);
-    skuCheckTimer = setTimeout(function() { checkSkuUniqueness(); }, 600);
-  });
-
-  // === Butoane reset Auto ===
-  if (slugAutoBtn) {
-    slugAutoBtn.addEventListener('click', function() {
-      slugManuallyEdited = false;
-      this.style.display = 'none';
-      var val = nameField.value.trim();
-      if (val) {
-        slugField.value = parameterize(val);
-        checkSlugUniqueness();
-      }
-    });
-  }
-
-  if (skuAutoBtn) {
-    skuAutoBtn.addEventListener('click', function() {
-      skuManuallyEdited = false;
-      this.style.display = 'none';
-      var val = nameField.value.trim();
-      if (val) {
-        skuField.value = parameterize(val).toUpperCase();
-        checkSkuUniqueness();
-      }
-    });
-  }
-
-  slugField.addEventListener('blur', function() {
-    if (this.value.trim()) checkSlugUniqueness();
-  });
-
-  skuField.addEventListener('blur', function() {
-    if (this.value.trim()) checkSkuUniqueness();
-  });
-
-  // === Verificare unicitate slug via AJAX ===
-  function checkSlugUniqueness() {
-    var slug = slugField.value.trim();
-    if (!slug) { slugStatus.style.display = 'none'; return; }
-
-    var url = '/products/check_slug?slug=' + encodeURIComponent(slug);
-    if (productId) url += '&product_id=' + productId;
-
-    fetch(url)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        slugStatus.style.display = 'block';
-        if (data.available) {
-          slugStatus.style.color = '#28a745';
-          slugStatus.textContent = '\u2713 URL disponibil';
-        } else {
-          slugField.value = data.slug;
-          slugStatus.style.color = '#dc8a00';
-          slugStatus.textContent = '\u26A0 URL ocupat, sugerat: ' + data.slug;
-        }
-      })
-      .catch(function() { slugStatus.style.display = 'none'; });
-  }
-
-  // === Verificare unicitate SKU via AJAX ===
-  function checkSkuUniqueness() {
-    var sku = skuField.value.trim();
-    if (!sku) { skuStatus.style.display = 'none'; return; }
-
-    var url = '/products/check_sku?sku=' + encodeURIComponent(sku);
-    if (productId) url += '&product_id=' + productId;
-
-    fetch(url)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        skuStatus.style.display = 'block';
-        if (data.available) {
-          skuStatus.style.color = '#28a745';
-          skuStatus.textContent = '\u2713 SKU disponibil';
-        } else {
-          skuField.value = data.sku;
-          skuStatus.style.color = '#dc8a00';
-          skuStatus.textContent = '\u26A0 SKU ocupat, sugerat: ' + data.sku;
-        }
-      })
-      .catch(function() { skuStatus.style.display = 'none'; });
-  }
-
-  // ===== AUTO-GENERARE SKU VARIANTE =====
-  var variantSkuManualEdits = {};
-
-  // Gaseste perechea top/bottom pentru o varianta
-  function getVariantPair(anyRow) {
-    var topRow, bottomRow;
-    if (anyRow.classList.contains('variant-row-top')) {
-      topRow = anyRow;
-      bottomRow = anyRow.nextElementSibling;
-    } else if (anyRow.classList.contains('variant-row-bottom')) {
-      bottomRow = anyRow;
-      topRow = anyRow.previousElementSibling;
-    }
-    return { top: topRow, bottom: bottomRow };
-  }
-
-  function autoGenerateVariantSku(topRow) {
-    var pair = getVariantPair(topRow);
-    if (!pair.top) return;
-
-    // SKU input is now in topRow (same row as options)
-    var skuInput = pair.top.querySelector('input[name*="[sku]"]');
-    if (!skuInput) return;
-
-    var rowId = skuInput.name;
-    if (variantSkuManualEdits[rowId]) return;
-
-    // Use product name (parameterized) as base for variant SKU
-    var productName = nameField.value.trim();
-    var baseSku = productName ? parameterize(productName).toUpperCase() : (skuField.value.trim() || 'VAR');
-    var selects = pair.top.querySelectorAll('select[name*="option_value_ids"]');
-    var parts = [baseSku];
-
-    selects.forEach(function(sel) {
-      var selectedOption = sel.options[sel.selectedIndex];
-      var text = selectedOption ? selectedOption.text.trim() : '';
-      if (text && text !== '-- alege --') {
-        var abbr = parameterize(text).substring(0, 3).toUpperCase();
-        if (abbr) parts.push(abbr);
-      }
-    });
-
-    if (parts.length === 1) {
-      var allTopRows = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)');
-      var idx = Array.from(allTopRows).indexOf(pair.top) + 1;
-      parts.push('V' + idx);
-    }
-
-    skuInput.value = parts.join('-');
-    // Check uniqueness after auto-generation
-    checkVariantSkuUniqueness(skuInput);
-  }
-
-  // Cand se schimba optiunile variantei -> regenereaza SKU
-  document.addEventListener('change', function(e) {
-    if (!e.target.matches('select[name*="option_value_ids"]')) return;
-    var topRow = e.target.closest('tr.variant-row-top');
-    if (topRow) autoGenerateVariantSku(topRow);
-  });
-
-  // Tracking editare manuala SKU varianta + arata butonul Auto
-  var variantSkuCheckTimers = {};
-
-  document.addEventListener('input', function(e) {
-    if (!e.target.matches('input.variant-sku')) return;
-    variantSkuManualEdits[e.target.name] = true;
-    var btn = e.target.closest('td').querySelector('.variant-sku-auto-btn');
-    if (btn) btn.style.display = 'inline-block';
-
-    // Debounced uniqueness check
-    clearTimeout(variantSkuCheckTimers[e.target.name]);
-    var input = e.target;
-    variantSkuCheckTimers[input.name] = setTimeout(function() { checkVariantSkuUniqueness(input); }, 600);
-  });
-
-  // Blur pe SKU varianta -> check unicitate
-  document.addEventListener('blur', function(e) {
-    if (!e.target.matches('input.variant-sku')) return;
-    if (e.target.value.trim()) checkVariantSkuUniqueness(e.target);
-  }, true);
-
-  // Verificare unicitate SKU varianta via AJAX + duplicat local in formular
-  function checkVariantSkuUniqueness(input) {
-    var sku = input.value.trim();
-    var statusEl = input.closest('td').querySelector('.variant-sku-status');
-    if (!sku || !statusEl) { if (statusEl) statusEl.style.display = 'none'; return; }
-
-    // Check local duplicates first (other variant SKUs in the same form)
-    var allSkuInputs = document.querySelectorAll('input.variant-sku');
-    var localDuplicate = false;
-    allSkuInputs.forEach(function(other) {
-      if (other !== input && other.value.trim().toUpperCase() === sku.toUpperCase()) {
-        // Check that the other variant is not destroyed
-        var otherRow = other.closest('tr');
-        if (otherRow && !otherRow.classList.contains('variant-destroyed')) {
-          localDuplicate = true;
-        }
-      }
-    });
-
-    if (localDuplicate) {
-      // Find next available suffix (-2, -3, etc.) that's unique both locally and not destroyed
-      var baseSku = sku.replace(/-\d+$/, '');
-      var counter = 2;
-      var candidate;
-      while (true) {
-        candidate = baseSku + '-' + counter;
-        var candidateTaken = false;
-        allSkuInputs.forEach(function(other) {
-          if (other !== input && other.value.trim().toUpperCase() === candidate.toUpperCase()) {
-            var otherRow = other.closest('tr');
-            if (otherRow && !otherRow.classList.contains('variant-destroyed')) {
-              candidateTaken = true;
-            }
-          }
-        });
-        if (!candidateTaken) break;
-        counter++;
-      }
-      input.value = candidate;
-      statusEl.style.display = 'block';
-      statusEl.style.color = '#dc8a00';
-      statusEl.textContent = '\u26A0 SKU duplicat, sugerat: ' + candidate;
-      // Also check the suggested SKU against the DB
-      checkVariantSkuUniqueness(input);
-      return;
-    }
-
-    var variantId = input.dataset.variantId || '';
-    var productId = document.querySelector('input[name="product[id]"], form[action*="products/"] input[name="_method"]');
-    // Extract product_id from form action URL
-    var formEl = document.querySelector('form.product-form, form[action*="products"]');
-    var pId = '';
-    if (formEl) {
-      var match = formEl.action.match(/products\/(\d+)/);
-      if (match) pId = match[1];
-    }
-
-    var url = '/products/check_variant_sku?sku=' + encodeURIComponent(sku);
-    if (variantId) url += '&variant_id=' + variantId;
-    if (pId) url += '&product_id=' + pId;
-
-    fetch(url)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        statusEl.style.display = 'block';
-        if (data.available) {
-          statusEl.style.color = '#28a745';
-          statusEl.textContent = '\u2713 SKU disponibil';
-        } else {
-          input.value = data.sku;
-          statusEl.style.color = '#dc8a00';
-          statusEl.textContent = '\u26A0 SKU ocupat, sugerat: ' + data.sku;
-        }
-      })
-      .catch(function() { statusEl.style.display = 'none'; });
-  }
-
-  // Click pe butonul Auto la varianta -> reset si regenereaza
-  document.addEventListener('click', function(e) {
-    if (!e.target.matches('.variant-sku-auto-btn')) return;
-    var topRow = e.target.closest('tr.variant-row-top');
-    if (!topRow) return;
-    var skuInput = topRow.querySelector('input.variant-sku');
-    if (skuInput) {
-      delete variantSkuManualEdits[skuInput.name];
-      e.target.style.display = 'none';
-      var statusEl = topRow.querySelector('.variant-sku-status');
-      if (statusEl) statusEl.style.display = 'none';
-      autoGenerateVariantSku(topRow);
-    }
-  });
-
-  // Cand se schimba numele produsului -> regenereaza SKU-uri variante (bazat pe nume)
-  function regenerateAllVariantSkus() {
-    var topRows = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)');
-    topRows.forEach(function(topRow) { autoGenerateVariantSku(topRow); });
-  }
-
-  nameField.addEventListener('input', function() { regenerateAllVariantSkus(); });
-  skuField.addEventListener('input', function() { regenerateAllVariantSkus(); });
-});
-</script>

@@ -24,7 +24,7 @@
       <% (option_types || []).each do |ot| %>
         <div class="variant-option-select" style="display:inline-block; margin-right:8px;">
           <label class="variant-option-label"><%= ot.name %></label>
-          <select name="<%= f.object_name %>[option_value_ids][]" class="variant-input">
+          <select name="<%= f.object_name %>[option_value_ids][]" class="variant-input" data-action="change->product-autogen#variantOptionChanged">
             <option value="">-- alege --</option>
             <% ot.option_values.each do |ov| %>
               <option value="<%= ov.id %>" <%= 'selected' if current_ov_ids.include?(ov.id.to_s) %>><%= ov.display_name %></option>
@@ -39,8 +39,10 @@
   <td colspan="3">
     <label class="variant-field-label">SKU</label>
     <div style="display:flex; gap:4px; align-items:center;">
-      <%= f.text_field :sku, placeholder: 'SKU-001', class: 'variant-input variant-sku', style: 'flex:1;', data: { variant_id: variant.persisted? ? variant.id : '' } %>
-      <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare">&#8635;</button>
+      <%= f.text_field :sku, placeholder: 'SKU-001', class: 'variant-input variant-sku', style: 'flex:1;',
+          data: { variant_id: variant.persisted? ? variant.id : '', action: "input->product-autogen#variantSkuChanged blur->product-autogen#variantSkuBlur" } %>
+      <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare"
+              data-action="click->product-autogen#resetVariantSku">&#8635;</button>
     </div>
     <small class="variant-sku-status" style="display:none; margin-top:2px; font-size:11px;"></small>
   </td>
@@ -67,19 +69,19 @@
       <% if variant.external_image_url.present? %>
         <div class="variant-gallery-item" data-role="main">
           <img src="<%= variant.external_image_url %>" class="variant-thumb">
-          <button type="button" class="remove-btn remove-variant-img" data-role="main">&times;</button>
+          <button type="button" class="remove-btn" data-action="click->product-variants#removeVariantImage" data-role="main">&times;</button>
           <span class="variant-img-label">P</span>
         </div>
       <% end %>
       <% (variant.external_image_urls || []).each do |url| %>
         <div class="variant-gallery-item" data-role="secondary" data-url="<%= url %>">
           <img src="<%= url %>" class="variant-thumb">
-          <button type="button" class="remove-btn remove-variant-img" data-role="secondary">&times;</button>
+          <button type="button" class="remove-btn" data-action="click->product-variants#removeVariantImage" data-role="secondary">&times;</button>
         </div>
       <% end %>
     </div>
-    <input type="file" accept="image/*" multiple class="variant-image-input" />
-    <label class="variant-add-img-btn" title="Adauga imagini">+</label>
+    <input type="file" accept="image/*" multiple class="variant-image-input" data-action="change->product-variants#uploadVariantImages" />
+    <label class="variant-add-img-btn" title="Adauga imagini" data-action="click->product-variants#triggerFileInput">+</label>
   </td>
 
   <%# Pret vanzare %>
@@ -136,11 +138,11 @@
 
   <%# Actiuni %>
   <td style="white-space:nowrap;">
-    <button type="button" class="btn btn-secondary btn-sm btn-duplicate-variant" title="Duplica varianta" style="margin-right:4px;">&#x2398;</button>
+    <button type="button" class="btn btn-info btn-sm" title="Duplica varianta" style="margin-right:4px; font-size:12px;" data-action="click->product-variants#duplicateVariant">Duplica</button>
     <% if has_orders %>
       <span class="variant-lock" title="Varianta are comenzi asociate">&#128274;</span>
     <% else %>
-      <button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button>
+      <button type="button" class="btn btn-danger btn-sm" title="Sterge varianta" data-action="click->product-variants#removeVariant">&times;</button>
     <% end %>
   </td>
 </tr>
