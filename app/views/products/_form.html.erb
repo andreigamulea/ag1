@@ -484,7 +484,7 @@
       </div>
     </div>
 
-    <div class="form-actions">
+    <div class="form-actions form-actions-sticky">
       <%= link_to "Anulează", products_path, class: "btn btn-secondary" %>
       <%= form.submit "Salvează produsul", class: "btn btn-primary" %>
     </div>
@@ -560,40 +560,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return div;
   };
 
+  // Upload status helper
+  const showUploadStatus = (container, message, isError) => {
+    let status = container.querySelector('.upload-status');
+    if (!status) {
+      status = document.createElement('div');
+      status.className = 'upload-status';
+      status.style.cssText = 'padding:6px 12px;margin-top:6px;border-radius:4px;font-size:13px;font-weight:500;';
+      container.appendChild(status);
+    }
+    status.textContent = message;
+    status.style.background = isError ? '#f8d7da' : '#d1ecf1';
+    status.style.color = isError ? '#721c24' : '#0c5460';
+    if (!isError && !message) status.remove();
+  };
+
+  const clearUploadStatus = (container) => {
+    const status = container.querySelector('.upload-status');
+    if (status) status.remove();
+  };
+
   if (mainInput) {
     mainInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
+      const parentField = mainInput.closest('.form-field');
 
-      const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
-      const { upload_url, headers } = await res.json();
-
-      const upload = await fetch(upload_url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": headers["Content-Type"],
-          "AccessKey": headers["AccessKey"]
-        },
-        body: file
-      });
-
-      if (upload.ok) {
-        const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
-        const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
-
-        mainHidden.value = cdnUrl;
-        mainPreview.innerHTML = "";
-        mainPreview.appendChild(createImageElement(cdnUrl, "main"));
-      }
-    });
-  }
-
-  if (secondaryInput) {
-    secondaryInput.addEventListener("change", async () => {
-      const existingInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
-      let currentIndex = existingInputs.length;
-
-      for (const file of secondaryInput.files) {
+      showUploadStatus(parentField, 'Se incarca imaginea...', false);
+      try {
         const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
         const { upload_url, headers } = await res.json();
 
@@ -610,22 +604,67 @@ document.addEventListener("DOMContentLoaded", () => {
           const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
           const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
 
-          const existingImgs = secondaryPreview.querySelectorAll("img");
-          const alreadyExists = Array.from(existingImgs).some(img => img.src === cdnUrl);
-          if (alreadyExists) continue;
-
-          const hidden = document.createElement("input");
-          hidden.type = "hidden";
-          hidden.name = "product[external_image_urls][]";
-          hidden.value = cdnUrl;
-          const externalContainer = document.getElementById("external-hidden-inputs");
-          externalContainer.appendChild(hidden);
-
-          secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
-          currentIndex++;
+          mainHidden.value = cdnUrl;
+          mainPreview.innerHTML = "";
+          mainPreview.appendChild(createImageElement(cdnUrl, "main"));
+          clearUploadStatus(parentField);
+        } else {
+          showUploadStatus(parentField, 'Eroare la upload. Incearca din nou.', true);
         }
+      } catch(err) {
+        showUploadStatus(parentField, 'Eroare la upload: ' + err.message, true);
+      }
+    });
+  }
+
+  if (secondaryInput) {
+    secondaryInput.addEventListener("change", async () => {
+      const parentField = secondaryInput.closest('.form-field');
+      const existingInputs = document.querySelectorAll("input[name='product[external_image_urls][]']");
+      let currentIndex = existingInputs.length;
+      const totalFiles = secondaryInput.files.length;
+      let uploaded = 0;
+
+      showUploadStatus(parentField, `Se incarca 0/${totalFiles} imagini...`, false);
+
+      for (const file of secondaryInput.files) {
+        try {
+          const res = await fetch(`/uploads/presign?filename=${encodeURIComponent(file.name)}`);
+          const { upload_url, headers } = await res.json();
+
+          const upload = await fetch(upload_url, {
+            method: "PUT",
+            headers: {
+              "Content-Type": headers["Content-Type"],
+              "AccessKey": headers["AccessKey"]
+            },
+            body: file
+          });
+
+          if (upload.ok) {
+            const path = new URL(upload_url).pathname.split('/').slice(2).join('/');
+            const cdnUrl = `https://ayus-cdn.b-cdn.net/${path}`;
+
+            const existingImgs = secondaryPreview.querySelectorAll("img");
+            const alreadyExists = Array.from(existingImgs).some(img => img.src === cdnUrl);
+            if (alreadyExists) { uploaded++; continue; }
+
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = "product[external_image_urls][]";
+            hidden.value = cdnUrl;
+            const externalContainer = document.getElementById("external-hidden-inputs");
+            externalContainer.appendChild(hidden);
+
+            secondaryPreview.appendChild(createImageElement(cdnUrl, "secondary", currentIndex));
+            currentIndex++;
+          }
+        } catch(err) {}
+        uploaded++;
+        showUploadStatus(parentField, `Se incarca ${uploaded}/${totalFiles} imagini...`, false);
       }
 
+      clearUploadStatus(parentField);
       secondaryInput.value = "";
     });
   }
@@ -798,7 +837,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td><label class="variant-field-label">TVA %</label><input type="number" name="${prefix}[vat_rate]" min="0" step="0.01" placeholder="0" value="0" class="variant-input variant-vat"></td>
         <td><label class="variant-field-label">Status</label><select name="${prefix}[status]" class="variant-input variant-status">${statusOpts}</select></td>
         <td><label class="variant-field-label">Sursa</label><br><span class="badge badge-new">Nou</span></td>
-        <td><button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button></td>
+        <td style="white-space:nowrap;"><button type="button" class="btn btn-secondary btn-sm btn-duplicate-variant" title="Duplica varianta" style="margin-right:4px;">&#x2398;</button><button type="button" class="btn btn-danger btn-sm btn-remove-variant" title="Sterge varianta">&times;</button></td>
       `;
 
       // Rand 3: Dimensiuni si Greutate
@@ -880,6 +919,75 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       topRow.remove();
     }
+  });
+
+  // ===== VARIANTE: Duplica varianta =====
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('btn-duplicate-variant')) return;
+    var bottomRow = e.target.closest('tr.variant-row-bottom');
+    if (!bottomRow) return;
+    var topRow = bottomRow.previousElementSibling;
+    var dimRow = bottomRow.nextElementSibling;
+    if (!topRow || !topRow.classList.contains('variant-row-top')) return;
+
+    // Click "Add variant" to create empty rows
+    if (addBtn) addBtn.click();
+
+    // Find the newly added rows (last 3 in tbody)
+    var allRows = tbody.querySelectorAll('tr.variant-row');
+    var newRows = [];
+    for (var i = allRows.length - 1; i >= 0 && newRows.length < 3; i--) {
+      newRows.unshift(allRows[i]);
+    }
+    var newTop = newRows[0], newBottom = newRows[1], newDim = newRows[2];
+    if (!newTop || !newBottom) return;
+
+    // Copy option selections
+    var srcSelects = topRow.querySelectorAll('select[name*="option_value_ids"]');
+    var dstSelects = newTop.querySelectorAll('select[name*="option_value_ids"]');
+    srcSelects.forEach(function(src, i) {
+      if (dstSelects[i]) dstSelects[i].value = src.value;
+    });
+
+    // Copy price fields from bottom row
+    var fieldsToCopy = ['price', 'cost_price', 'discount_price', 'stock', 'vat_rate'];
+    fieldsToCopy.forEach(function(field) {
+      var src = bottomRow.querySelector('input[name*="[' + field + ']"]');
+      var dst = newBottom.querySelector('input[name*="[' + field + ']"]');
+      if (src && dst) dst.value = src.value;
+    });
+
+    // Copy promo_active checkbox
+    var srcPromo = bottomRow.querySelector('input[type="checkbox"][name*="[promo_active]"]');
+    var dstPromo = newBottom.querySelector('input[type="checkbox"][name*="[promo_active]"]');
+    if (srcPromo && dstPromo) dstPromo.checked = srcPromo.checked;
+
+    // Copy status select
+    var srcStatus = bottomRow.querySelector('select[name*="[status]"]');
+    var dstStatus = newBottom.querySelector('select[name*="[status]"]');
+    if (srcStatus && dstStatus) dstStatus.value = srcStatus.value;
+
+    // Copy dimensions from dim row
+    if (dimRow && dimRow.classList.contains('variant-row-dimensions') && newDim) {
+      var dimFields = ['height', 'width', 'depth', 'weight'];
+      dimFields.forEach(function(field) {
+        var src = dimRow.querySelector('input[name*="[' + field + ']"]');
+        var dst = newDim.querySelector('input[name*="[' + field + ']"]');
+        if (src && dst) dst.value = src.value;
+      });
+    }
+
+    // Clear SKU (must be unique) and trigger auto-generation
+    var newSkuInput = newTop.querySelector('input.variant-sku');
+    if (newSkuInput) {
+      newSkuInput.value = '';
+      var autoBtn = newTop.querySelector('.variant-sku-auto-btn');
+      if (autoBtn) autoBtn.style.display = 'none';
+    }
+
+    // Clear EAN (must be unique)
+    var newEanInput = newTop.querySelector('input[name*="[ean]"]');
+    if (newEanInput) newEanInput.value = '';
   });
 
   // ===== VARIANTE: Buton "+" deschide file input ascuns =====
