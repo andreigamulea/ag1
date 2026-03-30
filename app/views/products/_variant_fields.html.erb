@@ -4,9 +4,10 @@
 <% is_new = variant.new_record? %>
 <% is_feed = !is_new && variant.respond_to?(:external_ids) && variant.external_ids.any? %>
 <% has_orders = !is_new && variant.respond_to?(:order_items) && variant.order_items.any? %>
+<% has_errors = variant.errors.any? %>
 
 <%# === RAND 1: Optiuni + SKU === %>
-<tr class="variant-row variant-row-top <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
+<tr class="variant-row variant-row-top <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %> <%= 'variant-has-errors' if has_errors %>"
     data-variant-id="<%= variant.id %>">
 
   <%# Hidden fields %>
@@ -53,7 +54,7 @@
 </tr>
 
 <%# === RAND 2: Imagine + Pret + Stoc + TVA + Status + Sursa + Actiuni === %>
-<tr class="variant-row variant-row-bottom <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
+<tr class="variant-row variant-row-bottom <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %> <%= 'variant-has-errors' if has_errors %>"
     data-variant-id="<%= variant.id %>">
 
   <%# Imagini %>
@@ -148,7 +149,7 @@
 </tr>
 
 <%# === RAND 3: Dimensiuni și Greutate === %>
-<tr class="variant-row variant-row-dimensions <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %>"
+<tr class="variant-row variant-row-dimensions <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %> <%= 'variant-has-errors' if has_errors %>"
     data-variant-id="<%= variant.id %>">
   <td colspan="10" style="padding: 6px 12px; background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
     <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">

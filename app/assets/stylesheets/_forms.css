@@ -511,6 +511,16 @@ select.form-control {
   border-top: 1px solid var(--color-gray-200);
 }
 
+.variant-row.variant-has-errors {
+  background: #fff5f5 !important;
+}
+.variant-row-top.variant-has-errors {
+  border-top: 2px solid #dc3545;
+}
+.variant-row-dimensions.variant-has-errors td {
+  background: #fff5f5 !important;
+}
+
 .form-actions-sticky {
   position: sticky;
   bottom: 0;

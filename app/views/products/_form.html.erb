@@ -5,10 +5,18 @@
 
     <% if product.errors.any? %>
       <div class="alert-danger">
-        <h4><%= pluralize(product.errors.count, "error") %> prohibited this product from being saved:</h4>
+        <h4><%= pluralize(product.errors.count, "eroare", "erori") %>:</h4>
         <ul>
-          <% product.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
+          <% product.errors.each do |error| %>
+            <% next if error.attribute.to_s.start_with?('variants') %>
+            <li><%= error.full_message %></li>
+          <% end %>
+          <% product.variants.reject(&:marked_for_destruction?).each_with_index do |v, i| %>
+            <% next unless v.errors.any? %>
+            <% label = v.sku.present? ? v.sku : (v.respond_to?(:options_text) && v.options_text.present? ? v.options_text : "Varianta ##{i + 1}") %>
+            <% v.errors.full_messages.each do |msg| %>
+              <li><strong><%= label %></strong>: <%= msg %></li>
+            <% end %>
           <% end %>
         </ul>
       </div>

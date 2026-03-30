@@ -24,5 +24,5 @@
 #   # config.content_security_policy_report_only = true
 # end
 Rails.application.config.content_security_policy do |policy|
-  policy.script_src *policy.script_src, :unsafe_inline  # Permite inline JS
+  policy.script_src :self, :unsafe_inline, "https://cdn.jsdelivr.net"
 end
