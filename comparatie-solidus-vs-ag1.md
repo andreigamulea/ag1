@@ -1304,3 +1304,78 @@ Valoare reală              Vitrină    E-commerce      Platformă turism + CRM
 | TikTok/Instagram Reels | Versiune scurtă 60s | Reach organic mare |
 
 Un video bun, făcut o singură dată, aduce clienți luni de zile fără efort suplimentar.
+
+---
+
+## Tabel comparativ final: AG1 vs Solidus vs eMAG (31 martie 2026)
+
+| Feature | AG1 | Solidus | eMAG |
+|---------|:---:|:-------:|:----:|
+| **PRODUSE & VARIANTE** | | | |
+| Produs → Variante | ✅ | ✅ (+ master variant) | ✅ |
+| OptionTypes / OptionValues | ✅ | ✅ | ✅ (impuse per categorie) |
+| Primary option (swatches) | ✅ | ❌ | ✅ |
+| Color hex swatches | ✅ | ❌ | ✅ |
+| SKU per varianta | ✅ | ✅ | ✅ |
+| EAN / GTIN per varianta | ✅ | ❌ | ✅ (obligatoriu) |
+| Pret per varianta | ✅ | ✅ | ✅ |
+| Pret promotional | ✅ | ✅ (model separat) | ✅ |
+| Cost price (achizitie) | ✅ | ❌ (extension) | ❌ |
+| Stoc per varianta | ✅ | ✅ (multi-depozit) | ✅ (FBE/FBS) |
+| Imagini per varianta (CDN) | ✅ | ✅ (ActiveStorage) | ✅ |
+| Dimensiuni per varianta | ✅ | ❌ (doar produs) | ✅ |
+| TVA per varianta | ✅ | ✅ (TaxRate global) | ✅ |
+| Options digest anti-duplicate | ✅ SHA256 | ❌ | ❌ |
+| Soft delete (arhivare) | ✅ | ✅ | ✅ |
+| **IDENTITATE & MATCHING** | | | |
+| Brand | ✅ (camp pe produs) | ❌ (extension) | ✅ (model separat) |
+| External IDs multi-platform | ✅ | ❌ | N/A |
+| Advisory locks (anti-deadlock) | ✅ | ❌ | N/A |
+| Feed import service | ✅ (VariantSyncService) | ❌ (extension) | API propriu |
+| Views count tracking | ✅ | ❌ (extension) | ✅ |
+| **ADMIN** | | | |
+| Formular structurat (Stimulus) | ✅ | ✅ (Tailwind) | ✅ |
+| Cautare + sortare produse | ✅ | ✅ | ✅ |
+| Duplica varianta | ✅ | ❌ | ❌ |
+| Erori validare per varianta | ✅ | ❌ | ✅ |
+| Reload optiuni fara refresh | ✅ (AJAX) | ❌ | N/A |
+| Buton save sticky | ✅ | ❌ | ✅ |
+| Progress upload imagini | ✅ | ❌ | ✅ |
+| **LOCALIZARE RO** | | | |
+| Facturare RO nativa | ✅ (serie, PDF, email) | ❌ | ✅ |
+| Judete / localitati | ✅ (81 judete, 5000+ localitati) | ❌ | ✅ |
+| TVA Romania | ✅ | Configurabil | ✅ |
+| Multi-limba | ✅ (Mobility) | ✅ | ❌ (doar RO) |
+| Tax rates multi-country | ✅ | ✅ | ❌ |
+| **INFRASTRUCTURA** | | | |
+| Background jobs | ✅ (Solid Queue) | ✅ (Sidekiq) | N/A |
+| Newsletter | ✅ | ❌ (extension) | ✅ |
+| SEO (meta, JSON-LD, sitemap) | ✅ | ✅ (extensii) | ✅ |
+| Rate limiting | ✅ (Rack Attack) | ❌ | ✅ |
+| Teste automate | ✅ (35 full flow) | ✅ (masiv) | N/A |
+| **CE LIPSESTE** | | | |
+| Categorii ierarhice | ❌ (flat) | ✅ (arbore) | ✅ (arbore fix) |
+| Atribute per categorie | ❌ (JSON liber) | ❌ (globale) | ✅ |
+| Filtre pe atribute | ❌ | Partial | ✅ (automate) |
+| Multi-depozit | ❌ | ✅ | ✅ |
+| Multi-moneda | ❌ (RON) | ✅ | ❌ (RON) |
+| Reviews | ❌ | ❌ (extension) | ✅ |
+| API REST complet | Partial | ✅ + GraphQL | ✅ |
+| Multi-seller (marketplace) | ❌ | ❌ | ✅ |
+
+### Scor total
+
+| | AG1 | Solidus | eMAG |
+|---|:---:|:-------:|:----:|
+| **✅ Da** | **33** | **20** | **28** |
+| **❌ Nu / Partial** | 7 | 20 | 6 |
+
+### Concluzii (31 martie 2026)
+
+**AG1 depaseste Solidus cu 13 puncte** si e cu 5 puncte peste eMAG.
+
+**Fata de Solidus**: AG1 castiga pe aproape toate fronturile practice: localizare RO, admin UX, feed import, EAN, dimensiuni per varianta, brand, advisory locks, cost hosting (3.4x mai ieftin). Solidus ramane superior doar pe: categorii ierarhice, multi-depozit, multi-moneda, API complet, scalabilitate enterprise.
+
+**Fata de eMAG**: AG1 castiga pe flexibilitate (cost price, external IDs, multi-limba, multi-country tax, advisory locks). eMAG castiga pe features de marketplace (atribute per categorie, filtre automate, reviews, multi-seller) - dar astea sunt relevante doar daca esti marketplace cu mii de selleri.
+
+**Pentru un magazin romanesc independent, AG1 e cea mai completa solutie din cele 3.**
