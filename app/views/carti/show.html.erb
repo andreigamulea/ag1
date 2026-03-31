@@ -491,8 +491,14 @@ function bindQuantityControls() {
     input.value = value;
   }
 
-  decreaseBtn.addEventListener('click', () => adjustQty(-1));
-  increaseBtn.addEventListener('click', () => adjustQty(1));
+  // Clone buttons to remove any previously attached listeners
+  const newDecrease = decreaseBtn.cloneNode(true);
+  const newIncrease = increaseBtn.cloneNode(true);
+  decreaseBtn.parentNode.replaceChild(newDecrease, decreaseBtn);
+  increaseBtn.parentNode.replaceChild(newIncrease, increaseBtn);
+
+  newDecrease.addEventListener('click', () => adjustQty(-1));
+  newIncrease.addEventListener('click', () => adjustQty(1));
 }
 
 // Variant selector logic (swatches primary + buttons secondary)
