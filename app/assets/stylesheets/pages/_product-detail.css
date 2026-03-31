@@ -162,9 +162,39 @@
 }
 
 .product-view .product-description {
-  line-height: 1.5;
+  line-height: 1.6;
   max-height: 255px;
   overflow-y: auto;
+  background: #faf8f5;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+}
+
+.product-view .product-description strong {
+  display: block;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-xs);
+}
+
+.product-view .variant-description {
+  line-height: 1.6;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #f5f0eb;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid #d4a574;
+  font-size: var(--font-size-base);
+  color: var(--color-gray-800);
+}
+
+.product-view .variant-description strong {
+  display: block;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: #8b5e3c;
+  margin-bottom: var(--spacing-xs);
 }
 
 /* Badges */
