@@ -126,7 +126,76 @@ export default class extends Controller {
     if (this.hasSectionInventoryTarget) this.sectionInventoryTarget.style.display = on ? 'none' : ''
     if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = on ? 'none' : ''
     if (this.hasVariantWarningTarget) this.variantWarningTarget.style.display = on ? '' : 'none'
+
+    // Cand bifeaza variante, goleste campurile de pret/stoc/dimensiuni la nivel de produs
+    if (on) {
+      this._clearProductFields()
+      this._showToggleWarning('Pretul si stocul se vor gestiona la nivel de varianta. Completeaza-le in tab-ul Variante.')
+    }
+
+    // Cand debifeaza variante, verifica daca exista variante active
+    if (!on) {
+      const activeVariants = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)')
+      if (activeVariants.length > 0) {
+        // Nu permite debifarea - rebifeaza si avertizeaza
+        this.toggleVariantsTarget.checked = true
+        this._showToggleWarning('Nu poti debifeaza "Are variante?" cat timp ai variante. Sterge mai intai toate variantele din tab-ul Variante.')
+        // Re-ascunde campurile de produs
+        if (this.hasSectionPricesTarget) this.sectionPricesTarget.style.display = 'none'
+        if (this.hasSectionInventoryTarget) this.sectionInventoryTarget.style.display = 'none'
+        if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = 'none'
+        return
+      }
+      this._hideToggleWarning()
+    }
+
     this.updateTabAccess()
+  }
+
+  _clearProductFields() {
+    // Goleste campuri text/number
+    const fields = ['product_price', 'product_cost_price', 'product_discount_price',
+                    'product_vat', 'product_stock', 'product_height', 'product_width',
+                    'product_depth', 'product_weight']
+    fields.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.value = ''
+    })
+
+    // Debifeza checkboxuri
+    const checkboxes = ['product_promo_active', 'product_taxable', 'product_coupon_applicable',
+                        'product_track_inventory', 'product_sold_individually']
+    checkboxes.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.checked = false
+    })
+
+    // Reset selecturi la prima optiune
+    const selects = ['product_stock_status']
+    selects.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.selectedIndex = 0
+    })
+  }
+
+  _showToggleWarning(message) {
+    const toggle = document.getElementById('section-variants-toggle')
+    if (!toggle) return
+    let warning = toggle.querySelector('.toggle-warning')
+    if (!warning) {
+      warning = document.createElement('div')
+      warning.className = 'toggle-warning'
+      warning.style.cssText = 'padding:8px 12px;margin-top:8px;border-radius:4px;font-size:13px;font-weight:500;background:#fff3cd;color:#856404;border:1px solid #ffc107;'
+      toggle.querySelector('.section-body').appendChild(warning)
+    }
+    warning.textContent = message
+  }
+
+  _hideToggleWarning() {
+    const toggle = document.getElementById('section-variants-toggle')
+    if (!toggle) return
+    const warning = toggle.querySelector('.toggle-warning')
+    if (warning) warning.remove()
   }
 
   _hasPrimaryOptionSelected() {
