@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_30_234855) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_31_130004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -519,6 +519,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_234855) do
     t.integer "depth"
     t.integer "weight"
     t.string "ean"
+    t.string "description_title"
+    t.text "description"
     t.index ["ean"], name: "idx_unique_ean", unique: true, where: "((ean IS NOT NULL) AND ((ean)::text <> ''::text))"
     t.index ["external_sku"], name: "idx_unique_external_sku", unique: true, where: "(external_sku IS NOT NULL)"
     t.index ["product_id", "options_digest"], name: "idx_unique_active_options_per_product", unique: true, where: "((options_digest IS NOT NULL) AND (status = 0))"

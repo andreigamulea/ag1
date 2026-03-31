@@ -148,7 +148,24 @@
   </td>
 </tr>
 
-<%# === RAND 3: Dimensiuni și Greutate === %>
+<%# === RAND 3: Descriere variantă === %>
+<tr class="variant-row variant-row-description <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %> <%= 'variant-has-errors' if has_errors %>"
+    data-variant-id="<%= variant.id %>">
+  <td colspan="10" style="padding: 6px 12px; background: #f8f9fa;">
+    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <label class="variant-field-label">Titlu descriere</label>
+        <%= f.text_field :description_title, placeholder: 'Titlu pentru sectiunea de descriere', class: 'variant-input', style: 'width:100%;' %>
+      </div>
+      <div style="flex:2; min-width:300px;">
+        <label class="variant-field-label">Descriere</label>
+        <%= f.text_area :description, placeholder: 'Descriere detaliata a variantei...', class: 'variant-input', style: 'width:100%; min-height:60px;' %>
+      </div>
+    </div>
+  </td>
+</tr>
+
+<%# === RAND 4: Dimensiuni și Greutate === %>
 <tr class="variant-row variant-row-dimensions <%= 'variant-new' if is_new %> <%= 'variant-inactive' if variant.inactive? %> <%= 'variant-has-errors' if has_errors %>"
     data-variant-id="<%= variant.id %>">
   <td colspan="10" style="padding: 6px 12px; background: #f8f9fa; border-bottom: 2px solid #dee2e6;">

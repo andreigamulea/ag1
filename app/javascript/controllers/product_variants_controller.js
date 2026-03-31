@@ -71,8 +71,25 @@ export default class extends Controller {
     `
 
     const tr3 = document.createElement('tr')
-    tr3.className = 'variant-row variant-row-dimensions variant-new'
+    tr3.className = 'variant-row variant-row-description variant-new'
     tr3.innerHTML = `
+      <td colspan="10" style="padding: 6px 12px; background: #f8f9fa;">
+        <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <label class="variant-field-label">Titlu descriere</label>
+            <input type="text" name="${prefix}[description_title]" placeholder="Titlu pentru sectiunea de descriere" class="variant-input" style="width:100%;">
+          </div>
+          <div style="flex:2; min-width:300px;">
+            <label class="variant-field-label">Descriere</label>
+            <textarea name="${prefix}[description]" placeholder="Descriere detaliata a variantei..." class="variant-input" style="width:100%; min-height:60px;"></textarea>
+          </div>
+        </div>
+      </td>
+    `
+
+    const tr4 = document.createElement('tr')
+    tr4.className = 'variant-row variant-row-dimensions variant-new'
+    tr4.innerHTML = `
       <td colspan="10" style="padding: 6px 12px; background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
         <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
           <span style="font-size:12px; font-weight:600; color:#666;">Dimensiuni:</span>
@@ -87,6 +104,7 @@ export default class extends Controller {
     tbody.appendChild(tr1)
     tbody.appendChild(tr2)
     tbody.appendChild(tr3)
+    tbody.appendChild(tr4)
   }
 
   // ===== REMOVE VARIANT =====
@@ -96,7 +114,9 @@ export default class extends Controller {
     let topRow = bottomRow ? bottomRow.previousElementSibling : e.target.closest('tr.variant-row-top')
     if (!topRow) return
     const realBottom = bottomRow || topRow.nextElementSibling
-    const dimRow = realBottom ? realBottom.nextElementSibling : null
+    const descRow = realBottom ? realBottom.nextElementSibling : null
+    const hasDescRow = descRow && descRow.classList.contains('variant-row-description')
+    const dimRow = hasDescRow ? descRow.nextElementSibling : (descRow && descRow.classList.contains('variant-row-dimensions') ? descRow : null)
     const hasDimRow = dimRow && dimRow.classList.contains('variant-row-dimensions')
     const idField = topRow.querySelector('input[name$="[id]"]')
     const destroyFlag = topRow.querySelector('.destroy-flag')
@@ -109,9 +129,11 @@ export default class extends Controller {
         realBottom.classList.add('variant-destroyed')
         realBottom.style.display = 'none'
       }
+      if (hasDescRow) { descRow.classList.add('variant-destroyed'); descRow.style.display = 'none' }
       if (hasDimRow) { dimRow.classList.add('variant-destroyed'); dimRow.style.display = 'none' }
     } else {
       if (hasDimRow) dimRow.remove()
+      if (hasDescRow) descRow.remove()
       if (realBottom && realBottom.classList.contains('variant-row-bottom')) realBottom.remove()
       topRow.remove()
     }
@@ -123,15 +145,17 @@ export default class extends Controller {
     const bottomRow = e.target.closest('tr.variant-row-bottom')
     if (!bottomRow) return
     const topRow = bottomRow.previousElementSibling
-    const dimRow = bottomRow.nextElementSibling
+    const descRow = bottomRow.nextElementSibling
+    const hasDescRow = descRow && descRow.classList.contains('variant-row-description')
+    const dimRow = hasDescRow ? descRow.nextElementSibling : descRow
     if (!topRow || !topRow.classList.contains('variant-row-top')) return
 
     this.addVariant()
 
     const allRows = this.tbodyTarget.querySelectorAll('tr.variant-row')
     const newRows = []
-    for (let i = allRows.length - 1; i >= 0 && newRows.length < 3; i--) newRows.unshift(allRows[i])
-    const [newTop, newBottom, newDim] = newRows
+    for (let i = allRows.length - 1; i >= 0 && newRows.length < 4; i--) newRows.unshift(allRows[i])
+    const [newTop, newBottom, newDesc, newDim] = newRows
     if (!newTop || !newBottom) return
 
     // Copy options
@@ -153,6 +177,16 @@ export default class extends Controller {
     const srcStatus = bottomRow.querySelector('select[name*="[status]"]')
     const dstStatus = newBottom.querySelector('select[name*="[status]"]')
     if (srcStatus && dstStatus) dstStatus.value = srcStatus.value
+
+    // Copy description
+    if (hasDescRow && newDesc) {
+      const srcTitle = descRow.querySelector('input[name*="[description_title]"]')
+      const dstTitle = newDesc.querySelector('input[name*="[description_title]"]')
+      if (srcTitle && dstTitle) dstTitle.value = srcTitle.value
+      const srcDesc = descRow.querySelector('textarea[name*="[description]"]')
+      const dstDesc = newDesc.querySelector('textarea[name*="[description]"]')
+      if (srcDesc && dstDesc) dstDesc.value = srcDesc.value
+    }
 
     // Copy dimensions
     if (dimRow && dimRow.classList.contains('variant-row-dimensions') && newDim) {
