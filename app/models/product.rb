@@ -27,8 +27,12 @@ class Product < ApplicationRecord
 
   before_validation :generate_slug
 
-  validates :name, :slug, :sku, presence: true
-  validates :price, presence: true, unless: :has_any_variants?
+  validates :name, presence: true, length: { minimum: 2 }
+  validates :slug, presence: true, uniqueness: true
+  validates :sku, presence: true, uniqueness: true
+  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }, unless: :has_any_variants?
+  validates :stock, presence: true, numericality: { greater_than_or_equal_to: 0, only_integer: true }, unless: :has_any_variants?
+  validates :vat, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validate :must_have_one_primary_option_type, if: :has_active_variants?
   validate :no_duplicate_variant_options
 

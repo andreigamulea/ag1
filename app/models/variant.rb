@@ -13,6 +13,9 @@ class Variant < ApplicationRecord
   validates :sku, uniqueness: { scope: :product_id }
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :stock, presence: true, numericality: { greater_than_or_equal_to: 0, only_integer: true }
+  validates :vat_rate, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :ean, format: { with: /\A\d{8}(\d{5})?\z/, message: "trebuie sa fie 8 sau 13 cifre" }, allow_blank: true
+  validates :ean, uniqueness: true, allow_blank: true
 
   before_save :compute_options_digest
 
