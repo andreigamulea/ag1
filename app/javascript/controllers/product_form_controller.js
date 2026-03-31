@@ -130,15 +130,18 @@ export default class extends Controller {
     if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = on ? 'none' : ''
     if (this.hasVariantWarningTarget) this.variantWarningTarget.style.display = on ? '' : 'none'
 
-    // Cand bifeaza variante
+    // Cand bifeaza variante - blocheaza daca are date de produs completate
     if (on) {
       const hasProductData = this._hasProductFieldsFilled()
       if (hasProductData) {
-        this._showToggleWarning('Datele de pret, stoc si dimensiuni au fost sterse. Se vor gestiona la nivel de varianta in tab-ul Variante.')
-      } else {
-        this._showToggleWarning('Pretul si stocul se vor gestiona la nivel de varianta. Completeaza-le in tab-ul Variante.')
+        this.toggleVariantsTarget.checked = false
+        this._showToggleWarning('Goleste campurile de pret, stoc si dimensiuni si salveaza produsul, apoi bifeaza "Are variante?".')
+        if (this.hasSectionPricesTarget) this.sectionPricesTarget.style.display = ''
+        if (this.hasSectionInventoryTarget) this.sectionInventoryTarget.style.display = ''
+        if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = ''
+        return
       }
-      this._clearProductFields()
+      this._hideToggleWarning()
     }
 
     // Cand debifeaza variante - blocheaza mereu, trebuie sa stearga variantele si sa salveze
