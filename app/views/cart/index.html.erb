@@ -1,10 +1,10 @@
 <%= render 'shared/noindex' %>
-<div class="cart-container">
-  <h1>Coșul tău</h1>
+<div class="cart-container" data-controller="cart">
+  <h1>Cosul tau</h1>
 
-  <!-- Lista articolelor din coș -->
+  <!-- Lista articolelor din cos -->
   <% if @cart_items.any? %>
-    <%= form_tag update_all_cart_index_path, method: :post, class: "cart-form", data: { turbo: false } do %>
+    <%= form_tag update_all_cart_index_path, method: :post, class: "cart-form", data: { turbo: false, action: "submit->cart#submitForm" } do %>
       <section class="cart-items">
         <ul class="cart-item-list">
           <% @cart_items.each do |item| %>
@@ -19,13 +19,13 @@
 
                 <!-- Counter pentru cantitate -->
                 <div class="quantity-counter">
-                  <button type="button" class="qty-btn qty-minus" data-cart-key="<%= item[:cart_key] %>">−</button>
+                  <button type="button" class="qty-btn qty-minus" data-cart-key="<%= item[:cart_key] %>" data-action="click->cart#minus">−</button>
                   <%= number_field_tag "quantities[#{item[:cart_key]}]",
                       item[:quantity],
                       min: 1,
                       class: "qty-input",
                       data: { cart_key: item[:cart_key] } %>
-                  <button type="button" class="qty-btn qty-plus" data-cart-key="<%= item[:cart_key] %>">+</button>
+                  <button type="button" class="qty-btn qty-plus" data-cart-key="<%= item[:cart_key] %>" data-action="click->cart#plus">+</button>
                 </div>
 
                 <span class="cart-item-price">
@@ -38,7 +38,7 @@
               <button type="button"
                       class="btn btn-danger cart-item-delete"
                       data-cart-key="<%= item[:cart_key] %>"
-                      data-remove-product>X</button>
+                      data-action="click->cart#remove">X</button>
             </li>
           <% end %>
         </ul>
@@ -130,8 +130,8 @@
 </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+<%#
+  Cart JS moved to cart_controller.js (Stimulus)
   // +/- buttons use data-cart-key
   const qtyMinusButtons = document.querySelectorAll('.qty-minus');
   const qtyPlusButtons = document.querySelectorAll('.qty-plus');
@@ -199,5 +199,4 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   });
-});
-</script>
+%>
