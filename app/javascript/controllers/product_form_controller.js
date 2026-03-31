@@ -141,18 +141,30 @@ export default class extends Controller {
       this._clearProductFields()
     }
 
-    // Cand debifeaza variante - blocheaza daca exista variante
+    // Cand debifeaza variante - blocheaza mereu, trebuie sa stearga variantele si sa salveze
     if (!on) {
       const activeVariants = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)')
+      const destroyedVariants = document.querySelectorAll('tr.variant-row-top.variant-destroyed')
+
       if (activeVariants.length > 0) {
+        // Are variante active - trebuie sterse mai intai
         this.toggleVariantsTarget.checked = true
-        this._showToggleWarning('Nu poti debifeaza "Are variante?" cat timp ai variante. Sterge mai intai toate variantele din tab-ul Variante.')
+        this._showToggleWarning('Sterge mai intai toate variantele din tab-ul Variante, apoi salveaza.')
+      } else if (destroyedVariants.length > 0) {
+        // Variantele sunt marcate pt stergere dar nu sunt salvate
+        this.toggleVariantsTarget.checked = true
+        this._showToggleWarning('Variantele sunt marcate pentru stergere. Salveaza produsul pentru a confirma stergerea.')
+      } else {
+        // Nu sunt variante deloc - permite debifarea
+        this._hideToggleWarning()
+      }
+
+      if (this.toggleVariantsTarget.checked) {
         if (this.hasSectionPricesTarget) this.sectionPricesTarget.style.display = 'none'
         if (this.hasSectionInventoryTarget) this.sectionInventoryTarget.style.display = 'none'
         if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = 'none'
         return
       }
-      this._hideToggleWarning()
     }
 
     this.updateTabAccess()
