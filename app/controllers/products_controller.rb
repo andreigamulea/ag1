@@ -485,9 +485,10 @@ class ProductsController < ApplicationController
       if primary_id > 0 && ot_ids.include?(primary_id)
         product.product_option_types.update_all(primary: false)
         product.product_option_types.where(option_type_id: primary_id).update_all(primary: true)
-      elsif product.product_option_types.where(primary: true).none? && product.product_option_types.any?
+      elsif product.product_option_types.reload.where(primary: true).none? && product.product_option_types.any?
         # Auto-select first if none set
-        product.product_option_types.order(:position).first.update!(primary: true)
+        first_pot = product.product_option_types.order(:position).first
+        first_pot.update!(primary: true) if first_pot
       end
     end
 
