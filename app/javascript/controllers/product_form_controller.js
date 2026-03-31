@@ -14,19 +14,61 @@ export default class extends Controller {
 
   connect() {
     this.updateVariantSections()
+    this.updateTabAccess()
   }
 
   // ===== TABS =====
 
+  _hasBasicInfo() {
+    const nameEl = this.element.querySelector('#product_name')
+    const skuEl = this.element.querySelector('#product_sku')
+    return nameEl && nameEl.value.trim().length >= 2 && skuEl && skuEl.value.trim().length >= 1
+  }
+
+  _hasVariantsEnabled() {
+    return this.hasToggleVariantsTarget && this.toggleVariantsTarget.checked
+  }
+
+  updateTabAccess() {
+    const hasBasic = this._hasBasicInfo()
+    const hasVariants = this._hasVariantsEnabled()
+
+    this.element.querySelectorAll('.product-tab').forEach(tab => {
+      const tabId = tab.dataset.tab
+      if (tabId === 'tab-product') {
+        tab.classList.remove('tab-disabled')
+        return
+      }
+      if (tabId === 'tab-variants') {
+        const enabled = hasBasic && hasVariants
+        tab.classList.toggle('tab-disabled', !enabled)
+        return
+      }
+      // Media, Organizare, SEO - need basic info
+      tab.classList.toggle('tab-disabled', !hasBasic)
+    })
+  }
+
   switchTab(e) {
-    const tabId = e.currentTarget.dataset.tab
+    const tab = e.currentTarget
+    if (tab.classList.contains('tab-disabled')) {
+      const hasBasic = this._hasBasicInfo()
+      if (!hasBasic) {
+        alert('Completeaza mai intai Numele si SKU-ul produsului.')
+      } else if (tab.dataset.tab === 'tab-variants' && !this._hasVariantsEnabled()) {
+        alert('Bifeaza "Are variante?" in tab-ul Produs.')
+      }
+      return
+    }
+
+    const tabId = tab.dataset.tab
 
     // Deactivate all tabs and panels
     this.element.querySelectorAll('.product-tab').forEach(t => t.classList.remove('active'))
     this.element.querySelectorAll('.product-tab-panel').forEach(p => p.classList.remove('active'))
 
     // Activate clicked tab and panel
-    e.currentTarget.classList.add('active')
+    tab.classList.add('active')
     const panel = this.element.querySelector('#' + tabId)
     if (panel) panel.classList.add('active')
   }
@@ -84,6 +126,7 @@ export default class extends Controller {
     if (this.hasSectionInventoryTarget) this.sectionInventoryTarget.style.display = on ? 'none' : ''
     if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = on ? 'none' : ''
     if (this.hasVariantWarningTarget) this.variantWarningTarget.style.display = on ? '' : 'none'
+    this.updateTabAccess()
   }
 
   _hasPrimaryOptionSelected() {

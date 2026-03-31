@@ -546,6 +546,12 @@ select.form-control {
   border-bottom-color: #8b0000;
 }
 
+.product-tab.tab-disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
 .product-tab-panel {
   display: none;
 }

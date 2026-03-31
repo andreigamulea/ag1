@@ -47,7 +47,7 @@
             <div class="form-field">
               <%= form.label :name, "Nume produs" %>
               <%= form.text_field :name, placeholder: "Nume produs", id: "product_name",
-                  data: { product_autogen_target: "name", action: "input->product-autogen#nameChanged" } %>
+                  data: { product_autogen_target: "name", action: "input->product-autogen#nameChanged input->product-form#updateTabAccess" } %>
             </div>
             <div class="form-field">
               <%= form.label :slug, "URL Slug" %>
@@ -58,6 +58,7 @@
                         data-product-autogen-target="slugAutoBtn" data-action="click->product-autogen#resetSlug">&#8635; Auto</button>
               </div>
               <small style="display:none; margin-top:4px;" data-product-autogen-target="slugStatus"></small>
+              <small class="form-hint">Se genereaza automat din nume. Folosit in URL-ul produsului.</small>
             </div>
           </div>
 
@@ -80,15 +81,17 @@
               <%= form.label :sku, "SKU" %>
               <div style="display:flex; gap:6px; align-items:center;">
                 <%= form.text_field :sku, placeholder: "SKU-12345", id: "product_sku", style: "flex:1;",
-                    data: { product_autogen_target: "sku", action: "input->product-autogen#skuChanged blur->product-autogen#skuBlur" } %>
+                    data: { product_autogen_target: "sku", action: "input->product-autogen#skuChanged blur->product-autogen#skuBlur input->product-form#updateTabAccess" } %>
                 <button type="button" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume"
                         data-product-autogen-target="skuAutoBtn" data-action="click->product-autogen#resetSku">&#8635; Auto</button>
               </div>
               <small style="display:none; margin-top:4px;" data-product-autogen-target="skuStatus"></small>
+              <small class="form-hint">Cod unic produs. Se genereaza automat din nume.</small>
             </div>
             <div class="form-field">
               <%= form.label :status, "Status" %>
               <%= form.select :status, ["active", "inactive", "archived"], {}, {} %>
+              <small class="form-hint">Active = vizibil pe site, Inactive = ascuns, Archived = sters</small>
             </div>
             <div class="checkbox-field" style="margin-top: 24px;">
               <%= form.check_box :featured %>
@@ -150,6 +153,7 @@
                 <%= form.check_box :promo_active, style: "width:auto; margin:0;" %>
                 <span style="font-size:13px; font-weight:600;">Afiseaza pretul promotional</span>
               </label>
+              <small class="form-hint">Bifeaza pentru a arata clientului pretul taiat + pretul redus</small>
             </div>
             <div class="form-field">
               <%= form.label :vat, "TVA" %>
@@ -157,6 +161,7 @@
                 <%= form.number_field :vat, min: 0, placeholder: "19" %>
                 <span class="input-group-text">%</span>
               </div>
+              <small class="form-hint">Cota TVA inclusa in pret (standard: 19%)</small>
             </div>
           </div>
           <div class="form-row cols-2">
@@ -183,6 +188,7 @@
             <div class="form-field">
               <%= form.label :stock, "Stoc" %>
               <%= form.number_field :stock, placeholder: "0" %>
+              <small class="form-hint">Numarul de bucati disponibile</small>
             </div>
             <div class="form-field">
               <%= form.label :stock_status, "Status stoc" %>

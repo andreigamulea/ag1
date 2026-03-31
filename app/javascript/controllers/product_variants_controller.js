@@ -21,7 +21,7 @@ export default class extends Controller {
       })
       optionsHtml += `<div class="variant-option-select">
         <label class="variant-option-label">${ot.name}</label>
-        <select name="${prefix}[option_value_ids][]" class="variant-input">${opts}</select>
+        <select name="${prefix}[option_value_ids][]" class="variant-input" data-action="change->product-autogen#variantOptionChanged">${opts}</select>
       </div>`
     })
 
@@ -38,8 +38,8 @@ export default class extends Controller {
       <td colspan="3">
         <label class="variant-field-label">SKU</label>
         <div style="display:flex; gap:4px; align-items:center;">
-          <input type="text" name="${prefix}[sku]" placeholder="SKU-001" class="variant-input variant-sku" style="flex:1;" data-variant-id="">
-          <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare">&#8635;</button>
+          <input type="text" name="${prefix}[sku]" placeholder="SKU-001" class="variant-input variant-sku" style="flex:1;" data-variant-id="" data-action="input->product-autogen#variantSkuChanged blur->product-autogen#variantSkuBlur">
+          <button type="button" class="variant-sku-auto-btn" style="display:none; padding:1px 6px; font-size:11px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#f8f9fa; white-space:nowrap;" title="Revenire la auto-generare" data-action="click->product-autogen#resetVariantSku">&#8635;</button>
         </div>
         <small class="variant-sku-status" style="display:none; margin-top:2px; font-size:11px;"></small>
       </td>
