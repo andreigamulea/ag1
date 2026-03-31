@@ -47,11 +47,11 @@ class CartiController < ApplicationController
   def show
     @product = if params[:slug] =~ /\A\d+\z/
       Product
-        .select(:id, :name, :price, :discount_price, :promo_active, :description, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls, :meta_title, :meta_description, :slug)
+        .select(:id, :name, :price, :discount_price, :promo_active, :description, :description_title, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls, :meta_title, :meta_description, :slug)
         .find(params[:slug])
     else
       Product
-        .select(:id, :name, :price, :discount_price, :promo_active, :description, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls, :meta_title, :meta_description, :slug)
+        .select(:id, :name, :price, :discount_price, :promo_active, :description, :description_title, :stock, :stock_status, :custom_attributes, :track_inventory, :external_image_url, :external_image_urls, :meta_title, :meta_description, :slug)
         .find_by!(slug: params[:slug])
     end
 
