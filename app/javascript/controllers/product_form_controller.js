@@ -130,20 +130,23 @@ export default class extends Controller {
     if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = on ? 'none' : ''
     if (this.hasVariantWarningTarget) this.variantWarningTarget.style.display = on ? '' : 'none'
 
-    // Cand bifeaza variante, goleste campurile de pret/stoc/dimensiuni la nivel de produs
+    // Cand bifeaza variante
     if (on) {
+      const hasProductData = this._hasProductFieldsFilled()
+      if (hasProductData) {
+        this._showToggleWarning('Datele de pret, stoc si dimensiuni au fost sterse. Se vor gestiona la nivel de varianta in tab-ul Variante.')
+      } else {
+        this._showToggleWarning('Pretul si stocul se vor gestiona la nivel de varianta. Completeaza-le in tab-ul Variante.')
+      }
       this._clearProductFields()
-      this._showToggleWarning('Pretul si stocul se vor gestiona la nivel de varianta. Completeaza-le in tab-ul Variante.')
     }
 
-    // Cand debifeaza variante, verifica daca exista variante active
+    // Cand debifeaza variante - blocheaza daca exista variante
     if (!on) {
       const activeVariants = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)')
       if (activeVariants.length > 0) {
-        // Nu permite debifarea - rebifeaza si avertizeaza
         this.toggleVariantsTarget.checked = true
         this._showToggleWarning('Nu poti debifeaza "Are variante?" cat timp ai variante. Sterge mai intai toate variantele din tab-ul Variante.')
-        // Re-ascunde campurile de produs
         if (this.hasSectionPricesTarget) this.sectionPricesTarget.style.display = 'none'
         if (this.hasSectionInventoryTarget) this.sectionInventoryTarget.style.display = 'none'
         if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = 'none'
@@ -153,6 +156,15 @@ export default class extends Controller {
     }
 
     this.updateTabAccess()
+  }
+
+  _hasProductFieldsFilled() {
+    const fields = ['product_price', 'product_cost_price', 'product_discount_price',
+                    'product_stock', 'product_height', 'product_width', 'product_depth', 'product_weight']
+    return fields.some(id => {
+      const el = document.getElementById(id)
+      return el && el.value && el.value.trim() !== '' && el.value !== '0'
+    })
   }
 
   _clearProductFields() {
