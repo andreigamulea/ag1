@@ -1,210 +1,274 @@
 <%= render 'shared/noindex' %>
-<p>
-  <strong>Nume:</strong>
-  <%= @product.name %>
-</p>
 
-<p>
-  <strong>Slug:</strong>
-  <%= @product.slug %>
-</p>
-
-<p>
-  <strong>Titlu descriere:</strong>
-  <%= @product.description_title %>
-</p>
-
-<p>
-  <strong>Descriere:</strong>
-  <%= simple_format(@product.description) %>
-</p>
-
+<% has_variants = @product.variants.active.any? %>
 <% has_discount = @product.promo_active? && @product.discount_price.present? && @product.discount_price > 0 %>
-<% active_price = has_discount ? @product.discount_price : @product.price %>
 <% breakdown = @product.price_breakdown %>
 
-<p>
-  <strong>Preț:</strong>
-  <% if has_discount %>
-    <span style="text-decoration: line-through; color: #999;"><%= number_to_currency(@product.price) %></span>
-    <span style="color: #dc3545; font-weight: bold; font-size: 1.2em;"><%= number_to_currency(@product.discount_price) %></span>
-  <% else %>
-    <%= number_to_currency(@product.price) %>
-  <% end %>
-</p>
+<div class="container_content product-show-admin">
+  <div class="product-show-header">
+    <div>
+      <h1 class="admin-title"><%= @product.name %></h1>
+      <span class="product-show-badge product-show-badge-<%= @product.status %>"><%= @product.status.capitalize %></span>
+      <% if @product.featured %><span class="product-show-badge product-show-badge-featured">Promovat</span><% end %>
+      <span class="product-show-badge"><%= @product.product_type.capitalize %></span>
+    </div>
+    <div class="product-show-actions">
+      <%= link_to "Editeaza", edit_product_path(@product), class: "btn btn-primary" %>
+      <%= link_to "Lista produse", products_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
 
-<p><strong>Preț (cu TVA):</strong> <%= number_to_currency(breakdown[:brut], unit: "lei") %></p>
-<p><strong>TVA inclus:</strong> <%= number_to_currency(breakdown[:tva], unit: "lei ") %> (<%= number_with_precision(@product.vat, precision: 2) %>%)</p>
-<p><strong>Preț fără TVA:</strong> <%= number_to_currency(breakdown[:net], unit: "lei ") %></p>
-
-<% if current_user&.admin? && @product.cost_price.present? && @product.cost_price > 0 %>
-  <p>
-    <strong>Preț achiziție:</strong>
-    <%= number_to_currency(@product.cost_price) %>
-    <small style="color: #666;">(vizibil doar admin)</small>
-  </p>
-<% end %>
-
-<p>
-  <strong>SKU:</strong>
-  <%= @product.sku %>
-</p>
-
-<p>
-  <strong>Stoc:</strong>
-  <%= @product.stock %> (<%= @product.stock_status.humanize %>)
-</p>
-
-<p>
-  <strong>Se scade stocul automat?</strong>
-  <%= @product.track_inventory ? "Da" : "Nu" %>
-</p>
-
-<p>
-  <strong>Se vinde individual?</strong>
-  <%= @product.sold_individually ? "Da" : "Nu" %>
-</p>
-
-<p>
-  <strong>Disponibil din:</strong>
-  <%= @product.available_on %>
-</p>
-
-<p>
-  <strong>Disponibil până la:</strong>
-  <%= @product.discontinue_on %>
-</p>
-
-<p>
-  <strong>Dimensiuni (H x W x D):</strong>
-  <%= [@product.height, @product.width, @product.depth]
-        .compact.map { |v| (v.to_f * 10).round }
-        .join(" x ") %> mm
-</p>
-
-<p>
-  <strong>Greutate:</strong>
-  <%= (@product.weight.to_f * 1000).round %> g
-</p>
-
-
-<p>
-  <strong>Status:</strong>
-  <%= @product.status.humanize %>
-</p>
-
-<p>
-  <strong>Este evidențiat?</strong>
-  <%= @product.featured ? "Da" : "Nu" %>
-</p>
-
-<p>
-  <strong>Meta Title:</strong>
-  <%= @product.meta_title %>
-</p>
-
-<p>
-  <strong>Meta Description:</strong>
-  <%= @product.meta_description %>
-</p>
-
-<p>
-  <strong>Meta Keywords:</strong>
-  <%= @product.meta_keywords %>
-</p>
-
-
-
-
-
-
-<p>
-  <strong>Tip produs:</strong>
-  <%= @product.product_type.humanize %>
-</p>
-
-<p>
-  <strong>Mod de livrare:</strong>
-  <%= @product.delivery_method.humanize %>
-</p>
-
-<p>
-  <strong>Vizibil pentru utilizatori neautentificați:</strong>
-  <%= @product.visible_to_guests ? "Da" : "Nu" %>
-</p>
-
-<p>
-  <strong>Se aplică TVA:</strong>
-  <%= @product.taxable ? "Da" : "Nu" %>
-</p>
-
-<p>
-  <strong>Se poate aplica cupon de reducere:</strong>
-  <%= @product.coupon_applicable ? "Da" : "Nu" %>
-</p>
-
-<p>
-  <strong>Categorii:</strong><br>
-  <% if @product.categories.any? %>
-    <ul>
-      <% @product.categories.each do |category| %>
-        <li><%= category.name %></li>
+  <div class="product-show-grid">
+    <!-- COLOANA STANGA: Imagini -->
+    <div class="product-show-images">
+      <% if @product.external_image_url.present? %>
+        <img src="<%= @product.external_image_url %>?width=400&height=400&quality=90" class="product-show-main-img" alt="<%= @product.name %>" />
+      <% else %>
+        <div class="product-show-no-img">Fara imagine</div>
       <% end %>
-    </ul>
-  <% else %>
-    <em>(Fără categorii asociate)</em>
+
+      <% if @product.external_image_urls.present? %>
+        <div class="product-show-gallery">
+          <% @product.external_image_urls.each do |url| %>
+            <img src="<%= url %>?width=100&height=100&quality=80" class="product-show-thumb" alt="Galerie" />
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- COLOANA DREAPTA: Info -->
+    <div class="product-show-info">
+      <!-- Preturi -->
+      <div class="product-show-card">
+        <h3>Preturi</h3>
+        <% unless has_variants %>
+          <div class="product-show-row">
+            <span>Pret vanzare</span>
+            <strong>
+              <% if has_discount %>
+                <span style="text-decoration:line-through;color:#999;"><%= number_to_currency(@product.price, unit: "RON ") %></span>
+                <span style="color:#dc3545;"><%= number_to_currency(@product.discount_price, unit: "RON ") %></span>
+              <% else %>
+                <%= number_to_currency(@product.price, unit: "RON ") %>
+              <% end %>
+            </strong>
+          </div>
+          <div class="product-show-row">
+            <span>TVA (<%= @product.vat || 0 %>%)</span>
+            <span><%= number_to_currency(breakdown[:tva], unit: "RON ") %></span>
+          </div>
+          <div class="product-show-row">
+            <span>Pret fara TVA</span>
+            <span><%= number_to_currency(breakdown[:net], unit: "RON ") %></span>
+          </div>
+          <% if current_user&.admin? && @product.cost_price.present? && @product.cost_price > 0 %>
+            <div class="product-show-row">
+              <span>Pret achizitie <small>(admin)</small></span>
+              <span><%= number_to_currency(@product.cost_price, unit: "RON ") %></span>
+            </div>
+          <% end %>
+        <% else %>
+          <p style="color:#666;font-size:13px;">Preturile se gestioneaza la nivel de varianta.</p>
+        <% end %>
+      </div>
+
+      <!-- Identificare -->
+      <div class="product-show-card">
+        <h3>Identificare</h3>
+        <div class="product-show-row">
+          <span>SKU</span>
+          <code><%= @product.sku %></code>
+        </div>
+        <div class="product-show-row">
+          <span>Slug</span>
+          <code><%= @product.slug %></code>
+        </div>
+        <% if @product.brand.present? %>
+          <div class="product-show-row">
+            <span>Brand</span>
+            <span><%= @product.brand %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Stoc -->
+      <% unless has_variants %>
+        <div class="product-show-card">
+          <h3>Inventar</h3>
+          <div class="product-show-row">
+            <span>Stoc</span>
+            <strong><%= @product.stock %> buc</strong>
+          </div>
+          <div class="product-show-row">
+            <span>Status stoc</span>
+            <span><%= @product.stock_status.humanize %></span>
+          </div>
+          <div class="product-show-row">
+            <span>Urmareste inventar</span>
+            <span><%= @product.track_inventory ? "Da" : "Nu" %></span>
+          </div>
+          <div class="product-show-row">
+            <span>Vinde individual</span>
+            <span><%= @product.sold_individually ? "Da" : "Nu" %></span>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Configurari -->
+      <div class="product-show-card">
+        <h3>Configurari</h3>
+        <div class="product-show-row">
+          <span>Tip produs</span>
+          <span><%= @product.product_type.capitalize %></span>
+        </div>
+        <div class="product-show-row">
+          <span>Livrare</span>
+          <span><%= @product.delivery_method.humanize %></span>
+        </div>
+        <div class="product-show-row">
+          <span>TVA aplicabil</span>
+          <span><%= @product.taxable ? "Da" : "Nu" %></span>
+        </div>
+        <div class="product-show-row">
+          <span>Cupon aplicabil</span>
+          <span><%= @product.coupon_applicable ? "Da" : "Nu" %></span>
+        </div>
+        <div class="product-show-row">
+          <span>Vizibil guests</span>
+          <span><%= @product.visible_to_guests ? "Da" : "Nu" %></span>
+        </div>
+        <div class="product-show-row">
+          <span>Necesita login</span>
+          <span><%= @product.requires_login ? "Da" : "Nu" %></span>
+        </div>
+      </div>
+
+      <!-- Categorii -->
+      <div class="product-show-card">
+        <h3>Categorii</h3>
+        <% if @product.categories.any? %>
+          <div class="product-show-badges">
+            <% @product.categories.each do |cat| %>
+              <span class="product-show-cat-badge"><%= cat.name %></span>
+            <% end %>
+          </div>
+        <% else %>
+          <p style="color:#999;">Fara categorii</p>
+        <% end %>
+      </div>
+
+      <!-- Disponibilitate & Dimensiuni -->
+      <div class="product-show-card">
+        <h3>Detalii</h3>
+        <% if @product.available_on.present? %>
+          <div class="product-show-row">
+            <span>Disponibil din</span>
+            <span><%= @product.available_on %></span>
+          </div>
+        <% end %>
+        <% if @product.discontinue_on.present? %>
+          <div class="product-show-row">
+            <span>Se intrerupe la</span>
+            <span><%= @product.discontinue_on %></span>
+          </div>
+        <% end %>
+        <% unless has_variants %>
+          <% if [@product.height, @product.width, @product.depth].any? { |v| v.present? && v > 0 } %>
+            <div class="product-show-row">
+              <span>Dimensiuni</span>
+              <span><%= [@product.height, @product.width, @product.depth].map { |v| v.to_i }.join(" x ") %> mm</span>
+            </div>
+          <% end %>
+          <% if @product.weight.present? && @product.weight > 0 %>
+            <div class="product-show-row">
+              <span>Greutate</span>
+              <span><%= @product.weight.to_i %> g</span>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Descriere -->
+      <% if @product.description.present? %>
+        <div class="product-show-card">
+          <h3><%= @product.description_title.presence || "Descriere" %></h3>
+          <div class="product-show-description"><%= simple_format(@product.description) %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- VARIANTE -->
+  <% if has_variants %>
+    <div class="product-show-card" style="margin-top:20px;">
+      <h3>Variante (<%= @product.variants.active.count %>)</h3>
+      <table class="styled-table" style="width:100%;">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>EAN</th>
+            <th>Optiuni</th>
+            <th>Pret</th>
+            <th>Stoc</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @product.variants.active.order(:id).each do |v| %>
+            <tr>
+              <td><code><%= v.sku %></code></td>
+              <td><%= v.ean.presence || "-" %></td>
+              <td><%= v.options_text %></td>
+              <td>
+                <% if v.promo_active? && v.discount_price.present? && v.discount_price > 0 %>
+                  <span style="text-decoration:line-through;color:#999;"><%= number_to_currency(v.price, unit: "RON ") %></span>
+                  <strong style="color:#dc3545;"><%= number_to_currency(v.discount_price, unit: "RON ") %></strong>
+                <% else %>
+                  <%= number_to_currency(v.price, unit: "RON ") %>
+                <% end %>
+              </td>
+              <td><%= v.stock %></td>
+              <td><%= v.status.capitalize %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   <% end %>
-</p>
 
+  <!-- FISIERE -->
+  <% if @product.external_file_urls.present? %>
+    <div class="product-show-card" style="margin-top:20px;">
+      <h3>Fisiere atasate</h3>
+      <% @product.external_file_urls.each do |url| %>
+        <div style="margin-bottom:4px;">
+          <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 
-<p>
-  <strong>Necesită autentificare pentru cumpărare:</strong>
-  <%= @product.requires_login ? "Da" : "Nu" %>
-</p>
+  <!-- SEO -->
+  <% if @product.meta_title.present? || @product.meta_description.present? %>
+    <div class="product-show-card" style="margin-top:20px;">
+      <h3>SEO</h3>
+      <% if @product.meta_title.present? %>
+        <div class="product-show-row"><span>Meta Title</span><span><%= @product.meta_title %></span></div>
+      <% end %>
+      <% if @product.meta_description.present? %>
+        <div class="product-show-row"><span>Meta Description</span><span><%= @product.meta_description %></span></div>
+      <% end %>
+      <% if @product.meta_keywords.present? %>
+        <div class="product-show-row"><span>Keywords</span><span><%= @product.meta_keywords %></span></div>
+      <% end %>
+    </div>
+  <% end %>
 
-<% if @product.external_file_urls.present? %>
-  <h3>Fișiere atașate (Bunny)</h3>
-  <div class="d-flex flex-column gap-2">
-    <% @product.external_file_urls.each do |url| %>
-      <div class="position-relative border rounded p-2">
-  <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener", class: "text-decoration-none d-block" %>
-  <%= link_to "×", purge_external_file_product_path(@product, url: CGI.escape(url)),
-              method: :delete,
-              data: { confirm: "Sigur vrei să ștergi acest fișier?" },
-              class: "btn btn-sm btn-danger position-absolute top-0 end-0 m-1" %>
+  <!-- ATRIBUTE -->
+  <% if @product.custom_attributes.present? && @product.custom_attributes != {} %>
+    <div class="product-show-card" style="margin-top:20px;">
+      <h3>Atribute personalizate</h3>
+      <pre style="background:#f8f9fa;padding:12px;border-radius:4px;font-size:12px;margin:0;"><%= JSON.pretty_generate(@product.custom_attributes) rescue "{}" %></pre>
+    </div>
+  <% end %>
 </div>
-
-    <% end %>
-  </div>
-<% else %>
-  <p><strong>Fișiere atașate:</strong> (niciun fișier)</p>
-<% end %>
-
-
-<p>
-  <strong>Atribute suplimentare:</strong><br>
-  <pre><%= JSON.pretty_generate(@product.attributes || {}) rescue "{}" %></pre>
-</p>
-<% if @product.external_image_url.present? %>
-  <h3>Imagine principală</h3>
-  <img src="<%= @product.external_image_url %>" class="img-fluid" style="max-width: 300px;" />
-<% end %>
-
-
-
-<% if @product.external_image_urls.present? %>
-  <h3>Imagini secundare</h3>
-  <div class="d-flex flex-wrap gap-2">
-    <% @product.external_image_urls.each do |url| %>
-      <img src="<%= url %>" class="img-thumbnail" style="width: 120px;" />
-    <% end %>
-  </div>
-<% end %>
-
-
-
-
-<hr>
-
-<%= link_to 'Edit', edit_product_path(@product) %> |
-<%= link_to 'Back', products_path %>
