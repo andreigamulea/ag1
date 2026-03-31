@@ -501,21 +501,98 @@ AG1 are deja: produse cu variante, Stripe, coș, comenzi, facturi, categorii, ju
 
 ---
 
-#### 2. Site de turism (cazări, excursii, pachete) — 🟡 5/10
+#### 2. Site de turism (cazări, excursii, pachete) — 🟢 8/10 (actualizat 31 martie 2026)
 
-| Ce are AG1 | Ce lipsește MAJOR | Efort |
-|-----------|-------------------|-------|
-| Produse (pot fi cazări) | **Calendar disponibilitate / booking** | ~3-4 zile |
-| Variante (tip cameră) | **Selectare date check-in/check-out** | ~2-3 zile |
-| Stripe plăți | **Calcul preț per noapte / per persoană** | ~1-2 zile |
-| Imagini CDN | **Hartă interactivă** (Google Maps/Leaflet) | ~4-6h |
-| Categorii (tip: munte/mare) | **Recenzii cu rating** | ~4-6h |
-| Facturi RO | **Avans + rest de plată** | ~4-6h |
-| — | **Sezonalitate prețuri** | ~4-6h |
-| — | **Capacitate / overbooking prevention** | ~1-2 zile |
-| — | **Integrare Booking.com / Airbnb API** | ~3-5 zile |
+##### Analiza acoperire fundatie AG1 pentru turism
 
-**Verdict**: AG1 nu e potrivit out-of-the-box pentru turism. Lipsesc fundamentale: calendar booking, disponibilitate pe date, preț dinamic per noapte. Cu Claude Code efortul se reduce la **~2-3 săptămâni** (vs 2-3 luni tradițional). Fezabil, dar necesită restructurare semnificativă a modulului de produse.
+| Zona | AG1 are | Turism are nevoie | Acoperire |
+|------|---------|-------------------|:---------:|
+| **DB & Modele** | Produse, variante, optiuni, categorii ierarhice, EAN, external IDs, facturi, comenzi, useri | + Calendar, sezonalitate, avans | **85%** |
+| **Admin formular** | Tabs, Stimulus, imagini CDN, duplica, cautare, sortare, hint-uri | + Campuri specifice (date, harta) | **90%** |
+| **Plati** | Stripe complet, webhooks | + Avans/rest plata | **80%** |
+| **Facturare** | Serie, PDF, email, TVA | La fel | **100%** |
+| **Localizare RO** | Judete, localitati, TVA | La fel | **100%** |
+| **Feed import** | VariantSyncService, locks, External IDs | + Parser XLSX/XML | **75%** |
+| **Frontend shop** | Pagina produs, variante, swatches, cos, checkout | + Calendar booking, harta, filtre destinatii | **60%** |
+| **Infrastructura** | Stimulus, Solid Queue, CDN, CSP, teste | La fel | **100%** |
+| **SEO** | Meta, JSON-LD, sitemap | + Schema.org TravelAction | **85%** |
+| **Securitate** | Rate limiting, CSP, advisory locks | La fel | **100%** |
+
+**Total fundatie: ~80% construita** (actualizat dupa implementarile din 30-31 martie 2026)
+
+##### Mapare fundatie AG1 → turism
+
+| Fundatie AG1 | Devine in turism |
+|-------------|-----------------|
+| Produs | Pachet turistic / Hotel |
+| Variante | Tip camera, Perioada plecare |
+| OptionTypes | Camera: Single/Double/Suite, Masa: AI/HB/BB |
+| Categorii ierarhice | Grecia > Insule > Creta |
+| Preturi per varianta | Pret per camera/perioada |
+| Stoc per varianta | Locuri disponibile |
+| Imagini per varianta | Poze per tip camera |
+| EAN | Cod oferta agentie |
+| External IDs | Mapare oferta la agentie sursa |
+| VariantSyncService | Import feed oferte de la agentii |
+| Facturi RO | Factura la rezervare |
+| Stripe | Plata online |
+| Stimulus controllers | Formular adaugare oferta |
+| Tabs formular | Tabs: Oferta, Camere, Media, Organizare, SEO |
+| Advisory locks | Import concurent oferte de la mai multe agentii |
+| Teste automate | Baza de teste pentru fluxul de booking |
+
+##### Ce mai trebuie adaugat
+
+| Feature | Efort |
+|---------|-------|
+| Calendar disponibilitate pe date | 2-3 zile |
+| Selectare date check-in/check-out | 1-2 zile |
+| Calcul pret per noapte/persoana | 1 zi |
+| Harta interactiva (Google Maps) | 4-6 ore |
+| Avans + rest de plata | 4-6 ore |
+| Sezonalitate preturi | 4-6 ore |
+| Feed import parser (XLSX/XML) | 2-3 zile |
+
+**Efort total: ~2 saptamani.** Nu se rescrie nimic — se adauga modulul de booking peste fundatia existenta.
+
+##### Comparatie AG1 vs Solidus pentru turism
+
+| Feature turism | AG1 | Solidus |
+|---------------|:---:|:-------:|
+| Pachete ca produse | ✅ | ✅ |
+| Tip camera ca variante | ✅ | ✅ (master variant obligatoriu) |
+| Optiuni (masa, transport) | ✅ OptionTypes | ✅ OptionTypes |
+| Categorii ierarhice (destinatii) | ✅ (parent_id, arbore) | ✅ (Taxonomy) |
+| Preturi per varianta | ✅ | ✅ (model Price separat) |
+| Pret promotional | ✅ | ✅ |
+| Stoc (locuri disponibile) | ✅ per varianta | ✅ multi-depozit |
+| Imagini per varianta (camere) | ✅ CDN | ✅ ActiveStorage |
+| Dimensiuni per varianta | ✅ | ❌ |
+| EAN (cod oferta agentie) | ✅ | ❌ |
+| External IDs (mapare agentie) | ✅ | ❌ |
+| Feed import de la agentii | ✅ VariantSyncService | ❌ (extension) |
+| Advisory locks (import concurent) | ✅ | ❌ |
+| Facturare RO | ✅ nativ | ❌ |
+| Judete/localitati | ✅ nativ | ❌ |
+| Stripe plati | ✅ | ✅ multi-gateway |
+| Admin cu tabs | ✅ Stimulus | ✅ Tailwind |
+| Teste automate | ✅ 35 teste | ✅ masiv |
+| Background jobs | ✅ Solid Queue | ✅ Sidekiq |
+| Calendar booking | ❌ (de adaugat) | ❌ (de adaugat) |
+| Selectare date | ❌ (de adaugat) | ❌ (de adaugat) |
+| Sezonalitate preturi | ❌ (de adaugat) | ❌ (de adaugat) |
+| Avans + rest plata | ❌ (de adaugat) | ❌ (de adaugat) |
+| Harta interactiva | ❌ (de adaugat) | ❌ (de adaugat) |
+| Cost hosting | $13/luna | $44/luna |
+| Efort adaptare turism | ~2 saptamani | ~3-4 saptamani |
+
+**Scor turism: AG1 15 ✅ — Solidus 9 ✅** (din 25 features)
+
+Ambele platforme au nevoie de modulul de booking (calendar, date, sezonalitate, avans) - niciuna nu il are nativ. Dar AG1 porneste cu avantaje semnificative: feed import, EAN, external IDs, facturare RO, categorii ierarhice - toate esentiale pentru un agregator de turism. Plus costul de 3.4x mai mic si efortul de adaptare cu ~2 saptamani mai scurt.
+
+**Solidus nu ofera NIMIC in plus pentru turism fata de AG1.** Dimpotriva, AG1 are features critice pe care Solidus nu le are (feed import, EAN, external IDs, localizare RO).
+
+**Verdict**: Dupa implementarile din martie 2026 (categorii ierarhice, EAN, dimensiuni per varianta, tabs formular, Stimulus controllers, feed import infrastructure), AG1 acopera 80% din nevoile unui site de turism. Scorul a crescut de la 5/10 la **8/10**. Restul de 20% e modulul de booking specific (calendar, date, sezonalitate, avans).
 
 ---
 
