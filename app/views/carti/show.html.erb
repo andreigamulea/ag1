@@ -152,9 +152,17 @@
       </p>
 
       <div class="product-description">
-        <strong>Descriere:</strong>
+        <strong><%= @product.description_title.presence || "Descriere" %>:</strong>
         <%= simple_format(sanitize(@product.description)) %>
       </div>
+
+      <% if @active_variants.present? %>
+        <div class="variant-description" id="variant-description"
+             style="<%= 'display:none;' unless initial_variant&.description.present? || initial_variant&.description_title.present? %>">
+          <strong id="variant-description-title"><%= initial_variant&.description_title.presence || "Detalii variantă" %>:</strong>
+          <div id="variant-description-text"><%= simple_format(sanitize(initial_variant&.description.to_s)) %></div>
+        </div>
+      <% end %>
       <div class="badges">
         <span class="badge">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="#8b0000" viewBox="0 0 24 24" width="16" height="16">
@@ -282,7 +290,7 @@
         </div>
 
         <script type="application/json" id="variants-data">
-          <%= @active_variants.map { |v| { id: v.id, price: v.price.to_f, effective_price: v.effective_price.to_f, discount_price: v.discount_price.to_f, promo_active: v.promo_active?, stock: v.stock, option_value_ids: v.option_value_ids, options_text: v.options_text, external_image_url: v.external_image_url, external_image_urls: v.external_image_urls || [] } }.to_json.html_safe %>
+          <%= @active_variants.map { |v| { id: v.id, price: v.price.to_f, effective_price: v.effective_price.to_f, discount_price: v.discount_price.to_f, promo_active: v.promo_active?, stock: v.stock, option_value_ids: v.option_value_ids, options_text: v.options_text, external_image_url: v.external_image_url, external_image_urls: v.external_image_urls || [], description_title: v.description_title, description: v.description } }.to_json.html_safe %>
         </script>
         <script type="application/json" id="product-images-data">
           <%= { external_image_url: @product.external_image_url, external_image_urls: @product.external_image_urls || [] }.to_json.html_safe %>
@@ -714,6 +722,17 @@ function bindVariantSelector() {
       submitBtn.disabled = match.stock <= 0;
       submitBtn.title = match.stock <= 0 ? 'Produsul nu este în stoc' : '';
       updateVariantImages(match);
+      // Update variant description
+      var descSection = document.getElementById('variant-description');
+      if (descSection) {
+        if (match.description || match.description_title) {
+          document.getElementById('variant-description-title').textContent = (match.description_title || 'Detalii variantă') + ':';
+          document.getElementById('variant-description-text').innerHTML = (match.description || '').replace(/\n/g, '<br>');
+          descSection.style.display = '';
+        } else {
+          descSection.style.display = 'none';
+        }
+      }
     } else {
       hiddenInput.value = '';
       submitBtn.disabled = true;
