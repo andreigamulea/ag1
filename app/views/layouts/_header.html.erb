@@ -1,8 +1,7 @@
-<script>
-/**
- * Mobile Menu Handler
- * Professional implementation with proper state management
- */
+<%# Menu logic moved to header_menu_controller.js (Stimulus) %>
+<%# Old inline script removed for CSP compatibility %>
+
+<%#
 
 function setupMobileMenu() {
   const hamburger = document.getElementById("hamburger");
@@ -170,6 +169,7 @@ if (document.readyState === 'loading') {
 } else {
   initMenu();
 }
+document.addEventListener('turbo:load', initMenu);
 
 /**
  * Re-inițializare la resize pentru a preveni probleme
@@ -187,10 +187,10 @@ window.addEventListener('resize', () => {
       }
     }
   }, 250);
-});
-</script>
+%>
 
-<div class="header_container">
+<div class="header_container" data-controller="header-menu"
+     data-action="click@document->header-menu#closeAccountOnClickOutside click@document->header-menu#closeMenuOnClickOutside keydown@document->header-menu#closeMenuOnEscape keydown@document->header-menu#closeAccountOnEscape">
   <header>
     <!-- Sigla principală -->
     <a href="/" class="navbar-brand">
@@ -212,10 +212,11 @@ window.addEventListener('resize', () => {
     </div>
 
     <!-- Buton hamburger pentru mobil -->
-    <button class="hamburger" id="hamburger" aria-label="Deschide meniul">&#9776;</button>
+    <button class="hamburger" id="hamburger" aria-label="Deschide meniul"
+            data-header-menu-target="hamburger" data-action="click->header-menu#toggleMenu">&#9776;</button>
 
     <!-- Meniu principal -->
-    <div class="nav-wrapper" id="nav-wrapper">
+    <div class="nav-wrapper" id="nav-wrapper" data-header-menu-target="navWrapper">
       <!-- Sigla duplicată pentru mobil -->
       <div class="mobile-logo">
         <a href="/">
@@ -245,10 +246,11 @@ window.addEventListener('resize', () => {
         <% if current_user %>
           <!-- Dropdown pentru Cont -->
           <div class="account-menu">
-            <button class="account-toggle" id="account-toggle">
-              👤 Cont <span class="arrow">▼</span>
+            <button class="account-toggle" id="account-toggle"
+                    data-header-menu-target="accountToggle" data-action="click->header-menu#toggleAccount">
+              Cont <span class="arrow">&#9660;</span>
             </button>
-            <div class="account-dropdown" id="account-dropdown">
+            <div class="account-dropdown" id="account-dropdown" data-header-menu-target="accountDropdown">
               <div class="user-info">
                 <%= current_user.email %>
               </div>
@@ -287,7 +289,8 @@ window.addEventListener('resize', () => {
       </nav>
 
       <!-- Buton închidere meniu pe mobil -->
-      <button class="close-menu" id="close-menu" aria-label="Închide meniul">&times;</button>
+      <button class="close-menu" id="close-menu" aria-label="Inchide meniul"
+              data-header-menu-target="closeBtn" data-action="click->header-menu#closeMenu">&times;</button>
     </div>
   </header>
 </div>
