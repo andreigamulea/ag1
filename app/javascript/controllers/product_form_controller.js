@@ -16,6 +16,21 @@ export default class extends Controller {
     this.updateVariantSections()
   }
 
+  // ===== TABS =====
+
+  switchTab(e) {
+    const tabId = e.currentTarget.dataset.tab
+
+    // Deactivate all tabs and panels
+    this.element.querySelectorAll('.product-tab').forEach(t => t.classList.remove('active'))
+    this.element.querySelectorAll('.product-tab-panel').forEach(p => p.classList.remove('active'))
+
+    // Activate clicked tab and panel
+    e.currentTarget.classList.add('active')
+    const panel = this.element.querySelector('#' + tabId)
+    if (panel) panel.classList.add('active')
+  }
+
   // ===== CATEGORIES =====
 
   toggleCategory(e) {

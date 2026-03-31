@@ -22,501 +22,537 @@
       </div>
     <% end %>
 
-    <!-- Informatii de baza -->
-    <div class="form-section">
-      <div class="section-header primary">
-        Informatii de baza
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-2">
-          <div class="form-field">
-            <%= form.label :name, "Nume produs" %>
-            <%= form.text_field :name, placeholder: "Nume produs", id: "product_name",
-                data: { product_autogen_target: "name", action: "input->product-autogen#nameChanged" } %>
-          </div>
-          <div class="form-field">
-            <%= form.label :slug, "URL Slug" %>
-            <div style="display:flex; gap:6px; align-items:center;">
-              <%= form.text_field :slug, placeholder: "url-friendly-name", id: "product_slug", style: "flex:1;",
-                  data: { product_autogen_target: "slug", action: "input->product-autogen#slugChanged blur->product-autogen#slugBlur" } %>
-              <button type="button" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume"
-                      data-product-autogen-target="slugAutoBtn" data-action="click->product-autogen#resetSlug">&#8635; Auto</button>
-            </div>
-            <small style="display:none; margin-top:4px;" data-product-autogen-target="slugStatus"></small>
-          </div>
-        </div>
+    <% has_variants = form.object.variants.any? { |v| !v.marked_for_destruction? } %>
 
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <%= form.label :description_title, "Titlu descriere" %>
-            <%= form.text_field :description_title, placeholder: "Titlu pentru sectiunea de descriere" %>
-          </div>
-        </div>
-
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <%= form.label :description, "Descriere" %>
-            <%= form.text_area :description, placeholder: "Descriere detaliata a produsului..." %>
-          </div>
-        </div>
-
-        <div class="form-row cols-3">
-          <div class="form-field">
-            <%= form.label :sku, "SKU" %>
-            <div style="display:flex; gap:6px; align-items:center;">
-              <%= form.text_field :sku, placeholder: "SKU-12345", id: "product_sku", style: "flex:1;",
-                  data: { product_autogen_target: "sku", action: "input->product-autogen#skuChanged blur->product-autogen#skuBlur" } %>
-              <button type="button" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume"
-                      data-product-autogen-target="skuAutoBtn" data-action="click->product-autogen#resetSku">&#8635; Auto</button>
-            </div>
-            <small style="display:none; margin-top:4px;" data-product-autogen-target="skuStatus"></small>
-          </div>
-          <div class="form-field">
-            <%= form.label :status, "Status" %>
-            <%= form.select :status, ["active", "inactive", "archived"], {}, {} %>
-          </div>
-          <div class="checkbox-field" style="margin-top: 24px;">
-            <%= form.check_box :featured %>
-            <%= form.label :featured, "Produs promovat" %>
-          </div>
-        </div>
-      </div>
+    <!-- TABS NAVIGATION -->
+    <div class="product-tabs">
+      <button type="button" class="product-tab active" data-tab="tab-product" data-action="click->product-form#switchTab">Produs</button>
+      <button type="button" class="product-tab" data-tab="tab-variants" data-action="click->product-form#switchTab">Variante</button>
+      <button type="button" class="product-tab" data-tab="tab-media" data-action="click->product-form#switchTab">Media</button>
+      <button type="button" class="product-tab" data-tab="tab-organize" data-action="click->product-form#switchTab">Organizare</button>
+      <button type="button" class="product-tab" data-tab="tab-seo" data-action="click->product-form#switchTab">SEO</button>
     </div>
 
-    <!-- Variante Produs (intrebare initiala) -->
-    <div class="form-section" id="section-variants-toggle">
-      <div class="section-header dark">
-        Variante Produs
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-1">
-          <div class="checkbox-field">
-            <% has_variants = form.object.variants.any? { |v| !v.marked_for_destruction? } %>
-            <%= hidden_field_tag :has_variants, '0', id: nil %>
-            <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants',
-                data: { product_form_target: "toggleVariants", action: "change->product-form#updateVariantSections" } %>
-            <label for="toggle-has-variants">Are variante? (culoare, marime, etc.)</label>
+    <!-- ============================================================ -->
+    <!-- TAB 1: PRODUS (info de baza + preturi/stoc daca fara variante) -->
+    <!-- ============================================================ -->
+    <div class="product-tab-panel active" id="tab-product">
+
+      <div class="form-section">
+        <div class="section-header primary">
+          Informatii de baza
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-2">
+            <div class="form-field">
+              <%= form.label :name, "Nume produs" %>
+              <%= form.text_field :name, placeholder: "Nume produs", id: "product_name",
+                  data: { product_autogen_target: "name", action: "input->product-autogen#nameChanged" } %>
+            </div>
+            <div class="form-field">
+              <%= form.label :slug, "URL Slug" %>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <%= form.text_field :slug, placeholder: "url-friendly-name", id: "product_slug", style: "flex:1;",
+                    data: { product_autogen_target: "slug", action: "input->product-autogen#slugChanged blur->product-autogen#slugBlur" } %>
+                <button type="button" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume"
+                        data-product-autogen-target="slugAutoBtn" data-action="click->product-autogen#resetSlug">&#8635; Auto</button>
+              </div>
+              <small style="display:none; margin-top:4px;" data-product-autogen-target="slugStatus"></small>
+            </div>
+          </div>
+
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <%= form.label :description_title, "Titlu descriere" %>
+              <%= form.text_field :description_title, placeholder: "Titlu pentru sectiunea de descriere" %>
+            </div>
+          </div>
+
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <%= form.label :description, "Descriere" %>
+              <%= form.text_area :description, placeholder: "Descriere detaliata a produsului..." %>
+            </div>
+          </div>
+
+          <div class="form-row cols-3">
+            <div class="form-field">
+              <%= form.label :sku, "SKU" %>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <%= form.text_field :sku, placeholder: "SKU-12345", id: "product_sku", style: "flex:1;",
+                    data: { product_autogen_target: "sku", action: "input->product-autogen#skuChanged blur->product-autogen#skuBlur" } %>
+                <button type="button" style="display:none; padding:2px 8px; font-size:12px; cursor:pointer; border:1px solid #ccc; border-radius:4px; background:#f8f9fa;" title="Revenire la auto-generare din nume"
+                        data-product-autogen-target="skuAutoBtn" data-action="click->product-autogen#resetSku">&#8635; Auto</button>
+              </div>
+              <small style="display:none; margin-top:4px;" data-product-autogen-target="skuStatus"></small>
+            </div>
+            <div class="form-field">
+              <%= form.label :status, "Status" %>
+              <%= form.select :status, ["active", "inactive", "archived"], {}, {} %>
+            </div>
+            <div class="checkbox-field" style="margin-top: 24px;">
+              <%= form.check_box :featured %>
+              <%= form.label :featured, "Produs promovat" %>
+            </div>
           </div>
         </div>
-        <% if has_variants %>
-          <p data-product-form-target="variantWarning" class="variant-warning">Pretul si stocul se gestioneaza la nivel de varianta.</p>
-        <% else %>
-          <p data-product-form-target="variantWarning" class="variant-warning" style="display:none;">Pretul si stocul se gestioneaza la nivel de varianta.</p>
+      </div>
+
+      <!-- Variante toggle -->
+      <div class="form-section" id="section-variants-toggle">
+        <div class="section-header dark">
+          Variante Produs
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-1">
+            <div class="checkbox-field">
+              <%= hidden_field_tag :has_variants, '0', id: nil %>
+              <%= check_box_tag :has_variants, '1', has_variants, id: 'toggle-has-variants',
+                  data: { product_form_target: "toggleVariants", action: "change->product-form#updateVariantSections" } %>
+              <label for="toggle-has-variants">Are variante? (culoare, marime, etc.)</label>
+            </div>
+          </div>
+          <p data-product-form-target="variantWarning" class="variant-warning" style="<%= has_variants ? '' : 'display:none;' %>">Pretul si stocul se gestioneaza la nivel de varianta.</p>
+        </div>
+      </div>
+
+      <!-- Preturi si Taxe (doar fara variante) -->
+      <div class="form-section" id="section-prices" style="<%= has_variants ? 'display:none;' : '' %>"
+           data-product-form-target="sectionPrices">
+        <div class="section-header success">
+          Preturi si Taxe
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-4">
+            <div class="form-field">
+              <%= form.label :price, "Pret vanzare" %>
+              <div class="input-group">
+                <%= form.number_field :price, step: 0.01, placeholder: "0.00" %>
+                <span class="input-group-text">RON</span>
+              </div>
+              <small class="form-hint">Pretul afisat clientului (obligatoriu)</small>
+            </div>
+            <div class="form-field">
+              <%= form.label :cost_price, "Pret achizitie" %>
+              <div class="input-group">
+                <%= form.number_field :cost_price, step: 0.01, placeholder: "0.00" %>
+                <span class="input-group-text">RON</span>
+              </div>
+              <small class="form-hint">Cat ai platit pe produs (vizibil doar admin)</small>
+            </div>
+            <div class="form-field">
+              <%= form.label :discount_price, "Pret promotional" %>
+              <div class="input-group">
+                <%= form.number_field :discount_price, step: 0.01, placeholder: "0.00" %>
+                <span class="input-group-text">RON</span>
+              </div>
+              <label style="display:flex; align-items:center; gap:6px; margin-top:6px; cursor:pointer;">
+                <%= form.check_box :promo_active, style: "width:auto; margin:0;" %>
+                <span style="font-size:13px; font-weight:600;">Afiseaza pretul promotional</span>
+              </label>
+            </div>
+            <div class="form-field">
+              <%= form.label :vat, "TVA" %>
+              <div class="input-group">
+                <%= form.number_field :vat, min: 0, placeholder: "19" %>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="checkbox-field">
+              <%= form.check_box :taxable %>
+              <%= form.label :taxable, "Se aplica TVA" %>
+            </div>
+            <div class="checkbox-field">
+              <%= form.check_box :coupon_applicable %>
+              <%= form.label :coupon_applicable, "Se aplica cupon de reducere" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventar si Stoc (doar fara variante) -->
+      <div class="form-section" id="section-inventory" style="<%= has_variants ? 'display:none;' : '' %>"
+           data-product-form-target="sectionInventory">
+        <div class="section-header info">
+          Inventar si Stoc
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-3">
+            <div class="form-field">
+              <%= form.label :stock, "Stoc" %>
+              <%= form.number_field :stock, placeholder: "0" %>
+            </div>
+            <div class="form-field">
+              <%= form.label :stock_status, "Status stoc" %>
+              <%= form.select :stock_status, Product.stock_statuses.keys.map { |k| [k.humanize, k] } %>
+            </div>
+            <div class="checkbox-field" style="margin-top: 24px;">
+              <%= form.check_box :track_inventory %>
+              <%= form.label :track_inventory, "Urmareste inventarul" %>
+            </div>
+          </div>
+          <div class="form-row cols-1">
+            <div class="checkbox-field">
+              <%= form.check_box :sold_individually %>
+              <%= form.label :sold_individually, "Se vinde individual" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dimensiuni (doar fara variante) -->
+      <div class="form-section" id="section-dimensions" style="<%= has_variants ? 'display:none;' : '' %>"
+           data-product-form-target="sectionDimensions">
+        <div class="section-header warning">
+          Dimensiuni si Greutate
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-4">
+            <div class="form-field">
+              <%= form.label :height, "Inaltime" %>
+              <div class="input-group">
+                <%= form.number_field :height, step: 1, min: 0, placeholder: "0" %>
+                <span class="input-group-text">mm</span>
+              </div>
+            </div>
+            <div class="form-field">
+              <%= form.label :width, "Latime" %>
+              <div class="input-group">
+                <%= form.number_field :width, step: 1, min: 0, placeholder: "0" %>
+                <span class="input-group-text">mm</span>
+              </div>
+            </div>
+            <div class="form-field">
+              <%= form.label :depth, "Adancime" %>
+              <div class="input-group">
+                <%= form.number_field :depth, step: 1, min: 0, placeholder: "0" %>
+                <span class="input-group-text">mm</span>
+              </div>
+            </div>
+            <div class="form-field">
+              <%= form.label :weight, "Greutate" %>
+              <div class="input-group">
+                <%= form.number_field :weight, step: 1, min: 0, placeholder: "0" %>
+                <span class="input-group-text">g</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end tab-product -->
+
+    <!-- ============================================================ -->
+    <!-- TAB 2: VARIANTE -->
+    <!-- ============================================================ -->
+    <div class="product-tab-panel" id="tab-variants">
+
+      <div class="form-section" id="section-primary-option" style="<%= has_variants ? '' : 'display:none;' %>"
+           data-product-form-target="sectionPrimaryOption">
+        <div class="section-header dark">
+          Optiune Principala (swatches pe site)
+        </div>
+        <div class="section-body">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <p class="variant-warning" style="margin:0;">Selecteaza optiunea care va fi afisata ca imagini thumbnail pe pagina produsului. Obligatorie.</p>
+            <%= link_to "Gestioneaza optiuni", admin_option_types_path, target: "_blank", class: "btn btn-secondary btn-sm", style: "white-space:nowrap;" %>
+          </div>
+          <div class="form-row cols-1" id="primary-option-radios" data-product-form-target="primaryOptionRadios">
+            <% current_primary_id = form.object.primary_product_option_type&.option_type_id || params[:primary_option_type_id]&.to_i %>
+            <% (@option_types || []).each do |ot| %>
+              <div class="radio-field">
+                <%= radio_button_tag :primary_option_type_id, ot.id,
+                    current_primary_id == ot.id,
+                    id: "primary_option_type_#{ot.id}",
+                    data: { action: "change->product-form#updateVariantSections" } %>
+                <label for="primary_option_type_<%= ot.id %>"><%= ot.presentation || ot.name %></label>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>"
+           data-product-form-target="sectionVariants">
+        <div class="section-header dark">
+          Lista Variante
+        </div>
+        <div class="section-body">
+          <table class="variants-table" id="variants-table">
+            <thead>
+              <tr>
+                <th>Optiuni</th>
+                <th colspan="5">SKU</th>
+              </tr>
+              <tr>
+                <th>Imagine</th>
+                <th>Pret vanzare</th>
+                <th>Achizitie</th>
+                <th>Promo</th>
+                <th>Stoc</th>
+                <th>TVA %</th>
+                <th>Status</th>
+                <th>Sursa</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="variants-tbody" data-product-variants-target="tbody">
+              <% variants_list = if form.object.errors.any? || !form.object.persisted?
+                   form.object.variants.reject(&:marked_for_destruction?).to_a
+                 else
+                   respond_to?(:preload_variants) ? preload_variants(form.object) : form.object.variants.order(:id).to_a
+                 end %>
+              <% variants_list.each do |variant| %>
+                <%= form.fields_for :variants, variant do |vf| %>
+                  <%= render 'variant_fields', f: vf, variant: variant, option_types: (@option_types || []) %>
+                <% end %>
+              <% end %>
+            </tbody>
+          </table>
+
+          <button type="button" class="btn btn-info" id="btn-add-variant"
+                  data-product-variants-target="addBtn"
+                  data-product-form-target="addVariantBtn"
+                  data-action="click->product-variants#addVariant"
+                  data-option-types="<%= (@option_types || []).map { |ot| { id: ot.id, name: ot.name, values: ot.option_values.map { |ov| { id: ov.id, name: ov.display_name } } } }.to_json %>"
+                  data-variant-index="<%= variants_list.size %>">
+            + Adauga varianta
+          </button>
+        </div>
+      </div>
+
+      <% unless has_variants %>
+        <div class="form-section">
+          <div class="section-body" style="text-align:center; padding:40px; color:#999;">
+            Bifeaza "Are variante?" in tab-ul Produs pentru a gestiona variante.
+          </div>
+        </div>
+      <% end %>
+
+    </div><!-- end tab-variants -->
+
+    <!-- ============================================================ -->
+    <!-- TAB 3: MEDIA (imagini + fisiere) -->
+    <!-- ============================================================ -->
+    <div class="product-tab-panel" id="tab-media">
+
+      <div class="form-section">
+        <div class="section-header success">
+          Imagini Produs
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <label>Imagine principala</label>
+              <input type="file" accept="image/*" style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
+                     data-action="change->product-form#uploadMainImage" />
+              <input type="hidden" name="product[external_image_url]" value="<%= @product.external_image_url %>"
+                     data-product-form-target="mainImageHidden" />
+              <div class="image-preview-container" data-product-form-target="mainImagePreview">
+                <% if @product.external_image_url.present? %>
+                  <div class="image-preview-item bunny-preview" data-type="main">
+                    <img src="<%= @product.external_image_url %>" style="max-height: 120px;">
+                    <button type="button" class="remove-btn" data-target="main" data-action="click->product-form#removeImage">&times;</button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <label>Imagini secundare (galerie)</label>
+              <input type="file" accept="image/*" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
+                     data-action="change->product-form#uploadSecondaryImages" />
+              <div class="image-preview-container" data-product-form-target="secondaryImagePreview">
+                <% if @product.external_image_urls.present? %>
+                  <% @product.external_image_urls.each_with_index do |url, idx| %>
+                    <div class="image-preview-item bunny-preview" data-type="secondary" data-index="<%= idx %>">
+                      <img src="<%= url %>" style="width: 100px;">
+                      <button type="button" class="remove-btn" data-target="secondary" data-index="<%= idx %>" data-action="click->product-form#removeImage">&times;</button>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <div data-product-form-target="externalHiddenInputs">
+            <% (@product.external_image_urls || []).each do |url| %>
+              <%= hidden_field_tag 'product[external_image_urls][]', url %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header info">
+          Fisiere Atasate
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <label>Fisiere atasate (Bunny)</label>
+              <input type="file" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
+                     data-action="change->product-form#uploadFiles" />
+              <div data-product-form-target="filePreview" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                <% if @product.external_file_urls.present? %>
+                  <% @product.external_file_urls.each do |url| %>
+                    <div class="file-preview-item">
+                      <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener" %>
+                      <button type="button" class="remove-btn" data-url="<%= url %>" data-action="click->product-form#removeFile">&times;</button>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-product-form-target="fileHiddenInputs">
+        <% (@product.external_file_urls || []).each do |url| %>
+          <%= hidden_field_tag 'product[external_file_urls][]', url %>
         <% end %>
       </div>
-    </div>
 
-    <div class="form-section" id="section-primary-option" style="<%= has_variants ? '' : 'display:none;' %>"
-         data-product-form-target="sectionPrimaryOption">
-      <div class="section-header dark">
-        Optiune Principala (swatches pe site)
-      </div>
-      <div class="section-body">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <p class="variant-warning" style="margin:0;">Selecteaza optiunea care va fi afisata ca imagini thumbnail pe pagina produsului. Obligatorie.</p>
-          <%= link_to "Gestioneaza optiuni", admin_option_types_path, target: "_blank", class: "btn btn-secondary btn-sm", style: "white-space:nowrap;" %>
-        </div>
-        <div class="form-row cols-1" id="primary-option-radios" data-product-form-target="primaryOptionRadios">
-          <% current_primary_id = form.object.primary_product_option_type&.option_type_id || params[:primary_option_type_id]&.to_i %>
-          <% (@option_types || []).each do |ot| %>
-            <div class="radio-field">
-              <%= radio_button_tag :primary_option_type_id, ot.id,
-                  current_primary_id == ot.id,
-                  id: "primary_option_type_#{ot.id}",
-                  data: { action: "change->product-form#updateVariantSections" } %>
-              <label for="primary_option_type_<%= ot.id %>"><%= ot.presentation || ot.name %></label>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
+    </div><!-- end tab-media -->
 
-    <div class="form-section" id="section-variants" style="<%= has_variants ? '' : 'display:none;' %>"
-         data-product-form-target="sectionVariants">
-      <div class="section-header dark">
-        Lista Variante
-      </div>
-      <div class="section-body">
-        <table class="variants-table" id="variants-table">
-          <thead>
-            <tr>
-              <th>Optiuni</th>
-              <th colspan="5">SKU</th>
-            </tr>
-            <tr>
-              <th>Imagine</th>
-              <th>Pret vanzare</th>
-              <th>Achizitie</th>
-              <th>Promo</th>
-              <th>Stoc</th>
-              <th>TVA %</th>
-              <th>Status</th>
-              <th>Sursa</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="variants-tbody" data-product-variants-target="tbody">
-            <% variants_list = if form.object.errors.any? || !form.object.persisted?
-                 form.object.variants.reject(&:marked_for_destruction?).to_a
-               else
-                 respond_to?(:preload_variants) ? preload_variants(form.object) : form.object.variants.order(:id).to_a
-               end %>
-            <% variants_list.each do |variant| %>
-              <%= form.fields_for :variants, variant do |vf| %>
-                <%= render 'variant_fields', f: vf, variant: variant, option_types: (@option_types || []) %>
-              <% end %>
-            <% end %>
-          </tbody>
-        </table>
+    <!-- ============================================================ -->
+    <!-- TAB 4: ORGANIZARE (categorii, disponibilitate, configurari) -->
+    <!-- ============================================================ -->
+    <div class="product-tab-panel" id="tab-organize">
 
-        <button type="button" class="btn btn-info" id="btn-add-variant"
-                data-product-variants-target="addBtn"
-                data-product-form-target="addVariantBtn"
-                data-action="click->product-variants#addVariant"
-                data-option-types="<%= (@option_types || []).map { |ot| { id: ot.id, name: ot.name, values: ot.option_values.map { |ov| { id: ov.id, name: ov.display_name } } } }.to_json %>"
-                data-variant-index="<%= variants_list.size %>">
-          + Adauga varianta
-        </button>
-      </div>
-    </div>
-
-    <!-- Preturi si Taxe -->
-    <div class="form-section" id="section-prices" style="<%= has_variants ? 'display:none;' : '' %>"
-         data-product-form-target="sectionPrices">
-      <div class="section-header success">
-        Preturi si Taxe
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-4">
-          <div class="form-field">
-            <%= form.label :price, "Pret vanzare" %>
-            <div class="input-group">
-              <%= form.number_field :price, step: 0.01, placeholder: "0.00" %>
-              <span class="input-group-text">RON</span>
-            </div>
-            <small class="form-hint">Pretul afisat clientului (obligatoriu)</small>
-          </div>
-          <div class="form-field">
-            <%= form.label :cost_price, "Pret achizitie" %>
-            <div class="input-group">
-              <%= form.number_field :cost_price, step: 0.01, placeholder: "0.00" %>
-              <span class="input-group-text">RON</span>
-            </div>
-            <small class="form-hint">Cat ai platit pe produs (vizibil doar admin, pentru calcul profit)</small>
-          </div>
-          <div class="form-field">
-            <%= form.label :discount_price, "Pret promotional" %>
-            <div class="input-group">
-              <%= form.number_field :discount_price, step: 0.01, placeholder: "0.00" %>
-              <span class="input-group-text">RON</span>
-            </div>
-            <label style="display:flex; align-items:center; gap:6px; margin-top:6px; cursor:pointer;">
-              <%= form.check_box :promo_active, style: "width:auto; margin:0;" %>
-              <span style="font-size:13px; font-weight:600;">Afiseaza pretul promotional in site</span>
-            </label>
-            <small class="form-hint">Bifeaza pentru a arata clientului pretul taiat + pretul redus</small>
-          </div>
-          <div class="form-field">
-            <%= form.label :vat, "TVA" %>
-            <div class="input-group">
-              <%= form.number_field :vat, min: 0, placeholder: "19" %>
-              <span class="input-group-text">%</span>
-            </div>
-            <small class="form-hint">Cota TVA inclusa in pret (standard: 19%)</small>
-          </div>
+      <div class="form-section">
+        <div class="section-header warning">
+          Categorii
         </div>
-
-        <div class="form-row cols-2">
-          <div class="checkbox-field">
-            <%= form.check_box :taxable %>
-            <%= form.label :taxable, "Se aplica TVA" %>
-          </div>
-          <div class="checkbox-field">
-            <%= form.check_box :coupon_applicable %>
-            <%= form.label :coupon_applicable, "Se aplica cupon de reducere" %>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Inventar si Stoc -->
-    <div class="form-section" id="section-inventory" style="<%= has_variants ? 'display:none;' : '' %>"
-         data-product-form-target="sectionInventory">
-      <div class="section-header info">
-        Inventar si Stoc
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-3">
-          <div class="form-field">
-            <%= form.label :stock, "Stoc" %>
-            <%= form.number_field :stock, placeholder: "0" %>
-          </div>
-          <div class="form-field">
-            <%= form.label :stock_status, "Status stoc" %>
-            <%= form.select :stock_status, Product.stock_statuses.keys.map { |k| [k.humanize, k] } %>
-          </div>
-          <div class="checkbox-field" style="margin-top: 24px;">
-            <%= form.check_box :track_inventory %>
-            <%= form.label :track_inventory, "Urmareste inventarul" %>
-          </div>
-        </div>
-
-        <div class="form-row cols-1">
-          <div class="checkbox-field">
-            <%= form.check_box :sold_individually %>
-            <%= form.label :sold_individually, "Se vinde individual" %>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dimensiuni si Greutate (doar pentru produse fara variante) -->
-    <div class="form-section" id="section-dimensions" style="<%= has_variants ? 'display:none;' : '' %>"
-         data-product-form-target="sectionDimensions">
-      <div class="section-header warning">
-        Dimensiuni si Greutate
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-4">
-          <div class="form-field">
-            <%= form.label :height, "Inaltime" %>
-            <div class="input-group">
-              <%= form.number_field :height, step: 1, min: 0, placeholder: "0" %>
-              <span class="input-group-text">mm</span>
-            </div>
-          </div>
-          <div class="form-field">
-            <%= form.label :width, "Latime" %>
-            <div class="input-group">
-              <%= form.number_field :width, step: 1, min: 0, placeholder: "0" %>
-              <span class="input-group-text">mm</span>
-            </div>
-          </div>
-          <div class="form-field">
-            <%= form.label :depth, "Adancime" %>
-            <div class="input-group">
-              <%= form.number_field :depth, step: 1, min: 0, placeholder: "0" %>
-              <span class="input-group-text">mm</span>
-            </div>
-          </div>
-          <div class="form-field">
-            <%= form.label :weight, "Greutate" %>
-            <div class="input-group">
-              <%= form.number_field :weight, step: 1, min: 0, placeholder: "0" %>
-              <span class="input-group-text">g</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Disponibilitate -->
-    <div class="form-section">
-      <div class="section-header secondary">
-        Disponibilitate
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-2">
-          <div class="form-field">
-            <%= form.label :available_on, "Disponibil din" %>
-            <%= form.date_field :available_on %>
-          </div>
-          <div class="form-field">
-            <%= form.label :discontinue_on, "Se intrerupe la" %>
-            <%= form.date_field :discontinue_on %>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Configurari Produs -->
-    <div class="form-section">
-      <div class="section-header dark">
-        Configurari Produs
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-2">
-          <div class="form-field">
-            <%= form.label :product_type, "Tip produs" %>
-            <%= form.select :product_type, Product.product_types.keys.map { |t| [t.titleize, t] } %>
-          </div>
-          <div class="form-field">
-            <%= form.label :delivery_method, "Mod de livrare" %>
-            <%= form.select :delivery_method, Product.delivery_methods.keys.map { |k| [k.titleize, k] } %>
-          </div>
-        </div>
-
-        <div class="form-row cols-2">
-          <div class="checkbox-field">
-            <%= form.check_box :requires_login %>
-            <%= form.label :requires_login, "Doar utilizatori logati pot cumpara" %>
-          </div>
-          <div class="checkbox-field">
-            <%= form.check_box :visible_to_guests %>
-            <%= form.label :visible_to_guests, "Vizibil pentru utilizatori neautentificati" %>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SEO si Metadata -->
-    <div class="form-section">
-      <div class="section-header primary">
-        SEO si Metadata
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <%= form.label :meta_title, "Titlu SEO" %>
-            <%= form.text_field :meta_title, placeholder: "Titlu pentru motoarele de cautare" %>
-          </div>
-        </div>
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <%= form.label :meta_description, "Descriere SEO" %>
-            <%= form.text_field :meta_description, placeholder: "Descriere pentru motoarele de cautare" %>
-          </div>
-        </div>
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <%= form.label :meta_keywords, "Cuvinte cheie" %>
-            <%= form.text_field :meta_keywords, placeholder: "cuvant1, cuvant2, cuvant3" %>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Imagini Produs -->
-    <div class="form-section">
-      <div class="section-header success">
-        Imagini Produs
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <label>Imagine principala</label>
-            <input type="file" accept="image/*" style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
-                   data-action="change->product-form#uploadMainImage" />
-            <input type="hidden" name="product[external_image_url]" value="<%= @product.external_image_url %>"
-                   data-product-form-target="mainImageHidden" />
-            <div class="image-preview-container" data-product-form-target="mainImagePreview">
-              <% if @product.external_image_url.present? %>
-                <div class="image-preview-item bunny-preview" data-type="main">
-                  <img src="<%= @product.external_image_url %>" style="max-height: 120px;">
-                  <button type="button" class="remove-btn" data-target="main" data-action="click->product-form#removeImage">&times;</button>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <label>Imagini secundare (galerie)</label>
-            <input type="file" accept="image/*" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
-                   data-action="change->product-form#uploadSecondaryImages" />
-            <div class="image-preview-container" data-product-form-target="secondaryImagePreview">
-              <% if @product.external_image_urls.present? %>
-                <% @product.external_image_urls.each_with_index do |url, idx| %>
-                  <div class="image-preview-item bunny-preview" data-type="secondary" data-index="<%= idx %>">
-                    <img src="<%= url %>" style="width: 100px;">
-                    <button type="button" class="remove-btn" data-target="secondary" data-index="<%= idx %>" data-action="click->product-form#removeImage">&times;</button>
-                  </div>
+        <div class="section-body">
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <%= form.label :category_ids, "Selecteaza categoriile" %>
+              <div class="category-badges category-tree">
+                <% Category.ordered_tree.each do |category, depth| %>
+                  <% selected = product.category_ids.include?(category.id) %>
+                  <span class="category-badge <%= selected ? 'active' : 'inactive' %>"
+                        style="margin-left: <%= depth * 24 %>px;"
+                        data-id="<%= category.id %>"
+                        data-parent-id="<%= category.parent_id %>"
+                        data-ancestor-ids="<%= category.ancestor_ids.join(',') %>"
+                        data-action="click->product-form#toggleCategory">
+                    <% if depth > 0 %><span class="tree-indent">└</span><% end %>
+                    <%= category.name %>
+                  </span>
                 <% end %>
-              <% end %>
-            </div>
-          </div>
-        </div>
+              </div>
 
-        <div data-product-form-target="externalHiddenInputs">
-          <% (@product.external_image_urls || []).each do |url| %>
-            <%= hidden_field_tag 'product[external_image_urls][]', url %>
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <!-- Fisiere Atasate -->
-    <div class="form-section">
-      <div class="section-header info">
-        Fisiere Atasate
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <label>Fisiere atasate (Bunny)</label>
-            <input type="file" multiple style="padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px;"
-                   data-action="change->product-form#uploadFiles" />
-            <div data-product-form-target="filePreview" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-              <% if @product.external_file_urls.present? %>
-                <% @product.external_file_urls.each do |url| %>
-                  <div class="file-preview-item">
-                    <%= link_to File.basename(URI.parse(url).path), url, target: "_blank", rel: "noopener" %>
-                    <button type="button" class="remove-btn" data-url="<%= url %>" data-action="click->product-form#removeFile">&times;</button>
-                  </div>
+              <div data-product-form-target="categoryHiddenInputs">
+                <input type="hidden" name="product[category_ids][]" value="">
+                <% product.category_ids.each do |cat_id| %>
+                  <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">
                 <% end %>
-              <% end %>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div data-product-form-target="fileHiddenInputs">
-      <% (@product.external_file_urls || []).each do |url| %>
-        <%= hidden_field_tag 'product[external_file_urls][]', url %>
-      <% end %>
-    </div>
-
-    <!-- Categorii -->
-    <div class="form-section">
-      <div class="section-header warning">
-        Categorii
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <%= form.label :category_ids, "Selecteaza categoriile" %>
-            <div class="category-badges category-tree">
-              <% Category.ordered_tree.each do |category, depth| %>
-                <% selected = product.category_ids.include?(category.id) %>
-                <span class="category-badge <%= selected ? 'active' : 'inactive' %>"
-                      style="margin-left: <%= depth * 24 %>px;"
-                      data-id="<%= category.id %>"
-                      data-parent-id="<%= category.parent_id %>"
-                      data-ancestor-ids="<%= category.ancestor_ids.join(',') %>"
-                      data-action="click->product-form#toggleCategory">
-                  <% if depth > 0 %><span class="tree-indent">└</span><% end %>
-                  <%= category.name %>
-                </span>
-              <% end %>
+      <div class="form-section">
+        <div class="section-header secondary">
+          Disponibilitate
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-2">
+            <div class="form-field">
+              <%= form.label :available_on, "Disponibil din" %>
+              <%= form.date_field :available_on %>
             </div>
-
-            <div data-product-form-target="categoryHiddenInputs">
-              <input type="hidden" name="product[category_ids][]" value="">
-              <% product.category_ids.each do |cat_id| %>
-                <input type="hidden" name="product[category_ids][]" value="<%= cat_id %>">
-              <% end %>
+            <div class="form-field">
+              <%= form.label :discontinue_on, "Se intrerupe la" %>
+              <%= form.date_field :discontinue_on %>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Atribute Personalizate -->
-    <div class="form-section">
-      <div class="section-header secondary">
-        Atribute Personalizate
-      </div>
-      <div class="section-body">
-        <div class="form-row cols-1">
-          <div class="form-field">
-            <%= form.label :custom_attributes, "Atribute personalizate (JSON)" %>
-            <%= form.text_area :custom_attributes, placeholder: '{"key": "value"}', style: "font-family: monospace;" %>
+      <div class="form-section">
+        <div class="section-header dark">
+          Configurari Produs
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-2">
+            <div class="form-field">
+              <%= form.label :product_type, "Tip produs" %>
+              <%= form.select :product_type, Product.product_types.keys.map { |t| [t.titleize, t] } %>
+            </div>
+            <div class="form-field">
+              <%= form.label :delivery_method, "Mod de livrare" %>
+              <%= form.select :delivery_method, Product.delivery_methods.keys.map { |k| [k.titleize, k] } %>
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="checkbox-field">
+              <%= form.check_box :requires_login %>
+              <%= form.label :requires_login, "Doar utilizatori logati pot cumpara" %>
+            </div>
+            <div class="checkbox-field">
+              <%= form.check_box :visible_to_guests %>
+              <%= form.label :visible_to_guests, "Vizibil pentru utilizatori neautentificati" %>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- end tab-organize -->
+
+    <!-- ============================================================ -->
+    <!-- TAB 5: SEO + ATRIBUTE -->
+    <!-- ============================================================ -->
+    <div class="product-tab-panel" id="tab-seo">
+
+      <div class="form-section">
+        <div class="section-header primary">
+          SEO si Metadata
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <%= form.label :meta_title, "Titlu SEO" %>
+              <%= form.text_field :meta_title, placeholder: "Titlu pentru motoarele de cautare" %>
+            </div>
+          </div>
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <%= form.label :meta_description, "Descriere SEO" %>
+              <%= form.text_field :meta_description, placeholder: "Descriere pentru motoarele de cautare" %>
+            </div>
+          </div>
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <%= form.label :meta_keywords, "Cuvinte cheie" %>
+              <%= form.text_field :meta_keywords, placeholder: "cuvant1, cuvant2, cuvant3" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header secondary">
+          Atribute Personalizate
+        </div>
+        <div class="section-body">
+          <div class="form-row cols-1">
+            <div class="form-field">
+              <%= form.label :custom_attributes, "Atribute personalizate (JSON)" %>
+              <%= form.text_area :custom_attributes, placeholder: '{"key": "value"}', style: "font-family: monospace;" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end tab-seo -->
 
     <div class="form-actions form-actions-sticky">
       <%= link_to "Anuleaza", products_path, class: "btn btn-secondary" %>

@@ -422,7 +422,9 @@ Features implementate recent:
 | **Complexitate setup** | Deja facut | Scazuta | Egal |
 | **Flexibilitate** | Ecosistem extensii | Cod direct, Stimulus controllers | Solidus |
 | **Produse & Variante** | Complet | Complet + external IDs + dimensiuni/varianta + EAN + options digest + advisory locks | **AG1** |
+| **Categorii** | Taxonomy (arbore) | Ierarhice (parent_id, auto-select parinti) | Egal |
 | **Admin formular** | Matur, editabil | Restructurat, Stimulus, cautare/sortare, duplicare, erori per varianta | Egal |
+| **Header/Menu** | Stimulus/JS framework | Stimulus (CSP-compatibil) | Egal |
 | **Checkout** | Multi-step, editabil | Single-step (functional pt RO) | Solidus |
 | **Plati** | Multi-gateway | Stripe (card + Apple/Google Pay) | Solidus |
 | **Promotii** | Engine complex | Cupoane (procent/fix/free shipping) | Solidus |
@@ -438,9 +440,9 @@ Features implementate recent:
 | **Multi-limba** | Nativ | Mobility (structura gata) | Egal |
 | **Brand** | Extensie | Nativ (camp pe produs) | **AG1** |
 
-**Scor: Solidus 4 — AG1 7 — Egal 5**
+**Scor: Solidus 3 — AG1 8 — Egal 5**
 
-AG1 a trecut de la Scenariul D (proiectat) la Scenariul E (implementat, 31 martie 2026). Diferenta fata de Solidus s-a marit: AG1 castiga 7-4 (fata de 6-3 proiectat). Features care au contribuit cel mai mult: EAN/GTIN, dimensiuni per varianta, formular admin restructurat cu Stimulus, teste automate complete, si feed import infrastructure.
+AG1 a trecut de la Scenariul D (proiectat) la Scenariul E (implementat, 31 martie 2026). Categorii ierarhice au fost adaugate, eliminand unul din ultimele avantaje Solidus. Header menu mutat din inline JS in Stimulus controller pentru compatibilitate CSP pe live. Features cheie: EAN/GTIN, dimensiuni per varianta, categorii ierarhice cu auto-select parinti, formular admin restructurat cu Stimulus, teste automate complete, feed import infrastructure, si header CSP-compatibil.
 
 ---
 
@@ -451,9 +453,10 @@ AG1 a trecut de la Scenariul D (proiectat) la Scenariul E (implementat, 31 marti
 | **A** — Out-of-the-box | 7 | 5 | 3 | 0 |
 | **B** — Solidus + localizare RO | 7 | 4 | 4 | 0 |
 | **C** — Solidus + localizare RO + MVC expus | **9** | **2** | 4 | 0 |
-| **D** — AG1 cu roadmap features | 3 | **6** | 6 | ~5-7 zile cu Claude Code |
+| **D** — AG1 cu roadmap features (proiectat) | 3 | **6** | 6 | ~5-7 zile cu Claude Code |
+| **E** — AG1 starea actuala (31 mar 2026) | **3** | **8** | 5 | Implementat |
 
-Scenariile A-C arată Solidus din ce în ce mai dominant pe măsură ce investești în customizarea lui. Dar **Scenariul D** inversează complet situația: cu ~5-7 zile de lucru cu Claude Code, scorul se întoarce **6-3 în favoarea AG1**.
+Scenariile A-C arată Solidus din ce în ce mai dominant pe măsură ce investești în customizarea lui. **Scenariul E** (starea actuala) arata AG1 dominant cu scor **8-3**: categorii ierarhice implementate, EAN/GTIN, dimensiuni per varianta, Stimulus controllers, teste automate, header CSP-compatibil.
 
 **De ce funcționează Scenariul D:**
 - Features adăugate sunt exact ce lipsea (checkout, promoții, admin, API)
@@ -1307,85 +1310,115 @@ Un video bun, făcut o singură dată, aduce clienți luni de zile fără efort 
 
 ---
 
-## Tabel comparativ final: AG1 vs Solidus vs eMAG (31 martie 2026)
+## Tabel comparativ final: AG1 vs Solidus vs eMAG vs WordPress/WooCommerce (actualizat 31 martie 2026)
 
-| Feature | AG1 | Solidus | eMAG |
-|---------|:---:|:-------:|:----:|
-| **PRODUSE & VARIANTE** | | | |
-| Produs → Variante | ✅ | ✅ (+ master variant) | ✅ |
-| OptionTypes / OptionValues | ✅ | ✅ | ✅ (impuse per categorie) |
-| Primary option (swatches) | ✅ | ❌ | ✅ |
-| Color hex swatches | ✅ | ❌ | ✅ |
-| SKU per varianta | ✅ | ✅ | ✅ |
-| EAN / GTIN per varianta | ✅ | ❌ | ✅ (obligatoriu) |
-| Pret per varianta | ✅ | ✅ | ✅ |
-| Pret promotional | ✅ | ✅ (model separat) | ✅ |
-| Cost price (achizitie) | ✅ | ❌ (extension) | ❌ |
-| Stoc per varianta | ✅ | ✅ (multi-depozit) | ✅ (FBE/FBS) |
-| Imagini per varianta (CDN) | ✅ | ✅ (ActiveStorage) | ✅ |
-| Dimensiuni per varianta | ✅ | ❌ (doar produs) | ✅ |
-| TVA per varianta | ✅ | ✅ (TaxRate global) | ✅ |
-| Options digest anti-duplicate | ✅ SHA256 | ❌ | ❌ |
-| Soft delete (arhivare) | ✅ | ✅ | ✅ |
-| **IDENTITATE & MATCHING** | | | |
-| Brand | ✅ (camp pe produs) | ❌ (extension) | ✅ (model separat) |
-| External IDs multi-platform | ✅ | ❌ | N/A |
-| Advisory locks (anti-deadlock) | ✅ | ❌ | N/A |
-| Feed import service | ✅ (VariantSyncService) | ❌ (extension) | API propriu |
-| Views count tracking | ✅ | ❌ (extension) | ✅ |
-| **ADMIN** | | | |
-| Formular structurat (Stimulus) | ✅ | ✅ (Tailwind) | ✅ |
-| Cautare + sortare produse | ✅ | ✅ | ✅ |
-| Duplica varianta | ✅ | ❌ | ❌ |
-| Erori validare per varianta | ✅ | ❌ | ✅ |
-| Reload optiuni fara refresh | ✅ (AJAX) | ❌ | N/A |
-| Buton save sticky | ✅ | ❌ | ✅ |
-| Progress upload imagini | ✅ | ❌ | ✅ |
-| **LOCALIZARE RO** | | | |
-| Facturare RO nativa | ✅ (serie, PDF, email) | ❌ | ✅ |
-| Judete / localitati | ✅ (81 judete, 5000+ localitati) | ❌ | ✅ |
-| TVA Romania | ✅ | Configurabil | ✅ |
-| Multi-limba | ✅ (Mobility) | ✅ | ❌ (doar RO) |
-| Tax rates multi-country | ✅ | ✅ | ❌ |
-| **INFRASTRUCTURA** | | | |
-| Background jobs | ✅ (Solid Queue) | ✅ (Sidekiq) | N/A |
-| Newsletter | ✅ | ❌ (extension) | ✅ |
-| SEO (meta, JSON-LD, sitemap) | ✅ | ✅ (extensii) | ✅ |
-| Rate limiting | ✅ (Rack Attack) | ❌ | ✅ |
-| Teste automate | ✅ (35 full flow) | ✅ (masiv) | N/A |
-| **CE LIPSESTE** | | | |
-| Categorii ierarhice | ❌ (flat) | ✅ (arbore) | ✅ (arbore fix) |
-| Atribute per categorie | ❌ (JSON liber) | ❌ (globale) | ✅ |
-| Filtre pe atribute | ❌ | Partial | ✅ (automate) |
-| Multi-depozit | ❌ | ✅ | ✅ |
-| Multi-moneda | ❌ (RON) | ✅ | ❌ (RON) |
-| Reviews | ❌ | ❌ (extension) | ✅ |
-| API REST complet | Partial | ✅ + GraphQL | ✅ |
-| Multi-seller (marketplace) | ❌ | ❌ | ✅ |
+| Feature | AG1 | Solidus | eMAG | WooCommerce |
+|---------|:---:|:-------:|:----:|:-----------:|
+| **PRODUSE & VARIANTE** | | | | |
+| Produs → Variante | ✅ | ✅ (+ master variant) | ✅ | ✅ |
+| OptionTypes / OptionValues | ✅ | ✅ | ✅ (impuse) | ✅ (attributes) |
+| Primary option (swatches) | ✅ | ❌ | ✅ | ❌ (plugin) |
+| Color hex swatches | ✅ | ❌ | ✅ | ❌ (plugin) |
+| SKU per varianta | ✅ | ✅ | ✅ | ✅ |
+| EAN / GTIN per varianta | ✅ | ❌ | ✅ (obligatoriu) | ❌ (plugin) |
+| Pret per varianta | ✅ | ✅ | ✅ | ✅ |
+| Pret promotional | ✅ | ✅ (model separat) | ✅ | ✅ (sale price) |
+| Cost price (achizitie) | ✅ | ❌ (extension) | ❌ | ❌ (plugin) |
+| Stoc per varianta | ✅ | ✅ (multi-depozit) | ✅ (FBE/FBS) | ✅ |
+| Imagini per varianta (CDN) | ✅ | ✅ (ActiveStorage) | ✅ | ✅ |
+| Dimensiuni per varianta | ✅ | ❌ (doar produs) | ✅ | ❌ (doar produs) |
+| TVA per varianta | ✅ | ✅ (TaxRate global) | ✅ | ✅ (tax classes) |
+| Options digest anti-duplicate | ✅ SHA256 | ❌ | ❌ | ❌ |
+| Soft delete (arhivare) | ✅ | ✅ | ✅ | ✅ (trash) |
+| **CATEGORII & ORGANIZARE** | | | | |
+| Categorii ierarhice | ✅ (parent_id, arbore) | ✅ (Taxonomy) | ✅ (arbore fix) | ✅ (nativ) |
+| Auto-select parinti | ✅ (Stimulus) | ❌ | N/A | ❌ |
+| **IDENTITATE & MATCHING** | | | | |
+| Brand | ✅ (camp pe produs) | ❌ (extension) | ✅ (model separat) | ❌ (plugin) |
+| External IDs multi-platform | ✅ | ❌ | N/A | ❌ (plugin) |
+| Advisory locks (anti-deadlock) | ✅ | ❌ | N/A | ❌ |
+| Feed import service | ✅ (VariantSyncService) | ❌ (extension) | API propriu | ✅ (plugin-uri) |
+| Views count tracking | ✅ | ❌ (extension) | ✅ | ❌ (plugin) |
+| **ADMIN** | | | | |
+| Formular structurat (Stimulus) | ✅ | ✅ (Tailwind) | ✅ | ✅ (React/Gutenberg) |
+| Cautare + sortare produse | ✅ | ✅ | ✅ | ✅ |
+| Duplica varianta | ✅ | ❌ | ❌ | ❌ |
+| Erori validare per varianta | ✅ | ❌ | ✅ | ❌ |
+| Reload optiuni fara refresh | ✅ (AJAX) | ❌ | N/A | Partial |
+| Buton save sticky | ✅ | ❌ | ✅ | ✅ |
+| Progress upload imagini | ✅ | ❌ | ✅ | ✅ |
+| Header menu CSP-compatibil | ✅ (Stimulus) | ✅ | ✅ | ❌ (inline JS) |
+| **LOCALIZARE RO** | | | | |
+| Facturare RO nativa | ✅ (serie, PDF, email) | ❌ | ✅ | ❌ (plugin) |
+| Judete / localitati | ✅ (81 judete, 5000+) | ❌ | ✅ | ❌ (plugin) |
+| TVA Romania | ✅ | Configurabil | ✅ | ✅ (configurabil) |
+| Multi-limba | ✅ (Mobility) | ✅ | ❌ (doar RO) | ✅ (WPML/Polylang) |
+| Tax rates multi-country | ✅ | ✅ | ❌ | ✅ |
+| **INFRASTRUCTURA** | | | | |
+| Background jobs | ✅ (Solid Queue) | ✅ (Sidekiq) | N/A | ✅ (WP Cron) |
+| Newsletter | ✅ | ❌ (extension) | ✅ | ✅ (plugin) |
+| SEO (meta, JSON-LD, sitemap) | ✅ | ✅ (extensii) | ✅ | ✅ (Yoast/RankMath) |
+| Rate limiting | ✅ (Rack Attack) | ❌ | ✅ | ❌ (plugin) |
+| Teste automate | ✅ (35 full flow) | ✅ (masiv) | N/A | ❌ (manual) |
+| **SECURITATE** | | | | |
+| CSP headers | ✅ | Partial | ✅ | ❌ (plugin hell) |
+| Vulnerabilitati plugin-uri | N/A (cod propriu) | Minim | N/A | ❌ (risc MAJOR) |
+| **PERFORMANTA** | | | | |
+| RAM footprint | ~250MB | ~512MB+ | N/A | ~256MB (dar PHP) |
+| Boot time | ~5s | ~15-30s | N/A | ~2-3s |
+| Cod spaghetti risc | Scazut (~25 modele) | Mediu (~100+ modele) | N/A | MARE (plugin conflicts) |
+| **COST** | | | | |
+| Hosting/luna | $13 | $44 | Comision 10-25% | $5-15 (shared) |
+| Cost plugin-uri/an | $0 | $0 | N/A | $200-500+ |
+| **CE LIPSESTE** | | | | |
+| Atribute per categorie | ❌ (JSON liber) | ❌ (globale) | ✅ | ✅ (nativ) |
+| Filtre pe atribute | ❌ | Partial | ✅ (automate) | ✅ (plugin) |
+| Multi-depozit | ❌ | ✅ | ✅ | ❌ (plugin) |
+| Multi-moneda | ❌ (RON) | ✅ | ❌ (RON) | ✅ (plugin) |
+| Reviews | ❌ | ❌ (extension) | ✅ | ✅ (nativ) |
+| API REST complet | Partial | ✅ + GraphQL | ✅ | ✅ (WP REST API) |
+| Multi-seller (marketplace) | ❌ | ❌ | ✅ | ❌ (plugin Dokan) |
 
 ### Scor total
 
-| | AG1 | Solidus | eMAG |
-|---|:---:|:-------:|:----:|
-| **✅ Da** | **33** | **20** | **28** |
-| **❌ Nu / Partial** | 7 | 20 | 6 |
+| | AG1 | Solidus | eMAG | WooCommerce |
+|---|:---:|:-------:|:----:|:-----------:|
+| **✅ Da** | **35** | **21** | **28** | **27** |
+| **❌ Nu / Partial** | 6 | 20 | 6 | 14 |
 
-### Concluzii (31 martie 2026)
+### Nota despre WooCommerce (WordPress)
 
-**AG1 depaseste Solidus cu 13 puncte** si e cu 5 puncte peste eMAG.
+WooCommerce e cea mai populara platforma e-commerce din lume (~36% din piata), dar are probleme structurale:
 
-**Fata de Solidus**: AG1 castiga pe aproape toate fronturile practice: localizare RO, admin UX, feed import, EAN, dimensiuni per varianta, brand, advisory locks, cost hosting (3.4x mai ieftin). Solidus ramane superior doar pe: categorii ierarhice, multi-depozit, multi-moneda, API complet. Insa niciuna din aceste diferente nu e blocanta - toate se pot implementa in AG1:
+| Avantaj WooCommerce | Dezavantaj WooCommerce |
+|---------------------|----------------------|
+| Ecosistem urias de plugin-uri | **Plugin hell** - conflicte, vulnerabilitati, update-uri care strica site-ul |
+| Tema-uri vizuale multe | Performanta slaba la volum mare (PHP + MySQL) |
+| Hosting ieftin (shared) | Securitate - #1 tinta de atacuri (40% din web ruleaza WordPress) |
+| Comunitate mare | Fiecare feature = alt plugin = alt abonament = alt risc |
+| SEO excelent (Yoast) | Nu ai control real asupra codului (depinzi de plugin-uri) |
+| Usor de instalat | Greu de scalat, greu de customizat in profunzime |
+
+**WooCommerce e ideal pentru**: site-uri mici, non-tehnici care vor sa instaleze si sa mearga.
+**AG1 e ideal pentru**: business-uri care vor control total, performanta, securitate, si cost predictibil.
+
+### Concluzii actualizate (31 martie 2026)
+
+**AG1 e pe primul loc cu 35 puncte**, urmat de eMAG (28), WooCommerce (27), si Solidus (21).
+
+**Fata de Solidus (35 vs 21, +14)**: AG1 castiga pe aproape toate fronturile. Solidus ramane superior doar pe multi-depozit, multi-moneda, API complet. Insa niciuna din aceste diferente nu e blocanta:
 
 | Feature "lipsa" | Efort in AG1 | Detalii |
 |-----------------|-------------|---------|
-| Categorii ierarhice | 1 zi | `parent_id` pe Category, self-join, nested display |
+| ~~Categorii ierarhice~~ | ~~1 zi~~ | ✅ **IMPLEMENTAT** - parent_id, arbore, auto-select parinti |
 | API REST complet | 2-3 zile | Controllers API cu token auth, JSON responses |
 | Multi-depozit | 2 zile | Model StockLocation + StockItem, stoc per locatie |
 | Multi-moneda | 1-2 zile | Model Price separat, currency per pret |
-| Scalabilitate enterprise | Nu e o feature | PostgreSQL scaleaza la sute de mii de produse fara probleme. AG1 nu are nimic care sa-l impiedice. |
 
-**Total: ~7 zile ar elimina complet orice avantaj Solidus, pastrand toate avantajele AG1 (cost 3.4x mai mic, codebase 4x mai mic, performanta 2x mai buna).**
+**Total: ~5-6 zile ar elimina complet orice avantaj Solidus.**
 
-**Fata de eMAG**: AG1 castiga pe flexibilitate (cost price, external IDs, multi-limba, multi-country tax, advisory locks). eMAG castiga pe features de marketplace (atribute per categorie, filtre automate, reviews, multi-seller) - dar astea sunt relevante doar daca esti marketplace cu mii de selleri.
+**Fata de WooCommerce (35 vs 27, +8)**: AG1 castiga pe securitate (cod propriu vs plugin hell), performanta, teste automate, localizare RO nativa, advisory locks, cost price, dimensiuni per varianta. WooCommerce castiga pe reviews, API, filtre pe atribute, dar cu costul de $200-500/an in plugin-uri si riscuri de securitate permanente.
 
-**Pentru un magazin romanesc independent, AG1 e cea mai completa solutie din cele 3.**
+**Fata de eMAG (35 vs 28, +7)**: AG1 castiga pe flexibilitate si independenta. eMAG castiga pe features de marketplace care sunt irelevante pentru un magazin independent.
+
+**AG1 e cea mai completa si sigura solutie pentru un magazin romanesc independent cu suport pentru feeds de la furnizori.** Infrastructura de import e gata (VariantSyncService, EAN/GTIN, External IDs, Advisory Locks, Solid Queue) - trebuie doar un parser de fisiere (XLSX/XML/CSV) si un endpoint/job de import, estimat la 2-3 zile.

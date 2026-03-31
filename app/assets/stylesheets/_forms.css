@@ -511,6 +511,49 @@ select.form-control {
   border-top: 1px solid var(--color-gray-200);
 }
 
+/* ===================================
+   PRODUCT FORM TABS
+   =================================== */
+
+.product-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 20px;
+}
+
+.product-tab {
+  padding: 10px 20px;
+  border: none;
+  background: #f8f9fa;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.product-tab:hover {
+  color: #333;
+  background: #e9ecef;
+}
+
+.product-tab.active {
+  color: #8b0000;
+  background: #fff;
+  border-bottom-color: #8b0000;
+}
+
+.product-tab-panel {
+  display: none;
+}
+
+.product-tab-panel.active {
+  display: block;
+}
+
 .variant-row.variant-has-errors {
   background: #fff5f5 !important;
 }
