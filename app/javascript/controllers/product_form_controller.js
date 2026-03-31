@@ -178,7 +178,9 @@ export default class extends Controller {
                     'product_stock', 'product_height', 'product_width', 'product_depth', 'product_weight']
     return fields.some(id => {
       const el = document.getElementById(id)
-      return el && el.value && el.value.trim() !== '' && el.value !== '0'
+      if (!el || !el.value) return false
+      const val = parseFloat(el.value)
+      return !isNaN(val) && val > 0
     })
   }
 
