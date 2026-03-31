@@ -40,7 +40,8 @@ export default class extends Controller {
         return
       }
       if (tabId === 'tab-variants') {
-        const enabled = hasBasic && hasVariants
+        const hasExistingVariants = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)').length > 0
+        const enabled = hasBasic && (hasVariants || hasExistingVariants)
         tab.classList.toggle('tab-disabled', !enabled)
         return
       }
@@ -120,8 +121,10 @@ export default class extends Controller {
     const on = this.hasToggleVariantsTarget && this.toggleVariantsTarget.checked
     const primarySelected = this._hasPrimaryOptionSelected()
 
+    const hasExistingVariants = document.querySelectorAll('tr.variant-row-top:not(.variant-destroyed)').length > 0
+
     if (this.hasSectionPrimaryOptionTarget) this.sectionPrimaryOptionTarget.style.display = on ? '' : 'none'
-    if (this.hasSectionVariantsTarget) this.sectionVariantsTarget.style.display = (on && primarySelected) ? '' : 'none'
+    if (this.hasSectionVariantsTarget) this.sectionVariantsTarget.style.display = (on && primarySelected) || hasExistingVariants ? '' : 'none'
     if (this.hasSectionPricesTarget) this.sectionPricesTarget.style.display = on ? 'none' : ''
     if (this.hasSectionInventoryTarget) this.sectionInventoryTarget.style.display = on ? 'none' : ''
     if (this.hasSectionDimensionsTarget) this.sectionDimensionsTarget.style.display = on ? 'none' : ''
