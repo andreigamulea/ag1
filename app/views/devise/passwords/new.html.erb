@@ -15,6 +15,8 @@
         <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-style" %>
       </div>
 
+      <%= render 'shared/flash_messages' %>
+
       <div class="actions" style="margin-top: 20px;">
         <%= f.submit "Trimite instrucțiuni", class: "link-button" %>
       </div>

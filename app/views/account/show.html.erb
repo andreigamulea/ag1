@@ -1,0 +1,16 @@
+<%= render 'shared/noindex' %>
+<div class="account-wrapper">
+  <%= render "account/sidebar" %>
+  <div class="account-content">
+    <% case @section %>
+    <% when "addresses" %>
+      <%= render "account/addresses", addresses: (@addresses || []) %>
+    <% when "billing" %>
+      <%= render "account/billing", addresses: (@addresses || []) %>
+    <% when "settings" %>
+      <%= render "account/settings" %>
+    <% when "orders" %>
+      <%= render "account/orders", orders: (@orders || []) %>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,134 @@
+<div class="order-detail order-detail-card">
+  <div class="order-detail-breadcrumb">
+    <%= link_to "Comenzile mele", contul_meu_path(section: "orders") %> &raquo; Detalii Comanda
+  </div>
+
+  <h2>Comanda nr. <%= order.id %></h2>
+
+  <div class="order-detail-summary">
+    <div class="order-detail-row">
+      <span>Plasata pe:</span>
+      <strong><%= order.placed_at&.strftime("%d.%m.%Y, %H:%M") || order.created_at.strftime("%d.%m.%Y, %H:%M") %></strong>
+    </div>
+    <div class="order-detail-row">
+      <span>Total:</span>
+      <strong><%= number_to_currency(order.total, unit: "", separator: ",", delimiter: ".") %> Lei</strong>
+    </div>
+    <div class="order-detail-row">
+      <span>Status:</span>
+      <span class="order-status-badge order-status--<%= order.status %>">
+        <%= case order.status
+            when "pending"    then "In asteptare"
+            when "paid"       then "Platita"
+            when "processing" then "Se proceseaza"
+            when "shipped"    then "Expediata"
+            when "delivered"  then "Livrata"
+            when "cancelled"  then "Anulata"
+            when "refunded"   then "Rambursata"
+            when "expired"    then "Expirata"
+            else order.status
+            end %>
+      </span>
+    </div>
+  </div>
+
+  <%# 3 coloane: Livrare / Facturare / Plata %>
+  <div class="order-detail-columns">
+    <div class="order-detail-col">
+      <h4>Modalitate livrare</h4>
+      <p class="col-label">Pentru:</p>
+      <p><%= order.shipping_first_name %> <%= order.shipping_last_name %>, <%= order.shipping_phone %></p>
+      <% if order.shipping_company_name.present? %>
+        <p>Companie: <%= order.shipping_company_name %></p>
+      <% end %>
+      <p class="col-label">Adresa:</p>
+      <p><%= order.shipping_street %> <%= order.shipping_street_number %>
+        <% if order.shipping_block_details.present? %>, <%= order.shipping_block_details %><% end %></p>
+      <p><%= order.shipping_city %>, <%= order.shipping_county %>, <%= order.shipping_postal_code %></p>
+      <p><%= order.shipping_country %></p>
+    </div>
+
+    <div class="order-detail-col">
+      <h4>Date facturare</h4>
+      <p class="col-label">Pentru:</p>
+      <% if order.company_name.present? %>
+        <p><%= order.company_name %><% if order.cui.present? %> - CUI: <%= order.cui %><% end %></p>
+      <% end %>
+      <p><%= order.first_name %> <%= order.last_name %>, <%= order.phone %></p>
+      <p><%= order.email %></p>
+      <p class="col-label">Adresa:</p>
+      <p><%= order.street %> <%= order.street_number %>
+        <% if order.block_details.present? %>, <%= order.block_details %><% end %></p>
+      <p><%= order.city %>, <%= order.county %>, <%= order.postal_code %></p>
+      <p><%= order.country %></p>
+    </div>
+
+    <div class="order-detail-col">
+      <h4>Modalitate plata</h4>
+      <p>Plata online cu Card bancar</p>
+      <% if order.paid? || order.processing? || order.shipped? || order.delivered? %>
+        <p class="order-payment-accepted">Plata acceptata</p>
+      <% end %>
+      <p class="col-label">Valoare totala:</p>
+      <p><strong><%= number_to_currency(order.total, unit: "", separator: ",", delimiter: ".") %> Lei</strong></p>
+      <% if order.invoice.present? %>
+        <div class="order-detail-invoice-actions">
+          <%= link_to "Factura #{order.invoice.invoice_number}", invoice_order_path(order, format: :pdf), class: "btn-order-invoice" %>
+          <%= link_to "Descarca XML", invoice_order_path(order, format: :xml), class: "btn-order-invoice btn-order-invoice-xml" %>
+        </div>
+      <% else %>
+        <p class="order-invoice-pending">Factura va fi disponibila dupa confirmarea platii.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Produse %>
+  <div class="order-detail-products">
+    <div class="order-detail-products-title">Produse comandate</div>
+    <% order.order_items.each do |item| %>
+      <% next if item.product_name.in?(["Transport", "Discount"]) %>
+      <div class="order-detail-product">
+        <div class="order-detail-product-info">
+          <span><%= item.product_name %></span>
+          <% if item.variant_options_text.present? %>
+            <small><%= item.variant_options_text %></small>
+          <% end %>
+        </div>
+        <div class="order-detail-product-price">
+          <span><%= number_to_currency(item.price, unit: "", separator: ",", delimiter: ".") %> lei</span>
+          <span><%= item.quantity %> buc</span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Totaluri %>
+  <% subtotal = order.order_items.reject { |i| i.product_name.in?(["Transport", "Discount"]) }.sum(&:total_price) %>
+  <% transport_item = order.order_items.find { |i| i.product_name == "Transport" } %>
+  <% discount_item = order.order_items.find { |i| i.product_name == "Discount" } %>
+
+  <div class="order-detail-totals">
+    <div class="order-detail-total-row">
+      <span>Total produse:</span>
+      <span><%= number_to_currency(subtotal, unit: "", separator: ",", delimiter: ".") %> Lei</span>
+    </div>
+    <% if discount_item %>
+      <div class="order-detail-total-row">
+        <span>Discount:</span>
+        <span class="text-success">-<%= number_to_currency(discount_item.total_price.abs, unit: "", separator: ",", delimiter: ".") %> Lei</span>
+      </div>
+    <% end %>
+    <div class="order-detail-total-row">
+      <span>Cost livrare:</span>
+      <span><%= transport_item && transport_item.total_price > 0 ? "#{number_to_currency(transport_item.total_price, unit: '', separator: ',', delimiter: '.')} Lei" : "GRATUIT" %></span>
+    </div>
+    <div class="order-detail-total-row order-detail-total-final">
+      <span>Total platit:</span>
+      <strong><%= number_to_currency(order.total, unit: "", separator: ",", delimiter: ".") %> Lei</strong>
+    </div>
+  </div>
+
+  <div class="order-detail-back">
+    <%= link_to "Inapoi la comenzi", contul_meu_path(section: "orders"), class: "btn-order-action" %>
+  </div>
+</div>

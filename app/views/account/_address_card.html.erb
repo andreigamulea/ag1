@@ -1,0 +1,35 @@
+<div class="address-card address-card--<%= address.address_type %>">
+  <div class="address-card-header">
+    <div class="address-card-icon">
+      <% if address.address_type == "billing" %>
+        &#128462;
+      <% else %>
+        &#128205;
+      <% end %>
+    </div>
+    <div class="address-card-info">
+      <% if address.address_type == "billing" && address.company_name.present? %>
+        <strong class="address-card-title"><%= address.company_name %> - CUI: <%= address.cui %></strong>
+        <div class="address-card-name"><%= address.full_name %> - <%= address.phone %> &bull; <%= address.email %></div>
+      <% elsif address.address_type == "billing" %>
+        <strong class="address-card-title"><%= address.full_name %> - <%= address.phone %></strong>
+        <div class="address-card-name"><%= address.email %></div>
+      <% else %>
+        <strong class="address-card-title"><%= address.full_name %> - <%= address.phone %></strong>
+      <% end %>
+      <div class="address-card-address"><%= address.full_address %></div>
+      <% if address.label.present? %>
+        <span class="address-card-label"><%= address.label %></span>
+      <% end %>
+      <% if address.default? %>
+        <span class="address-card-default">Adresa principala</span>
+      <% end %>
+    </div>
+  </div>
+  <div class="address-card-actions">
+    <%= link_to "editează", edit_address_path(address), class: "address-action-link" %>
+    <%= button_to "sterge", address_path(address), method: :delete,
+        class: "address-action-link address-action-delete",
+        data: { turbo_confirm: "Ești sigur că vrei să ștergi această adresă?" } %>
+  </div>
+</div>

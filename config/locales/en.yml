@@ -7,6 +7,42 @@ en:
         password_confirmation: "Confirmare parolă"
         current_password: "Parola curentă"
         remember_me: "Autentificare automată"
+      address:
+        first_name: "Prenumele"
+        last_name: "Numele"
+        street: "Strada"
+        street_number: "Numarul"
+        phone: "Telefonul"
+        postal_code: "Codul postal"
+        country: "Tara"
+        county: "Judetul"
+        city: "Localitatea"
+        email: "Email-ul"
+        company_name: "Compania"
+        cui: "CUI"
+        block_details: "Detalii bloc"
+        label: "Eticheta"
+        address_type: "Tipul adresei"
+      order:
+        first_name: "Prenumele"
+        last_name: "Numele"
+        street: "Strada"
+        street_number: "Numarul"
+        phone: "Telefonul"
+        email: "Email-ul"
+        postal_code: "Codul postal"
+        country: "Tara"
+        county: "Judetul"
+        city: "Localitatea"
+        shipping_first_name: "Prenumele (livrare)"
+        shipping_last_name: "Numele (livrare)"
+        shipping_street: "Strada (livrare)"
+        shipping_street_number: "Numarul (livrare)"
+        shipping_phone: "Telefonul (livrare)"
+        shipping_postal_code: "Codul postal (livrare)"
+        shipping_country: "Tara (livrare)"
+        shipping_county: "Judetul (livrare)"
+        shipping_city: "Localitatea (livrare)"
     errors:
       models:
         user:
@@ -16,10 +52,35 @@ en:
               taken: "este deja folosit"
               invalid: "nu este valid"
             password:
-              blank: "nu poate fi goală"
-              too_short: "este prea scurtă (minimum %{count} caractere)"
+              blank: "nu poate fi goala"
+              too_short: "este prea scurta (minimum %{count} caractere)"
             password_confirmation:
               confirmation: "nu coincide cu parola"
+            current_password:
+              blank: "nu poate fi goala"
+        address:
+          attributes:
+            first_name:
+              blank: "este obligatoriu"
+            last_name:
+              blank: "este obligatoriu"
+            street:
+              blank: "este obligatorie"
+            street_number:
+              blank: "este obligatoriu"
+            phone:
+              blank: "este obligatoriu"
+              invalid: "format invalid (doar cifre, spatii, - si optional + la inceput)"
+            country:
+              blank: "este obligatorie"
+            county:
+              blank: "este obligatoriu"
+            city:
+              blank: "este obligatorie"
+            email:
+              blank: "este obligatoriu pentru adresa de facturare"
+            address_type:
+              inclusion: "trebuie sa fie livrare sau facturare"
   errors:
     messages:
       blank: "nu poate fi gol"
@@ -28,12 +89,20 @@ en:
       too_short: "este prea scurt (minimum %{count} caractere)"
       too_long: "este prea lung (maximum %{count} caractere)"
       confirmation: "nu coincide"
-      not_a_number: "nu este un număr"
-      greater_than: "trebuie să fie mai mare decât %{count}"
-      equal_to: "trebuie să fie egal cu %{count}"
+      not_a_number: "nu este un numar"
+      greater_than: "trebuie sa fie mai mare decat %{count}"
+      equal_to: "trebuie sa fie egal cu %{count}"
       accepted: "trebuie acceptat"
       empty: "nu poate fi gol"
+      inclusion: "nu este inclus in lista"
       not_saved:
-        one: "O eroare a împiedicat salvarea:"
-        other: "%{count} erori au împiedicat salvarea:"
+        one: "O eroare a impiedicat salvarea:"
+        other: "%{count} erori au impiedicat salvarea:"
     format: "%{attribute} %{message}"
+  views:
+    pagination:
+      first: "Prima"
+      last: "Ultima"
+      previous: "&laquo; Inapoi"
+      next: "Inainte &raquo;"
+      truncate: "&hellip;"

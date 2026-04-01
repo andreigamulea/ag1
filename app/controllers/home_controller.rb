@@ -1,6 +1,6 @@
 class HomeController < ApplicationController
-  before_action :authenticate_user!, only: [:admin]
-  before_action :check_admin, only: [:admin, :lista_newsletter, :edit_newsletter, :update_newsletter, :delete_newsletter]
+  before_action :authenticate_user!, only: [:admin, :save_admin_preferences, :reset_admin_preferences]
+  before_action :check_admin, only: [:admin, :lista_newsletter, :edit_newsletter, :update_newsletter, :delete_newsletter, :save_admin_preferences, :reset_admin_preferences]
 
   # Define which actions use shop layout (frontend)
   def is_shop_page?
@@ -9,14 +9,28 @@ class HomeController < ApplicationController
 
   # Define which actions use admin layout
   def is_admin_page?
-    %w[admin lista_newsletter edit_newsletter update_newsletter delete_newsletter].include?(action_name)
+    %w[admin lista_newsletter edit_newsletter update_newsletter delete_newsletter save_admin_preferences reset_admin_preferences].include?(action_name)
   end
 
   def index
   end
-  
+
   def admin
-    # panou admin
+    @admin_prefs = current_user.admin_preferences || {}
+  end
+
+  def save_admin_preferences
+    prefs = current_user.admin_preferences || {}
+    prefs["dashboard_order"] = params[:dashboard_order]
+    current_user.update_column(:admin_preferences, prefs)
+    head :ok
+  end
+
+  def reset_admin_preferences
+    prefs = current_user.admin_preferences || {}
+    prefs.delete("dashboard_order")
+    current_user.update_column(:admin_preferences, prefs)
+    redirect_to admin_path, notice: "Afisarea a fost resetata la implicit."
   end
   
   def contact

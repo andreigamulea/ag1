@@ -1,56 +1,62 @@
 <%= render 'shared/noindex' %>
-<div class="container_content user-list">
-  <h1 class="admin-title">👥 Listă utilizatori</h1>
+<div class="container_content product-list">
+  <h1 class="admin-title">Lista utilizatori</h1>
 
-  <%= link_to "➕ Adaugă utilizator", new_user_path, class: "form-button", style: "margin-bottom: 1.5rem;" %>
+  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <%= link_to "+ Adauga utilizator", new_user_path, class: "form-button" %>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <input type="text" id="user-search" placeholder="Cauta utilizator..." style="padding:6px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:14px; width:250px;">
+    </div>
+  </div>
 
   <div class="table-wrapper">
-    <table class="styled-table">
+    <table class="styled-table" id="users-table">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Status</th>
-          <th>Creat la</th>
-          <th>Acțiuni</th>
+          <th data-sort="number" style="cursor:pointer;">ID <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Email <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Rol <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Status <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Creat la <span class="sort-arrow">&#8597;</span></th>
+          <th>Actiuni</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="users-tbody">
         <% @users.each do |user| %>
           <tr>
             <td><%= user.id %></td>
             <td><%= user.email %></td>
             <td>
-              <%= case user.role
-                  when 0 then "Client"
-                  when 1 then "Administrator"
-                  when 2 then "Manager"
-                  else "Necunoscut"
-                  end %>
+              <% case user.role %>
+              <% when 0 %>
+                <span class="badge badge-manual">Client</span>
+              <% when 1 %>
+                <span class="badge badge-feed">Admin</span>
+              <% else %>
+                <span class="badge">Necunoscut</span>
+              <% end %>
             </td>
             <td>
               <% if user.active? %>
-                <span class="status-badge active">✓ Activ</span>
+                <span style="color: #28a745; font-weight: 600;">Activ</span>
               <% else %>
-                <span class="status-badge inactive">✗ Inactiv</span>
+                <span style="color: #dc3545; font-weight: 600;">Inactiv</span>
               <% end %>
             </td>
-            <td><%= user.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+            <td><%= user.created_at.strftime("%d.%m.%Y %H:%M") %></td>
             <td class="table-actions">
               <%= link_to "Detalii", user_path(user), class: "table-button neutral" %>
-              <%= link_to "Editează", admin_edit_user_path(user), class: "table-button primary" %>
-              
+              <%= link_to "Editeaza", admin_edit_user_path(user), class: "table-button primary" %>
               <% unless user.active? %>
-                <%= button_to "🔓 Reactivează", 
-                    reactivate_user_path(user), 
-                    method: :patch,
-                    class: "table-button success",
-                    form: { style: "display: inline;" } %>
+                <%= button_to "Reactiveaza", reactivate_user_path(user), method: :patch,
+                    class: "table-button success", form: { class: "d-inline-block m-0" } %>
               <% end %>
-              
               <% if user != current_user %>
-                <%= link_to "Șterge", user_path(user), method: :delete, data: { confirm: "Ești sigur?" }, class: "table-button danger" %>
+                <%= button_to "Sterge", user_path(user), method: :delete,
+                    data: { confirm: "Esti sigur?" }, class: "table-button danger",
+                    form: { class: "d-inline-block m-0" } %>
               <% end %>
             </td>
           </tr>
@@ -60,3 +66,46 @@
   </div>
 </div>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var searchInput = document.getElementById('user-search');
+  var tbody = document.getElementById('users-tbody');
+  if (!searchInput || !tbody) return;
+
+  searchInput.addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var rows = tbody.querySelectorAll('tr');
+    rows.forEach(function(row) {
+      if (!query || query.length < 2) { row.style.display = ''; return; }
+      row.style.display = row.textContent.toLowerCase().indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+
+  var table = document.getElementById('users-table');
+  var headers = table.querySelectorAll('th[data-sort]');
+  var currentSort = { col: -1, asc: true };
+
+  headers.forEach(function(th, index) {
+    th.addEventListener('click', function() {
+      var sortType = th.dataset.sort;
+      var asc = (currentSort.col === index) ? !currentSort.asc : true;
+      currentSort = { col: index, asc: asc };
+
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aText = a.children[index].textContent.trim();
+        var bText = b.children[index].textContent.trim();
+        if (sortType === 'number') {
+          return asc ? (parseFloat(aText) || 0) - (parseFloat(bText) || 0) : (parseFloat(bText) || 0) - (parseFloat(aText) || 0);
+        }
+        return asc ? aText.localeCompare(bText, 'ro') : bText.localeCompare(aText, 'ro');
+      });
+      rows.forEach(function(row) { tbody.appendChild(row); });
+
+      headers.forEach(function(h) { var a = h.querySelector('.sort-arrow'); if (a) a.innerHTML = '&#8597;'; });
+      var arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.innerHTML = asc ? '&#9650;' : '&#9660;';
+    });
+  });
+});
+</script>

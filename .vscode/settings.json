@@ -1,0 +1,27 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "bin/rails": true,
+        "bundle": true,
+        "gem": true,
+        "/^ruby -Ilib:test test/system/adding_product_to_cart_test\\.rb$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^rails test test/system/adding_product_to_cart_test\\.rb 2>&1 \\| Write-Output$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Get-Service -Name postgres\\* -ErrorAction SilentlyContinue$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^where psql$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^psql -U postgres -d ag1_development -c \"\\\\dt ag1_test\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

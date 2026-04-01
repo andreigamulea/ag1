@@ -25,6 +25,7 @@
  *= require _animations
  *= require _swiper
  *= require _newsletter
+ *= require _flash
  *= require pages/_products
  *= require pages/_product-detail
  *= require pages/_cart
@@ -35,5 +36,6 @@
  *= require pages/_auth
  *= require pages/_admin
  *= require pages/_legal
+ *= require pages/_account
  *= require_self
  */

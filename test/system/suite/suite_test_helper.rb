@@ -163,12 +163,8 @@ class SuiteTestCase < ApplicationSystemTestCase
     fill_in "Email", with: email
     fill_in "user[password]", with: password
     click_button "Intră în cont"
-    # Wait for login redirect to complete; retry once if still on login page
-    if page.has_selector?("input[name='user[password]']", wait: 3)
-      fill_in "Email", with: email
-      fill_in "user[password]", with: password
-      click_button "Intră în cont"
-    end
+    # Așteaptă ca login-ul să se finalizeze — fie vedem meniul Cont, fie suntem pe altă pagină
+    assert_no_selector "input[name='user[password]']", wait: 10
   end
 
   def sign_out

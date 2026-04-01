@@ -34,39 +34,81 @@ end
   def new
     @order = Order.new
 
-    if user_signed_in? && current_user.orders.exists?
-      last_order = current_user.orders.order(placed_at: :desc).first
-      @order.assign_attributes(last_order.slice(
-        :first_name, :last_name, :company_name, :cui, :cnp,
-        :email, :phone, :country, :county, :city, :postal_code,
-        :street, :street_number, :block_details,
-        :shipping_first_name, :shipping_last_name, :shipping_company_name,
-        :shipping_country, :shipping_county, :shipping_city,
-        :shipping_postal_code, :shipping_street, :shipping_street_number,
-        :shipping_block_details, :shipping_phone
-      ))
+    if user_signed_in?
+      # Prioritate 1: adrese salvate
+      shipping_addr = current_user.shipping_addresses.first
+      billing_addr = current_user.billing_addresses.first
 
-      # Dacă ultima comandă NU avea livrare diferită, copiază câmpurile shipping din facturare
-      unless @order.use_different_shipping
-        @order.shipping_first_name = @order.first_name
-        @order.shipping_last_name = @order.last_name
-        @order.shipping_company_name = @order.company_name
-        @order.shipping_country = @order.country
-        @order.shipping_county = @order.county
-        @order.shipping_city = @order.city
-        @order.shipping_postal_code = @order.postal_code
-        @order.shipping_street = @order.street
-        @order.shipping_street_number = @order.street_number
-        @order.shipping_block_details = @order.block_details
-        @order.shipping_phone = @order.phone
+      if shipping_addr
+        @order.shipping_first_name = shipping_addr.first_name
+        @order.shipping_last_name = shipping_addr.last_name
+        @order.shipping_company_name = shipping_addr.company_name
+        @order.shipping_country = shipping_addr.country
+        @order.shipping_county = shipping_addr.county
+        @order.shipping_city = shipping_addr.city
+        @order.shipping_postal_code = shipping_addr.postal_code
+        @order.shipping_street = shipping_addr.street
+        @order.shipping_street_number = shipping_addr.street_number
+        @order.shipping_block_details = shipping_addr.block_details
+        @order.shipping_phone = shipping_addr.phone
       end
-    else
-      # Pentru user nou, populăm doar emailul din modelul User
-      @order.email = current_user.email if user_signed_in?
+
+      if billing_addr
+        @order.first_name = billing_addr.first_name
+        @order.last_name = billing_addr.last_name
+        @order.company_name = billing_addr.company_name
+        @order.cui = billing_addr.cui
+        @order.email = billing_addr.email
+        @order.phone = billing_addr.phone
+        @order.country = billing_addr.country
+        @order.county = billing_addr.county
+        @order.city = billing_addr.city
+        @order.postal_code = billing_addr.postal_code
+        @order.street = billing_addr.street
+        @order.street_number = billing_addr.street_number
+        @order.block_details = billing_addr.block_details
+      end
+
+      # Prioritate 2: fallback pe ultima comandă dacă nu are adrese salvate
+      if !shipping_addr && !billing_addr && current_user.orders.exists?
+        last_order = current_user.orders.order(placed_at: :desc).first
+        @order.assign_attributes(last_order.slice(
+          :first_name, :last_name, :company_name, :cui, :cnp,
+          :email, :phone, :country, :county, :city, :postal_code,
+          :street, :street_number, :block_details,
+          :shipping_first_name, :shipping_last_name, :shipping_company_name,
+          :shipping_country, :shipping_county, :shipping_city,
+          :shipping_postal_code, :shipping_street, :shipping_street_number,
+          :shipping_block_details, :shipping_phone
+        ))
+
+        unless @order.use_different_shipping
+          @order.shipping_first_name = @order.first_name
+          @order.shipping_last_name = @order.last_name
+          @order.shipping_company_name = @order.company_name
+          @order.shipping_country = @order.country
+          @order.shipping_county = @order.county
+          @order.shipping_city = @order.city
+          @order.shipping_postal_code = @order.postal_code
+          @order.shipping_street = @order.street
+          @order.shipping_street_number = @order.street_number
+          @order.shipping_block_details = @order.block_details
+          @order.shipping_phone = @order.phone
+        end
+      end
+
+      # Fallback email din user dacă încă lipsește
+      @order.email = current_user.email if @order.email.blank?
     end
 
     # Păstrează params dacă vine din alt flow
     @order.use_different_shipping = params[:use_different_shipping] if params[:use_different_shipping].present?
+
+    # Adrese salvate pentru selectorul de checkout
+    if user_signed_in?
+      @saved_shipping_addresses = current_user.shipping_addresses.to_a
+      @saved_billing_addresses = current_user.billing_addresses.to_a
+    end
 
     @subtotal = calculate_subtotal
     @discount = calculate_discount

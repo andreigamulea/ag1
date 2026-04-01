@@ -1,0 +1,31 @@
+<aside class="account-sidebar">
+  <%= link_to contul_meu_path(section: "addresses"),
+      class: "account-sidebar-link #{'active' if @section == 'addresses'}" do %>
+    <span class="sidebar-icon">&#128205;</span>
+    <span>Adrese de livrare</span>
+  <% end %>
+
+  <%= link_to contul_meu_path(section: "billing"),
+      class: "account-sidebar-link #{'active' if @section == 'billing'}" do %>
+    <span class="sidebar-icon">&#128462;</span>
+    <span>Date facturare</span>
+  <% end %>
+
+  <%= link_to contul_meu_path(section: "settings"),
+      class: "account-sidebar-link #{'active' if @section == 'settings'}" do %>
+    <span class="sidebar-icon">&#128274;</span>
+    <span>Setari cont</span>
+  <% end %>
+
+  <%= link_to contul_meu_path(section: "orders"),
+      class: "account-sidebar-link #{'active' if @section == 'orders'}" do %>
+    <span class="sidebar-icon">&#128230;</span>
+    <span>Comenzile mele</span>
+  <% end %>
+
+  <%= button_to destroy_user_session_path, method: :delete,
+      class: "account-sidebar-link sidebar-logout" do %>
+    <span class="sidebar-icon">&#128682;</span>
+    <span>Log out</span>
+  <% end %>
+</aside>

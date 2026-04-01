@@ -1,0 +1,13 @@
+<%= render 'shared/noindex' %>
+<div class="account-wrapper">
+  <%= render "account/sidebar" %>
+  <div class="account-content">
+    <div class="address-form-breadcrumb">
+      <%= link_to(@address.address_type == "billing" ? "Date facturare" : "Adrese de livrare",
+          contul_meu_path(section: @address.address_type == "billing" ? "billing" : "addresses")) %>
+      &raquo; Editare adresa
+    </div>
+    <h2>Editare adresa <%= @address.address_type == "billing" ? "de facturare" : "de livrare" %></h2>
+    <%= render "form", address: @address %>
+  </div>
+</div>

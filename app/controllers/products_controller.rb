@@ -14,7 +14,11 @@ class ProductsController < ApplicationController
   end
 
   def is_admin_page?
-    %w[index new edit update destroy purge_image force_gc].include?(action_name)
+    %w[index new edit update destroy purge_image force_gc
+       categories_index new_standalone_category show_standalone_category
+       edit_standalone_category create_standalone_category
+       update_standalone_category delete_standalone_category
+       new_category create_category edit_categories update_categories].include?(action_name)
   end
 
   # GET /products or /products.json

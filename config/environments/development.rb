@@ -41,7 +41,7 @@ config.action_mailer.smtp_settings = {
   port: 465,
   authentication: :plain,
   user_name: "comenzi@ayus.ro",
-  password: Rails.application.credentials[:email_password],
+  password: (Rails.application.credentials[:email_password] rescue nil) || ENV['EMAIL_PASSWORD'],
   domain: "ayus.ro",
   ssl: true,                    # ← SSL explicit pe port 465
   enable_starttls_auto: false,  # ← Dezactivează STARTTLS

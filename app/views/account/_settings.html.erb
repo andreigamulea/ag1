@@ -1,0 +1,93 @@
+<h2>Setari cont</h2>
+
+<div class="settings-cards" data-controller="settings-toggle">
+  <%# Card Email %>
+  <div class="settings-card">
+    <div class="settings-card-display" data-settings-toggle-target="display" data-card="email">
+      <div class="settings-card-left">
+        <div class="settings-card-icon">&#64;</div>
+        <div>
+          <strong>Adresa de e-mail</strong>
+          <p>Adresa de email actuala a contului tau este <strong><%= current_user.email %></strong></p>
+        </div>
+      </div>
+      <button type="button" class="btn-settings-edit" data-action="click->settings-toggle#toggle" data-card="email">modifica</button>
+    </div>
+    <div class="settings-card-form" data-settings-toggle-target="form" data-card="email" style="display: none;">
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+        <div class="settings-form-hint">
+          Dupa ce salvezi, vei primi un email cu un link de confirmare la noua adresa.
+          Apasa link-ul din email pentru a activa schimbarea.
+          Pana atunci, te loghezi cu adresa actuala (<strong><%= current_user.email %></strong>).
+        </div>
+        <div class="settings-form-field">
+          <%= f.label :email, "Noua adresa de email" %>
+          <%= f.email_field :email, autocomplete: "email", class: "form-control", placeholder: "introdu noua adresa de email" %>
+        </div>
+        <div class="settings-form-field">
+          <%= f.label :current_password, "Parola ta curenta" %>
+          <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control", placeholder: "necesara pentru a confirma schimbarea" %>
+        </div>
+        <div class="settings-form-actions">
+          <%= f.submit "Salveaza noua adresa", class: "btn-settings-save" %>
+          <button type="button" class="btn-settings-cancel" data-action="click->settings-toggle#toggle" data-card="email">Anuleaza</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Card Parola %>
+  <div class="settings-card">
+    <div class="settings-card-display" data-settings-toggle-target="display" data-card="password">
+      <div class="settings-card-left">
+        <div class="settings-card-icon">&#128274;</div>
+        <div>
+          <strong>Parola</strong>
+          <p>Este o idee buna sa folosesti o parola puternica pe care nu o mai folosesti si in alta parte</p>
+        </div>
+      </div>
+      <button type="button" class="btn-settings-edit" data-action="click->settings-toggle#toggle" data-card="password">modifica</button>
+    </div>
+    <div class="settings-card-form" data-settings-toggle-target="form" data-card="password" style="display: none;">
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+        <div class="settings-form-hint">
+          Alege o parola de minim <%= @minimum_password_length || 6 %> caractere, diferita de cele folosite pe alte site-uri.
+          Dupa schimbare, vei ramane logat automat.
+        </div>
+        <div class="settings-form-field">
+          <%= f.label :password, "Parola noua" %>
+          <%= f.password_field :password, autocomplete: "new-password", class: "form-control", placeholder: "minim #{@minimum_password_length || 6} caractere" %>
+        </div>
+        <div class="settings-form-field">
+          <%= f.label :password_confirmation, "Repeta parola noua" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", placeholder: "scrie din nou parola aleasa" %>
+        </div>
+        <div class="settings-form-field">
+          <%= f.label :current_password, "Parola ta curenta" %>
+          <%= f.password_field :current_password, autocomplete: "current-password", class: "form-control", placeholder: "necesara pentru a confirma schimbarea" %>
+        </div>
+        <div class="settings-form-actions">
+          <%= f.submit "Schimba parola", class: "btn-settings-save" %>
+          <button type="button" class="btn-settings-cancel" data-action="click->settings-toggle#toggle" data-card="password">Anuleaza</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%# Dezactivare cont %>
+<div class="settings-deactivate">
+  <h3>Dezactiveaza contul</h3>
+  <div class="settings-deactivate-warning">
+    <p><strong>Atentie!</strong> Contul tau va deveni inactiv si nu vei mai putea sa te autentifici. Poti reactiva contul oricand contactand echipa de suport.</p>
+  </div>
+  <%= form_with url: deactivate_user_registration_path, method: :patch, local: true, scope: :user do |f| %>
+    <div class="settings-form-field">
+      <%= f.label :current_password, "Confirma parola curenta pentru a dezactiva contul" %>
+      <%= f.password_field :current_password, autocomplete: "current-password", required: true, class: "form-control" %>
+    </div>
+    <%= f.submit "Dezactiveaza contul meu",
+        data: { turbo_confirm: "Esti sigur ca vrei sa dezactivezi contul?" },
+        class: "btn-settings-danger" %>
+  <% end %>
+</div>

@@ -1,37 +1,140 @@
 <%= render 'shared/noindex' %>
-<h1>Lista cuponelor</h1>
+<div class="container_content product-list">
+  <h1 class="admin-title">Lista cuponelor</h1>
 
-<%= link_to "Adaugă cupon nou", new_coupon_path, class: "btn btn-primary" %>
+  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <%= link_to "+ Adauga cupon", new_coupon_path, class: "form-button" %>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <input type="text" id="coupon-search" placeholder="Cauta cupon..." style="padding:6px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:14px; width:250px;">
+    </div>
+  </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Cod</th>
-      <th>Tip reducere</th>
-      <th>Valoare</th>
-      <th>Activ</th>
-      <th>Valabilitate</th>
-      <th>Utilizări</th>
-      <th>Acțiuni</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @coupons.each do |coupon| %>
-      <tr>
-        <td><%= coupon.code %></td>
-        <td><%= coupon.discount_type %></td>
-        <td><%= coupon.discount_value %></td>
-        <td><%= coupon.active ? "✔" : "✖" %></td>
-        <td>
-          <%= coupon.starts_at&.strftime("%d.%m.%Y") %> -
-          <%= coupon.expires_at&.strftime("%d.%m.%Y") %>
-        </td>
-        <td><%= coupon.usage_count %>/<%= coupon.usage_limit || "∞" %></td>
-        <td>
-          <%= link_to "Editare", edit_coupon_path(coupon), class: "btn btn-sm btn-warning" %>
-          <%= link_to "Șterge", coupon_path(coupon), method: :delete, data: { confirm: "Ești sigur?" }, class: "btn btn-sm btn-danger" %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+  <div class="table-wrapper">
+    <table class="styled-table" id="coupons-table">
+      <thead>
+        <tr>
+          <th data-sort="string" style="cursor:pointer;">Cod <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Tip <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="number" style="cursor:pointer;">Valoare <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Activ <span class="sort-arrow">&#8597;</span></th>
+          <th>Valabilitate</th>
+          <th data-sort="number" style="cursor:pointer;">Utilizari <span class="sort-arrow">&#8597;</span></th>
+          <th>Min. cos</th>
+          <th>Min. cant.</th>
+          <th>Transport gratuit</th>
+          <th>Actiuni</th>
+        </tr>
+      </thead>
+      <tbody id="coupons-tbody">
+        <% @coupons.each do |coupon| %>
+          <tr>
+            <td><strong><%= coupon.code %></strong></td>
+            <td>
+              <% if coupon.discount_type == "percentage" %>
+                <span class="badge badge-manual">Procent</span>
+              <% else %>
+                <span class="badge badge-feed">Fix</span>
+              <% end %>
+            </td>
+            <td>
+              <% if coupon.discount_type == "percentage" %>
+                <%= coupon.discount_value %>%
+              <% else %>
+                <%= number_to_currency(coupon.discount_value, unit: "", separator: ",", delimiter: ".") %> lei
+              <% end %>
+            </td>
+            <td>
+              <% if coupon.active %>
+                <span style="color: #28a745; font-weight: 600;">Activ</span>
+              <% else %>
+                <span style="color: #dc3545; font-weight: 600;">Inactiv</span>
+              <% end %>
+            </td>
+            <td>
+              <% if coupon.starts_at || coupon.expires_at %>
+                <%= coupon.starts_at&.strftime("%d.%m.%Y") || "—" %>
+                &rarr;
+                <%= coupon.expires_at&.strftime("%d.%m.%Y") || "—" %>
+              <% else %>
+                Nelimitat
+              <% end %>
+            </td>
+            <td><%= coupon.usage_count || 0 %> / <%= coupon.usage_limit || "∞" %></td>
+            <td><%= coupon.minimum_cart_value.present? ? number_to_currency(coupon.minimum_cart_value, unit: "", separator: ",", delimiter: ".") + " lei" : "—" %></td>
+            <td><%= coupon.minimum_quantity.present? ? coupon.minimum_quantity : "—" %></td>
+            <td><%= coupon.free_shipping ? "Da" : "—" %></td>
+            <td class="table-actions">
+              <%= link_to "Editare", edit_coupon_path(coupon), class: "table-button primary" %>
+              <%= button_to "Sterge", coupon_path(coupon), method: :delete,
+                  data: { confirm: "Esti sigur ca vrei sa stergi acest cupon?" },
+                  class: "table-button danger",
+                  form: { class: "d-inline-block m-0" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // ===== CAUTARE LIVE =====
+  var searchInput = document.getElementById('coupon-search');
+  var tbody = document.getElementById('coupons-tbody');
+  if (!searchInput || !tbody) return;
+
+  searchInput.addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var rows = tbody.querySelectorAll('tr');
+
+    rows.forEach(function(row) {
+      if (!query || query.length < 2) {
+        row.style.display = '';
+        return;
+      }
+      var text = row.textContent.toLowerCase();
+      row.style.display = text.indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+
+  // ===== SORTARE PE COLOANE =====
+  var table = document.getElementById('coupons-table');
+  var headers = table.querySelectorAll('th[data-sort]');
+  var currentSort = { col: -1, asc: true };
+
+  headers.forEach(function(th, index) {
+    th.addEventListener('click', function() {
+      var sortType = th.dataset.sort;
+      var colIndex = index;
+      var asc = (currentSort.col === colIndex) ? !currentSort.asc : true;
+      currentSort = { col: colIndex, asc: asc };
+
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aText = a.children[colIndex].textContent.trim();
+        var bText = b.children[colIndex].textContent.trim();
+
+        if (sortType === 'number') {
+          var aNum = parseFloat(aText.replace(/[^0-9.\-]/g, '')) || 0;
+          var bNum = parseFloat(bText.replace(/[^0-9.\-]/g, '')) || 0;
+          return asc ? aNum - bNum : bNum - aNum;
+        } else {
+          return asc ? aText.localeCompare(bText, 'ro') : bText.localeCompare(aText, 'ro');
+        }
+      });
+
+      rows.forEach(function(row) { tbody.appendChild(row); });
+
+      headers.forEach(function(h) {
+        var arrow = h.querySelector('.sort-arrow');
+        if (arrow) arrow.innerHTML = '&#8597;';
+      });
+      var activeArrow = th.querySelector('.sort-arrow');
+      if (activeArrow) activeArrow.innerHTML = asc ? '&#9650;' : '&#9660;';
+    });
+  });
+});
+</script>

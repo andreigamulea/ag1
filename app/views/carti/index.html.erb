@@ -81,17 +81,21 @@
             </div>
           <% end %>
 
-          <div class="add-to-cart-form">
+          <div class="add-to-cart-form add-to-cart-form-compact">
             <%= form_tag add_cart_index_path, method: :post do %>
               <input type="hidden" name="product_id" value="<%= product.id %>">
               <input type="hidden" name="variant_id" value="<%= variant.id %>">
-              <%= number_field_tag :quantity, 1,
-                id: "quantity_v#{variant.id}",
-                class: "qty-input",
-                min: 1 %>
+              <div class="qty-controls">
+                <button type="button" class="qty-btn" onclick="this.parentNode.querySelector('input').stepDown()">−</button>
+                <%= number_field_tag :quantity, 1,
+                  id: "quantity_v#{variant.id}",
+                  class: "qty-input qty-input-compact",
+                  min: 1 %>
+                <button type="button" class="qty-btn" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
+              </div>
 
-              <%= submit_tag "Adaugă în coș",
-                class: "add-to-cart-btn",
+              <%= submit_tag "🛒 Adaugă",
+                class: "add-to-cart-btn add-to-cart-btn-compact",
                 disabled: (variant.stock <= 0) %>
             <% end %>
           </div>
@@ -160,17 +164,20 @@
           </div>
         <% end %>
 
-        <div class="add-to-cart-form">
+        <div class="add-to-cart-form add-to-cart-form-compact">
           <%= form_tag add_cart_index_path, method: :post do %>
             <input type="hidden" name="product_id" id="product_id_<%= product.id %>" value="<%= product.id %>">
-            <%= number_field_tag :quantity, 1,
-              id: "quantity_#{product.id}",
-              class: "qty-input",
-              min: 1,
-              max: (product.track_inventory ? nil : product.stock) %>
+            <div class="qty-controls">
+              <button type="button" class="qty-btn" onclick="this.parentNode.querySelector('input').stepDown()">−</button>
+              <%= number_field_tag :quantity, 1,
+                id: "quantity_#{product.id}",
+                class: "qty-input qty-input-compact",
+                min: 1 %>
+              <button type="button" class="qty-btn" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
+            </div>
 
-            <%= submit_tag "Adaugă în coș",
-              class: "add-to-cart-btn",
+            <%= submit_tag "🛒 Adaugă",
+              class: "add-to-cart-btn add-to-cart-btn-compact",
               disabled: (!product.track_inventory && product.stock <= 0) %>
           <% end %>
         </div>

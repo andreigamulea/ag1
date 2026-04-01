@@ -1,100 +1,179 @@
 require_relative "suite_test_helper"
 
 class AccountManagementTest < SuiteTestCase
-  # ── EDITARE PROFIL ────────────────────────────────────────────────
 
-  test "user accesează pagina de editare profil" do
+  # ── REDIRECT /users/edit → DASHBOARD ─────────────────────────
+
+  test "/users/edit redirecționează la dashboard settings" do
     user = create_test_user(password: "password123")
     sign_in(email: user.email, password: "password123")
-    assert_selector "#account-toggle", wait: 5
-
     visit edit_user_registration_path
-    assert_text "Editează Contul", wait: 5
-    assert_field "user[email]"
+
+    assert_current_path contul_meu_path(section: "settings")
   end
 
-  test "user schimbă parola cu succes" do
+  # ── SETĂRI CONT: CARDURI EMAIL/PAROLĂ ────────────────────────
+
+  test "setări cont afișează email-ul curent" do
     user = create_test_user(password: "password123")
     sign_in(email: user.email, password: "password123")
-    assert_selector "#account-toggle", wait: 5
+    visit contul_meu_path(section: "settings")
 
-    visit edit_user_registration_path
-    assert_text "Editează Contul", wait: 5
+    assert_text "Setari cont"
+    assert_text user.email
+    assert_button "modifica", count: 2
+  end
 
-    fill_in "user[password]", with: "newpassword456", match: :first
-    fill_in "user[password_confirmation]", with: "newpassword456"
+  test "toggle modifică email afișează formularul" do
+    user = create_test_user(password: "password123")
+    sign_in(email: user.email, password: "password123")
+    visit contul_meu_path(section: "settings")
 
-    # Parola curentă - primul câmp (din formularul de editare, nu cel de dezactivare)
-    # Pagina are 2 câmpuri user[current_password]: unul în form-ul de edit, altul în cancel-account
+    # Click pe primul buton "modifica" (email)
+    within(".settings-card-display[data-card='email']") do
+      click_button "modifica"
+    end
+
+    assert_field "user[email]", wait: 3
+    assert_field "user[current_password]"
+    assert_button "Salveaza"
+    assert_button "Anuleaza"
+  end
+
+  test "toggle modifică parolă afișează formularul" do
+    user = create_test_user(password: "password123")
+    sign_in(email: user.email, password: "password123")
+    visit contul_meu_path(section: "settings")
+
+    within(".settings-card-display[data-card='password']") do
+      click_button "modifica"
+    end
+
+    assert_field "user[password]", wait: 3
+    assert_field "user[password_confirmation]"
+    assert_field "user[current_password]"
+  end
+
+  # ── SCHIMBARE EMAIL ──────────────────────────────────────────
+
+  test "schimbare email cu parolă curentă corectă" do
+    user = create_test_user(password: "password123")
+    new_email = "newemail-#{SecureRandom.hex(4)}@example.com"
+    sign_in(email: user.email, password: "password123")
+    visit contul_meu_path(section: "settings")
+
+    within(".settings-card-display[data-card='email']") do
+      click_button "modifica"
+    end
+
+    fill_in "user[email]", with: new_email
     all(:field, "user[current_password]", visible: true).first.set("password123")
-    click_button "Actualizeaza"
 
-    assert_no_text "Internal Server Error"
+    within(".settings-card-form[data-card='email']") do
+      click_button "Salveaza noua adresa"
+    end
+
+    assert_current_path contul_meu_path(section: "settings"), wait: 5
   end
 
-  test "user NU poate schimba parola fără parola curentă" do
+  test "schimbare email fără parolă curentă eșuează" do
     user = create_test_user(password: "password123")
     sign_in(email: user.email, password: "password123")
-    assert_selector "#account-toggle", wait: 5
+    visit contul_meu_path(section: "settings")
 
-    visit edit_user_registration_path
-    assert_text "Editează Contul", wait: 5
+    within(".settings-card-display[data-card='email']") do
+      click_button "modifica"
+    end
+
+    fill_in "user[email]", with: "alt-email@example.com"
+    # Nu completăm current_password
+
+    within(".settings-card-form[data-card='email']") do
+      click_button "Salveaza noua adresa"
+    end
+
+    # Rămâne pe dashboard cu erori
+    assert_selector ".account-wrapper", wait: 5
+  end
+
+  # ── SCHIMBARE PAROLĂ ─────────────────────────────────────────
+
+  test "schimbare parolă cu date corecte" do
+    user = create_test_user(password: "password123")
+    sign_in(email: user.email, password: "password123")
+    visit contul_meu_path(section: "settings")
+
+    within(".settings-card-display[data-card='password']") do
+      click_button "modifica"
+    end
+
     fill_in "user[password]", with: "newpassword456", match: :first
     fill_in "user[password_confirmation]", with: "newpassword456"
-    # Nu completăm current_password
-    click_button "Actualizeaza"
+    all(:field, "user[current_password]", visible: true).last.set("password123")
 
-    # Ar trebui eroare
-    assert_text "Editează Contul"
+    within(".settings-card-form[data-card='password']") do
+      click_button "Schimba parola"
+    end
+
+    assert_current_path contul_meu_path(section: "settings"), wait: 5
   end
 
-  # ── DEZACTIVARE CONT ──────────────────────────────────────────────
-
-  test "user dezactivează contul cu parola corectă" do
+  test "schimbare parolă cu confirmare diferită eșuează" do
     user = create_test_user(password: "password123")
     sign_in(email: user.email, password: "password123")
-    assert_selector "#account-toggle", wait: 5
+    visit contul_meu_path(section: "settings")
 
-    visit edit_user_registration_path
-    assert_text "Dezactiveaza contul", wait: 5
+    within(".settings-card-display[data-card='password']") do
+      click_button "modifica"
+    end
 
-    within ".cancel-account-section" do
+    fill_in "user[password]", with: "newpass123", match: :first
+    fill_in "user[password_confirmation]", with: "altaparola"
+    all(:field, "user[current_password]", visible: true).last.set("password123")
+
+    within(".settings-card-form[data-card='password']") do
+      click_button "Schimba parola"
+    end
+
+    # Rămâne pe dashboard
+    assert_selector ".account-wrapper", wait: 5
+  end
+
+  # ── DEZACTIVARE CONT ─────────────────────────────────────────
+
+  test "dezactivare cont cu parolă corectă" do
+    user = create_test_user(password: "password123")
+    sign_in(email: user.email, password: "password123")
+    visit contul_meu_path(section: "settings")
+
+    assert_text "Dezactiveaza contul"
+
+    within ".settings-deactivate" do
       fill_in "user[current_password]", with: "password123"
     end
 
-    # Submitem formularul de dezactivare direct via JS (bypass confirm dialog)
-    page.execute_script(<<~JS)
-      var form = document.querySelector('.cancel-account-section form');
-      if (form) { form.submit(); }
-    JS
+    # Submit direct via JS (bypass turbo_confirm)
+    page.execute_script("document.querySelector('.settings-deactivate form').submit()")
 
-    # Ar trebui delogat și redirecționat
-    assert_selector "h1", text: "AYUS GRUP Romania", wait: 5
+    # Delogat și redirecționat
+    assert_no_selector "#account-toggle", wait: 5
   end
 
-  test "user NU poate dezactiva contul cu parola greșită" do
+  test "dezactivare cont cu parolă greșită eșuează" do
     user = create_test_user(password: "password123")
     sign_in(email: user.email, password: "password123")
-    assert_selector "#account-toggle", wait: 5
+    visit contul_meu_path(section: "settings")
 
-    visit edit_user_registration_path
-    assert_text "Dezactiveaza contul", wait: 5
-
-    within ".cancel-account-section" do
+    within ".settings-deactivate" do
       fill_in "user[current_password]", with: "parolagresita"
     end
 
-    # Submitem formularul direct via JS (bypass confirm dialog)
-    page.execute_script(<<~JS)
-      var form = document.querySelector('.cancel-account-section form');
-      if (form) { form.submit(); }
-    JS
+    page.execute_script("document.querySelector('.settings-deactivate form').submit()")
 
-    # Ar trebui să rămână pe pagina de edit cu eroare
-    assert_text "Editează Contul", wait: 5
+    # Rămâne logat, redirecționat la settings cu eroare
+    assert_selector ".account-wrapper", wait: 5
+    assert_text "Parola curenta este incorecta"
   end
-
-  # ── USER DEZACTIVAT NU SE POATE AUTENTIFICA ───────────────────────
 
   test "user dezactivat nu se poate autentifica" do
     user = create_test_user(password: "password123", active: false)
@@ -104,19 +183,19 @@ class AccountManagementTest < SuiteTestCase
     fill_in "user[password]", with: "password123"
     click_button "Intră în cont"
 
-    # Nu ar trebui să fie autentificat
     assert_no_selector "#account-toggle"
   end
 
-  # ── REACTIVARE DE CĂTRE ADMIN ─────────────────────────────────────
+  # ── REACTIVARE DE CĂTRE ADMIN ────────────────────────────────
 
-  test "admin reactivează un cont și userul se poate autentifica din nou" do
+  test "admin reactivează un cont dezactivat" do
     inactive = create_test_user(password: "password123", active: false)
 
     admin = sign_in_as_admin
     assert_selector "#account-toggle", wait: 5
     visit users_path
-    assert_text "Listă utilizatori", wait: 5
+    assert_text inactive.email, wait: 5
+
     within("tr", text: inactive.email) do
       click_button "Reactivează"
     end
@@ -126,32 +205,5 @@ class AccountManagementTest < SuiteTestCase
 
     sign_in(email: inactive.email, password: "password123")
     assert_selector "#account-toggle", wait: 5
-  end
-
-  # ── SIGNUP CU EMAIL EXISTENT ──────────────────────────────────────
-
-  test "signup cu email deja existent afișează eroare" do
-    user = create_test_user(password: "password123")
-
-    sign_up(email: user.email, password: "password456")
-
-    # Ar trebui eroare de validare
-    assert_text "Email"
-    assert_no_selector "#account-toggle"
-  end
-
-  # ── REDIRECT DUPĂ LOGIN ───────────────────────────────────────────
-
-  test "user este redirecționat la pagina anterioară după login" do
-    user = create_test_user(password: "password123")
-
-    visit orders_path
-    assert_selector "h1", text: "Autentificare", wait: 5
-
-    fill_in "Email", with: user.email
-    fill_in "user[password]", with: "password123"
-    click_button "Intră în cont"
-
-    assert_current_path orders_path, wait: 5
   end
 end

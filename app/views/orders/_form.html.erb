@@ -1,4 +1,4 @@
-<%= form_with model: @order, url: orders_path, method: :post, local: true do |f| %>
+<%= form_with model: @order, url: orders_path, method: :post, local: true, data: { turbo: false } do |f| %>
   <% if @order.errors.any? %>
     <div class="alert alert-danger">
       <h4><strong>Comanda nu a putut fi salvată:</strong></h4>
@@ -13,6 +13,30 @@
   <!-- ADRESA DE LIVRARE - PRIMA -->
   <fieldset>
     <legend><strong>Date de livrare</strong></legend>
+
+    <% if @saved_shipping_addresses.present? %>
+      <div class="saved-address-picker">
+        <label>Adresa de livrare:</label>
+        <select id="shipping-address-picker" class="form-control" onchange="fillShippingFromSaved(this.value)">
+          <% @saved_shipping_addresses.each_with_index do |addr, i| %>
+            <option value="<%= addr.id %>" <%= 'selected' if i == 0 %>
+                    data-first-name="<%= addr.first_name %>"
+                    data-last-name="<%= addr.last_name %>"
+                    data-company-name="<%= addr.company_name %>"
+                    data-phone="<%= addr.phone %>"
+                    data-country="<%= addr.country %>"
+                    data-county="<%= addr.county %>"
+                    data-city="<%= addr.city %>"
+                    data-postal-code="<%= addr.postal_code %>"
+                    data-street="<%= addr.street %>"
+                    data-street-number="<%= addr.street_number %>"
+                    data-block-details="<%= addr.block_details %>"
+                    ><%= addr.display_title %> — <%= addr.city %>, <%= addr.county %></option>
+          <% end %>
+          <option value="">Adauga adresa noua</option>
+        </select>
+      </div>
+    <% end %>
 
     <div class="row">
       <div class="col"><%= f.label :shipping_last_name, "Nume" %>
@@ -76,7 +100,7 @@
   <div data-controller="toggle-billing">
     <div style="margin: 20px 0;">
       <div class="field">
-        <%= f.check_box :use_different_billing, id: "toggle-billing" %>
+        <%= f.check_box :use_different_billing, id: "toggle-billing", data: { toggle_billing_target: "checkbox", action: "toggle-billing#toggle" } %>
         <%= f.label :use_different_billing, "Adresa de facturare este diferită" %>
       </div>
     </div>
@@ -85,6 +109,32 @@
     <div id="billing-fields" data-toggle-billing-target="fields" style="display: none;">
       <fieldset>
         <legend><strong>Date de facturare</strong></legend>
+
+        <% if @saved_billing_addresses.present? %>
+          <div class="saved-address-picker">
+            <label>Adresa de facturare:</label>
+            <select id="billing-address-picker" class="form-control" onchange="fillBillingFromSaved(this.value)">
+              <% @saved_billing_addresses.each_with_index do |addr, i| %>
+                <option value="<%= addr.id %>" <%= 'selected' if i == 0 %>
+                        data-first-name="<%= addr.first_name %>"
+                        data-last-name="<%= addr.last_name %>"
+                        data-company-name="<%= addr.company_name %>"
+                        data-cui="<%= addr.cui %>"
+                        data-phone="<%= addr.phone %>"
+                        data-email="<%= addr.email %>"
+                        data-country="<%= addr.country %>"
+                        data-county="<%= addr.county %>"
+                        data-city="<%= addr.city %>"
+                        data-postal-code="<%= addr.postal_code %>"
+                        data-street="<%= addr.street %>"
+                        data-street-number="<%= addr.street_number %>"
+                        data-block-details="<%= addr.block_details %>"
+                        ><%= addr.company_name.present? ? "#{addr.company_name} — " : "" %><%= addr.display_title %> — <%= addr.city %></option>
+              <% end %>
+              <option value="">Adauga adresa noua</option>
+            </select>
+          </div>
+        <% end %>
 
         <div class="row">
           <div class="col"><%= f.label :last_name, "Nume" %>
@@ -169,7 +219,7 @@
 <% end %>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("turbo:load", () => {
     function setupAutocomplete(inputId, dropdownId, endpoint, filterId = null, taraInputId = "tara_input") {
       const input = document.getElementById(inputId);
       const dropdown = document.getElementById(dropdownId);
@@ -424,19 +474,93 @@
   });
 </script>
 
+
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const checkbox = document.getElementById("toggle-billing");
-    const fields = document.getElementById("billing-fields");
+  function fillShippingFromSaved(addressId) {
+    var picker = document.getElementById('shipping-address-picker');
+    if (!picker) return;
+    var option = picker.querySelector('option[value="' + addressId + '"]');
 
-    if (checkbox && fields) {
-      fields.style.display = checkbox.checked ? "block" : "none";
+    var fields = {
+      'order_shipping_first_name': 'firstName',
+      'order_shipping_last_name': 'lastName',
+      'order_shipping_company_name': 'companyName',
+      'order_shipping_phone': 'phone',
+      'shipping_tara_input': 'country',
+      'shipping_judet_input': 'county',
+      'shipping_localitate_input': 'city',
+      'order_shipping_postal_code': 'postalCode',
+      'order_shipping_street': 'street',
+      'order_shipping_street_number': 'streetNumber',
+      'order_shipping_block_details': 'blockDetails'
+    };
 
-      checkbox.addEventListener("change", () => {
-        fields.style.display = checkbox.checked ? "block" : "none";
+    if (!addressId || !option) {
+      Object.keys(fields).forEach(function(fieldId) {
+        var el = document.getElementById(fieldId);
+        if (el) { el.value = ''; el.disabled = false; }
       });
-    } else {
-      console.error("Eroare: Checkbox sau fields nu găsit!");
+      initializeFields("shipping_");
+      return;
     }
-  });
+
+    Object.keys(fields).forEach(function(fieldId) {
+      var el = document.getElementById(fieldId);
+      if (!el) return;
+      var dataKey = fields[fieldId];
+      var value = option.dataset[dataKey] || '';
+      el.value = value;
+      el.disabled = false;
+    });
+
+    var judetInput = document.getElementById('shipping_judet_input');
+    var localitateInput = document.getElementById('shipping_localitate_input');
+    if (judetInput) judetInput.disabled = false;
+    if (localitateInput) localitateInput.disabled = false;
+  }
+
+  function fillBillingFromSaved(addressId) {
+    var picker = document.getElementById('billing-address-picker');
+    if (!picker) return;
+    var option = picker.querySelector('option[value="' + addressId + '"]');
+
+    var fields = {
+      'order_first_name': 'firstName',
+      'order_last_name': 'lastName',
+      'order_company_name': 'companyName',
+      'order_cui': 'cui',
+      'order_phone': 'phone',
+      'order_email': 'email',
+      'tara_input': 'country',
+      'judet_input': 'county',
+      'localitate_input': 'city',
+      'order_postal_code': 'postalCode',
+      'order_street': 'street',
+      'order_street_number': 'streetNumber',
+      'order_block_details': 'blockDetails'
+    };
+
+    if (!addressId || !option) {
+      Object.keys(fields).forEach(function(fieldId) {
+        var el = document.getElementById(fieldId);
+        if (el) { el.value = ''; el.disabled = false; }
+      });
+      initializeFields();
+      return;
+    }
+
+    Object.keys(fields).forEach(function(fieldId) {
+      var el = document.getElementById(fieldId);
+      if (!el) return;
+      var dataKey = fields[fieldId];
+      var value = option.dataset[dataKey] || '';
+      el.value = value;
+      el.disabled = false;
+    });
+
+    var judetInput = document.getElementById('judet_input');
+    var localitateInput = document.getElementById('localitate_input');
+    if (judetInput) judetInput.disabled = false;
+    if (localitateInput) localitateInput.disabled = false;
+  }
 </script>

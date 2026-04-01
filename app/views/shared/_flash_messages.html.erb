@@ -1,0 +1,11 @@
+<% flash.each do |type, message| %>
+  <% next if message.blank? %>
+  <% css_class = case type.to_s
+                 when "notice", "success" then "flash-success"
+                 when "alert", "error"   then "flash-error"
+                 else "flash-info"
+                 end %>
+  <div class="flash-message <%= css_class %>" data-turbo-cache="false">
+    <span><%= message.html_safe %></span>
+  </div>
+<% end %>

@@ -1,42 +1,87 @@
 <%= render 'shared/noindex' %>
-<div class="container_content category-list">
-  <h1 class="admin-title">📂 Listă categorii</h1>
+<div class="container_content product-list">
+  <h1 class="admin-title">Lista categorii</h1>
 
-  <div class="category-actions">
-    <%= link_to "➕ Adaugă categorie nouă", new_standalone_category_products_path, class: "form-button" %>
+  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <%= link_to "+ Adauga categorie", new_standalone_category_products_path, class: "form-button" %>
+      <span style="margin-left:12px; font-size:13px; color:#888;">Total: <strong><%= @categories.count %></strong></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <input type="text" id="category-search" placeholder="Cauta categorie..." style="padding:6px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:14px; width:250px;">
+    </div>
   </div>
 
   <div class="table-wrapper">
-    <table class="styled-table">
+    <table class="styled-table" id="categories-table">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Nume</th>
-          <th>Slug</th>
-          <th>Acțiuni</th>
+          <th data-sort="number" style="cursor:pointer;">ID <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Nume <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Slug <span class="sort-arrow">&#8597;</span></th>
+          <th>Actiuni</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="categories-tbody">
         <% @categories.each do |category| %>
           <tr>
             <td><%= category.id %></td>
-            <td><%= category.name %></td>
+            <td><strong><%= category.name %></strong></td>
             <td><%= category.slug %></td>
             <td class="table-actions">
-  <%= link_to "Vezi", show_standalone_category_products_path(id: category.id), class: "table-button neutral" %>
-  <%= link_to "Editare", edit_standalone_category_products_path(id: category.id), class: "table-button primary" %>
-  <%= button_to "Ștergere", delete_standalone_category_products_path(id: category.id),
-        method: :delete,
-        data: { confirm: "Ești sigur că vrei să ștergi această categorie?" },
-        class: "table-button danger",
-        form: { style: "display:inline-block;" } %>
-</td>
-
+              <%= link_to "Vezi", show_standalone_category_products_path(id: category.id), class: "table-button neutral" %>
+              <%= link_to "Editeaza", edit_standalone_category_products_path(id: category.id), class: "table-button primary" %>
+              <%= button_to "Sterge", delete_standalone_category_products_path(id: category.id),
+                  method: :delete, data: { confirm: "Esti sigur ca vrei sa stergi aceasta categorie?" },
+                  class: "table-button danger", form: { class: "d-inline-block m-0" } %>
+            </td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
-
-  <%= link_to "← Înapoi la produse", products_path, class: "link-button mt-2xl" %>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var searchInput = document.getElementById('category-search');
+  var tbody = document.getElementById('categories-tbody');
+  if (!searchInput || !tbody) return;
+
+  searchInput.addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var rows = tbody.querySelectorAll('tr');
+    rows.forEach(function(row) {
+      if (!query || query.length < 2) { row.style.display = ''; return; }
+      row.style.display = row.textContent.toLowerCase().indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+
+  var table = document.getElementById('categories-table');
+  var headers = table.querySelectorAll('th[data-sort]');
+  var currentSort = { col: -1, asc: true };
+
+  headers.forEach(function(th, index) {
+    th.addEventListener('click', function() {
+      var sortType = th.dataset.sort;
+      var asc = (currentSort.col === index) ? !currentSort.asc : true;
+      currentSort = { col: index, asc: asc };
+
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aText = a.children[index].textContent.trim();
+        var bText = b.children[index].textContent.trim();
+        if (sortType === 'number') {
+          return asc ? (parseFloat(aText) || 0) - (parseFloat(bText) || 0) : (parseFloat(bText) || 0) - (parseFloat(aText) || 0);
+        }
+        return asc ? aText.localeCompare(bText, 'ro') : bText.localeCompare(aText, 'ro');
+      });
+      rows.forEach(function(row) { tbody.appendChild(row); });
+
+      headers.forEach(function(h) { var a = h.querySelector('.sort-arrow'); if (a) a.innerHTML = '&#8597;'; });
+      var arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.innerHTML = asc ? '&#9650;' : '&#9660;';
+    });
+  });
+});
+</script>

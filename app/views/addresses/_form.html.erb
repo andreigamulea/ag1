@@ -1,0 +1,129 @@
+<%= form_with model: address, local: true, class: "address-form", data: { controller: "address-form" } do |f| %>
+  <%= f.hidden_field :address_type %>
+
+  <% if address.errors.any? %>
+    <div class="address-form-errors">
+      <h4>Adresa nu a putut fi salvata:</h4>
+      <ul>
+        <% address.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% billing = address.address_type == "billing" %>
+
+  <div class="address-form-row">
+    <div class="address-form-field">
+      <%= f.label :last_name do %>Nume <span class="required">*</span><% end %>
+      <%= f.text_field :last_name, required: true, class: "form-control" %>
+    </div>
+    <div class="address-form-field">
+      <%= f.label :first_name do %>Prenume <span class="required">*</span><% end %>
+      <%= f.text_field :first_name, required: true, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="address-form-row">
+    <div class="address-form-field">
+      <%= f.label :company_name, "Companie (optional)" %>
+      <%= f.text_field :company_name, class: "form-control" %>
+    </div>
+    <div class="address-form-field">
+      <%= f.label :phone do %>Telefon <span class="required">*</span><% end %>
+      <%= f.telephone_field :phone, required: true, class: "form-control", pattern: "[\\+]?[0-9\\s\\-]{6,20}", placeholder: "ex: 0749079619 sau +40749079619" %>
+    </div>
+  </div>
+
+  <% if billing %>
+    <div class="address-form-row">
+      <div class="address-form-field">
+        <%= f.label :cui, "CUI (optional)" %>
+        <%= f.text_field :cui, class: "form-control" %>
+      </div>
+      <div class="address-form-field">
+        <%= f.label :email do %>Email <span class="required">*</span><% end %>
+        <%= f.email_field :email, required: true, class: "form-control" %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="address-form-field">
+    <%= f.label :country do %>Tara <span class="required">*</span><% end %>
+    <div class="position-relative">
+      <%= f.text_field :country, class: "form-control",
+          id: "address_tara_input",
+          placeholder: "Click pentru a schimba tara...",
+          autocomplete: "off",
+          value: address.country.presence || "Romania",
+          data: { address_form_target: "taraInput" } %>
+      <div id="address_tara_dropdown" class="dropdown-menu w-100 shadow" data-address-form-target="taraDropdown"></div>
+    </div>
+  </div>
+
+  <div class="address-form-row">
+    <div class="address-form-field">
+      <%= f.label :county do %>Judet <span class="required">*</span><% end %>
+      <div class="position-relative">
+        <%= f.text_field :county, class: "form-control",
+            id: "address_judet_input",
+            placeholder: "Tasteaza max 2 litere...",
+            autocomplete: "off",
+            data: { address_form_target: "judetInput" } %>
+        <div id="address_judet_dropdown" class="dropdown-menu w-100 shadow" data-address-form-target="judetDropdown"></div>
+      </div>
+    </div>
+    <div class="address-form-field">
+      <%= f.label :city do %>Localitate <span class="required">*</span><% end %>
+      <div class="position-relative">
+        <%= f.text_field :city, class: "form-control",
+            id: "address_localitate_input",
+            placeholder: "Tasteaza max 2 litere...",
+            autocomplete: "off",
+            disabled: address.city.blank?,
+            data: { address_form_target: "localitateInput" } %>
+        <div id="address_localitate_dropdown" class="dropdown-menu w-100 shadow" data-address-form-target="localitateDropdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="address-form-field">
+    <%= f.label :postal_code, "Cod postal (optional)" %>
+    <%= f.text_field :postal_code, class: "form-control" %>
+  </div>
+
+  <div class="address-form-row">
+    <div class="address-form-field">
+      <%= f.label :street do %>Strada <span class="required">*</span><% end %>
+      <%= f.text_field :street, required: true, class: "form-control" %>
+    </div>
+    <div class="address-form-field">
+      <%= f.label :street_number do %>Numar <span class="required">*</span><% end %>
+      <%= f.text_field :street_number, required: true, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="address-form-field">
+    <%= f.label :block_details, "Bloc/Etaj/Apt (optional)" %>
+    <%= f.text_field :block_details, class: "form-control" %>
+  </div>
+
+  <div class="address-form-row">
+    <div class="address-form-field">
+      <%= f.label :label, "Etichetă (optional)" %>
+      <%= f.text_field :label, class: "form-control", placeholder: "ex: Acasa, Birou" %>
+    </div>
+    <div class="address-form-field address-form-checkbox">
+      <%= f.check_box :default %>
+      <%= f.label :default, "Adresa principala" %>
+    </div>
+  </div>
+
+  <div class="address-form-actions">
+    <%= link_to "Inapoi",
+        contul_meu_path(section: address.address_type == "billing" ? "billing" : "addresses"),
+        class: "btn-address-cancel" %>
+    <%= f.submit "Salveaza adresa", class: "btn-address-save" %>
+  </div>
+<% end %>

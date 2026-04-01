@@ -1,0 +1,134 @@
+﻿Running 5 tests in a single process (parallelization threshold is 50)
+Run options: --seed 22185
+
+# Running:
+
+E
+
+Error:
+ProductModelTest#test_should_save_a_valid_product_to_database:
+ActiveRecord::Fixture::FixtureError: table "products" has no columns named "\\".
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:549:in `block in build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:586:in `block in build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `filter_map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:455:in `insert_fixtures_set'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:681:in `block in insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:658:in `read_and_insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:603:in `create_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:256:in `load_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:143:in `setup_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    vendor/bundle/ruby/3.3.0/gems/activesupport-7.1.5.1/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/product_model_test.rb:48
+
+E
+
+Error:
+ProductModelTest#test_should_not_create_a_product_without_a_price:
+ActiveRecord::Fixture::FixtureError: table "products" has no columns named "\\".
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:549:in `block in build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:586:in `block in build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `filter_map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:455:in `insert_fixtures_set'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:681:in `block in insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:658:in `read_and_insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:603:in `create_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:256:in `load_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:143:in `setup_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    vendor/bundle/ruby/3.3.0/gems/activesupport-7.1.5.1/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/product_model_test.rb:26
+
+E
+
+Error:
+ProductModelTest#test_should_not_create_a_product_without_a_slug:
+ActiveRecord::Fixture::FixtureError: table "products" has no columns named "\\".
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:549:in `block in build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:586:in `block in build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `filter_map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:455:in `insert_fixtures_set'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:681:in `block in insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:658:in `read_and_insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:603:in `create_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:256:in `load_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:143:in `setup_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    vendor/bundle/ruby/3.3.0/gems/activesupport-7.1.5.1/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/product_model_test.rb:37
+
+E
+
+Error:
+ProductModelTest#test_should_not_create_a_product_without_a_name:
+ActiveRecord::Fixture::FixtureError: table "products" has no columns named "\\".
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:549:in `block in build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:586:in `block in build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `filter_map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:455:in `insert_fixtures_set'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:681:in `block in insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:658:in `read_and_insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:603:in `create_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:256:in `load_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:143:in `setup_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    vendor/bundle/ruby/3.3.0/gems/activesupport-7.1.5.1/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/product_model_test.rb:15
+
+E
+
+Error:
+ProductModelTest#test_should_create_a_valid_product:
+ActiveRecord::Fixture::FixtureError: table "products" has no columns named "\\".
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:549:in `block in build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:544:in `build_fixture_sql'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:586:in `block in build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `filter_map'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:584:in `build_fixture_statements'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/connection_adapters/abstract/database_statements.rb:455:in `insert_fixtures_set'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:681:in `block in insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `each'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:672:in `insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:658:in `read_and_insert'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/fixtures.rb:603:in `create_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:256:in `load_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:143:in `setup_fixtures'
+    vendor/bundle/ruby/3.3.0/gems/activerecord-7.1.5.1/lib/active_record/test_fixtures.rb:10:in `before_setup'
+    vendor/bundle/ruby/3.3.0/gems/activesupport-7.1.5.1/lib/active_support/testing/setup_and_teardown.rb:40:in `before_setup'
+
+bin/rails test test/models/product_model_test.rb:4
+
+
+
+Finished in 0.273552s, 18.2781 runs/s, 0.0000 assertions/s.
+5 runs, 0 assertions, 0 failures, 5 errors, 0 skips

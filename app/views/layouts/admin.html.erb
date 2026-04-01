@@ -19,6 +19,12 @@
   <body class="admin-layout">
     <%= render "layouts/header" %>
     <div class="admin-container">
+      <%= render 'shared/flash_messages' %>
+      <% unless content_for?(:hide_admin_back) %>
+        <div class="admin-back-bar">
+          <%= link_to "← Panou administrare", admin_path, class: "admin-back-link" %>
+        </div>
+      <% end %>
       <div class="admin-content">
         <%= yield %>
       </div>

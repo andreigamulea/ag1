@@ -1,86 +1,139 @@
 <%= render 'shared/noindex' %>
-<!-- app/views/orders/index.html.erb -->
-<div class="orders-page-wrapper">
-  <!-- Titlul principal pe toată lățimea -->
-  <div class="page-header">
-    <h1>Administrare Comenzi</h1>
+<div class="container_content product-list">
+  <h1 class="admin-title">Lista comenzi</h1>
+
+  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div style="font-size:13px; color:#888;">
+      Total: <strong><%= @orders.total_count %></strong> comenzi
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <input type="text" id="order-search" placeholder="Cauta comanda..." style="padding:6px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:14px; width:250px;">
+    </div>
   </div>
 
-  <!-- Containerul cu cele două coloane -->
-  <div class="orders-container">
-    <div class="orders-row">
-      <!-- Coloana stângă: Tabelul cu ordine -->
-      <div class="orders-table-column">
-        <table class="table table-striped table-sm">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nume</th>
-              <th>Email</th>
-              <th>Telefon</th>
-              <th>Data Creării</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Acțiuni</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @orders.each do |order| %>
-              <tr>
-                <td><%= order.id %></td>
-                <td><%= "#{order.first_name} #{order.last_name}" %></td>
-                <td><%= order.email %></td>
-                <td><%= order.phone %></td>
-                <td><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></td>
-                <td><%= order.total %> RON</td>
-                <td><%= order.status %></td>
-                <td>
-                  <div class="action-buttons">
-                    <%= button_to "Produse", show_items_order_path(order), remote: true, class: "btn btn-primary btn-sm", data: { target: order.id } %>
-                    <% if order.invoice.present? %>
-                      <%= link_to "PDF", invoice_order_path(order, format: :pdf), class: "btn btn-secondary btn-sm" %>
-                      <%= link_to "XML", invoice_order_path(order, format: :xml), class: "btn btn-info btn-sm" %>
-                    <% end %>
-                  </div>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-        <div class="orders-pagination-wrapper">
-          <%= paginate @orders %>
-        </div>
-      </div>
+  <div class="table-wrapper">
+    <table class="styled-table" id="orders-table">
+      <thead>
+        <tr>
+          <th data-sort="number" style="cursor:pointer;">ID <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Nume <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Email <span class="sort-arrow">&#8597;</span></th>
+          <th>Telefon</th>
+          <th data-sort="string" style="cursor:pointer;">Data <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="number" style="cursor:pointer;">Total <span class="sort-arrow">&#8597;</span></th>
+          <th data-sort="string" style="cursor:pointer;">Status <span class="sort-arrow">&#8597;</span></th>
+          <th>Actiuni</th>
+        </tr>
+      </thead>
+      <tbody id="orders-tbody">
+        <% @orders.each do |order| %>
+          <tr>
+            <td><%= order.id %></td>
+            <td><%= order.shipping_first_name %> <%= order.shipping_last_name %></td>
+            <td><%= order.email %></td>
+            <td><%= order.shipping_phone %></td>
+            <td><%= order.created_at.strftime("%d.%m.%Y %H:%M") %></td>
+            <td><%= number_to_currency(order.total, unit: "", separator: ",", delimiter: ".") %> lei</td>
+            <td>
+              <% case order.status %>
+              <% when "pending" %>
+                <span class="badge" style="background:#f0f0f0; color:#666; border:1px solid #ddd;">In asteptare</span>
+              <% when "paid" %>
+                <span class="badge" style="background:#d4edda; color:#155724; border:1px solid #c3e6cb;">Platita</span>
+              <% when "processing" %>
+                <span class="badge" style="background:#d1ecf1; color:#0c5460; border:1px solid #bee5eb;">Procesare</span>
+              <% when "shipped" %>
+                <span class="badge" style="background:#fff3cd; color:#856404; border:1px solid #ffeeba;">Expediata</span>
+              <% when "delivered" %>
+                <span class="badge" style="background:#d4edda; color:#155724; border:1px solid #c3e6cb;">Livrata</span>
+              <% when "cancelled" %>
+                <span class="badge" style="background:#f8d7da; color:#721c24; border:1px solid #f5c6cb;">Anulata</span>
+              <% when "refunded" %>
+                <span class="badge" style="background:#e2e3e5; color:#383d41; border:1px solid #d6d8db;">Rambursata</span>
+              <% else %>
+                <span class="badge"><%= order.status %></span>
+              <% end %>
+            </td>
+            <td class="table-actions">
+              <%= button_to "Produse", show_items_order_path(order), class: "table-button neutral", data: { target: order.id } %>
+              <% if order.invoice.present? %>
+                <%= link_to "PDF", invoice_order_path(order, format: :pdf), class: "table-button primary" %>
+                <%= link_to "XML", invoice_order_path(order, format: :xml), class: "table-button neutral" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 
-      <!-- Coloana dreaptă: Detalii ordin -->
-      <div class="order-details-column" id="order-items-container">
-        <h2>Detalii Ordin</h2>
-        <p>Selectează un ordin pentru a vedea produsele.</p>
-      </div>
-    </div>
+  <div style="margin-top: 20px;">
+    <%= paginate @orders %>
   </div>
 </div>
 
-<!-- JavaScript pentru a gestiona încărcarea AJAX -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('button[data-target]').forEach(button => {
-      button.addEventListener('click', function(event) {
-        event.preventDefault();
-        const orderId = this.dataset.target;
-        const url = `/orders/${orderId}/show_items`;
+<!-- Detalii ordin AJAX -->
+<div id="order-items-container" style="max-width: 1380px; margin: 20px auto; padding: 0 20px;"></div>
 
-        fetch(url, {
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        })
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById('order-items-container').innerHTML = html;
-        })
-        .catch(error => console.error('Error:', error));
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Cautare live
+  var searchInput = document.getElementById('order-search');
+  var tbody = document.getElementById('orders-tbody');
+  if (!searchInput || !tbody) return;
+
+  searchInput.addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var rows = tbody.querySelectorAll('tr');
+    rows.forEach(function(row) {
+      if (!query || query.length < 2) { row.style.display = ''; return; }
+      row.style.display = row.textContent.toLowerCase().indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+
+  // Sortare coloane
+  var table = document.getElementById('orders-table');
+  var headers = table.querySelectorAll('th[data-sort]');
+  var currentSort = { col: -1, asc: true };
+
+  headers.forEach(function(th, index) {
+    th.addEventListener('click', function() {
+      var sortType = th.dataset.sort;
+      var asc = (currentSort.col === index) ? !currentSort.asc : true;
+      currentSort = { col: index, asc: asc };
+
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aText = a.children[index].textContent.trim();
+        var bText = b.children[index].textContent.trim();
+        if (sortType === 'number') {
+          return asc ? (parseFloat(aText.replace(/[^0-9.\-]/g, '')) || 0) - (parseFloat(bText.replace(/[^0-9.\-]/g, '')) || 0)
+                     : (parseFloat(bText.replace(/[^0-9.\-]/g, '')) || 0) - (parseFloat(aText.replace(/[^0-9.\-]/g, '')) || 0);
+        }
+        return asc ? aText.localeCompare(bText, 'ro') : bText.localeCompare(aText, 'ro');
+      });
+      rows.forEach(function(row) { tbody.appendChild(row); });
+
+      headers.forEach(function(h) { var a = h.querySelector('.sort-arrow'); if (a) a.innerHTML = '&#8597;'; });
+      var arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.innerHTML = asc ? '&#9650;' : '&#9660;';
+    });
+  });
+
+  // AJAX pentru detalii ordin
+  document.querySelectorAll('button[data-target]').forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      event.preventDefault();
+      var orderId = this.dataset.target;
+      fetch('/orders/' + orderId + '/show_items', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(response) { return response.text(); })
+      .then(function(html) {
+        document.getElementById('order-items-container').innerHTML = html;
+        document.getElementById('order-items-container').scrollIntoView({ behavior: 'smooth' });
       });
     });
   });
+});
 </script>

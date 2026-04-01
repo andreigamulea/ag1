@@ -1,16 +1,175 @@
+<% content_for(:hide_admin_back) { true } %>
 <%= render 'shared/noindex' %>
 <div class="container_content admin-panel">
-  <h1 class="admin-title">📂 Panou administrare</h1>
+  <h1 class="admin-title">Panou administrare</h1>
   <p class="admin-welcome">Bine ai venit, <%= current_user.email %>!</p>
 
-  <ul class="admin-links">
-    <li><%= link_to "🛒 Produse", products_path %></li>
-    <li><%= link_to "📂 Categorii", categories_index_products_path %></li>
-    <li><%= link_to "🎨 Option Types (Culoare, Mărime)", admin_option_types_path %></li>
-    <li><%= link_to "👤 Utilizatori", users_path %></li>
-    <li><%= link_to "🏷️ Cupoane", coupons_path %></li>
-    <li><%= link_to "📦 Ordine", orders_path %></li>
-    <li><%= link_to "📧 Newsletter (#{Newsletter.count})", lista_newsletter_path %></li>
-  </ul>
+  <div class="admin-cards" id="admin-cards-container"
+       data-save-url="<%= save_admin_preferences_path %>"
+       data-saved-order="<%= (@admin_prefs['dashboard_order'] || {}).to_json %>">
+
+    <div class="admin-card-group" data-group="comenzi">
+      <h3 class="admin-card-group-title">Comenzi & Clienti</h3>
+      <div class="admin-cards-row">
+        <%= link_to orders_path, class: "admin-card", data: { card_id: "comenzi" } do %>
+          <div class="admin-card-icon">📦</div>
+          <div class="admin-card-body">
+            <strong>Comenzi</strong>
+            <span class="admin-card-count"><%= Order.count %></span>
+          </div>
+          <p class="admin-card-desc">Administreaza si urmareste comenzile</p>
+        <% end %>
+
+        <%= link_to products_path, class: "admin-card", data: { card_id: "produse" } do %>
+          <div class="admin-card-icon">🛒</div>
+          <div class="admin-card-body">
+            <strong>Produse</strong>
+            <span class="admin-card-count"><%= Product.count %></span>
+          </div>
+          <p class="admin-card-desc">Gestioneaza produse, preturi, stocuri</p>
+        <% end %>
+
+        <%= link_to categories_index_products_path, class: "admin-card", data: { card_id: "categorii" } do %>
+          <div class="admin-card-icon">📂</div>
+          <div class="admin-card-body">
+            <strong>Categorii</strong>
+            <span class="admin-card-count"><%= Category.count %></span>
+          </div>
+          <p class="admin-card-desc">Organizeaza produsele pe categorii</p>
+        <% end %>
+
+        <%= link_to admin_option_types_path, class: "admin-card", data: { card_id: "variante" } do %>
+          <div class="admin-card-icon">🎨</div>
+          <div class="admin-card-body">
+            <strong>Variante</strong>
+            <span class="admin-card-count"><%= OptionType.count %></span>
+          </div>
+          <p class="admin-card-desc">Culori, marimi si alte optiuni</p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="admin-card-group" data-group="magazin">
+      <h3 class="admin-card-group-title">Magazin</h3>
+      <div class="admin-cards-row">
+        <%= link_to users_path, class: "admin-card", data: { card_id: "utilizatori" } do %>
+          <div class="admin-card-icon">👤</div>
+          <div class="admin-card-body">
+            <strong>Utilizatori</strong>
+            <span class="admin-card-count"><%= User.count %></span>
+          </div>
+          <p class="admin-card-desc">Conturi, roluri si permisiuni</p>
+        <% end %>
+
+        <%= link_to coupons_path, class: "admin-card", data: { card_id: "cupoane" } do %>
+          <div class="admin-card-icon">🏷️</div>
+          <div class="admin-card-body">
+            <strong>Cupoane</strong>
+            <span class="admin-card-count"><%= Coupon.count %></span>
+          </div>
+          <p class="admin-card-desc">Reduceri si coduri promotionale</p>
+        <% end %>
+
+        <%= link_to lista_newsletter_path, class: "admin-card", data: { card_id: "newsletter" } do %>
+          <div class="admin-card-icon">📧</div>
+          <div class="admin-card-body">
+            <strong>Newsletter</strong>
+            <span class="admin-card-count"><%= Newsletter.count %></span>
+          </div>
+          <p class="admin-card-desc">Abonati si comunicari</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-reset-bar">
+    <%= button_to "Reseteaza afisarea la implicit", reset_admin_preferences_path,
+        method: :delete, class: "admin-reset-btn",
+        data: { turbo_confirm: "Resetezi ordinea cardurilor la implicit?" } %>
+  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+function initAdminDashboard() {
+  var container = document.getElementById('admin-cards-container');
+  if (!container) return;
+
+  var saveUrl = container.dataset.saveUrl;
+  var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+  // Restaureaza ordinea din DB
+  try {
+    var saved = JSON.parse(container.dataset.savedOrder || '{}');
+    if (saved.groups) {
+      var groups = Array.from(container.querySelectorAll('.admin-card-group'));
+      var groupMap = {};
+      groups.forEach(function(g) { groupMap[g.dataset.group] = g; });
+      saved.groups.forEach(function(id) {
+        if (groupMap[id]) container.appendChild(groupMap[id]);
+      });
+    }
+    if (saved.cards) {
+      var allRows = container.querySelectorAll('.admin-cards-row');
+      saved.cards.forEach(function(cardIds, i) {
+        if (!allRows[i]) return;
+        var row = allRows[i];
+        var cardMap = {};
+        row.querySelectorAll('.admin-card').forEach(function(c) { cardMap[c.dataset.cardId] = c; });
+        cardIds.forEach(function(id) { if (cardMap[id]) row.appendChild(cardMap[id]); });
+      });
+    }
+  } catch(e) {}
+
+  // Functie de salvare in DB
+  function saveOrder() {
+    var groups = [];
+    container.querySelectorAll('.admin-card-group').forEach(function(g) {
+      groups.push(g.dataset.group);
+    });
+
+    var cards = [];
+    container.querySelectorAll('.admin-cards-row').forEach(function(row) {
+      var ids = [];
+      row.querySelectorAll('.admin-card').forEach(function(c) { ids.push(c.dataset.cardId); });
+      cards.push(ids);
+    });
+
+    fetch(saveUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ dashboard_order: { groups: groups, cards: cards } })
+    });
+  }
+
+  // Drag & drop pe grupuri
+  new Sortable(container, {
+    animation: 150,
+    handle: '.admin-card-group-title',
+    ghostClass: 'admin-card-group-ghost',
+    draggable: '.admin-card-group',
+    onEnd: saveOrder
+  });
+
+  // Drag & drop pe carduri
+  container.querySelectorAll('.admin-cards-row').forEach(function(row) {
+    new Sortable(row, {
+      animation: 150,
+      ghostClass: 'admin-card-ghost',
+      group: 'cards',
+      onEnd: saveOrder
+    });
+  });
+
+  // Cursor grab pe titluri
+  container.querySelectorAll('.admin-card-group-title').forEach(function(t) {
+    t.style.cursor = 'grab';
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initAdminDashboard);
+document.addEventListener("turbo:load", initAdminDashboard);
+</script>

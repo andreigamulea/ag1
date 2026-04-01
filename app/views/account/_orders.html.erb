@@ -1,0 +1,108 @@
+<h2>Comenzile mele</h2>
+
+<div class="orders-filters">
+  <%= form_tag contul_meu_path, method: :get, class: "orders-search-form" do %>
+    <%= hidden_field_tag :section, "orders" %>
+
+    <div class="orders-filter-row">
+      <div class="orders-search-field">
+        <%= text_field_tag :q, params[:q], placeholder: "Cauta dupa nr. comanda sau produs...", class: "form-control" %>
+      </div>
+
+      <div class="orders-filter-group">
+        <span class="filter-label">vezi</span>
+        <%= select_tag :status, options_for_select(
+          [["toate comenzile", ""], ["in asteptare", "pending"], ["platite", "paid"],
+           ["in procesare", "processing"], ["expediate", "shipped"],
+           ["livrate", "delivered"], ["anulate", "cancelled"], ["rambursate", "refunded"]],
+          params[:status]
+        ), class: "form-control form-control-inline", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="orders-filter-group">
+        <span class="filter-label">din</span>
+        <%= select_tag :period, options_for_select(
+          [["ultimele 3 luni", "3m"], ["ultimele 6 luni", "6m"],
+           ["#{Date.current.year}", Date.current.year.to_s],
+           ["#{Date.current.year - 1}", (Date.current.year - 1).to_s],
+           ["#{Date.current.year - 2}", (Date.current.year - 2).to_s],
+           ["toate", ""]],
+          params[:period]
+        ), class: "form-control form-control-inline", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="orders-filter-group">
+        <span class="filter-label">cate</span>
+        <%= select_tag :per, options_for_select(
+          [["10", "10"], ["15", "15"], ["20", "20"]],
+          params[:per] || "10"
+        ), class: "form-control form-control-inline", onchange: "this.form.submit()" %>
+      </div>
+
+      <div class="orders-search-btn">
+        <%= submit_tag "Filtreaza", class: "btn-order-filter" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if orders.any? %>
+  <div class="orders-list">
+    <% orders.each do |order| %>
+      <% next if order.order_items.empty? %>
+      <div class="order-card">
+        <div class="order-card-header">
+          <div class="order-card-info">
+            <strong>Comanda #<%= order.id %></strong>
+            <span class="order-card-date"><%= order.placed_at&.strftime("%d.%m.%Y, %H:%M") || order.created_at.strftime("%d.%m.%Y, %H:%M") %></span>
+          </div>
+          <span class="order-status-badge order-status--<%= order.status %>">
+            <%= case order.status
+                when "pending"    then "In asteptare"
+                when "paid"       then "Platita"
+                when "processing" then "Se proceseaza"
+                when "shipped"    then "Expediata"
+                when "delivered"  then "Livrata"
+                when "cancelled"  then "Anulata"
+                when "refunded"   then "Rambursata"
+                when "expired"    then "Expirata"
+                else order.status
+                end %>
+          </span>
+        </div>
+        <div class="order-card-items">
+          <% order.order_items.each do |item| %>
+            <% next if item.product_name.in?(["Transport", "Discount"]) %>
+            <div class="order-card-item">
+              <span><%= item.product_name %><% if item.variant_options_text.present? %> - <small><%= item.variant_options_text %></small><% end %> &times; <%= item.quantity %></span>
+              <span><%= number_to_currency(item.total_price, unit: "", separator: ",", delimiter: ".") %> lei</span>
+            </div>
+          <% end %>
+        </div>
+        <div class="order-card-footer">
+          <strong>Total: <%= number_to_currency(order.total, unit: "", separator: ",", delimiter: ".") %> lei</strong>
+          <div class="order-card-actions">
+            <%= link_to "Detalii", contul_meu_order_path(order), class: "btn-order-action" %>
+            <% if order.invoice.present? %>
+              <%= link_to "Factura PDF", invoice_order_path(order, format: :pdf), class: "btn-order-action" %>
+              <%= link_to "XML", invoice_order_path(order, format: :xml), class: "btn-order-action" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <div class="account-pagination">
+    <%= paginate orders %>
+  </div>
+<% else %>
+  <div class="account-empty-state">
+    <% if params[:q].present? || params[:status].present? %>
+      <p>Nu am gasit comenzi care sa corespunda cautarii.</p>
+      <p><%= link_to "Sterge filtrele", contul_meu_path(section: "orders") %></p>
+    <% else %>
+      <p>Nu ai nicio comanda.</p>
+      <p>Viziteaza <%= link_to "magazinul nostru", carti_index_path %> pentru a face prima comanda.</p>
+    <% end %>
+  </div>
+<% end %>

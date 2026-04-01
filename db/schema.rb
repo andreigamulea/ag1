@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_31_130004) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_01_212502) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,30 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_130004) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "addresses", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "address_type", default: "shipping", null: false
+    t.string "first_name"
+    t.string "last_name"
+    t.string "company_name"
+    t.string "cui"
+    t.string "phone"
+    t.string "email"
+    t.string "country"
+    t.string "county"
+    t.string "city"
+    t.string "postal_code"
+    t.string "street"
+    t.string "street_number"
+    t.text "block_details"
+    t.string "label"
+    t.boolean "default", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "address_type"], name: "index_addresses_on_user_id_and_address_type"
+    t.index ["user_id"], name: "index_addresses_on_user_id"
   end
 
   create_table "cart_snapshots", force: :cascade do |t|
@@ -476,6 +500,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_130004) do
     t.datetime "updated_at", null: false
     t.integer "role", default: 0, null: false
     t.boolean "active", default: true, null: false
+    t.jsonb "admin_preferences", default: {}
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
@@ -535,6 +560,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_31_130004) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "addresses", "users"
   add_foreign_key "cart_snapshots", "users"
   add_foreign_key "categories", "categories", column: "parent_id", on_delete: :nullify
   add_foreign_key "invoices", "orders"

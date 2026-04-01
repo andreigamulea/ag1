@@ -1,56 +1,49 @@
 <%= render 'shared/noindex' %>
-<div style="max-width: 1400px; margin: 40px auto; padding: 0 20px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+<div class="container_content product-list">
+  <h1 class="admin-title">Lista abonati newsletter</h1>
+
+  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
     <div>
-      <h1 style="color: #8b0000; margin: 0 0 10px 0;">Listă Abonați Newsletter</h1>
-      <p style="font-size: 18px; margin: 0; color: #666;">
-        Total abonați: <strong style="color: #8b0000;"><%= @nr_inscrisi %></strong>
-      </p>
+      <%= link_to "Export CSV", "#", onclick: "exportToCSV(); return false;", class: "form-button" %>
+      <span style="margin-left:12px; font-size:13px; color:#888;">Total abonati: <strong><%= @nr_inscrisi %></strong></span>
     </div>
-    <div>
-      <%= link_to "← Înapoi la Admin", admin_path, style: "display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 6px; margin-right: 10px;" %>
-      <%= link_to "📥 Export CSV", "#", onclick: "exportToCSV(); return false;", style: "display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 6px;" %>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <input type="text" id="newsletter-search" placeholder="Cauta abonat..." style="padding:6px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:14px; width:250px;">
     </div>
   </div>
 
   <% if @lista.any? %>
-    <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
-      <table id="newsletter-table" style="width: 100%; border-collapse: collapse;">
+    <div class="table-wrapper">
+      <table class="styled-table" id="newsletter-table">
         <thead>
-          <tr style="background: #8b0000; color: white;">
-            <th style="padding: 15px; text-align: left; font-weight: 600;">Nr.</th>
-            <th style="padding: 15px; text-align: left; font-weight: 600;">Nume</th>
-            <th style="padding: 15px; text-align: left; font-weight: 600;">Email</th>
-            <th style="padding: 15px; text-align: center; font-weight: 600;">Validat</th>
-            <th style="padding: 15px; text-align: left; font-weight: 600;">Data înregistrării</th>
-            <th style="padding: 15px; text-align: center; font-weight: 600;">Acțiuni</th>
+          <tr>
+            <th data-sort="number" style="cursor:pointer;">Nr. <span class="sort-arrow">&#8597;</span></th>
+            <th data-sort="string" style="cursor:pointer;">Nume <span class="sort-arrow">&#8597;</span></th>
+            <th data-sort="string" style="cursor:pointer;">Email <span class="sort-arrow">&#8597;</span></th>
+            <th data-sort="string" style="cursor:pointer;">Validat <span class="sort-arrow">&#8597;</span></th>
+            <th data-sort="string" style="cursor:pointer;">Data <span class="sort-arrow">&#8597;</span></th>
+            <th>Actiuni</th>
           </tr>
         </thead>
-        <tbody>
-          <% @lista.each do |abonat| %>
-            <% @n += 1 %>
-            <tr style="border-bottom: 1px solid #eee; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
-              <td style="padding: 15px;"><%= @n %></td>
-              <td style="padding: 15px; font-weight: 500;"><%= abonat.nume %></td>
-              <td style="padding: 15px; color: #495057;"><%= abonat.email %></td>
-              <td style="padding: 15px; text-align: center;">
-                <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; <%= abonat.validat ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' %>">
-                  <%= abonat.validat ? '✓ Validat' : '✗ Nevalidat' %>
-                </span>
+        <tbody id="newsletter-tbody">
+          <% @lista.each_with_index do |abonat, index| %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= abonat.nume %></td>
+              <td><%= abonat.email %></td>
+              <td>
+                <% if abonat.validat %>
+                  <span style="color: #28a745; font-weight: 600;">Validat</span>
+                <% else %>
+                  <span style="color: #dc3545; font-weight: 600;">Nevalidat</span>
+                <% end %>
               </td>
-              <td style="padding: 15px; color: #6c757d;">
-                <%= abonat.created_at.strftime('%d.%m.%Y, %H:%M') %>
-              </td>
-              <td style="padding: 15px; text-align: center;">
-                <%= link_to "✏️ Editează", 
-                    edit_newsletter_path(abonat), 
-                    style: "display: inline-block; background: #ffc107; color: #000; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; margin-right: 5px;" %>
-                <%= button_to "🗑️ Șterge", 
-                    delete_newsletter_path(abonat), 
-                    method: :delete, 
-                    data: { confirm: "Sigur vrei să ștergi abonatul #{abonat.nume}?" },
-                    style: "background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;",
-                    form: { style: "display: inline;" } %>
+              <td><%= abonat.created_at.strftime('%d.%m.%Y, %H:%M') %></td>
+              <td class="table-actions">
+                <%= link_to "Editeaza", edit_newsletter_path(abonat), class: "table-button primary" %>
+                <%= button_to "Sterge", delete_newsletter_path(abonat), method: :delete,
+                    data: { confirm: "Sigur vrei sa stergi abonatul #{abonat.nume}?" },
+                    class: "table-button danger", form: { class: "d-inline-block m-0" } %>
               </td>
             </tr>
           <% end %>
@@ -59,45 +52,74 @@
     </div>
   <% else %>
     <div style="padding: 40px; background: #f8f9fa; border-radius: 8px; text-align: center;">
-      <p style="font-size: 18px; color: #6c757d; margin: 0;">
-        📭 Nu există abonați încă.
-      </p>
+      <p style="font-size: 16px; color: #6c757d; margin: 0;">Nu exista abonati.</p>
     </div>
   <% end %>
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+  var searchInput = document.getElementById('newsletter-search');
+  var tbody = document.getElementById('newsletter-tbody');
+  if (!searchInput || !tbody) return;
+
+  searchInput.addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var rows = tbody.querySelectorAll('tr');
+    rows.forEach(function(row) {
+      if (!query || query.length < 2) { row.style.display = ''; return; }
+      row.style.display = row.textContent.toLowerCase().indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+
+  var table = document.getElementById('newsletter-table');
+  var headers = table.querySelectorAll('th[data-sort]');
+  var currentSort = { col: -1, asc: true };
+
+  headers.forEach(function(th, index) {
+    th.addEventListener('click', function() {
+      var sortType = th.dataset.sort;
+      var asc = (currentSort.col === index) ? !currentSort.asc : true;
+      currentSort = { col: index, asc: asc };
+
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aText = a.children[index].textContent.trim();
+        var bText = b.children[index].textContent.trim();
+        if (sortType === 'number') {
+          return asc ? (parseFloat(aText) || 0) - (parseFloat(bText) || 0) : (parseFloat(bText) || 0) - (parseFloat(aText) || 0);
+        }
+        return asc ? aText.localeCompare(bText, 'ro') : bText.localeCompare(aText, 'ro');
+      });
+      rows.forEach(function(row) { tbody.appendChild(row); });
+
+      headers.forEach(function(h) { var a = h.querySelector('.sort-arrow'); if (a) a.innerHTML = '&#8597;'; });
+      var arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.innerHTML = asc ? '&#9650;' : '&#9660;';
+    });
+  });
+});
+
 function exportToCSV() {
   var table = document.getElementById('newsletter-table');
   var rows = table.querySelectorAll('tr');
   var csv = [];
-  
-  // Header
   var headerCols = rows[0].querySelectorAll('th');
   var headerRow = [];
-  for (var i = 0; i < headerCols.length - 1; i++) { // -1 to skip "Acțiuni"
-    headerRow.push(headerCols[i].textContent.trim());
-  }
+  for (var i = 0; i < headerCols.length - 1; i++) { headerRow.push(headerCols[i].textContent.trim()); }
   csv.push(headerRow.join(','));
-  
-  // Data rows
   for (var i = 1; i < rows.length; i++) {
     var cols = rows[i].querySelectorAll('td');
     var row = [];
-    for (var j = 0; j < cols.length - 1; j++) { // -1 to skip "Acțiuni"
-      var text = cols[j].textContent.trim().replace(/,/g, ';');
-      row.push('"' + text + '"');
+    for (var j = 0; j < cols.length - 1; j++) {
+      row.push('"' + cols[j].textContent.trim().replace(/,/g, ';') + '"');
     }
     csv.push(row.join(','));
   }
-  
-  // Download
-  var csvContent = csv.join('\n');
-  var blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  var blob = new Blob(['\ufeff' + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
   var link = document.createElement('a');
-  var url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', 'newsletter_abonati_' + new Date().toISOString().split('T')[0] + '.csv');
+  link.setAttribute('href', URL.createObjectURL(blob));
+  link.setAttribute('download', 'newsletter_' + new Date().toISOString().split('T')[0] + '.csv');
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
   link.click();

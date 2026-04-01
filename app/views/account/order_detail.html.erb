@@ -1,0 +1,7 @@
+<%= render 'shared/noindex' %>
+<div class="account-wrapper">
+  <%= render "account/sidebar" %>
+  <div class="account-content">
+    <%= render "account/order_detail_content", order: @order %>
+  </div>
+</div>

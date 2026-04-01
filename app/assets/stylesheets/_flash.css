@@ -1,0 +1,144 @@
+/* ===================================
+   FLASH MESSAGES
+   Notificari pentru actiunile utilizatorului
+   =================================== */
+
+.flash-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  margin: 0 0 20px 0;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.93rem;
+  line-height: 1.5;
+  animation: flashSlideDown 0.3s ease-out;
+}
+
+.flash-message span {
+  flex: 1;
+}
+
+/* Succes */
+.flash-success {
+  background-color: #edf7ed;
+  color: #1e4620;
+  border-left: 4px solid #4caf50;
+}
+
+.flash-success::before {
+  content: "\2713";
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #4caf50;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Eroare */
+.flash-error {
+  background-color: #fef2f2;
+  color: #7f1d1d;
+  border-left: 4px solid var(--color-primary, #8b0000);
+}
+
+.flash-error::before {
+  content: "!";
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--color-primary, #8b0000);
+  background: #fecaca;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Info */
+.flash-info {
+  background-color: #eff6ff;
+  color: #1e3a5f;
+  border-left: 4px solid #3b82f6;
+}
+
+.flash-info::before {
+  content: "i";
+  font-weight: bold;
+  font-size: 1rem;
+  font-style: italic;
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ===================================
+   FLASH IN PAGINILE AUTH (Devise)
+   Sub "Autentificare automata" / echivalent
+   Fara iconita, fara border-left, centrat
+   =================================== */
+
+#login-page .flash-message,
+#signup-page .flash-message,
+#forgot-password-page .flash-message,
+.edit-account-form .flash-message {
+  margin: 15px 0 0 0;
+  text-align: center;
+  justify-content: center;
+  border-left: none;
+  border-radius: var(--radius-md, 8px);
+  padding: 14px 20px;
+}
+
+#login-page .flash-message::before,
+#signup-page .flash-message::before,
+#forgot-password-page .flash-message::before,
+.edit-account-form .flash-message::before {
+  display: none;
+}
+
+/* ===================================
+   LINK-URI DIN MESAJE
+   Albastru, bold, underline - ies in evidenta
+   =================================== */
+
+.flash-message a {
+  color: #1a56db;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.flash-message a:hover {
+  color: #1e40af;
+}
+
+/* ===================================
+   ANIMATIE
+   =================================== */
+
+@keyframes flashSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   LAYOUT-URI (non-auth) - centrat
+   =================================== */
+
+.default-container > .flash-message,
+.admin-container > .flash-message,
+.shop-container > .flash-message {
+  max-width: 600px;
+  margin: 15px auto;
+}

@@ -42,6 +42,8 @@
         <%= f.password_field :current_password, autocomplete: "current-password" %>
       </div>
 
+      <%= render 'shared/flash_messages' %>
+
       <div class="form-actions">
         <%= link_to "Inapoi", :back, class: "btn-back" %>
         <%= f.submit "Actualizeaza", class: "btn-update" %>

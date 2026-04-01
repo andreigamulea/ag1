@@ -1,6 +1,10 @@
 class Admin::OptionTypesController < ApplicationController
   before_action :authenticate_user!
   before_action :require_admin
+
+  def is_admin_page?
+    true
+  end
   before_action :set_option_type, only: [:edit, :update, :destroy]
 
   def index

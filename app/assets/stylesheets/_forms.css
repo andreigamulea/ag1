@@ -340,6 +340,78 @@ select.form-control {
   cursor: not-allowed;
 }
 
+/* Compact variant for catalog grid */
+.add-to-cart-form-compact form {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qty-input-compact {
+  width: 34px;
+  height: 30px;
+  padding: 2px;
+  font-size: 12px;
+}
+
+/* Ascunde săgețile native pe input number */
+.qty-input-compact::-webkit-inner-spin-button,
+.qty-input-compact::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.qty-input-compact {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Butoane +/- pentru cantitate */
+.qty-controls {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.qty-btn {
+  width: 28px;
+  height: 30px;
+  border: none;
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+  padding: 0;
+  line-height: 1;
+}
+
+.qty-btn:hover {
+  background: var(--color-gray-300);
+}
+
+.qty-controls .qty-input-compact {
+  width: 32px;
+  height: 30px;
+  border: none;
+  border-left: 1px solid var(--color-gray-300);
+  border-right: 1px solid var(--color-gray-300);
+  border-radius: 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.add-to-cart-btn-compact {
+  padding: 5px 10px;
+  font-size: 0.8em;
+}
+
 /* ===================================
    ADMIN FORM ROWS
    =================================== */

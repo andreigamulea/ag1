@@ -1,45 +1,100 @@
-<div class="container_content">
-  <div class="section-title">
-    <h1>Option Types Management</h1>
-    <div class="separator"></div>
+<%= render 'shared/noindex' %>
+<div class="container_content product-list">
+  <h1 class="admin-title">Tipuri de optiuni (variante)</h1>
+
+  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <%= link_to "+ Adauga tip optiune", new_admin_option_type_path, class: "form-button" %>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <input type="text" id="option-search" placeholder="Cauta..." style="padding:6px 12px; border:1px solid #d9d9d9; border-radius:4px; font-size:14px; width:250px;">
+    </div>
   </div>
 
-  <%= link_to "➕ New Option Type", new_admin_option_type_path, class: "btn btn-primary", style: "margin-bottom: 20px;" %>
-
-  <% if @option_types.empty? %>
-    <p>No option types defined yet. Create your first one!</p>
+  <% if @option_types.any? %>
+    <div class="table-wrapper">
+      <table class="styled-table" id="options-table">
+        <thead>
+          <tr>
+            <th data-sort="string" style="cursor:pointer;">Nume <span class="sort-arrow">&#8597;</span></th>
+            <th data-sort="number" style="cursor:pointer;">Pozitie <span class="sort-arrow">&#8597;</span></th>
+            <th>Valori</th>
+            <th data-sort="number" style="cursor:pointer;">Produse <span class="sort-arrow">&#8597;</span></th>
+            <th>Actiuni</th>
+          </tr>
+        </thead>
+        <tbody id="options-tbody">
+          <% @option_types.each do |option_type| %>
+            <tr>
+              <td><strong><%= option_type.name %></strong></td>
+              <td><%= option_type.position %></td>
+              <td>
+                <% if option_type.option_values.any? %>
+                  <%= option_type.option_values.map(&:name).join(', ') %>
+                  <span style="color:#888; font-size:12px;">(<%= option_type.option_values.count %>)</span>
+                <% else %>
+                  <span style="color:#999;">—</span>
+                <% end %>
+              </td>
+              <td><%= option_type.products.count %></td>
+              <td class="table-actions">
+                <%= link_to "Editeaza", edit_admin_option_type_path(option_type), class: "table-button primary" %>
+                <%= button_to "Sterge", admin_option_type_path(option_type), method: :delete,
+                    data: { turbo_confirm: "Esti sigur ca vrei sa stergi '#{option_type.name}'?" },
+                    class: "table-button danger", form: { class: "d-inline-block m-0" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   <% else %>
-    <div class="option-types-list">
-      <% @option_types.each do |option_type| %>
-        <div class="option-type-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-          <h3><%= option_type.name %> <span style="color: #666; font-size: 14px;">(Position: <%= option_type.position %>)</span></h3>
-
-          <div style="margin: 10px 0;">
-            <strong>Values:</strong>
-            <% if option_type.option_values.any? %>
-              <%= option_type.option_values.map(&:name).join(', ') %>
-              <span style="color: #666;">(<%= option_type.option_values.count %> values)</span>
-            <% else %>
-              <span style="color: #999;">No values yet</span>
-            <% end %>
-          </div>
-
-          <div style="margin: 10px 0;">
-            <strong>Used by:</strong>
-            <span style="color: <%= option_type.products.count > 0 ? '#28a745' : '#999' %>;">
-              <%= option_type.products.count %> products
-            </span>
-          </div>
-
-          <div style="margin-top: 15px;">
-            <%= link_to "Edit", edit_admin_option_type_path(option_type), class: "btn btn-secondary" %>
-            <%= button_to "Delete", admin_option_type_path(option_type),
-                method: :delete,
-                data: { turbo_confirm: "Are you sure you want to delete '#{option_type.name}'?" },
-                class: "btn btn-danger" %>
-          </div>
-        </div>
-      <% end %>
+    <div style="padding: 40px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+      <p style="font-size: 16px; color: #6c757d; margin: 0;">Nu exista tipuri de optiuni. Creeaza primul!</p>
     </div>
   <% end %>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var searchInput = document.getElementById('option-search');
+  var tbody = document.getElementById('options-tbody');
+  if (!searchInput || !tbody) return;
+
+  searchInput.addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var rows = tbody.querySelectorAll('tr');
+    rows.forEach(function(row) {
+      if (!query || query.length < 2) { row.style.display = ''; return; }
+      row.style.display = row.textContent.toLowerCase().indexOf(query) !== -1 ? '' : 'none';
+    });
+  });
+
+  var table = document.getElementById('options-table');
+  var headers = table.querySelectorAll('th[data-sort]');
+  var currentSort = { col: -1, asc: true };
+
+  headers.forEach(function(th, index) {
+    th.addEventListener('click', function() {
+      var sortType = th.dataset.sort;
+      var asc = (currentSort.col === index) ? !currentSort.asc : true;
+      currentSort = { col: index, asc: asc };
+
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort(function(a, b) {
+        var aText = a.children[index].textContent.trim();
+        var bText = b.children[index].textContent.trim();
+        if (sortType === 'number') {
+          return asc ? (parseFloat(aText) || 0) - (parseFloat(bText) || 0) : (parseFloat(bText) || 0) - (parseFloat(aText) || 0);
+        }
+        return asc ? aText.localeCompare(bText, 'ro') : bText.localeCompare(aText, 'ro');
+      });
+      rows.forEach(function(row) { tbody.appendChild(row); });
+
+      headers.forEach(function(h) { var a = h.querySelector('.sort-arrow'); if (a) a.innerHTML = '&#8597;'; });
+      var arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.innerHTML = asc ? '&#9650;' : '&#9660;';
+    });
+  });
+});
+</script>

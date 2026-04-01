@@ -50,6 +50,11 @@ Rails.application.routes.draw do
 
   get 'memory_logs/index'
   
+  # Contul meu — dashboard utilizator
+  get "contul-meu", to: "account#show", as: :contul_meu
+  get "contul-meu/comenzi/:id", to: "account#order_detail", as: :contul_meu_order
+  resources :addresses, except: [:index, :show]
+
   # Autentificare Devise cu controller custom (fără modul Users::)
   devise_for :users, controllers: {
     registrations: 'custom_registrations'
@@ -107,6 +112,10 @@ end
       delete :delete_standalone_category
     end
   end
+
+  # Admin preferences
+  patch 'admin/save_preferences', to: 'home#save_admin_preferences', as: :save_admin_preferences
+  delete 'admin/reset_preferences', to: 'home#reset_admin_preferences', as: :reset_admin_preferences
 
   # Pagini custom
   get 'admin', to: 'home#admin'

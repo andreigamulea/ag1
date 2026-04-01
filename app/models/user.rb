@@ -1,5 +1,8 @@
 class User < ApplicationRecord
   has_many :orders
+  has_many :addresses, dependent: :destroy
+  has_many :shipping_addresses, -> { shipping.default_first }, class_name: "Address"
+  has_many :billing_addresses,  -> { billing.default_first },  class_name: "Address"
 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable

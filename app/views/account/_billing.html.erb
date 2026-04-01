@@ -1,0 +1,19 @@
+<div class="account-section-header">
+  <h2>Date de facturare</h2>
+  <%= link_to new_address_path(type: "billing"), class: "btn-add-address" do %>
+    + Adauga adresa
+  <% end %>
+</div>
+
+<% if addresses.any? %>
+  <div class="address-grid">
+    <% addresses.each do |address| %>
+      <%= render "account/address_card", address: address %>
+    <% end %>
+  </div>
+<% else %>
+  <div class="account-empty-state">
+    <p>Nu ai nicio adresa de facturare salvata.</p>
+    <p>Adauga datele de facturare pentru a le reutiliza la urmatoarele comenzi.</p>
+  </div>
+<% end %>

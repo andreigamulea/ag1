@@ -2,6 +2,10 @@ class UploadsController < ApplicationController
   before_action :authenticate_user!
   before_action :require_admin
 
+  def is_admin_page?
+    true
+  end
+
   ALLOWED_EXTENSIONS = %w[jpg jpeg png gif webp svg pdf zip doc docx xls xlsx csv mp4 mp3].freeze
 
   def presign
