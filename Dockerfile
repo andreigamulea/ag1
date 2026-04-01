@@ -67,6 +67,7 @@ COPY --from=build /rails/public /rails/public
 
 # Create app user and assign ownership
 RUN useradd rails --create-home --shell /bin/bash && \
+    mkdir -p db log storage tmp && \
     chown -R rails:rails db log storage tmp
 
 USER rails:rails
