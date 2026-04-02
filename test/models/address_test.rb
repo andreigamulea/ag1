@@ -5,7 +5,8 @@ class AddressTest < ActiveSupport::TestCase
     @user = User.create!(
       email: "addr-test-#{SecureRandom.hex(4)}@example.com",
       password: "password123",
-      password_confirmation: "password123"
+      password_confirmation: "password123",
+      confirmed_at: Time.current
     )
   end
 

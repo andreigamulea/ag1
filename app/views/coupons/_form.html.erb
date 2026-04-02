@@ -1,60 +1,66 @@
-<%= form_with model: coupon, local: true do |f| %>
-  <div>
-    <%= f.label :code, "Cod cupon" %>
-    <%= f.text_field :code %>
+<%= form_with model: coupon, local: true, html: { class: "coupon-admin-form" } do |f| %>
+  <div class="coupon-form-grid">
+    <div class="coupon-form-section">
+      <h3 class="coupon-section-title">Detalii cupon</h3>
+      <div class="coupon-field">
+        <%= f.label :code, "Cod cupon" %>
+        <%= f.text_field :code, class: "input-style", placeholder: "ex: REDUCERE20" %>
+      </div>
+      <div class="coupon-field-row">
+        <div class="coupon-field">
+          <%= f.label :discount_type, "Tip reducere" %>
+          <%= f.select :discount_type, [["Procentaj", "percentage"], ["Fix", "fixed"]], {}, class: "input-style" %>
+        </div>
+        <div class="coupon-field">
+          <%= f.label :discount_value, "Valoare reducere" %>
+          <%= f.number_field :discount_value, step: 0.01, class: "input-style", placeholder: "0.00" %>
+        </div>
+      </div>
+      <div class="coupon-checkbox">
+        <%= f.check_box :active %>
+        <%= f.label :active, "Activ" %>
+      </div>
+    </div>
+
+    <div class="coupon-form-section">
+      <h3 class="coupon-section-title">Valabilitate</h3>
+      <div class="coupon-field">
+        <%= f.label :starts_at, "Data început" %>
+        <%= f.datetime_local_field :starts_at, class: "input-style" %>
+      </div>
+      <div class="coupon-field">
+        <%= f.label :expires_at, "Data sfârșit" %>
+        <%= f.datetime_local_field :expires_at, class: "input-style" %>
+      </div>
+    </div>
+
+    <div class="coupon-form-section">
+      <h3 class="coupon-section-title">Condiții</h3>
+      <div class="coupon-field">
+        <%= f.label :usage_limit, "Limită utilizări" %>
+        <%= f.number_field :usage_limit, class: "input-style", placeholder: "Nelimitat" %>
+      </div>
+      <div class="coupon-field">
+        <%= f.label :minimum_cart_value, "Valoare minimă coș" %>
+        <%= f.number_field :minimum_cart_value, step: 0.01, class: "input-style", placeholder: "0.00" %>
+      </div>
+      <div class="coupon-field">
+        <%= f.label :minimum_quantity, "Cantitate minimă totală" %>
+        <%= f.number_field :minimum_quantity, class: "input-style", placeholder: "0" %>
+      </div>
+      <div class="coupon-field">
+        <%= f.label :product_id, "Valabil doar pentru produs (ID opțional)" %>
+        <%= f.number_field :product_id, class: "input-style", placeholder: "Toate produsele" %>
+      </div>
+      <div class="coupon-checkbox">
+        <%= f.check_box :free_shipping %>
+        <%= f.label :free_shipping, "Transport gratuit?" %>
+      </div>
+    </div>
   </div>
 
-  <div>
-    <%= f.label :discount_type, "Tip reducere" %>
-    <%= f.select :discount_type, [["Procentaj", "percentage"], ["Fix", "fixed"]] %>
-  </div>
-
-  <div>
-    <%= f.label :discount_value, "Valoare reducere" %>
-    <%= f.number_field :discount_value, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= f.label :active, "Activ" %>
-    <%= f.check_box :active %>
-  </div>
-
-  <div>
-    <%= f.label :starts_at, "Data început" %>
-    <%= f.datetime_select :starts_at, include_blank: true %>
-  </div>
-
-  <div>
-    <%= f.label :expires_at, "Data sfârșit" %>
-    <%= f.datetime_select :expires_at, include_blank: true %>
-  </div>
-
-  <div>
-    <%= f.label :usage_limit, "Limită utilizări" %>
-    <%= f.number_field :usage_limit %>
-  </div>
-
-  <div>
-    <%= f.label :minimum_cart_value, "Valoare minimă coș" %>
-    <%= f.number_field :minimum_cart_value, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= f.label :minimum_quantity, "Cantitate minimă totală" %>
-    <%= f.number_field :minimum_quantity %>
-  </div>
-
-  <div>
-    <%= f.label :product_id, "Valabil doar pentru produs (ID opțional)" %>
-    <%= f.number_field :product_id %>
-  </div>
-
-  <div>
-    <%= f.label :free_shipping, "Transport gratuit?" %>
-    <%= f.check_box :free_shipping %>
-  </div>
-
-  <div>
-    <%= f.submit class: "btn btn-success" %>
+  <div class="coupon-form-actions">
+    <%= f.submit coupon.new_record? ? "Crează cupon" : "Salvează modificările", class: "btn btn-success" %>
+    <%= link_to "Anulează", coupons_path, class: "btn btn-secondary" %>
   </div>
 <% end %>

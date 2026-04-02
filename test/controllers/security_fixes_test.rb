@@ -16,7 +16,8 @@ class ProductsAuthorizationTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 1,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
 
     @regular_user = User.create!(
@@ -24,7 +25,8 @@ class ProductsAuthorizationTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 0,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
 
     @product = Product.create!(
@@ -168,7 +170,8 @@ class CouponsAuthorizationTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 1,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
 
     @regular_user = User.create!(
@@ -176,7 +179,8 @@ class CouponsAuthorizationTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 0,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
 
     @coupon = Coupon.create!(
@@ -268,7 +272,8 @@ class UploadsAuthorizationTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 1,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
 
     @regular_user = User.create!(
@@ -276,7 +281,8 @@ class UploadsAuthorizationTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 0,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
   end
 

@@ -1,110 +1,104 @@
 <!-- app/views/orders/_order_items.html.erb -->
 <% if order_items.any? %>
-  <h2>Produse Comandă #<%= order.id %></h2>
-  
-  <table>
-    <thead>
-      <tr>
-        <th>Produs</th>
-        <th>Cant.</th>
-        <th>Preț</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% order_items.each do |item| %>
+  <div class="order-items-card">
+    <h2 class="order-items-title">Produse Comandă #<%= order.id %></h2>
+
+    <table class="order-items-table">
+      <thead>
         <tr>
-          <td>
-            <%= item.product_name %>
-            <% if item.variant_options_text.present? %>
-              <br><small style="color: #666;"><%= item.variant_options_text %></small>
-            <% end %>
-          </td>
-          <td><%= item.quantity %></td>
-          <td><%= number_to_currency(item.price, unit: "RON ", separator: ",", delimiter: ".") %></td>
-          <td><%= number_to_currency(item.total_price, unit: "RON ", separator: ",", delimiter: ".") %></td>
+          <th>Produs</th>
+          <th class="text-center">Cant.</th>
+          <th class="text-right">Preț</th>
+          <th class="text-right">Total</th>
         </tr>
-      <% end %>
-      <tr>
-        <td colspan="3">Total Ordin:</td>
-        <td><%= number_to_currency(order.total, unit: "RON ", separator: ",", delimiter: ".") %></td>
-      </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% order_items.each do |item| %>
+          <tr>
+            <td>
+              <%= item.product_name %>
+              <% if item.variant_options_text.present? %>
+                <br><small class="text-muted"><%= item.variant_options_text %></small>
+              <% end %>
+            </td>
+            <td class="text-center"><%= item.quantity %></td>
+            <td class="text-right"><%= number_to_currency(item.price, unit: "RON ", separator: ",", delimiter: ".") %></td>
+            <td class="text-right"><%= number_to_currency(item.total_price, unit: "RON ", separator: ",", delimiter: ".") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" class="text-right"><strong>Total Ordin:</strong></td>
+          <td class="text-right"><strong><%= number_to_currency(order.total, unit: "RON ", separator: ",", delimiter: ".") %></strong></td>
+        </tr>
+      </tfoot>
+    </table>
 
-  <!-- Date de Facturare - TOATE câmpurile pe o linie -->
-  <div style="padding: 15px 20px; border-top: 1px solid #e9ecef; font-size: 12px; line-height: 1.8;">
-    <strong style="color: #8b0000;">📄 Facturare:</strong>
-    <%= order.first_name %> <%= order.last_name %>
-    <% if order.company_name.present? %>
-      • Companie: <%= order.company_name %>
-    <% end %>
-    <% if order.cui.present? %>
-      • CUI: <%= order.cui %>
-    <% end %>
-    <% if order.cnp.present? %>
-      • CNP: <%= order.cnp %>
-    <% end %>
-    • <%= order.email %>
-    • <%= order.phone %>
-    • <%= order.street %> <%= order.street_number %>
-    <% if order.block_details.present? %>
-      , <%= order.block_details %>
-    <% end %>
-    • <%= order.city %>, <%= order.county %>, <%= order.postal_code %>
-    • <%= order.country %>
-  </div>
-
-  <!-- Date de Livrare - cu indicator vizual -->
-  <% 
-    shipping_different = order.shipping_first_name.present? && (
-      order.shipping_first_name != order.first_name ||
-      order.shipping_street != order.street ||
-      order.shipping_city != order.city
-    )
-  %>
-
-  <% if shipping_different %>
-    <!-- Adrese DIFERITE - roșu -->
-    <div style="padding: 15px 20px; border-top: 1px solid #e9ecef; border-left: 4px solid #dc3545; background-color: #fff5f5; font-size: 12px; line-height: 1.8;">
-      <div style="margin-bottom: 8px;">
-        <span style="display: inline-block; background-color: #dc3545; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-          🔴 Adresă de livrare diferită
-        </span>
+    <!-- Date de Facturare -->
+    <div class="order-items-section order-items-section-billing">
+      <div class="order-items-badge order-items-badge-billing">FACTURARE</div>
+      <div class="order-items-details">
+        <div><strong><%= order.first_name %> <%= order.last_name %></strong></div>
+        <% if order.company_name.present? %>
+          <div>Companie: <%= order.company_name %></div>
+        <% end %>
+        <% if order.cui.present? %>
+          <div>CUI: <%= order.cui %></div>
+        <% end %>
+        <% if order.cnp.present? && order.cnp != "0000000000000" %>
+          <div>CNP: <%= order.cnp %></div>
+        <% end %>
+        <div><%= order.email %></div>
+        <div><%= order.phone %></div>
+        <div><%= order.street %> <%= order.street_number %><%= ", #{order.block_details}" if order.block_details.present? %></div>
+        <div><%= order.city %>, <%= order.county %>, <%= order.postal_code %></div>
+        <div><%= order.country %></div>
       </div>
-      <strong style="color: #8b0000;">📦 Livrare:</strong>
-      <%= order.shipping_first_name %> <%= order.shipping_last_name %>
-      <% if order.shipping_company_name.present? %>
-        • Companie: <%= order.shipping_company_name %>
-      <% end %>
-      • <%= order.shipping_phone %>
-      • <%= order.shipping_street %> <%= order.shipping_street_number %>
-      <% if order.shipping_block_details.present? %>
-        , <%= order.shipping_block_details %>
-      <% end %>
-      • <%= order.shipping_city %>, <%= order.shipping_county %>, <%= order.shipping_postal_code %>
-      • <%= order.shipping_country %>
     </div>
-  <% else %>
-    <!-- Adrese IDENTICE - verde -->
-    <div style="padding: 15px 20px; border-top: 1px solid #e9ecef; border-left: 4px solid #28a745; background-color: #f0fff4; font-size: 12px;">
-      <span style="display: inline-block; background-color: #28a745; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-        🟢 Adresă unică
-      </span>
-      <span style="color: #28a745; font-weight: 500; margin-left: 8px;">
-        Livrare și facturare la aceeași adresă
-      </span>
-    </div>
-  <% end %>
 
-  <div class="back-button-container">
-    <%= link_to 'Înapoi la Lista', orders_path, class: 'btn btn-secondary' %>
+    <!-- Date de Livrare -->
+    <%
+      shipping_different = order.shipping_first_name.present? && (
+        order.shipping_first_name != order.first_name ||
+        order.shipping_street != order.street ||
+        order.shipping_city != order.city
+      )
+    %>
+
+    <% if shipping_different %>
+      <div class="order-items-section order-items-section-shipping-different">
+        <div class="order-items-badge order-items-badge-shipping-different">ADRESĂ DE LIVRARE DIFERITĂ</div>
+        <div class="order-items-details">
+          <div><strong><%= order.shipping_first_name %> <%= order.shipping_last_name %></strong></div>
+          <% if order.shipping_company_name.present? %>
+            <div>Companie: <%= order.shipping_company_name %></div>
+          <% end %>
+          <div><%= order.shipping_phone %></div>
+          <div><%= order.shipping_street %> <%= order.shipping_street_number %><%= ", #{order.shipping_block_details}" if order.shipping_block_details.present? %></div>
+          <div><%= order.shipping_city %>, <%= order.shipping_county %>, <%= order.shipping_postal_code %></div>
+          <div><%= order.shipping_country %></div>
+        </div>
+      </div>
+    <% else %>
+      <div class="order-items-section order-items-section-shipping-same">
+        <div class="order-items-badge order-items-badge-shipping-same">ADRESĂ UNICĂ</div>
+        <div class="order-items-details">
+          Livrare și facturare la aceeași adresă
+        </div>
+      </div>
+    <% end %>
+
+    <div class="order-items-actions">
+      <%= link_to 'Înapoi la Lista', orders_path, class: 'btn btn-secondary' %>
+    </div>
   </div>
-
 <% else %>
-  <h2>Detalii Ordin</h2>
-  <p>Nu există produse pentru acest ordin.</p>
-  <div class="back-button-container">
-    <%= link_to 'Înapoi la Lista', orders_path, class: 'btn btn-secondary' %>
+  <div class="order-items-card">
+    <h2 class="order-items-title">Detalii Ordin</h2>
+    <p>Nu există produse pentru acest ordin.</p>
+    <div class="order-items-actions">
+      <%= link_to 'Înapoi la Lista', orders_path, class: 'btn btn-secondary' %>
+    </div>
   </div>
 <% end %>

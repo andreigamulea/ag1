@@ -3,49 +3,34 @@
   <h1 class="admin-title">Feeduri produse</h1>
 
   <!-- Legenda tipuri feeduri -->
-  <div class="table-wrapper" style="margin: 0 0 20px 0;">
-    <table class="styled-table" style="font-size:13px; width:auto; min-width:30%;">
-      <thead>
-        <tr>
-          <th>Tip feed</th>
-          <th>Format</th>
-          <th>Utilizare</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="feed-format-badge xml" style="margin-right:6px;">XML</span> <strong>RSS / Atom</strong></td>
-          <td><code>.xml</code></td>
-          <td>WordPress, Feedly, orice cititor RSS</td>
-        </tr>
-        <tr>
-          <td><span class="feed-format-badge json" style="margin-right:6px;">JSON</span> <strong>JSON Feed</strong></td>
-          <td><code>.json</code></td>
-          <td>Aplicatii web, SPA-uri, integrari API</td>
-        </tr>
-        <tr>
-          <td><span class="feed-format-badge xml" style="margin-right:6px;">XML</span> <strong>Google Shopping</strong></td>
-          <td><code>.xml</code></td>
-          <td>Google Merchant Center, pret, disponibilitate, GTIN/EAN</td>
-        </tr>
-        <tr>
-          <td><span class="feed-format-badge csv" style="margin-right:6px;">TSV</span> <strong>Facebook Catalog</strong></td>
-          <td><code>.csv</code></td>
-          <td>Facebook / Instagram Shop, Dynamic Ads</td>
-        </tr>
-        <tr>
-          <td><span class="feed-format-badge csv" style="margin-right:6px;">CSV</span> <strong>CSV Export</strong></td>
-          <td><code>.csv</code></td>
-          <td>Comparatoare preturi, import bulk, export date</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="feeds-legend">
+    <h3 class="feeds-legend-title">Tipuri de feeduri disponibile</h3>
+    <div class="feeds-legend-grid">
+      <div class="feeds-legend-item">
+        <span class="feed-format-badge xml">XML</span>
+        <div><strong>RSS / Atom</strong><br><small>WordPress, Feedly, orice cititor RSS</small></div>
+      </div>
+      <div class="feeds-legend-item">
+        <span class="feed-format-badge json">JSON</span>
+        <div><strong>JSON Feed</strong><br><small>Aplicații web, SPA-uri, integrări API</small></div>
+      </div>
+      <div class="feeds-legend-item">
+        <span class="feed-format-badge xml">XML</span>
+        <div><strong>Google Shopping</strong><br><small>Google Merchant Center, preț, disponibilitate, GTIN/EAN</small></div>
+      </div>
+      <div class="feeds-legend-item">
+        <span class="feed-format-badge csv">TSV</span>
+        <div><strong>Facebook Catalog</strong><br><small>Facebook / Instagram Shop, Dynamic Ads</small></div>
+      </div>
+      <div class="feeds-legend-item">
+        <span class="feed-format-badge csv">CSV</span>
+        <div><strong>CSV Export</strong><br><small>Comparatoare prețuri, import bulk, export date</small></div>
+      </div>
+    </div>
   </div>
 
-  <div class="product-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
-    <div>
-      <%= link_to "+ Adauga feed", new_admin_feed_path, class: "form-button" %>
-    </div>
+  <div class="feeds-actions-bar">
+    <%= link_to "+ Adaugă feed", new_admin_feed_path, class: "form-button" %>
   </div>
 
   <% if @feeds.any? %>
@@ -60,7 +45,7 @@
             <th>Produse</th>
             <th>URL Feed</th>
             <th>Ultima generare</th>
-            <th>Actiuni</th>
+            <th>Acțiuni</th>
           </tr>
         </thead>
         <tbody>
@@ -83,23 +68,23 @@
               </td>
               <td>
                 <% if feed.last_generated_at %>
-                  <span style="font-size:13px;"><%= feed.last_generated_at.strftime('%d.%m.%Y %H:%M') %></span>
+                  <span class="feeds-date"><%= feed.last_generated_at.strftime('%d.%m.%Y %H:%M') %></span>
                 <% else %>
-                  <span style="color:#999;">—</span>
+                  <span class="feeds-no-date">&mdash;</span>
                 <% end %>
               </td>
               <td class="table-actions">
                 <div class="feed-actions-row">
                   <a href="<%= url %>" target="_blank" class="table-button neutral">Deschide</a>
-                  <%= link_to "Editeaza", edit_admin_feed_path(feed), class: "table-button primary" %>
-                  <%= button_to feed.active? ? "Dezactiveaza" : "Activeaza",
+                  <%= link_to "Editează", edit_admin_feed_path(feed), class: "table-button primary" %>
+                  <%= button_to feed.active? ? "Dezactivează" : "Activează",
                       toggle_status_admin_feed_path(feed), method: :patch,
                       class: "table-button #{feed.active? ? 'danger' : 'success'}",
-                      form: { style: "display:inline-block;margin:0;" } %>
-                  <%= button_to "Sterge", admin_feed_path(feed), method: :delete,
-                      data: { turbo_confirm: "Esti sigur ca vrei sa stergi feed-ul '#{feed.name}'?" },
+                      form: { class: "inline-form" } %>
+                  <%= button_to "Șterge", admin_feed_path(feed), method: :delete,
+                      data: { turbo_confirm: "Ești sigur că vrei să ștergi feed-ul '#{feed.name}'?" },
                       class: "table-button danger",
-                      form: { style: "display:inline-block;margin:0;" } %>
+                      form: { class: "inline-form" } %>
                 </div>
               </td>
             </tr>
@@ -108,8 +93,8 @@
       </table>
     </div>
   <% else %>
-    <div style="padding: 40px; background: #f8f9fa; border-radius: 8px; text-align: center;">
-      <p style="font-size: 16px; color: #6c757d; margin: 0;">Nu exista feeduri. Creeaza primul!</p>
+    <div class="feeds-empty">
+      <p>Nu există feeduri. Creează primul!</p>
     </div>
   <% end %>
 </div>

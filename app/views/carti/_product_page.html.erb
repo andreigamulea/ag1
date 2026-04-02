@@ -1,0 +1,9 @@
+<% @products.each do |product| %>
+  <%= render "carti/product_card", product: product, product_variants: @product_variants[product.id] %>
+<% end %>
+
+<% if @products.next_page %>
+  <div data-next-page-url="<%= carti_index_path(page: @products.next_page) %>" data-has-next="true"></div>
+<% else %>
+  <div data-has-next="false"></div>
+<% end %>

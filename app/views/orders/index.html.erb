@@ -58,7 +58,8 @@
               <%= button_to "Produse", show_items_order_path(order), class: "table-button neutral", data: { target: order.id } %>
               <% if order.invoice.present? %>
                 <%= link_to "PDF", invoice_order_path(order, format: :pdf), class: "table-button primary" %>
-                <%= link_to "XML", invoice_order_path(order, format: :xml), class: "table-button neutral" %>
+                <%= link_to "SAGA", invoice_order_path(order, format: :xml), class: "table-button neutral" %>
+                <%= link_to "ANAF", invoice_efactura_order_path(order), class: "table-button success" %>
               <% end %>
             </td>
           </tr>
@@ -73,7 +74,7 @@
 </div>
 
 <!-- Detalii ordin AJAX -->
-<div id="order-items-container" style="max-width: 1380px; margin: 20px auto; padding: 0 20px;"></div>
+<div id="order-items-container"></div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

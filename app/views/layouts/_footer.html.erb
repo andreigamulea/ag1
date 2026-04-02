@@ -17,7 +17,7 @@
               <%= button_to "Ieși din cont", destroy_user_session_path,
                   method: :delete,
                   id: "logout_link",
-                  form: { style: "display: inline;" } %>
+                  form: { style: "display: inline;", data: { turbo_confirm: "Ești sigur că vrei să te deloghezi?" } } %>
             </li>
           <% else %>
             <!-- Utilizator neautentificat -->

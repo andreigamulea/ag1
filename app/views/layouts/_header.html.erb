@@ -266,7 +266,7 @@ window.addEventListener('resize', () => {
               <div class="divider"></div>
               <%= button_to "🚪 Logout", destroy_user_session_path,
                   method: :delete,
-                  form: { style: "margin: 0;" } %>
+                  form: { style: "margin: 0;", data: { turbo_confirm: "Ești sigur că vrei să te deloghezi?" } } %>
             </div>
           </div>
         <% else %>

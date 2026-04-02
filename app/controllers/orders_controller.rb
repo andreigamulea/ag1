@@ -1,8 +1,8 @@
 # app/controllers/orders_controller.rb
 class OrdersController < ApplicationController
-  before_action :authenticate_user!, only: [:index, :show_items, :invoice]
-  before_action :set_order, only: [:show_items, :invoice]
-  before_action :check_order_access, only: [:show_items, :invoice]
+  before_action :authenticate_user!, only: [:index, :show_items, :invoice, :invoice_efactura]
+  before_action :set_order, only: [:show_items, :invoice, :invoice_efactura]
+  before_action :check_order_access, only: [:show_items, :invoice, :invoice_efactura]
 
   # Orders index and new are shop pages for users, but admin layout for admin users
   def is_shop_page?
@@ -495,6 +495,30 @@ end
   end
 end
 
+
+  def invoice_efactura
+    @invoice = @order.invoice
+
+    if @invoice.nil?
+      flash[:alert] = "Factură disponibilă doar pentru ordine plătite."
+      redirect_to orders_path and return
+    end
+
+    xml = render_to_string(
+      template: 'orders/invoice_efactura',
+      formats: [:xml],
+      handlers: [:builder],
+      layout: false,
+      locals: { order: @order, invoice: @invoice }
+    )
+
+    filename = "eFactura_#{@invoice.invoice_number}_din_#{@invoice.emitted_at.strftime('%d.%m.%Y')}.xml"
+
+    send_data xml,
+              filename: filename,
+              type: 'application/xml',
+              disposition: 'attachment'
+  end
 
   private
 

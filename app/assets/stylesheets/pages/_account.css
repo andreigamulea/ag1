@@ -64,6 +64,8 @@
 .sidebar-icon {
   font-size: 1.2rem;
   flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
 }
 
 .sidebar-logout {
@@ -613,6 +615,7 @@
 
 .order-detail-summary {
   background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-300);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
@@ -625,8 +628,9 @@
 }
 
 .order-detail-row span:first-child {
-  min-width: 100px;
+  min-width: 120px;
   color: var(--color-gray-600);
+  font-weight: 600;
 }
 
 .order-detail-columns {
@@ -646,10 +650,12 @@
 
 .order-detail-col h4 {
   font-size: var(--font-size-base);
-  color: var(--color-gray-800);
+  color: var(--color-primary);
+  background: var(--color-gray-100);
   margin: 0 0 var(--spacing-md) 0;
-  padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--color-gray-200);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
 }
 
 .order-detail-col p {
@@ -697,6 +703,26 @@
   color: var(--color-white);
 }
 
+.btn-order-invoice-anaf {
+  border-color: #2e7d32;
+  color: #2e7d32;
+}
+
+.btn-order-invoice-anaf:hover {
+  background: #2e7d32;
+  color: var(--color-white);
+}
+
+.btn-order-action-anaf {
+  border-color: #2e7d32;
+  color: #2e7d32;
+}
+
+.btn-order-action-anaf:hover {
+  background: #2e7d32;
+  color: var(--color-white);
+}
+
 .order-detail-invoice-actions {
   display: flex;
   flex-direction: column;
@@ -721,7 +747,11 @@
 .order-detail-products-title {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--color-gray-800);
+  color: var(--color-primary);
+  background: var(--color-gray-100);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -755,6 +785,7 @@
 /* Totaluri */
 .order-detail-totals {
   background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-300);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
@@ -768,10 +799,11 @@
 }
 
 .order-detail-total-final {
-  border-top: 2px solid var(--color-gray-300);
+  border-top: 2px solid var(--color-primary);
   padding-top: var(--spacing-sm);
   margin-top: var(--spacing-sm);
   font-size: var(--font-size-lg);
+  font-weight: 700;
 }
 
 .text-success {

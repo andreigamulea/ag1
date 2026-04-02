@@ -24,9 +24,10 @@ class ProductModelTest < ActiveSupport::TestCase
     assert_not @product.valid?
   end
 
-  test "product should be invalid without a slug" do
+  test "product slug is auto-generated from name" do
     @product.slug = nil
-    assert_not @product.valid?
+    @product.valid?
+    assert_equal @product.name.parameterize, @product.slug
   end
 
   test "product should be invalid without a sku" do

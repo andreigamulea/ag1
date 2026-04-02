@@ -9,7 +9,8 @@ class ProductsControllerVariantsTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 1,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
     sign_in @admin
   end
@@ -222,7 +223,8 @@ class ProductsControllerVariantsTest < ActionDispatch::IntegrationTest
       password: "password123",
       password_confirmation: "password123",
       role: 0,
-      active: true
+      active: true,
+      confirmed_at: Time.current
     )
     sign_in regular_user
 

@@ -74,7 +74,8 @@
       <% if order.invoice.present? %>
         <div class="order-detail-invoice-actions">
           <%= link_to "Factura #{order.invoice.invoice_number}", invoice_order_path(order, format: :pdf), class: "btn-order-invoice" %>
-          <%= link_to "Descarca XML", invoice_order_path(order, format: :xml), class: "btn-order-invoice btn-order-invoice-xml" %>
+          <%= link_to "Descarca XML (SAGA)", invoice_order_path(order, format: :xml), class: "btn-order-invoice btn-order-invoice-xml" %>
+          <%= link_to "Descarca e-Factura (ANAF)", invoice_efactura_order_path(order), class: "btn-order-invoice btn-order-invoice-anaf" %>
         </div>
       <% else %>
         <p class="order-invoice-pending">Factura va fi disponibila dupa confirmarea platii.</p>

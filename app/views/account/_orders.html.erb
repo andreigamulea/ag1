@@ -85,7 +85,8 @@
             <%= link_to "Detalii", contul_meu_order_path(order), class: "btn-order-action" %>
             <% if order.invoice.present? %>
               <%= link_to "Factura PDF", invoice_order_path(order, format: :pdf), class: "btn-order-action" %>
-              <%= link_to "XML", invoice_order_path(order, format: :xml), class: "btn-order-action" %>
+              <%= link_to "XML (SAGA)", invoice_order_path(order, format: :xml), class: "btn-order-action" %>
+              <%= link_to "e-Factura", invoice_efactura_order_path(order), class: "btn-order-action btn-order-action-anaf" %>
             <% end %>
           </div>
         </div>

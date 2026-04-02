@@ -5,7 +5,8 @@ class AddressTranslationsTest < ActiveSupport::TestCase
     @user = User.create!(
       email: "trans-test-#{SecureRandom.hex(4)}@example.com",
       password: "password123",
-      password_confirmation: "password123"
+      password_confirmation: "password123",
+      confirmed_at: Time.current
     )
   end
 

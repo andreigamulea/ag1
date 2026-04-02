@@ -27,7 +27,8 @@ class SuiteTestCase < ApplicationSystemTestCase
       password: password,
       password_confirmation: password,
       role: role,
-      active: active
+      active: active,
+      confirmed_at: Time.current
     )
   end
 

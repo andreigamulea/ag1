@@ -64,7 +64,7 @@
   <body class="default-layout">
     <%= render "layouts/header" %>
     <div class="default-container">
-      <%= render 'shared/flash_messages' %>
+      <%= render 'shared/flash_messages' unless content_for?(:skip_layout_flash) %>
       <%= yield %>
     </div>
     <%= render 'layouts/newsleter' %>

@@ -24,7 +24,8 @@
   <% end %>
 
   <%= button_to destroy_user_session_path, method: :delete,
-      class: "account-sidebar-link sidebar-logout" do %>
+      class: "account-sidebar-link sidebar-logout",
+      form: { data: { turbo_confirm: "Ești sigur că vrei să te deloghezi?" } } do %>
     <span class="sidebar-icon">&#128682;</span>
     <span>Log out</span>
   <% end %>

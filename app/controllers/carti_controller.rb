@@ -42,6 +42,10 @@ class CartiController < ApplicationController
     else
       @product_variants = {}
     end
+
+    if request.headers["X-Load-More"].present?
+      render partial: "carti/product_page", layout: false
+    end
   end
 
   def show

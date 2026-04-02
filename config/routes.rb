@@ -49,6 +49,7 @@ Rails.application.routes.draw do
     member do
       get :show_items
       get :invoice
+      get :invoice_efactura
     end
     collection do
       get :thank_you
@@ -70,7 +71,8 @@ Rails.application.routes.draw do
   # Autentificare Devise cu controller custom (fără modul Users::)
   devise_for :users, controllers: {
     registrations: 'custom_registrations',
-    omniauth_callbacks: 'omniauth_callbacks'
+    omniauth_callbacks: 'omniauth_callbacks',
+    sessions: 'custom_sessions'
   }
   
   # Rută personalizată pentru dezactivare

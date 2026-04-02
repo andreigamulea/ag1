@@ -232,10 +232,10 @@ end
     session[:cart] = @cart
   end
 
-  # Devise: după login, atașează snapshot-ul la user
+  # După login: atașează cart snapshot-ul anonim la user + redirect la ultima pagină vizitată
   def after_sign_in_path_for(resource)
     CartSnapshot.where(session_id: session.id.to_s, user_id: nil).update_all(user_id: resource.id)
-    super
+    stored_location_for(resource) || super
   end
 
 
@@ -249,12 +249,8 @@ end
     store_location_for(:user, request.fullpath)
   end
 
-  # ✅ După login, redirecționează către ultima locație memorată
-  def after_sign_in_path_for(resource_or_scope)
-    stored_location_for(resource_or_scope) || super
-  end
   def after_sign_out_path_for(_resource_or_scope)
-    request.referer || root_path
+    root_path
   end
   
 end
