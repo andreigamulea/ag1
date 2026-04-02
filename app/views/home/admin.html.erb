@@ -50,8 +50,16 @@
     </div>
 
     <div class="admin-card-group" data-group="magazin">
-      <h3 class="admin-card-group-title">Magazin</h3>
+      <h3 class="admin-card-group-title">Magazin & Integrari</h3>
       <div class="admin-cards-row">
+        <%= link_to admin_feeds_path, class: "admin-card", data: { card_id: "feeduri" } do %>
+          <div class="admin-card-icon">📡</div>
+          <div class="admin-card-body">
+            <strong>Feeduri</strong>
+            <span class="admin-card-count"><%= Feed.count %></span>
+          </div>
+          <p class="admin-card-desc">RSS, JSON, Google Shopping, Facebook, CSV</p>
+        <% end %>
         <%= link_to users_path, class: "admin-card", data: { card_id: "utilizatori" } do %>
           <div class="admin-card-icon">👤</div>
           <div class="admin-card-body">

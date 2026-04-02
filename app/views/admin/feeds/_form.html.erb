@@ -1,0 +1,155 @@
+<div class="admin-form-container">
+  <%= form_with(model: [:admin, feed], local: true) do |f| %>
+    <% if feed.errors.any? %>
+      <div style="background:#f8d7da; color:#721c24; padding:12px 16px; border-radius:8px; margin-bottom:20px;">
+        <strong><%= pluralize(feed.errors.count, "eroare") %>:</strong>
+        <ul style="margin:8px 0 0; padding-left:20px;">
+          <% feed.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <!-- Informatii generale -->
+    <div class="form-section">
+      <div class="section-header primary">Informatii generale</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group">
+          <label>Nume feed *</label>
+          <%= f.text_field :name, class: "form-control", placeholder: "ex: Feed RSS Produse", id: "feed_name" %>
+        </div>
+        <div class="form-group">
+          <label>Slug (URL)</label>
+          <%= f.text_field :slug, class: "form-control", placeholder: "auto-generat din nume", id: "feed_slug" %>
+          <small style="color:#888;">Folosit in URL: /feeds/<strong><%= feed.slug.presence || 'slug' %></strong>.xml</small>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px;">
+        <div class="form-group">
+          <label>Tip feed *</label>
+          <%= f.select :feed_type, Feed::FEED_TYPES.map { |k, v| [v, k] },
+              {}, class: "form-control", id: "feed_type_select" %>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <%= f.select :status, [['Activ', 'active'], ['Inactiv', 'inactive']], {}, class: "form-control" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalii feed -->
+    <div class="form-section">
+      <div class="section-header info">Detalii feed</div>
+      <div class="form-group">
+        <label>Titlu feed</label>
+        <%= f.text_field :title, class: "form-control", placeholder: "Titlul care apare in feed" %>
+      </div>
+      <div class="form-group" style="margin-top:12px;">
+        <label>Descriere</label>
+        <%= f.text_area :description, class: "form-control", rows: 3, placeholder: "Descrierea feed-ului" %>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-top:12px;">
+        <div class="form-group">
+          <label>Link site</label>
+          <%= f.text_field :link, class: "form-control", placeholder: "https://ayus.ro" %>
+        </div>
+        <div class="form-group">
+          <label>Limba</label>
+          <%= f.select :language, [['Romana', 'ro'], ['Engleza', 'en'], ['Maghiara', 'hu']], {}, class: "form-control" %>
+        </div>
+        <div class="form-group">
+          <label>Moneda</label>
+          <%= f.select :currency, [['RON', 'RON'], ['EUR', 'EUR'], ['USD', 'USD']], {}, class: "form-control" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtre produse -->
+    <div class="form-section">
+      <div class="section-header warning">Filtre produse</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group">
+          <label>Limita produse</label>
+          <%= f.number_field :products_limit, class: "form-control", placeholder: "Toate produsele", min: 1 %>
+          <small style="color:#888;">Lasa gol pentru toate produsele active</small>
+        </div>
+        <div class="form-group" style="display:flex; flex-direction:column; gap:12px; padding-top:8px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <%= f.check_box :include_variants, style: "width:18px;height:18px;" %>
+            Include variante (fiecare varianta = rand separat)
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <%= f.check_box :include_out_of_stock, style: "width:18px;height:18px;" %>
+            Include produse fara stoc
+          </label>
+        </div>
+      </div>
+
+      <% if @categories&.any? %>
+        <div class="form-group" style="margin-top:16px;">
+          <label>Filtru categorii <small style="color:#888;">(lasa neselectat pentru toate)</small></label>
+          <div class="category-badges" style="margin-top:8px;">
+            <% selected = feed.selected_category_ids %>
+            <% @categories.each do |cat, depth| %>
+              <span class="category-badge <%= selected.include?(cat.id) ? 'active' : 'inactive' %>"
+                    style="cursor:pointer;" data-feed-cat-badge>
+                <% if depth > 0 %><span class="tree-indent"><%= '└ ' * depth %></span><% end %>
+                <input type="checkbox" name="feed[selected_category_ids][]" value="<%= cat.id %>"
+                       <%= 'checked' if selected.include?(cat.id) %>
+                       style="display:none;" data-feed-cat-check>
+                <%= cat.name %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <%= f.submit feed.persisted? ? "Salveaza modificarile" : "Creeaza feed", class: "form-button" %>
+      <%= link_to "Anuleaza", admin_feeds_path, style: "margin-left:16px; color:#888;" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+function initFeedForm() {
+  // Auto-generate slug from name
+  var nameField = document.getElementById('feed_name');
+  var slugField = document.getElementById('feed_slug');
+  if (nameField && slugField) {
+    nameField.addEventListener('input', function() {
+      if (!slugField.dataset.manual) {
+        slugField.value = nameField.value
+          .toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+    });
+    slugField.addEventListener('input', function() {
+      slugField.dataset.manual = slugField.value ? 'true' : '';
+    });
+  }
+
+  // Toggle category badges
+  document.querySelectorAll('[data-feed-cat-badge]').forEach(function(badge) {
+    if (badge.dataset.bound) return;
+    badge.dataset.bound = 'true';
+    badge.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var cb = badge.querySelector('[data-feed-cat-check]');
+      cb.checked = !cb.checked;
+      badge.className = 'category-badge ' + (cb.checked ? 'active' : 'inactive');
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initFeedForm);
+document.addEventListener("turbo:load", initFeedForm);
+</script>

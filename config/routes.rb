@@ -23,7 +23,19 @@ Rails.application.routes.draw do
     resources :option_types do
       resources :option_values, only: [:create, :update, :destroy]
     end
+    resources :feeds do
+      member do
+        patch :toggle_status
+        get :preview
+      end
+    end
   end
+
+  # Public feed endpoints
+  get 'feeds/:slug.xml', to: 'feeds#show', as: :public_feed_xml, defaults: { format: 'xml' }
+  get 'feeds/:slug.json', to: 'feeds#show', as: :public_feed_json, defaults: { format: 'json' }
+  get 'feeds/:slug.csv', to: 'feeds#show', as: :public_feed_csv, defaults: { format: 'csv' }
+  get 'feeds/:slug', to: 'feeds#show', as: :public_feed, defaults: { format: 'xml' }
 
   resources :cart, only: [:index] do
     post :add, on: :collection

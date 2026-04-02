@@ -1,0 +1,43 @@
+<%= render 'shared/noindex' %>
+<div class="container_content">
+  <h1 class="admin-title">Preview: <%= @feed.name %></h1>
+  <p style="text-align:center; color:#888;">Tip: <strong><%= Feed::FEED_TYPES[@feed.feed_type] %></strong> | Primele 5 produse</p>
+
+  <div class="table-wrapper">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Imagine</th>
+          <th>Nume</th>
+          <th>SKU</th>
+          <th>Pret</th>
+          <th>Stoc</th>
+          <th>Categorii</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @products.each do |product| %>
+          <tr>
+            <td>
+              <% if product.external_image_url.present? %>
+                <img src="<%= product.external_image_url %>?width=60&height=60" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">
+              <% else %>
+                <span style="color:#999;">—</span>
+              <% end %>
+            </td>
+            <td><strong><%= product.name %></strong></td>
+            <td style="font-family:monospace;"><%= product.sku %></td>
+            <td><%= number_to_currency(product.effective_price, unit: @feed.currency + ' ', format: '%n %u') %></td>
+            <td><%= product.stock %></td>
+            <td><%= product.categories.map(&:name).join(', ') %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="text-align:center; margin-top:20px;">
+    <%= link_to "Inapoi la feeduri", admin_feeds_path, class: "form-button" %>
+    <a href="<%= @feed.feed_url(host: request.base_url) %>" target="_blank" class="form-button" style="margin-left:8px; background:var(--color-success);">Deschide feed-ul</a>
+  </div>
+</div>

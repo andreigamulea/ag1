@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_02_111046) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_02_142652) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -111,6 +111,30 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_02_111046) do
     t.boolean "free_shipping"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "feeds", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.string "feed_type", default: "rss", null: false
+    t.string "format_type", default: "xml", null: false
+    t.integer "status", default: 0, null: false
+    t.string "title"
+    t.text "description"
+    t.string "link"
+    t.string "language", default: "ro"
+    t.string "currency", default: "RON"
+    t.boolean "include_variants", default: false
+    t.boolean "include_out_of_stock", default: false
+    t.text "category_ids"
+    t.jsonb "custom_filters", default: {}
+    t.integer "products_limit"
+    t.datetime "last_generated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["feed_type"], name: "index_feeds_on_feed_type"
+    t.index ["slug"], name: "index_feeds_on_slug", unique: true
+    t.index ["status"], name: "index_feeds_on_status"
   end
 
   create_table "invoices", force: :cascade do |t|
