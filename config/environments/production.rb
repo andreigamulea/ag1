@@ -48,7 +48,7 @@ Rails.application.configure do
   # URL-uri DOAR pentru link-uri din email-uri (separat de routes)
   config.action_mailer.default_url_options = {
     host: "ayus.ro",
-    protocol: "https" 
+    protocol: "https"
   }
 
   config.action_mailer.delivery_method = :smtp
