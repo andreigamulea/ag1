@@ -7,7 +7,29 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable, :confirmable,
+         :omniauthable, omniauth_providers: [:google_oauth2]
+
+  def self.from_omniauth(auth)
+    # Verifică dacă există un utilizator cu aceeași adresă de email
+    existing_user = find_by(email: auth.info.email)
+
+    if existing_user
+      existing_user.assign_attributes(provider: auth.provider, uid: auth.uid, google_token: auth.credentials.token)
+      existing_user.save!
+      return existing_user
+    else
+      user = find_or_create_by(provider: auth.provider, uid: auth.uid) do |user|
+        user.email = auth.info.email
+        user.password = Devise.friendly_token[0, 20]
+        user.confirmed_at = Time.current # Google a verificat deja emailul
+      end
+
+      user.google_token = auth.credentials.token
+      user.save!
+      return user
+    end
+  end
 
   def admin?
     role == 1

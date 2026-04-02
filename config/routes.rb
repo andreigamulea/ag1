@@ -57,7 +57,8 @@ Rails.application.routes.draw do
 
   # Autentificare Devise cu controller custom (fără modul Users::)
   devise_for :users, controllers: {
-    registrations: 'custom_registrations'
+    registrations: 'custom_registrations',
+    omniauth_callbacks: 'omniauth_callbacks'
   }
   
   # Rută personalizată pentru dezactivare

@@ -18,8 +18,4 @@
   <%= link_to "Nu ai primit instrucțiunile de deblocare?", new_unlock_path(resource_name) %>
 <% end %>
 
-<%- if devise_mapping.omniauthable? %>
-  <%- resource_class.omniauth_providers.each do |provider| %>
-    <%= button_to "Autentificare cu #{OmniAuth::Utils.camelize(provider)}", omniauth_authorize_path(resource_name, provider), data: { turbo: false } %>
-  <% end %>
-<% end %>
+<%# Google OAuth button is rendered separately via devise/shared/google_button %>

@@ -93,3 +93,7 @@ gem 'sitemap_generator', '~> 6.3'
 # Rate limiting
 gem 'rack-attack', '~> 6.7'
 
+# Google OAuth
+gem 'omniauth-google-oauth2', '~> 1.2'
+gem 'omniauth-rails_csrf_protection', '~> 1.0'
+
