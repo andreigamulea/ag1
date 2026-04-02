@@ -20,6 +20,7 @@ items = []
         date_published: product.created_at.iso8601,
         date_modified: product.updated_at.iso8601,
         image: variant.external_image_url.presence || product.external_image_url,
+        additional_images: (variant.external_image_urls.presence || product.external_image_urls || []),
         tags: product.categories.map(&:name),
         _ag1: {
           sku: variant.sku,
@@ -44,6 +45,7 @@ items = []
       date_published: product.created_at.iso8601,
       date_modified: product.updated_at.iso8601,
       image: product.external_image_url,
+      additional_images: (product.external_image_urls || []),
       tags: product.categories.map(&:name),
       _ag1: {
         sku: product.sku,

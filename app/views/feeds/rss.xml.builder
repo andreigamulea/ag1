@@ -1,7 +1,7 @@
 base_url = (@feed.link.presence || request.base_url).chomp('/')
 
 xml.instruct! :xml, version: "1.0", encoding: "UTF-8"
-xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:dc" => "http://purl.org/dc/elements/1.1/" do
+xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:dc" => "http://purl.org/dc/elements/1.1/", "xmlns:media" => "http://search.yahoo.com/mrss/" do
   xml.channel do
     xml.title @feed.title.presence || @feed.name
     xml.description @feed.description.presence || "Produse din #{@feed.name}"
@@ -26,9 +26,14 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:dc
             product.categories.each do |cat|
               xml.category cat.name
             end
-            if variant.external_image_url.present? || product.external_image_url.present?
-              xml.enclosure url: variant.external_image_url.presence || product.external_image_url,
-                           type: "image/jpeg", length: "0"
+            main_image = variant.external_image_url.presence || product.external_image_url
+            additional_images = variant.external_image_urls.presence || product.external_image_urls || []
+            if main_image.present?
+              xml.enclosure url: main_image, type: "image/jpeg", length: "0"
+              xml.tag! "media:content", url: main_image, medium: "image", isDefault: "true"
+            end
+            additional_images.each do |img_url|
+              xml.tag! "media:content", url: img_url, medium: "image"
             end
           end
         end
@@ -45,6 +50,12 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom", "xmlns:dc
           end
           if product.external_image_url.present?
             xml.enclosure url: product.external_image_url, type: "image/jpeg", length: "0"
+            xml.tag! "media:content", url: product.external_image_url, medium: "image", isDefault: "true"
+          end
+          if product.external_image_urls.present?
+            product.external_image_urls.each do |img_url|
+              xml.tag! "media:content", url: img_url, medium: "image"
+            end
           end
         end
       end

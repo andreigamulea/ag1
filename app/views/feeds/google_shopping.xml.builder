@@ -18,6 +18,10 @@ xml.rss version: "2.0", "xmlns:g" => "http://base.google.com/ns/1.0" do
             xml.description strip_tags(product.description).to_s.truncate(5000)
             xml.link product_link
             xml.tag! "g:image_link", variant.external_image_url.presence || product.external_image_url
+            additional_images = variant.external_image_urls.presence || product.external_image_urls || []
+            additional_images.first(10).each do |url|
+              xml.tag! "g:additional_image_link", url
+            end
             xml.tag! "g:availability", variant.stock > 0 ? "in_stock" : "out_of_stock"
             xml.tag! "g:price", "#{variant.price} #{@feed.currency}"
             if variant.promo_active? && variant.discount_price.present?

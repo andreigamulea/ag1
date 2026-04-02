@@ -30,7 +30,7 @@ class FeedsController < ApplicationController
     CSV.generate(headers: true, col_sep: feed.feed_type == 'facebook' ? "\t" : ',') do |csv|
       if feed.feed_type == 'facebook'
         csv << ['id', 'title', 'description', 'availability', 'condition', 'price', 'link',
-                'image_link', 'brand', 'google_product_category', 'sale_price']
+                'image_link', 'additional_image_link', 'brand', 'google_product_category', 'sale_price']
         products.each do |product|
           if feed.include_variants && product.variants.active.any?
             product.variants.active.each do |variant|
@@ -42,7 +42,7 @@ class FeedsController < ApplicationController
         end
       else
         csv << ['SKU', 'Nume', 'Descriere', 'Pret', 'Pret promotional', 'Stoc', 'Status',
-                'Categorie', 'Brand', 'Imagine', 'URL', 'EAN', 'Greutate']
+                'Categorie', 'Brand', 'Imagine', 'Imagini aditionale', 'URL', 'EAN', 'Greutate']
         products.each do |product|
           if feed.include_variants && product.variants.active.any?
             product.variants.active.each do |variant|
@@ -71,6 +71,7 @@ class FeedsController < ApplicationController
       "#{product.price} #{feed.currency}",
       product_url_for(product, feed),
       product.external_image_url,
+      product.external_image_urls&.join(' | '),
       product.brand,
       product.categories.first&.name,
       product.promo_active? && product.discount_price.present? ? "#{product.discount_price} #{feed.currency}" : nil
@@ -78,6 +79,7 @@ class FeedsController < ApplicationController
   end
 
   def facebook_variant_row(product, variant, feed)
+    additional = variant.external_image_urls.presence || product.external_image_urls
     [
       variant.sku,
       "#{product.name} - #{variant.options_text}",
@@ -87,6 +89,7 @@ class FeedsController < ApplicationController
       "#{variant.price} #{feed.currency}",
       product_url_for(product, feed),
       variant.external_image_url.presence || product.external_image_url,
+      additional&.join(' | '),
       product.brand,
       product.categories.first&.name,
       variant.promo_active? && variant.discount_price.present? ? "#{variant.discount_price} #{feed.currency}" : nil
@@ -105,6 +108,7 @@ class FeedsController < ApplicationController
       product.categories.map(&:name).join(', '),
       product.brand,
       product.external_image_url,
+      product.external_image_urls&.join(' | '),
       product_url_for(product, feed),
       nil,
       product.weight
@@ -112,6 +116,7 @@ class FeedsController < ApplicationController
   end
 
   def csv_variant_row(product, variant, feed)
+    additional = variant.external_image_urls.presence || product.external_image_urls
     [
       variant.sku,
       "#{product.name} - #{variant.options_text}",
@@ -123,6 +128,7 @@ class FeedsController < ApplicationController
       product.categories.map(&:name).join(', '),
       product.brand,
       variant.external_image_url.presence || product.external_image_url,
+      additional&.join(' | '),
       product_url_for(product, feed),
       variant.ean,
       variant.weight
